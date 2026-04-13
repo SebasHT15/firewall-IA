@@ -18,14 +18,22 @@ INSTRUCTION = (
 
 # ── Categorías a parsear ────────────────────────────────────────
 CATEGORIES = {
-    "SQL Injection":    "BLOCK | SQL injection payload detected.",
-    "XSS Injection":    "BLOCK | Cross-site scripting payload detected.",
-    "Path Traversal":   "BLOCK | Path traversal attack detected.",
-    "Command Injection":"BLOCK | Command injection payload detected.",
-    "LDAP Injection":   "BLOCK | LDAP injection payload detected.",
-    "XXE Injection":    "BLOCK | XML external entity injection detected.",
-    "CSRF Injection":   "BLOCK | CSRF attack pattern detected.",
-    "Open Redirect":    "BLOCK | Open redirect payload detected.",
+    "SQL Injection":                  "BLOCK | SQL injection payload detected.",
+    "XSS Injection":                  "BLOCK | Cross-site scripting payload detected.",
+    "Path Traversal":                 "BLOCK | Path traversal attack detected.",
+    "Command Injection":              "BLOCK | Command injection payload detected.",
+    "LDAP Injection":                 "BLOCK | LDAP injection payload detected.",
+    "XXE Injection":                  "BLOCK | XML external entity injection detected.",
+    "CSRF Injection":                 "BLOCK | CSRF attack pattern detected.",
+    "Open Redirect":                  "BLOCK | Open redirect payload detected.",
+    "Server Side Request Forgery":    "BLOCK | Server-side request forgery attack detected.",
+    "JSON Web Token":                 "BLOCK | JWT token manipulation attack detected.",
+    "GraphQL Injection":              "BLOCK | GraphQL injection payload detected.",
+    "NoSQL Injection":                "BLOCK | NoSQL injection payload detected.",
+    "Server Side Template Injection": "BLOCK | Server-side template injection payload detected.",
+    "File Inclusion":                 "BLOCK | File inclusion attack detected.",
+    "Insecure Deserialization":       "BLOCK | Insecure deserialization payload detected.",
+    "Request Smuggling":              "BLOCK | HTTP request smuggling attack detected.",
 }
 
 # ── Tráfico legítimo sintético ──────────────────────────────────

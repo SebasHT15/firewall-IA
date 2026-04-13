@@ -14,7 +14,7 @@ from trl import SFTTrainer
 MODEL_NAME   = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 TRAIN_FILE   = os.path.expanduser("~/ai-firewall/train.jsonl")
 EVAL_FILE    = os.path.expanduser("~/ai-firewall/eval.jsonl")
-OUTPUT_DIR   = os.path.expanduser("~/ai-firewall/model-output")
+OUTPUT_DIR   = os.path.expanduser("~/Desktop/firewall-IA/model-output-v2")
 MAX_SEQ_LEN  = 512
 
 # ── Cuantización 4-bit ─────────────────────────────────────────
@@ -86,8 +86,8 @@ print("...")
 print("\n[4/5] Configurando entrenamiento...")
 training_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
-    num_train_epochs=3,
-    per_device_train_batch_size=4,
+    num_train_epochs=4,
+    per_device_train_batch_size=8,
     per_device_eval_batch_size=4,
     gradient_accumulation_steps=4,
     evaluation_strategy="steps",
