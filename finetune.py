@@ -7,7 +7,7 @@ from transformers import (
     TrainingArguments,
     BitsAndBytesConfig,
 )
-from peft import LoraConfig, get_peft_model, TaskType
+from peft import LoraConfig, TaskType
 from trl import SFTTrainer
 
 # ── Configuración ──────────────────────────────────────────────
@@ -45,7 +45,6 @@ model.config.use_cache = False
 print("      Modelo cargado OK")
 
 # ── Configuración LoRA ─────────────────────────────────────────
-print("[2/5] Aplicando LoRA...")
 lora_config = LoraConfig(
     r=16,
     lora_alpha=32,
@@ -55,8 +54,6 @@ lora_config = LoraConfig(
     bias="none",
     task_type=TaskType.CAUSAL_LM,
 )
-model = get_peft_model(model, lora_config)
-model.print_trainable_parameters()
 
 # ── Dataset ────────────────────────────────────────────────────
 print("[3/5] Cargando dataset...")
@@ -90,7 +87,7 @@ training_args = TrainingArguments(
     per_device_train_batch_size=8,
     per_device_eval_batch_size=4,
     gradient_accumulation_steps=4,
-    evaluation_strategy="steps",
+    eval_strategy="steps",
     eval_steps=200,
     save_steps=200,
     logging_steps=50,

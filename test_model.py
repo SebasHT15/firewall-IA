@@ -82,6 +82,9 @@ model = PeftModel.from_pretrained(base_model, ADAPTER_DIR)
 model.eval()
 print("      Modelo cargado OK\n")
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
+end_token_id = tokenizer.convert_tokens_to_ids("###END###")
+
 # ── Inferencia ─────────────────────────────────────────────────
 def classify(request):
     prompt = (
@@ -89,13 +92,14 @@ def classify(request):
         f"<|user|>\n{request}</s>\n"
         f"<|assistant|>\n"
     )
-    inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
     with torch.no_grad():
         outputs = model.generate(
             **inputs,
             max_new_tokens=40,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
+            eos_token_id=end_token_id,
         )
     # Decodificar solo los tokens nuevos (no el prompt)
     input_len = inputs["input_ids"].shape[1]
@@ -103,9 +107,9 @@ def classify(request):
     response = tokenizer.decode(new_tokens, skip_special_tokens=True)
 
     # Extraer solo ALLOW/BLOCK | <razón> usando regex
-    match = re.search(r"(ALLOW|BLOCK)\s*\|\s*[^.\n]+\.", response)
+    match = re.search(r"(ALLOW|BLOCK)\s*\|\s*(.+?)(?:\s*###END###|\.|$)", response)
     if match:
-        return match.group(0).strip()
+        return f"{match.group(1)} | {match.group(2).strip()}"
     # Fallback: retornar primera línea limpia
     return response.split("\n")[0].strip()
 
@@ -129,3 +133,98 @@ for i, request in enumerate(TEST_CASES):
 
 print("=" * 70)
 print(f"Accuracy: {correct}/{total} ({100*correct//total}%)")
+
+# ── Suite adversarial ──────────────────────────────────────────
+# Casos que el modelo NO vio en entrenamiento:
+#   - Ataques conocidos con ofuscación (URL-encoded, unicode, IFS)
+#   - Categorías fuera de las 14 entrenadas (CRLF, HPP, XPath)
+#   - Falsos positivos: tráfico legítimo con palabras clave sospechosas
+#
+# expected: (request, "BLOCK"|"ALLOW", descripción)
+ADVERSARIAL_CASES = [
+    # ── Obfuscated known attacks ───────────────────────────────
+    (
+        "GET /search?q=%27%20OR%20%271%27%3D%271 HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "SQL injection, URL-encoded",
+    ),
+    (
+        "GET /search?q=\\u003cscript\\u003ealert(1)\\u003c/script\\u003e HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "XSS, unicode-escaped",
+    ),
+    (
+        "GET /api/ping?host=127.0.0.1;$(whoami) HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "Command injection, bash substitution",
+    ),
+    (
+        "GET /api/ping?host=127.0.0.1|$(cat${IFS}/etc/passwd) HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "Command injection, IFS evasion",
+    ),
+    # ── Attack categories outside the 14 trained ──────────────
+    (
+        "GET /redirect?url=https://evil.com%0d%0aSet-Cookie:%20session=hijacked HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "CRLF injection",
+    ),
+    (
+        "GET /search?id=1&id=2&id=99999 HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "HTTP Parameter Pollution",
+    ),
+    (
+        "POST /xml HTTP/1.1\nHost: target.com\nContent-Type: application/xml\n\n<user><name>' or '1'='1</name></user>",
+        "BLOCK",
+        "XPath injection",
+    ),
+    (
+        "GET /api/user?input={{''.__class__.__mro__[1].__subclasses__()}} HTTP/1.1\nHost: target.com",
+        "BLOCK",
+        "Python SSTI advanced",
+    ),
+    # ── Potential false positives ──────────────────────────────
+    (
+        "GET /ui/dropdown?action=drop&item=table HTTP/1.1\nHost: app.com",
+        "ALLOW",
+        "Legitimate UI action, contains 'drop table' keywords",
+    ),
+    (
+        "POST /api/users HTTP/1.1\nHost: app.com\nContent-Type: application/json\n\n{\"role\":\"admin\",\"active\":true,\"username\":\"bob\"}",
+        "ALLOW",
+        "Legitimate admin API call",
+    ),
+    (
+        "GET /blog/post?title=how-to-union-workers-rights HTTP/1.1\nHost: blog.example.com",
+        "ALLOW",
+        "Legitimate blog URL, contains 'union'",
+    ),
+    (
+        "GET /api/search?q=select+your+plan HTTP/1.1\nHost: app.com",
+        "ALLOW",
+        "Legitimate search query, contains 'select'",
+    ),
+]
+
+print()
+print("=" * 70)
+print("ADVERSARIAL TEST SUITE")
+print("=" * 70)
+
+adv_correct = 0
+adv_total   = len(ADVERSARIAL_CASES)
+
+for request, expected, description in ADVERSARIAL_CASES:
+    result  = classify(request)
+    got     = "BLOCK" if "BLOCK" in result.upper() else "ALLOW"
+    status  = "✅" if got == expected else "❌"
+    adv_correct += 1 if got == expected else 0
+
+    print(f"{status} [{expected}→{got}] {description}")
+    print(f"   Request:  {request[:70]}...")
+    print(f"   Respuesta: {result}")
+    print()
+
+print("=" * 70)
+print(f"Adversarial Accuracy: {adv_correct}/{adv_total} ({100*adv_correct//adv_total}%)")
