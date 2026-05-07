@@ -18,7 +18,7 @@ Internet ──► [ firewall-IA ] ──► Internal Network
          HTTP request arrives
                    │
          Fed to TinyLlama 1.1B
-         (fine-tuned on 33k attacks)
+         (fine-tuned on 52k attacks)
                    │
           ┌────────┴────────┐
           │                 │
@@ -38,7 +38,7 @@ The firewall parses the verdict and acts on it immediately — forwarding legiti
 
 ---
 
-## Detected Attack Categories (v2 Model)
+## Detected Attack Categories (v3 Model)
 
 | Category | Example Payload |
 |---|---|
@@ -56,6 +56,11 @@ The firewall parses the verdict and acts on it immediately — forwarding legiti
 | File Inclusion | `../../../../etc/passwd`, `php://filter/` |
 | Insecure Deserialization | Java serialized objects, PHP object injection |
 | HTTP Request Smuggling | CL.TE and TE.CL desync attacks |
+| CRLF Injection | `%0d%0aSet-Cookie: session=hijacked` |
+| HTTP Parameter Pollution | `?id=1&id=2&id=admin` |
+| XPath Injection | `' or '1'='1`, `'] \| //* \| //*['` |
+| Path Traversal | `../../etc/passwd`, `..%2F..%2Fetc%2Fpasswd` |
+| CSRF | Forged cross-origin POST, null-origin bypass |
 
 ---
 
@@ -66,6 +71,9 @@ The firewall parses the verdict and acts on it immediately — forwarding legiti
 - **No obfuscated/encoded variants yet**: The model has not been trained on URL-encoded, base64-encoded, or otherwise obfuscated attack payloads.
 - **Request Smuggling reason string**: The model correctly BLOCKs HTTP Request Smuggling attempts but may output a different attack category label in the reason string (e.g., "SQL injection" instead of "HTTP request smuggling"). The blocking verdict is always correct.
 - **Not yet tested on physical embedded hardware**: All testing has been done on desktop GPU hardware. llama.cpp deployment on embedded Linux targets is pending.
+- **JWT detection is blind to base64-encoded token content**: The model cannot detect `alg:none`, `kid` path traversal, or forged signature attacks — the malicious signal is inside the encoded token payload. v3 scores 0% on JWT attack cases. Dedicated training examples are needed for v4.
+- **CSRF detection is unreliable**: Zero training examples exist for this category. The model has no signal from Origin/Referer headers. v3 scores 40% on CSRF cases by chance pattern matching only.
+- **GraphQL introspection not reliably distinguished from benign GraphQL queries**: The model allows `__schema` introspection in some cases. v3 scores 60% on GraphQL attack cases.
 
 ---
 
@@ -85,21 +93,22 @@ The firewall parses the verdict and acts on it immediately — forwarding legiti
 
 ---
 
-## Training Results (v2)
+## Training Results
 
-| Metric | Value |
-|---|---|
-| Dataset size | 33,648 examples (16,828 BLOCK / 16,820 ALLOW) |
-| Attack categories | 14 |
-| Epochs | 4 |
-| Batch size | 8 (effective 32 with gradient accumulation) |
-| LoRA rank | 16 |
-| Final train loss | 0.2837 |
-| Best eval loss | 0.3289 (at epoch 2.85) |
-| Test accuracy | **26/26 (100%)** across all 14 categories |
-| Training time | ~78 minutes |
+| Metric | v2 | v3 |
+|---|---|---|
+| Dataset size | 33,648 (16,828 BLOCK / 16,820 ALLOW) | 52,670 (26,335 BLOCK / 26,335 ALLOW) |
+| Data sources | PayloadsAllTheThings only | PayloadsAllTheThings + CSIC 2010 + synthetic templates |
+| Attack categories | 14 | 19 |
+| Epochs | 4 | 4 |
+| Final train loss | 0.2837 | 0.2036 |
+| Best eval loss | 0.3289 | 0.5344 |
+| Test suite accuracy | 26/26 (100%) — 26 cases | 124/135 (91%) — 135 cases |
+| False positives | 0 | 0 |
+| Inference latency (avg) | not measured | 799.7ms (HuggingFace Transformers, RTX 4090 Laptop) |
+| Training time | ~78 min | ~150 min |
 
-Loss curve: started at 0.52 (epoch 0.12) and converged smoothly to 0.28 by epoch 4. Eval loss plateaued around epoch 2.6–2.9 with no signs of overfitting.
+> **Note on eval loss:** v3's eval loss (0.5344) is higher than v2's (0.3289). This is because the v3 eval set is significantly larger and more diverse (10,534 vs ~2,700 examples), making direct comparison of raw loss values misleading. Accuracy on the expanded test suite is the more reliable indicator.
 
 ---
 
@@ -116,9 +125,10 @@ firewall-IA/
 │                       # via PEFT, and trains with SFTTrainer. Saves the LoRA adapter to
 │                       # model-output-v2/. Requires CUDA GPU.
 │
-├── test_model.py       # Inference test harness: loads the fine-tuned adapter, runs 26
-│                       # hand-crafted test cases (22 BLOCK, 4 ALLOW), and reports per-case
-│                       # verdict + accuracy. Use this to validate any new checkpoint.
+├── test_model.py       # Inference test harness: loads the fine-tuned adapter, runs 135-case
+│                       # comprehensive test suite (95 systematic BLOCK cases across 19
+│                       # categories, 20 adversarial cases, 20 false-positive stress tests).
+│                       # Reports per-case verdict, per-category accuracy, and inference benchmark.
 │
 ├── .gitignore          # Excludes model weights, generated datasets, Python cache, and venvs.
 │
@@ -172,7 +182,11 @@ python test_model.py
 - [ ] **Inline proxy interceptor** — Build the actual HTTP proxy layer that feeds live traffic into the model and enforces verdicts in real time
 - [ ] **Obfuscated attack variants** — Expand the dataset with URL-encoded, Unicode-escaped, base64, and double-encoded payloads to improve evasion resistance
 - [ ] **Physical embedded hardware testing** — Deploy on an ARM-based embedded Linux board and measure latency and throughput under real network conditions
-- [ ] **Per-category accuracy benchmarking** — Build a structured evaluation suite with pass/fail counts broken down by attack category
+- [x] **Per-category accuracy benchmarking** — done — see v3 results (91% overall, 0 false positives, failures concentrated in JWT/CSRF/GraphQL)
+- [ ] **Fix JWT dataset** — add `alg:none`, `kid` injection, and forged signature training examples
+- [ ] **Fix CSRF dataset** — add Origin/Referer-based examples to `parse_dataset.py`
+- [ ] **Fix GraphQL dataset** — add examples distinguishing `__schema` introspection from benign queries
+- [ ] **Retrain as v4** with expanded dataset targeting the four weak categories
 - [ ] **Logging and alerting** — Add structured logging (JSON) and optional webhook/syslog alerts on BLOCK verdicts
 
 ---
