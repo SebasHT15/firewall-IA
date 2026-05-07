@@ -7,14 +7,14 @@ from transformers import (
     TrainingArguments,
     BitsAndBytesConfig,
 )
-from peft import LoraConfig, get_peft_model, TaskType
+from peft import LoraConfig, TaskType
 from trl import SFTTrainer
 
 # ── Configuración ──────────────────────────────────────────────
 MODEL_NAME   = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 TRAIN_FILE   = os.path.expanduser("~/ai-firewall/train.jsonl")
 EVAL_FILE    = os.path.expanduser("~/ai-firewall/eval.jsonl")
-OUTPUT_DIR   = os.path.expanduser("~/Desktop/firewall-IA/model-output-v2")
+OUTPUT_DIR   = os.path.expanduser("~/Desktop/firewall-IA/model-output-v3")
 MAX_SEQ_LEN  = 512
 
 # ── Cuantización 4-bit ─────────────────────────────────────────
@@ -45,7 +45,6 @@ model.config.use_cache = False
 print("      Modelo cargado OK")
 
 # ── Configuración LoRA ─────────────────────────────────────────
-print("[2/5] Aplicando LoRA...")
 lora_config = LoraConfig(
     r=16,
     lora_alpha=32,
@@ -55,8 +54,6 @@ lora_config = LoraConfig(
     bias="none",
     task_type=TaskType.CAUSAL_LM,
 )
-model = get_peft_model(model, lora_config)
-model.print_trainable_parameters()
 
 # ── Dataset ────────────────────────────────────────────────────
 print("[3/5] Cargando dataset...")
@@ -87,10 +84,11 @@ print("\n[4/5] Configurando entrenamiento...")
 training_args = TrainingArguments(
     output_dir=OUTPUT_DIR,
     num_train_epochs=4,
-    per_device_train_batch_size=8,
-    per_device_eval_batch_size=4,
-    gradient_accumulation_steps=4,
-    evaluation_strategy="steps",
+    per_device_train_batch_size=4,
+    per_device_eval_batch_size=2,
+    gradient_accumulation_steps=8,
+    gradient_checkpointing=True,
+    eval_strategy="steps",
     eval_steps=200,
     save_steps=200,
     logging_steps=50,
@@ -117,7 +115,7 @@ trainer = SFTTrainer(
 
 # ── Entrenar ───────────────────────────────────────────────────
 print("[5/5] Iniciando entrenamiento...")
-trainer.train()
+trainer.train(resume_from_checkpoint=True)
 
 # ── Guardar modelo final ───────────────────────────────────────
 print("\n✅ Entrenamiento completo. Guardando modelo...")
