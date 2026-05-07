@@ -105,8 +105,8 @@ The firewall parses the verdict and acts on it immediately — forwarding legiti
 | Best eval loss | 0.3289 | 0.5344 |
 | Test suite accuracy | 26/26 (100%) — 26 cases | 124/135 (91%) — 135 cases |
 | False positives | 0 | 0 |
-| Inference latency (avg) | not measured | 799.7ms (HuggingFace Transformers, RTX 4090 Laptop) |
-| Training time | ~78 min | ~150 min |
+| Inference latency (avg) | not measured | avg 799.7ms \| min 787.2ms \| max 825.6ms \| std 7.5ms (HuggingFace Transformers, RTX 4090 Laptop) |
+| Training time | ~78 min | ~8 hours (5:30 PM – 1:30 AM) |
 
 > **Note on eval loss:** v3's eval loss (0.5344) is higher than v2's (0.3289). This is because the v3 eval set is significantly larger and more diverse (10,534 vs ~2,700 examples), making direct comparison of raw loss values misleading. Accuracy on the expanded test suite is the more reliable indicator.
 
