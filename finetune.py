@@ -12,8 +12,8 @@ from trl import SFTTrainer
 
 # ── Configuración ──────────────────────────────────────────────
 MODEL_NAME   = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-TRAIN_FILE   = os.path.expanduser("~/ai-firewall/train.jsonl")
-EVAL_FILE    = os.path.expanduser("~/ai-firewall/eval.jsonl")
+TRAIN_FILE = os.path.expanduser("~/Desktop/firewall-IA/train.jsonl")
+EVAL_FILE  = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
 OUTPUT_DIR   = os.path.expanduser("~/Desktop/firewall-IA/model-output-v3")
 MAX_SEQ_LEN  = 512
 
@@ -115,7 +115,7 @@ trainer = SFTTrainer(
 
 # ── Entrenar ───────────────────────────────────────────────────
 print("[5/5] Iniciando entrenamiento...")
-trainer.train(resume_from_checkpoint=True)
+trainer.train(resume_from_checkpoint=False)
 
 # ── Guardar modelo final ───────────────────────────────────────
 print("\n✅ Entrenamiento completo. Guardando modelo...")

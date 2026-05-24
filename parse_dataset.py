@@ -5,8 +5,8 @@ import random
 
 # ── Configuración ──────────────────────────────────────────────
 PAYLOADS_REPO   = os.path.expanduser("~/PayloadsAllTheThings")
-OUTPUT_TRAIN    = os.path.expanduser("~/ai-firewall/train.jsonl")
-OUTPUT_EVAL     = os.path.expanduser("~/ai-firewall/eval.jsonl")
+OUTPUT_TRAIN    = os.path.expanduser("~/Desktop/firewall-IA/train.jsonl")
+OUTPUT_EVAL     = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
 CSIC_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "csic_database.csv")
 EVAL_SPLIT          = 0.2
 RANDOM_SEED         = 42
@@ -23,11 +23,11 @@ INSTRUCTION = (
 CATEGORIES = {
     "SQL Injection":                  "BLOCK | SQL injection payload detected.",
     "XSS Injection":                  "BLOCK | Cross-site scripting payload detected.",
-    "Path Traversal":                 "BLOCK | Path traversal attack detected.",
+    "Directory Traversal":                 "BLOCK | Path traversal attack detected.",
     "Command Injection":              "BLOCK | Command injection payload detected.",
     "LDAP Injection":                 "BLOCK | LDAP injection payload detected.",
     "XXE Injection":                  "BLOCK | XML external entity injection detected.",
-    "CSRF Injection":                 "BLOCK | CSRF attack pattern detected.",
+    "Cross-Site Request Forgery":                 "BLOCK | CSRF attack pattern detected.",
     "Open Redirect":                  "BLOCK | Open redirect payload detected.",
     "Server Side Request Forgery":    "BLOCK | Server-side request forgery attack detected.",
     "JSON Web Token":                 "BLOCK | JWT token manipulation attack detected.",

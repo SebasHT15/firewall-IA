@@ -12,7 +12,7 @@ import os
 # ── Configuración ──────────────────────────────────────────────
 BASE_MODEL  = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
 ADAPTER_DIR = os.path.expanduser("~/Desktop/firewall-IA/model-output-v3")
-EVAL_FILE   = os.path.expanduser("~/ai-firewall/eval.jsonl")
+EVAL_FILE = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
 
 INSTRUCTION = (
     "You are a network security firewall classifier. "
