@@ -206,9 +206,10 @@ Generates train/eval JSONL. Run `python3.12 parse_dataset.py`.
 LoRA fine-tune (4-bit NF4, rank=16, alpha=32). Run `python3.12 finetune.py`.
 - `TRAIN_FILE`/`EVAL_FILE` → `~/Desktop/firewall-IA/`; `OUTPUT_DIR = model-output-v3` (already set).
 - `resume_from_checkpoint=False` (set this session — fresh machine has no checkpoint to resume; `True` would crash).
-- 4 epochs, batch 4, grad accum 8, lr 2e-4 cosine, FP16, paged_adamw_8bit. Eval every 200 steps. SFTTrainer.
-- **⚠️ WILL NOT RUN on the installed stack** — see §12 F4. Not yet ported (D-note: porting is explicitly out of scope for the current checkpoint).
-- **⚠️ `###END###` handling is broken** — see §12 F5. Being removed per **D5**.
+- 4 epochs, batch 4, grad accum 8, lr 2e-4 cosine, **BF16 (D11)**, paged_adamw_8bit. Eval and save every 200 steps, `save_total_limit=2` (**D12**). `SFTConfig` + `SFTTrainer`.
+- **Ported 2026-08-17 (E1) and verified running** — `SFTConfig`, `processing_class=`, `max_length=512`. See §12 F3 and `reports/e1_training_pipeline_smoke.txt`.
+- `--smoke` runs a bounded compatibility test (500/100 examples, 12 steps, separate `model-output-e1-smoke/`). `--force-fp16` reproduces the pre-D11 incompatibility.
+- **⚠️ `###END###` handling is still broken** — see §12 F5. Being removed per **D5**, as a separate isolated change.
 
 ### `test_model.py`
 Loads base TinyLlama + LoRA from `model-output-v3`. Runs SYSTEMATIC (5×19 categories) + ADVERSARIAL (20) + FALSE_POSITIVE (20) suites; prints per-category accuracy, false positives/negatives, failures, and a 100-sample latency benchmark.
@@ -323,7 +324,15 @@ Cause: `main()` shuffles and splits a pool that already contains exact duplicate
 
 The fix must dedup *and* split on a payload-identity key, so that obfuscated/wrapped variants of one payload cannot straddle the split.
 
-### F3 — CRITICAL — `finetune.py` cannot run on the installed stack
+### F3 — RESOLVED 2026-08-17 (E1) — `finetune.py` could not run on the installed stack
+
+> **Resolved.** Ported to `SFTConfig` / `processing_class` / `max_length`; smoke test PASS. See `reports/e1_training_pipeline_smoke.txt`.
+>
+> **One recipe-affecting change was forced, now ratified as D11:** `fp16=True` → `bf16=True`. TRL 1.4 casts all trainable params to bfloat16 when the base model is 4-bit loaded (`sft_trainer.py:1088-1092`), and `fp16` routes through `GradScaler`, whose `_amp_foreach_non_finite_check_and_unscale_cuda` kernel has no BFloat16 implementation. fp16 + 4-bit QLoRA cannot run on TRL 1.4 at all. `python3.12 finetune.py --smoke --force-fp16` reproduces the crash. **D11 is a compatibility decision and must never be presented as a model-quality improvement** — no fp16-vs-bf16 quality comparison exists or can be made.
+>
+> **Also confirmed quantitatively, now ratified as D12:** the production recipe (4 epochs, `save_steps=200`, no `save_total_limit`) would produce ~49 checkpoints at ~302 MB each ≈ **14.8 GB before optimizer state**. `save_total_limit=2` is now set; `save_steps` and all other hyperparameters are unchanged.
+>
+> Original finding preserved below.
 
 Installed and verified 2026-08-16: `transformers 5.8.0`, `trl 1.4.0`, `peft 0.19.1`, `torch 2.6.0+cu124`, `bitsandbytes 0.49.2`, `accelerate 1.13.0`, `datasets 4.8.5`.
 
@@ -337,9 +346,18 @@ Verified by introspecting `trl.SFTTrainer.__init__` on this machine — `dataset
 
 `finetune.py` adds `###END###` as a special token and calls `resize_token_embeddings`, appending a **randomly initialised** row to `embed_tokens` and `lm_head`. `LoraConfig.target_modules` covers only `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj` — **`embed_tokens` and `lm_head` are in neither `target_modules` nor `modules_to_save`.** Therefore:
 
-1. The new token's embedding and output-head row receive no gradient and stay at random init.
-2. They are not saved in the adapter; `test_model.py` and `classifier_api.py` re-run `resize_token_embeddings` at load, producing a *different* random init each time.
-3. `generate(..., eos_token_id=end_token_id)` therefore almost certainly never fires — every inference runs the full `max_new_tokens=40`.
+1. The new token's embedding and output-head row receive no gradient.
+2. `generate(..., eos_token_id=end_token_id)` therefore almost certainly never fires — every inference runs the full `max_new_tokens=40`.
+
+> **⚠️ CORRECTED 2026-08-17 by E1 measurement** (`reports/e1_training_pipeline_smoke.txt` §7a). Two parts of the original finding were wrong on this stack:
+>
+> - **"randomly initialised"** — wrong. transformers 5.8 mean-resizes new rows from a multivariate normal fitted to the existing embeddings' mean and covariance.
+> - **"never saved / re-randomised on every load"** — wrong. PEFT force-saves **both full embedding matrices** when it detects a resize (`peft/utils/save_and_load.py:386`), so the row is persisted and deterministic across loads.
+> - **"receives no gradient"** — **correct, and confirmed.** The saved `adapter_config.json` has `modules_to_save=None` and `trainable_token_indices=None`. The token is saved at its initialisation value and never learns to be emitted.
+>
+> **The strongest argument for D5 is now a measured cost, not load non-determinism:** the resize inflates the saved adapter from ~24 MiB (LoRA only, 12,615,680 params) to **298 MB**, because 131,076,096 params of full `embed_tokens` + `lm_head` matrices are written into every checkpoint and into the final adapter — carrying no trained information beyond the base model. **A ~12× size increase.** This bears directly on D8 item 3 (GGUF export) and D10 (embedded storage budget).
+>
+> TRL 1.4 has machinery that would fix this class of bug (`trainable_token_indices` + automatic `modules_to_save=["lm_head"]`), but it only fires for tokens TRL itself adds via chat-template cloning — not for tokens added externally as `finetune.py` does.
 
 **Resolved by D5: remove the token, use native `</s>`. Do NOT repair it with `modules_to_save`.** Per D5, do not claim a measured latency improvement from this change without a controlled experiment — the historical v3 no longer exists to compare against.
 
@@ -391,7 +409,7 @@ Supersedes the v4 plan in §7. Decisions D1–D10 are recorded in `DECISIONS.md`
 | Step | Experiment | Status |
 |------|-----------|--------|
 | **E0** | Dataset integrity gate (`check_dataset.py`) | **DONE 2026-08-16** — current dataset reports **FAIL**, as expected |
-| **E1** | Port `finetune.py` to TRL 1.4 / transformers 5.8; smoke-test | **NOT STARTED** — hard blocker for all training |
+| **E1** | Port `finetune.py` to TRL 1.4 / transformers 5.8; smoke-test | **DONE 2026-08-17 — PASS** (`reports/e1_training_pipeline_smoke.txt`). Tooling unblocked. |
 | — | Documentation correction (this file + `DECISIONS.md` + `README.md`) | CONTEXT + DECISIONS done 2026-08-16; **README still stale** |
 | **E2** | Envelope ablation — regenerate under D1, train, compare | **NOT STARTED** — the decisive experiment |
 | **E3** | Leakage-free split (dedup + payload-keyed group split) | NOT STARTED |

@@ -142,6 +142,39 @@ Files affected when implemented: `parse_dataset.py` (INSTRUCTION + all output la
 `finetune.py` (`add_special_tokens` / `resize_token_embeddings`), `test_model.py` (extraction
 regex, `eos_token_id`), `classifier_api.py` (must stay byte-identical to `test_model.py`).
 
+### Additional deployment rationale — measured in E1, 2026-08-17
+
+The E1 smoke test established that resizing the tokenizer causes PEFT to persist the **full**
+`embed_tokens` and `lm_head` matrices into every checkpoint and into the final adapter
+(`peft/utils/save_and_load.py:386` sets `save_embedding_layers=True` automatically on
+detecting a resize).
+
+Measured on the E1 smoke adapter:
+
+| Component | Params | Size |
+|---|---:|---:|
+| LoRA tensors (308) | 12,615,680 | ~24 MiB |
+| Full `embed_tokens` + `lm_head` | 131,076,096 | ~250 MiB |
+| **Resulting adapter** | | **~298 MB** |
+
+**The custom token causes roughly a 12× adapter-size inflation — despite the new token not
+being configured as a trainable token** (`modules_to_save=None`, `trainable_token_indices=None`
+in the saved `adapter_config.json`, so it receives no gradient and carries no trained
+information).
+
+This gives D5 a deployment reason independent of the original termination-behaviour argument,
+and it bears directly on **D8 item 3** (GGUF / quantized deployment path) and **D10**
+(embedded storage budget).
+
+It also corrects part of the original audit finding F5: the new row is *not* randomly
+initialised (transformers 5.8 mean-resizes from the existing embeddings' mean and covariance)
+and is *not* re-randomised per load (PEFT persists it). What holds is that it receives no
+gradient and never learns to be emitted. See `CONTEXT.md` §12 F5 and
+`reports/e1_training_pipeline_smoke.txt` §7/§7a.
+
+**`###END###` is NOT removed in this step.** D5 remains approved and will be implemented
+separately, before clean baseline training.
+
 ---
 
 ## D6 — Dataset versioning
@@ -280,6 +313,73 @@ quantization work in D8 item 3, neither of which has been performed.
 
 ---
 
+## D11 — Training numerical precision
+
+- **Date:** 2026-08-17
+- **Status:** APPROVED
+- **Implementation:** DONE — applied to `finetune.py` 2026-08-17
+
+**Decision.** Adopt BF16 for the current QLoRA training pipeline.
+
+```
+bf16 = True
+fp16 = False
+bnb_4bit_compute_dtype = torch.bfloat16
+```
+
+**Rationale.** TRL 1.4.0 casts trainable LoRA parameters to BF16 for 4-bit models
+(`trl/trainer/sft_trainer.py:1088-1092`, following the QLoRA paper; there is no flag to
+disable it). The E1 smoke test demonstrated that `fp16=True` is incompatible with that path
+because `GradScaler` cannot unscale BF16 trainable tensors:
+
+```
+RuntimeError: "_amp_foreach_non_finite_check_and_unscale_cuda"
+              not implemented for 'BFloat16'
+```
+
+The RTX 4090 supports BF16 natively (`torch.cuda.is_bf16_supported() = True`).
+
+**This is an environment compatibility / numerical consistency decision. It must NOT later be
+presented as a measured model-quality improvement.** No quality comparison between the fp16
+and bf16 recipes exists, and none can be made — the fp16 path does not run at all on this
+stack.
+
+`bnb_4bit_compute_dtype` moves from `torch.float16` to `torch.bfloat16` under this decision.
+E1 had deliberately left it at float16 pending approval, since it is quantization
+configuration and was not required to fix the crash; it is now aligned for consistency with
+the QLoRA reference configuration.
+
+**Reproducer retained.** `python3.12 finetune.py --smoke --force-fp16` still reproduces the
+original incompatibility for the record. It is opt-in only and contradicts this decision by
+design.
+
+Evidence: `reports/e1_training_pipeline_smoke.txt` §3a.
+
+---
+
+## D12 — Checkpoint retention
+
+- **Date:** 2026-08-17
+- **Status:** APPROVED
+- **Implementation:** DONE — applied to `finetune.py` 2026-08-17
+
+**Decision.** Set `save_total_limit=2` for the normal training recipe.
+
+Do **not** change `save_steps` or any other training hyperparameter.
+
+**Rationale.** E1 measured approximately 300 MB per checkpoint/adapter-scale artifact, and the
+current production schedule (4 epochs, `save_steps=200`, ~9,900 optimizer steps) could produce
+approximately 49 checkpoints — roughly 14.8 GB before optimizer state. Checkpoint retention
+must therefore be bounded before any full training run.
+
+Note that the ~300 MB per-checkpoint figure is itself inflated by the `###END###` resize
+(see D5); once D5 is implemented, per-checkpoint size should fall to roughly 24 MiB of LoRA
+tensors. `save_total_limit=2` remains correct regardless.
+
+Evidence: `reports/e1_training_pipeline_smoke.txt` §9.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -294,6 +394,8 @@ quantization work in D8 item 3, neither of which has been performed.
 | D8 | Core project scope — 7 mandatory items | APPROVED (advisor confirmation where needed) | IN PROGRESS |
 | D9 | Conventional rule-based comparison | FUTURE WORK | OUT OF CURRENT SCOPE |
 | D10 | Embedded deployment — platform TBD | CORE REQUIREMENT | NOT YET |
+| D11 | Training precision — BF16 (compatibility, not quality) | APPROVED | DONE |
+| D12 | Checkpoint retention — `save_total_limit=2` | APPROVED | DONE |
 
 ---
 
