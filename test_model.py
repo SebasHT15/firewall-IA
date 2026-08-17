@@ -17,8 +17,14 @@ EVAL_FILE = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
 INSTRUCTION = (
     "You are a network security firewall classifier. "
     "Analyze the following HTTP request and respond with exactly: "
-    "ALLOW or BLOCK | <one sentence reason>. Then output ###END###"
+    "ALLOW or BLOCK | <one sentence reason>."
 )
+
+# Decision contract: "ALLOW | <reason>" / "BLOCK | <reason>".
+# Terminated by native EOS (D5/E4) — no custom stop token.
+# Defensive against leading/trailing whitespace, a trailing period, and any
+# continuation text the model emits after the reason.
+EXTRACT_RE = re.compile(r"\b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)")
 
 # ── Test cases: (request, expected_label, category, description) ──
 # SYSTEMATIC: 5 cases per category × 19 categories = 95 BLOCK
@@ -641,14 +647,12 @@ base_model = AutoModelForCausalLM.from_pretrained(
     quantization_config=bnb_config,
     device_map="auto",
 )
-base_model.resize_token_embeddings(len(tokenizer))
 
 model = PeftModel.from_pretrained(base_model, ADAPTER_DIR)
 model.eval()
 print("      Modelo cargado OK\n")
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-end_token_id = tokenizer.convert_tokens_to_ids("###END###")
 
 
 # ── Inferencia ────────────────────────────────────────────────────
@@ -665,12 +669,11 @@ def classify(request):
             max_new_tokens=40,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=end_token_id,
         )
     input_len = inputs["input_ids"].shape[1]
     new_tokens = outputs[0][input_len:]
     response = tokenizer.decode(new_tokens, skip_special_tokens=True)
-    match = re.search(r"(ALLOW|BLOCK)\s*\|\s*(.+?)(?:\s*###END###|\.|$)", response)
+    match = EXTRACT_RE.search(response)
     if match:
         return f"{match.group(1)} | {match.group(2).strip()}"
     return response.split("\n")[0].strip()

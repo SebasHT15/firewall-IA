@@ -69,23 +69,34 @@ CHECKPOINT RETENTION — DECISIONS.md D12 (APPROVED 2026-08-17):
   schedule would otherwise produce ~49 of them (~14.8 GB before optimizer
   state). save_steps and all other hyperparameters are unchanged.
 
-KNOWN DEFECT, DELIBERATELY PRESERVED FOR NOW (audit F5 / DECISIONS.md D5):
-  The `###END###` token below is added to the tokenizer and the embeddings are
-  resized, but `embed_tokens` / `lm_head` are in neither `target_modules` nor
-  `modules_to_save` — so the new rows never receive a gradient and the token
-  never learns to be emitted.
+CUSTOM STOP TOKEN REMOVED — DECISIONS.md D5, experiment E4 (2026-08-17):
 
-  MEASURED IN E1: PEFT detects the resize and force-saves BOTH full embedding
-  matrices (peft/utils/save_and_load.py:386), so the untrained rows ARE
-  persisted — and they inflate the adapter from ~24 MiB of LoRA tensors to
-  ~298 MB (131,076,096 extra params, ~250 MiB, carrying no trained
-  information). A ~12x size increase. See DECISIONS.md D5.
+  The `###END###` special token, the tokenizer `add_special_tokens` call and
+  the `resize_token_embeddings` call are all gone. Termination now uses
+  TinyLlama's native EOS.
 
-  D5 (approved) removes the token entirely. That removal is a separate,
-  isolated change and is NOT part of E1.
-  Note: TRL 1.4 has machinery for exactly this bug (`trainable_token_indices`
-  + auto `modules_to_save=["lm_head"]`), but it only fires for tokens TRL adds
-  itself via chat-template cloning — not for tokens added externally as here.
+  Verified on the installed stack: format_example() ends each sequence with a
+  literal "</s>", which tokenizes to eos_token_id 2, and TRL 1.4 appends EOS
+  only when the text does not already end with it — so exactly one EOS is
+  present, not two.
+
+  Why it was removed (measured in E1):
+    * `###END###` was unnecessary — native EOS already exists and was already
+      present in every training sequence.
+    * Resizing the vocabulary made PEFT set `save_embedding_layers=True`
+      automatically, persisting the FULL `embed_tokens` and `lm_head` matrices
+      into every checkpoint and into the final adapter.
+    * The E1 smoke adapter held ~24 MiB of actual LoRA tensors but totalled
+      ~298 MB, the balance being ~250 MiB of those two matrices.
+    * The token was never configured as a trainable token
+      (`modules_to_save=None`, `trainable_token_indices=None`), so those
+      matrices carried no trained information.
+    * Removing it simplifies the pipeline and supports the future GGUF /
+      embedded-deployment objective (D8 item 3, D10).
+
+  NOTE: no latency improvement is claimed. That remains a hypothesis until a
+  controlled experiment measures it (D5).
+
 ────────────────────────────────────────────────────────────────────────────
 """
 
@@ -153,8 +164,10 @@ tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.padding_side = "right"
 
-# Agregar stop token ###END###  (see D5 — to be removed in a separate change)
-tokenizer.add_special_tokens({"additional_special_tokens": ["###END###"]})
+# No custom stop token. Termination is the model's NATIVE EOS (</s>, id 2),
+# which format_example() appends to every training sequence. See D5 / E4.
+# The tokenizer vocabulary is NOT resized, so PEFT has no reason to force-save
+# the full embed_tokens and lm_head matrices into every checkpoint.
 
 model = AutoModelForCausalLM.from_pretrained(
     MODEL_NAME,
@@ -162,7 +175,6 @@ model = AutoModelForCausalLM.from_pretrained(
     device_map="auto",
     trust_remote_code=True,
 )
-model.resize_token_embeddings(len(tokenizer))
 model.config.use_cache = False
 print("      Modelo cargado OK")
 print(f"      4-bit cargado: {getattr(model, 'is_loaded_in_4bit', False)}")

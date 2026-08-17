@@ -74,8 +74,10 @@ ALLOW | Normal HTTP request with no attack patterns detected.
 BLOCK | SQL injection payload detected.
 ```
 
-> The `###END###` suffix that appears in the current dataset is **being removed** — it is
-> structurally untrainable under the current LoRA configuration. See `DECISIONS.md` D5.
+> Generation terminates on the model's **native EOS** (`</s>`). The former `###END###` stop
+> token was removed in experiment E4 — it was structurally untrainable and its tokenizer
+> resize made PEFT persist the full embedding and output-head matrices, inflating the E1
+> smoke adapter to ~298 MB. See `DECISIONS.md` D5.
 
 **Failure behaviour is FAIL-CLOSED** (`DECISIONS.md` D4): if the classifier times out,
 crashes, is unavailable, or returns an invalid decision, traffic is blocked by default.
@@ -141,9 +143,9 @@ Re-measure with `check_dataset.py` after any regeneration rather than quoting th
 
 - **`finetune.py` will not run** on the installed stack: TRL 1.4's `SFTTrainer` rejects
   `dataset_text_field`, `max_seq_length` and `tokenizer`.
-- **`###END###` is structurally untrainable**: the resized embedding rows are neither in
-  `target_modules` nor `modules_to_save`, so they receive no gradient, are never saved, and
-  are re-randomised on every load.
+- ~~`###END###` is structurally untrainable~~ — **RESOLVED in E4 (2026-08-17).** The token,
+  the tokenizer resize and the `eos_token_id` override are removed from all four pipeline
+  files; termination is native EOS.
 
 ### Evaluation
 
@@ -324,7 +326,7 @@ Ordered experiment sequence. Scope decisions are recorded in `DECISIONS.md`.
       classes (D1), retrain, compare. *The decisive experiment.*
 - [ ] **E3 — Leakage-free split** — deduplicate and split on a payload-identity key so
       obfuscated/wrapped variants of one payload cannot straddle the split
-- [ ] **E4 — Remove `###END###`** (D5) and use native termination
+- [x] **E4 — Remove `###END###`** (D5) — done 2026-08-17, native EOS
 - [ ] **E5 — Per-category rebalancing** — address the 525:1 spread, including CSRF, request
       smuggling, GraphQL, LDAP, NoSQL and JWT
 - [ ] **E6 — Held-out evasion evaluation** — transforms and base payloads not seen in training

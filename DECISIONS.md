@@ -122,25 +122,62 @@ accident.
 
 - **Date:** 2026-08-16
 - **Status:** APPROVED
-- **Implementation:** NOT YET — to be applied before the clean baseline training
+- **Implementation:** **DONE — experiment E4, 2026-08-17**
 
 **Decision.** Remove the custom `###END###` token. Use the model's native termination
 behaviour instead. **Do not** attempt to repair `###END###` with `modules_to_save`.
 
 Because the historical v3 model no longer exists, **do not claim a measured before/after
 latency improvement from this change** unless a controlled experiment is later performed.
+A latency improvement remains a **hypothesis**, not a result.
 
-**Rationale.** Audit finding F5: `finetune.py` adds `###END###` and calls
-`resize_token_embeddings`, appending randomly-initialised rows to `embed_tokens` and
-`lm_head`. The LoRA config targets only `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj,
-down_proj`, and `modules_to_save` is unset — so those rows receive no gradient, are never
-saved, and are re-randomised on every load. `eos_token_id=end_token_id` therefore almost
-certainly never fires. The token is structurally untrainable as configured, and TinyLlama's
-native `</s>` already provides termination.
+### Rationale (corrected against measured E1 evidence)
 
-Files affected when implemented: `parse_dataset.py` (INSTRUCTION + all output labels),
-`finetune.py` (`add_special_tokens` / `resize_token_embeddings`), `test_model.py` (extraction
-regex, `eos_token_id`), `classifier_api.py` (must stay byte-identical to `test_model.py`).
+1. **`###END###` is unnecessary — native EOS already exists.** TinyLlama's `</s>` is
+   `eos_token_id` 2, and `format_example()` already appended a literal `</s>` to every
+   training sequence, verified to tokenize to id 2 on the installed stack.
+2. **Under the observed E1 stack, resizing the tokenizer caused PEFT to persist the full
+   `embed_tokens` and `lm_head` matrices.** `peft/utils/save_and_load.py:386` sets
+   `save_embedding_layers=True` automatically when it detects a resize.
+3. **The E1 smoke adapter totalled ~298 MB**, of which only ~24 MiB was actual LoRA tensors
+   (12,615,680 params); the remaining ~250 MiB was 131,076,096 params of those two matrices.
+4. **The custom token was never configured as a trainable token** — the saved
+   `adapter_config.json` showed `modules_to_save=None` and `trainable_token_indices=None`, so
+   it received no gradient and those matrices carried no trained information.
+5. **Removing it simplifies the pipeline and supports the future GGUF / embedded-deployment
+   objective** (D8 item 3, D10).
+
+> **Note on two earlier claims, corrected during E1 and not repeated here:** the audit's
+> original F5 stated that the embedding row was randomly re-initialised on every load and
+> that the embedding/head matrices were never saved. Both were **wrong** on this stack —
+> transformers 5.8 mean-resizes new rows, and PEFT does persist the matrices. What held is
+> that the row received no gradient and never learned to be emitted.
+
+### E4 implementation and verification (2026-08-17)
+
+Files changed: `parse_dataset_v4.py` (INSTRUCTION + all output labels), `finetune.py`
+(`add_special_tokens` / `resize_token_embeddings` removed), `test_model.py` and
+`classifier_api.py` (tokenizer resize, `end_token_id`, `eos_token_id` override and
+custom-token regex all removed; their extraction regex is byte-identical).
+
+Output contract is unchanged: `ALLOW | <reason>` / `BLOCK | <reason>`.
+
+Verified without any training run:
+
+| Check | Result |
+|---|---|
+| Tokenizer vocabulary | 32,000 — **not resized**; added vocab is only `<unk>/<s>/</s>` |
+| Formatted sequence termination | ends with `eos_token_id` 2; exactly 3 EOS, **no duplicate** |
+| `embed_tokens` / `lm_head` in saved adapter | **NONE** — 12,615,680 params total |
+| `modules_to_save` / `trainable_token_indices` | `None` / `None` |
+| Generation | works with no `eos_token_id` override |
+| Dataset regeneration | input side **byte-identical**; only label text changed |
+| E0 regression | every metric byte-identical to the pre-E4 report |
+
+**The structural cause of the E1 embedding/head inflation has been removed.** No production
+adapter size is claimed, since no training run was performed.
+
+Evidence: `reports/e4_remove_end_token.txt`.
 
 ### Additional deployment rationale — measured in E1, 2026-08-17
 
@@ -172,8 +209,7 @@ and is *not* re-randomised per load (PEFT persists it). What holds is that it re
 gradient and never learns to be emitted. See `CONTEXT.md` §12 F5 and
 `reports/e1_training_pipeline_smoke.txt` §7/§7a.
 
-**`###END###` is NOT removed in this step.** D5 remains approved and will be implemented
-separately, before clean baseline training.
+**`###END###` was subsequently removed in experiment E4 (2026-08-17).** See the D5 entry above.
 
 ---
 
@@ -665,7 +701,7 @@ Evidence: `reports/e2_e3_clean_dataset.txt` §6.
 | D2 | CSIC excluded anomalies — keep out of baseline | APPROVED FOR FUTURE WORK | N/A |
 | D3 | Latency target — P95 ≤ 200 ms end-to-end added | APPROVED | N/A |
 | D4 | Failure behavior — FAIL-CLOSED | APPROVED | OUT OF CURRENT SCOPE |
-| D5 | Remove `###END###`, use native termination | APPROVED | NOT YET |
+| D5 | Remove `###END###`, use native termination | APPROVED | **DONE (E4)** |
 | D6 | Dataset versioning — manifest-based, no `git rm` yet | APPROVED | NOT YET |
 | D7 | Scientific integrity over the historical 91% | APPROVED | N/A |
 | D8 | Core project scope — 7 mandatory items | APPROVED (advisor confirmation where needed) | IN PROGRESS |

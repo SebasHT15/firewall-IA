@@ -2,9 +2,9 @@
   "dataset_name": "firewall-IA v4 clean (candidate)",
   "version": "v4-clean-candidate",
   "status": "CANDIDATE — not a validated baseline until E0 passes and it is reviewed",
-  "generated_utc": "2026-08-17T06:35:57+00:00",
+  "generated_utc": "2026-08-17T06:49:20+00:00",
   "generator": "parse_dataset_v4.py",
-  "generator_git_commit": "def0c92f67c4f17b23c7e616fde43c0f08cbaa9d",
+  "generator_git_commit": "1bf412fb843992399665e96ec034016462feda7f",
   "payloadsallthethings_commit": "e961fef231d8327bae83b563fab50aec2e6b77c0",
   "seed": 42,
   "eval_fraction_requested": 0.2,
@@ -221,12 +221,12 @@
     "CRLF Injection": "Encoded CR/LF sequences interacting with the request-target and response headers ARE the attack. The payload itself carries the signal; the envelope is shared."
   },
   "artifact_sha256": {
-    "train": "ffc8b51246119b247fc43fa73df049ae3adaefd58ccbc1f79f0ab0b7575271f8",
-    "eval": "d4e4bd48b4ad67185f29d31f437ac00426cd6c5cc08153b034ebc8c59d0460a9"
+    "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+    "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
   },
   "artifact_bytes": {
-    "train": 13934680,
-    "eval": 3439498
+    "train": 13130392,
+    "eval": 3240906
   },
   "known_limitations": [
     "CANDIDATE dataset. Not a validated baseline until check_dataset.py passes and the dataset is reviewed.",
@@ -234,7 +234,7 @@
     "Categories listed under not_evaluable_categories have ZERO held-out eval rows and are NOT EVALUABLE (D18). No performance claim may be made for them.",
     "Categories listed under insufficient_data_categories have too few unique logical samples to support a per-category performance claim.",
     "Held-out transforms were used to generate NOTHING here; obfuscation robustness against them is therefore unmeasured by design (D15).",
-    "###END### is retained pending D5, which is a separate isolated change.",
+    "Labels terminate via native EOS (D5/E4); no custom stop token is used.",
     "Synthetic benign traffic is generated, not captured. Its realism is bounded by the parameter pools in this file."
   ]
 }

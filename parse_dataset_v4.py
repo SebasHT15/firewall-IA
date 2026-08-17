@@ -51,8 +51,8 @@ F8  Obfuscation used simultaneously as training augmentation and as
 ────────────────────────────────────────────────────────────────────────────
 NOT DONE HERE, DELIBERATELY
 
-  * ###END### is retained. D5 removes it as a separate isolated change; it is
-    not required by generation logic, so it is not touched here.
+  * ###END### has been REMOVED (D5, experiment E4). Labels are now
+    "ALLOW | <reason>" / "BLOCK | <reason>", terminating via native EOS.
   * Weak categories are never inflated (D14). No floors, no upsampling, no
     duplication, no fabrication. Scarce categories are reported as
     INSUFFICIENT DATA and, where they have no held-out rows, as NOT EVALUABLE
@@ -127,9 +127,14 @@ RANDOM_SEED = 42
 INSTRUCTION = (
     "You are a network security firewall classifier. "
     "Analyze the following HTTP request and respond with exactly: "
-    "ALLOW or BLOCK | <one sentence reason>. Then output ###END###"
+    "ALLOW or BLOCK | <one sentence reason>."
 )
-END = " ###END###"          # D5 will remove this; retained deliberately for now
+
+# D5 (experiment E4): the custom ###END### stop token is REMOVED. Labels
+# terminate with the model's NATIVE EOS. finetune.py's format_example() appends
+# a literal "</s>", which was verified on the installed stack to tokenize to
+# eos_token_id 2, and TRL 1.4 does not double-append because the formatted text
+# already ends with EOS.
 
 ALLOW_LABEL = "ALLOW | Normal HTTP request with no attack patterns detected."
 
@@ -1341,7 +1346,7 @@ def main():
         # and for statistics. They are stripped before writing, so the JSONL
         # output is unaffected.
         rows[split].append({"instruction": INSTRUCTION, "input": inp,
-                            "output": out_label + END,
+                            "output": out_label,
                             "_src": src, "_cat": cat, "_gid": gid})
         per_cat[cat][split] += 1
 
@@ -1443,7 +1448,7 @@ def main():
         for sp in ("train", "eval"):
             for r in rows[sp]:
                 if r["output"].startswith("BLOCK"):
-                    lbl = r["output"].replace(END, "").strip()
+                    lbl = r["output"].strip()
                     blk_by_cat[lbl][sp].append(r)
 
         def subsample(pool: list, quota: int) -> list:
@@ -1499,10 +1504,10 @@ def main():
                     keep_ids.add(id(r))
             for sp in ("train", "eval"):
                 rows[sp] = [r for r in rows[sp]
-                            if not (r["output"].replace(END, "").strip() == lbl)
+                            if not (r["output"].strip() == lbl)
                             or id(r) in keep_ids]
             kept = [r for sp in ("train", "eval") for r in rows[sp]
-                    if r["output"].replace(END, "").strip() == lbl]
+                    if r["output"].strip() == lbl]
             row_cap_report[lbl] = {
                 "rows_before": total, "rows_after": len(kept),
                 "rows_removed": total - len(kept),
@@ -1563,7 +1568,7 @@ def main():
     final_cat = Counter()
     for sp in ("train", "eval"):
         for r in rows[sp]:
-            o = r["output"].replace(END, "").strip()
+            o = r["output"].strip()
             final_cat[o] += 1
 
     group_split = Counter()
@@ -1580,11 +1585,11 @@ def main():
     eval_rows_per_reason = Counter()
     for r in rows["eval"]:
         if r["output"].startswith("BLOCK"):
-            eval_rows_per_reason[r["output"].replace(END, "").strip()] += 1
+            eval_rows_per_reason[r["output"].strip()] += 1
     train_rows_per_reason = Counter()
     for r in rows["train"]:
         if r["output"].startswith("BLOCK"):
-            train_rows_per_reason[r["output"].replace(END, "").strip()] += 1
+            train_rows_per_reason[r["output"].strip()] += 1
     not_evaluable = sorted(
         lbl for lbl in train_rows_per_reason if eval_rows_per_reason[lbl] == 0
     )
@@ -1667,7 +1672,7 @@ def main():
             "logical samples to support a per-category performance claim.",
             "Held-out transforms were used to generate NOTHING here; obfuscation "
             "robustness against them is therefore unmeasured by design (D15).",
-            "###END### is retained pending D5, which is a separate isolated change.",
+            "Labels terminate via native EOS (D5/E4); no custom stop token is used.",
             "Synthetic benign traffic is generated, not captured. Its realism is bounded "
             "by the parameter pools in this file.",
         ],
@@ -1686,7 +1691,7 @@ def main():
             for r in rows[sp]:
                 if not r["output"].startswith("BLOCK"):
                     continue
-                lbl = r["output"].replace(END, "").strip()
+                lbl = r["output"].strip()
                 cat = REASON_TO_CATEGORY.get(lbl[len("BLOCK | "):], lbl)
                 cat_rows[cat][sp] += 1
                 cat_rows[cat][r["_src"] if r["_src"] in ("csic_attack",) else "attack"] += 1

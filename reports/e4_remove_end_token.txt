@@ -1,0 +1,380 @@
+==============================================================================
+firewall-IA — E4: REMOVE THE CUSTOM ###END### TOKEN
+Isolated implementation of approved decision D5
+==============================================================================
+Date (UTC)              : 2026-08-17
+Git commit at E4 start  : 1bf412fb843992399665e96ec034016462feda7f
+Branch                  : API
+Scope                   : token removal only. NO methodology change, NO training.
+
+STATUS: COMPLETE. No commit created — handed off for manual review.
+
+==============================================================================
+1. OUTPUT FORMAT — BEFORE / AFTER
+==============================================================================
+  BEFORE
+    instruction : "...respond with exactly: ALLOW or BLOCK | <one sentence
+                   reason>. Then output ###END###"
+    label       : "ALLOW | Normal HTTP request with no attack patterns detected. ###END###"
+                  "BLOCK | SQL injection payload detected. ###END###"
+
+  AFTER
+    instruction : "...respond with exactly: ALLOW or BLOCK | <one sentence
+                   reason>."
+    label       : "ALLOW | Normal HTTP request with no attack patterns detected."
+                  "BLOCK | SQL injection payload detected."
+
+  The SEMANTIC OUTPUT CONTRACT IS UNCHANGED: "ALLOW | <reason>" / "BLOCK | <reason>".
+  Only the termination mechanism changed, from a custom string to native EOS.
+
+==============================================================================
+2. NATIVE EOS — VERIFIED BEFORE ANY EDIT
+==============================================================================
+A stop condition for E4 was "native EOS behavior is ambiguous under the
+installed stack". It is not. Measured on TinyLlama-1.1B-Chat-v1.0 with
+transformers 5.8.0 / TRL 1.4.0:
+
+  eos_token                        '</s>'
+  eos_token_id                     2
+  pad_token (pre-set)              '</s>'
+  vocab_size / len(tokenizer)      32000 / 32000
+
+  A literal "</s>" inside the formatted text tokenizes to the REAL eos id:
+    text tail  "...no attack patterns detected.</s>"
+    ids  tail  [694, 5337, 15038, 17809, 29889, 2]      last id == 2  -> True
+
+  => format_example() has ALWAYS emitted a genuine native EOS. The custom token
+     was never the actual termination mechanism.
+
+  TRL 1.4 add_eos guard (trl/trainer/sft_trainer.py:1427):
+    appends EOS only `if not example["text"].endswith(eos_token)`.
+    The formatted text ends with "</s>", so TRL does NOT append a second EOS.
+
+  CRITICAL SIDE-FINDING that shaped the edits:
+    Without the tokenizer resize, `tokenizer.convert_tokens_to_ids("###END###")`
+    returns 0 — the UNK token id. Any surviving `eos_token_id=end_token_id`
+    override would therefore have silently set EOS to <unk>. Every such
+    override was removed, not merely the token registration.
+    (With the base tokenizer, "###END###" is 4 ordinary tokens:
+     [835, 11794, 2277, 29937].)
+
+==============================================================================
+3. FILES CHANGED
+==============================================================================
+  parse_dataset_v4.py    INSTRUCTION, label emission, docstring, manifest note
+  finetune.py            tokenizer/model init, docstring
+  test_model.py          tokenizer/model init, generation, parser
+  classifier_api.py      tokenizer/model init, generation, parser
+  CONTEXT.md             D5/F5 status, pipeline descriptions, roadmap
+  DECISIONS.md           D5 rationale corrected + marked DONE, index
+  README.md              termination note, limitations, roadmap
+  datasets/v4_clean/train.jsonl   regenerated (labels only)
+  datasets/v4_clean/eval.jsonl    regenerated (labels only)
+  datasets/manifest_v4_clean.json regenerated (new hashes)
+
+  NOT TOUCHED: parse_dataset.py (historical generator, deliberately frozen as
+  the E2 control condition — it still contains the old format, correctly),
+  check_dataset.py, the historical root train.jsonl/eval.jsonl.
+
+------------------------------------------------------------------------------
+3a. TOKENIZER CHANGES
+------------------------------------------------------------------------------
+  REMOVED  finetune.py     tokenizer.add_special_tokens({"additional_special_tokens": ["###END###"]})
+  REMOVED  finetune.py     model.resize_token_embeddings(len(tokenizer))
+  REMOVED  test_model.py   base_model.resize_token_embeddings(len(tokenizer))
+  REMOVED  test_model.py   end_token_id = tokenizer.convert_tokens_to_ids("###END###")
+  REMOVED  classifier_api  base_model.resize_token_embeddings(len(tokenizer))
+  REMOVED  classifier_api  end_token_id (module global, lifespan global, assignment)
+
+  KEPT (normal initialisation, untouched):
+    AutoTokenizer.from_pretrained(MODEL_NAME)
+    tokenizer.pad_token = tokenizer.eos_token
+    tokenizer.padding_side = "right"
+
+------------------------------------------------------------------------------
+3b. MODEL INITIALIZATION CHANGES
+------------------------------------------------------------------------------
+  The ONLY removal is the vocabulary resize. Explicitly unchanged:
+    base model TinyLlama/TinyLlama-1.1B-Chat-v1.0
+    LoRA r=16, alpha=32, dropout=0.05, bias=none, task_type=CAUSAL_LM
+    target_modules q_proj k_proj v_proj o_proj gate_proj up_proj down_proj
+    BitsAndBytesConfig load_in_4bit, nf4, double_quant
+    D11 precision: bf16=True, fp16=False, bnb_4bit_compute_dtype=bfloat16
+    D12 checkpoint retention: save_total_limit=2
+    epochs, lr, scheduler, warmup, batch size, gradient accumulation
+
+------------------------------------------------------------------------------
+3c. TRAINING-FORMAT CHANGES
+------------------------------------------------------------------------------
+  format_example() is UNCHANGED:
+    <|system|>\\n{instruction}</s>\\n<|user|>\\n{input}</s>\\n<|assistant|>\\n{output}</s>
+  Only {instruction} and {output} lost their "###END###" text. The sequence
+  still ends with "</s>" -> eos_token_id 2.
+
+------------------------------------------------------------------------------
+3d. INFERENCE-GENERATION CHANGES
+------------------------------------------------------------------------------
+  BEFORE  generate(..., max_new_tokens=40, do_sample=False,
+                   pad_token_id=tokenizer.eos_token_id,
+                   eos_token_id=end_token_id)
+  AFTER   generate(..., max_new_tokens=40, do_sample=False,
+                   pad_token_id=tokenizer.eos_token_id)
+
+  Generation now stops on the model's native EOS. max_new_tokens=40 is retained
+  unchanged as the safety bound.
+
+------------------------------------------------------------------------------
+3e. INFERENCE-PARSER CHANGES
+------------------------------------------------------------------------------
+  BEFORE  r"(ALLOW|BLOCK)\\s*\\|\\s*(.+?)(?:\\s*###END###|\\.|$)"
+  AFTER   r"\\b(ALLOW|BLOCK)\\b\\s*\\|\\s*(.+?)\\s*(?:\\.|\\n|$)"
+
+  VERIFIED BYTE-IDENTICAL between test_model.py and classifier_api.py.
+
+  Defensive behaviour verified against realistic decoder output:
+    "ALLOW | Normal ... detected."               -> ALLOW | 'Normal ... detected'
+    "  BLOCK |   Path traversal detected.   "    -> BLOCK | 'Path traversal detected'
+    "BLOCK | Command injection detected"          -> BLOCK | 'Command injection detected'  (no period)
+    "ALLOW | Normal ... detected.\\nExtra text"   -> ALLOW | 'Normal ... detected'         (continuation ignored)
+    "BLOCK | XSS detected. More rambling"         -> BLOCK | 'XSS detected'                (continuation ignored)
+    "ALLOW| Normal request."                      -> ALLOW | 'Normal request'              (missing space)
+    "garbage with no contract"                    -> no match -> existing fallback path
+  The existing fallback (decision inferred from the presence of "BLOCK") is
+  unchanged in both files.
+
+==============================================================================
+4. DATASET REGENERATION — STRUCTURAL COMPARISON
+==============================================================================
+Regenerated with the EXACT finalized E2/E3 methodology (D17 FINAL defaults:
+policy B, logical-group cap 2500, rendered-row cap 4000).
+
+  CHECK                          PRE-E4                    POST-E4
+  ----------------------------  ------------------------  ------------------------
+  train rows                    25,134                    25,134              OK
+  eval rows                      6,206                     6,206              OK
+  total rows                    31,340                    31,340              OK
+  eval ratio                    0.1980                    0.1980              OK
+  train ALLOW / BLOCK           12,567 / 12,567           12,567 / 12,567     OK
+  eval  ALLOW / BLOCK            3,103 /  3,103            3,103 /  3,103     OK
+  train distinct categories     20                        20                  OK
+  eval  distinct categories     19                        19                  OK
+  per-category counts           (all 20)                  identical           OK
+  train INPUT-side sha256       89451cb39b958df3ab063ea6  89451cb39b958df3ab063ea6  OK
+  eval  INPUT-side sha256       4e9a8036ed28b7b81b61b275  4e9a8036ed28b7b81b61b275  OK
+
+  THE INPUT-SIDE HASH IS THE KEY EVIDENCE. It is the sha256 of every rendered
+  request string in order. Its being byte-identical proves that NOTHING on the
+  request side changed: envelope distributions, group identities, group->split
+  assignment, caps, row selection, source composition, balancing, ordering and
+  filtering are all bit-for-bit the same. Only the "output" field text differs.
+
+  Unchanged and re-confirmed from the manifest:
+    cap_per_category 2500 · cap_policy_variant B · row_cap_per_category 4000
+    insufficient-data categories: the same 11, same counts
+    NOT EVALUABLE: HTTP Request Smuggling (7 train, 0 eval) — unchanged
+    CSIC_ANOMALOUS_RESERVED: 19,165 — unchanged
+
+  Label format confirmation on the regenerated files:
+    rows containing "###END###" (output or instruction) : 0
+    sample ALLOW : 'ALLOW | Normal HTTP request with no attack patterns detected.'
+    sample BLOCK : 'BLOCK | SQL injection payload detected.'
+    instruction  : 'You are a network security firewall classifier. Analyze the
+                    following HTTP request and respond with exactly: ALLOW or
+                    BLOCK | <one sentence reason>.'
+
+==============================================================================
+5. E0 REGRESSION
+==============================================================================
+  Command:
+    python3.12 check_dataset.py \\
+      --train datasets/v4_clean/train.jsonl \\
+      --eval  datasets/v4_clean/eval.jsonl \\
+      --out   reports/e0_dataset_integrity_v4_clean.txt
+
+  Exit code 1 = WARNING (category scarcity only). Blocking failures: 0.
+  check_dataset.py was NOT modified and no threshold was weakened.
+
+  REQUIRED STRUCTURAL INVARIANTS
+    exact train->eval leakage      0 rows / 6,206  =  0.00%    PASS
+    distinct leaked inputs         0                           PASS
+    train duplicates               0.00%  (25,134 unique)      PASS
+    eval  duplicates               0.00%  ( 6,206 unique)      PASS
+    combined duplicates            0.00%  (31,340 unique)      PASS
+    deterministic incidental reveals   0                       PASS
+
+  INCIDENTAL BASELINES (majority = 50.00%)
+    Content-Type (value)                 51.16%   +1.16%
+    User-Agent (value)                   50.47%   +0.47%
+    HTTP method                          50.00%   +0.00%
+    Malformed request-target             50.00%   +0.00%
+    Body present/absent                  50.00%   +0.00%
+    Header count                         49.89%   -0.11%
+    User-Agent (present/absent)          49.76%   -0.24%
+    Host (value)                         49.73%   -0.27%
+    Cookie (present/absent)              49.65%   -0.35%
+    Header-name set                      49.21%   -0.79%
+
+  REGRESSION CHECK: the pre-E4 and post-E4 E0 reports were diffed with
+  timestamps and file hashes excluded. The ONLY differing line was the recorded
+  firewall-IA git commit (def0c92 -> 1bf412f). EVERY measured metric is
+  byte-identical.
+
+  This is the expected result: E0 reads the INPUT side and the label only as
+  ALLOW/BLOCK, and neither changed.
+
+==============================================================================
+6. DETERMINISM
+==============================================================================
+Regeneration verified BIT-IDENTICAL across four PYTHONHASHSEED values,
+including a randomized one:
+
+    PYTHONHASHSEED=0        train=OK  eval=OK
+    PYTHONHASHSEED=7        train=OK  eval=OK
+    PYTHONHASHSEED=99991    train=OK  eval=OK
+    PYTHONHASHSEED=random   train=OK  eval=OK
+
+==============================================================================
+7. MANIFEST HASHES
+==============================================================================
+  PRE-E4 (with ###END###)
+    train.jsonl  ffc8b51246119b247fc43fa73df049ae3adaefd58ccbc1f79f0ab0b7575271f8   13,934,680 B
+    eval.jsonl   d4e4bd48b4ad67185f29d31f437ac00426cd6c5cc08153b034ebc8c59d0460a9    3,439,498 B
+
+  POST-E4 (native EOS)
+    train.jsonl  4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b   13,130,392 B
+    eval.jsonl   61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859    3,240,906 B
+
+  Size reduction is 804,288 + 198,592 = 1,002,880 bytes = 31,340 rows x 32 bytes,
+  exactly the removed " ###END###" suffix (10 bytes) plus the shortened
+  instruction (22 bytes) per row. The byte delta is fully accounted for.
+
+  Manifest known_limitations now reads:
+    "Labels terminate via native EOS (D5/E4); no custom stop token is used."
+
+==============================================================================
+8. SMOKE VERIFICATION  (no training run)
+==============================================================================
+  1  tokenizer NOT resized for ###END###
+       len(tokenizer) = 32000 ; added vocab = {<unk>:0, <s>:1, </s>:2} only     PASS
+  2  ###END### absent from generated labels
+       0 of 31,340 rows contain it in output or instruction                     PASS
+  3  formatted training sample terminates on native EOS
+       tail ids [694, 5337, 15038, 17809, 29889, 2] ; last == eos_id 2
+       EOS count = 3 (system/user/assistant) — NO duplicate EOS
+       tokenized length 197 tokens (within max_length=512)                      PASS
+  4  QLoRA model initializes
+       is_loaded_in_4bit = True ; embed rows = 32000 (unresized)                PASS
+  5  LoRA attaches correctly
+       12,615,680 trainable params across 308 LoRA tensors                      PASS
+  6  dataset tokenizes correctly                                                PASS
+  7  inference/generation no longer requires ###END###
+       generate() ran with no eos_token_id override                             PASS
+  8  decision parsing works with the expected contract
+       verified on 8 synthetic decoder outputs incl. malformed cases            PASS
+
+  On (7): the live generation used an UNTRAINED adapter, so its text is
+  meaningless and the parser correctly fell through to the fallback path. This
+  is a mechanical check only and is NOT a quality signal.
+
+==============================================================================
+9. ADAPTER / EMBEDDING PERSISTENCE
+==============================================================================
+Verified WITHOUT any training run: a PEFT model was constructed exactly as
+finetune.py now does (4-bit NF4 base, no resize, same LoraConfig) and saved with
+save_pretrained. The saved adapter was then inspected.
+
+  adapter_config.json
+    modules_to_save          = None
+    trainable_token_indices  = None
+  adapter_model.safetensors
+    embed_tokens / lm_head tensors present : NONE
+    total parameters                       : 12,615,680  (LoRA only)
+
+  COMPARISON WITH E1 (which had the resize):
+    E1  308 LoRA tensors  12,615,680 params
+        + base_model.model.model.embed_tokens.weight  [32001, 2048]
+        + base_model.model.lm_head.weight             [32001, 2048]
+        = 131,076,096 extra params, ~250 MiB, adapter total ~298 MB
+    E4  308 LoRA tensors  12,615,680 params, and nothing else.
+
+  CONCLUSION, stated exactly as the evidence supports:
+    "The structural cause of the E1 embedding/head inflation has been removed."
+
+  NO production adapter size is claimed. The probe file measured 48.2 MiB
+  because a bare get_peft_model keeps LoRA params in fp32 (12,615,680 x 4 B);
+  under the real training path TRL casts trainable params to bf16 for 4-bit
+  models (D11), which is why E1 measured ~24 MiB of LoRA tensors. The dtype,
+  not the token, explains that difference. An exact production figure requires
+  an actual training run and is deliberately not asserted here.
+
+  NO LATENCY IMPROVEMENT IS CLAIMED. Under the old configuration
+  eos_token_id pointed at a token the model could not emit, so generation
+  plausibly always ran to max_new_tokens=40; native EOS may terminate earlier.
+  That remains a HYPOTHESIS until measured with a trained model (D5).
+
+==============================================================================
+10. DOCUMENTATION UPDATES
+==============================================================================
+  DECISIONS.md D5   Implementation NOT YET -> DONE (E4). Rationale rewritten to
+                    the five measured points. The two claims disproven during E1
+                    (random re-initialisation on every load; matrices never
+                    saved) are explicitly flagged as corrected and are NOT
+                    repeated as rationale. Index row updated.
+  CONTEXT.md        Project overview termination sentence; finetune.py and
+                    test_model.py descriptions; §12 F5 retitled RESOLVED with an
+                    E4 outcome block; roadmap E4 marked DONE.
+  README.md         Output-contract note now describes native EOS; the
+                    "structurally untrainable" limitation struck through and
+                    marked resolved; roadmap E4 checked.
+
+  Remaining "###END###" occurrences in the tree are HISTORICAL/EXPLANATORY only
+  (they describe what was removed and why), plus parse_dataset.py, which is the
+  frozen E2 control-condition generator and correctly still produces the old
+  format.
+
+==============================================================================
+11. UNRESOLVED LIMITATIONS
+==============================================================================
+  1. NO TRAINING RUN was performed, so the end-to-end trained behaviour of the
+     new format is unverified. Whether the fine-tuned model reliably emits EOS
+     after the reason is an open question until a training run happens.
+  2. LATENCY unmeasured — hypothesis only (section 9).
+  3. PRODUCTION ADAPTER SIZE unmeasured — only the structural cause is verified.
+  4. test_model.py's 135-case suite is UNCHANGED per E4 scope. It remains
+     109 BLOCK / 26 ALLOW with 5 cases per category and an in-distribution
+     adversarial set; it cannot support per-category or FPR claims, and D18
+     requires excluding Request Smuggling from any per-category reporting.
+  5. README.md is STALE BEYOND E4's SCOPE: its status block, attack-category
+     table and "Blocking — dataset validity" section still describe the
+     pre-E2/E3 dataset (93.72% Host baseline, 26.65% leakage, FAIL gate). Only
+     the ###END###-related entries were corrected here. This needs a separate
+     documentation pass.
+  6. Dataset scarcity is untouched: 11 INSUFFICIENT DATA categories, Request
+     Smuggling NOT EVALUABLE.
+
+==============================================================================
+12. STOP CONDITIONS — NONE TRIGGERED
+==============================================================================
+  native EOS ambiguous under installed stack      NO — verified, section 2
+  dataset structure changed unexpectedly          NO — input hash identical
+  another vocabulary resize required              NO — vocab stays 32,000
+  inference parsing needed redesign               NO — regex simplified, equivalent
+  E0 structural invariants regressed              NO — report byte-identical
+  E2/E3 policy changed unexpectedly               NO — manifest confirms 2500/B/4000
+  QLoRA initialization failed                     NO — 308 LoRA tensors attached
+
+==============================================================================
+13. STATE
+==============================================================================
+  Commit created            : NO — handed off for manual review
+  Files staged              : NO
+  Pushed                    : NO
+  finetune.py run           : NO
+  Historical dataset        : UNCHANGED
+  parse_dataset.py          : UNCHANGED (frozen E2 control condition)
+  check_dataset.py          : UNCHANGED, not weakened
+  E5 / evaluation expansion : NOT STARTED
+
+==============================================================================
+END OF REPORT
+==============================================================================

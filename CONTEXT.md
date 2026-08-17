@@ -6,7 +6,7 @@
 
 The system is conceptually comparable to an application firewall / WAF-like security mechanism. It is **NOT** a replacement for a conventional stateful network firewall, and must not be described as one. The classifier is **stateless at the application-request level** — each HTTP request is classified independently, with no session context carried across requests. Being inline does not make it stateful.
 
-firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP request string, it outputs `ALLOW | <reason>` or `BLOCK | <reason>` (the `###END###` suffix is being removed — see D5 in `DECISIONS.md`). The model is trained via LoRA (4-bit quantized) using supervised fine-tuning on a labeled dataset of real and synthetic HTTP traffic. The end goal is a GGUF-exported model embedded behind an inline HTTP proxy for real-time application-layer classification.
+firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP request string, it outputs `ALLOW | <reason>` or `BLOCK | <reason>`, terminating on the model's native EOS (the `###END###` suffix was removed in E4 — see D5 in `DECISIONS.md`). The model is trained via LoRA (4-bit quantized) using supervised fine-tuning on a labeled dataset of real and synthetic HTTP traffic. The end goal is a GGUF-exported model embedded behind an inline HTTP proxy for real-time application-layer classification.
 
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
@@ -209,11 +209,11 @@ LoRA fine-tune (4-bit NF4, rank=16, alpha=32). Run `python3.12 finetune.py`.
 - 4 epochs, batch 4, grad accum 8, lr 2e-4 cosine, **BF16 (D11)**, paged_adamw_8bit. Eval and save every 200 steps, `save_total_limit=2` (**D12**). `SFTConfig` + `SFTTrainer`.
 - **Ported 2026-08-17 (E1) and verified running** — `SFTConfig`, `processing_class=`, `max_length=512`. See §12 F3 and `reports/e1_training_pipeline_smoke.txt`.
 - `--smoke` runs a bounded compatibility test (500/100 examples, 12 steps, separate `model-output-e1-smoke/`). `--force-fp16` reproduces the pre-D11 incompatibility.
-- **⚠️ `###END###` handling is still broken** — see §12 F5. Being removed per **D5**, as a separate isolated change.
+- **`###END###` removed 2026-08-17 (E4/D5).** No `add_special_tokens`, no `resize_token_embeddings`; termination is native EOS. See §12 F5 and `reports/e4_remove_end_token.txt`.
 
 ### `test_model.py`
 Loads base TinyLlama + LoRA from `model-output-v3`. Runs SYSTEMATIC (5×19 categories) + ADVERSARIAL (20) + FALSE_POSITIVE (20) suites; prints per-category accuracy, false positives/negatives, failures, and a 100-sample latency benchmark.
-- Greedy decode, max 40 new tokens, regex `(ALLOW|BLOCK)\s*\|\s*(.+?)(?:\s*###END###|\.|$)`.
+- Greedy decode, max 40 new tokens, regex `\b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)` — byte-identical to `classifier_api.py` (E4).
 - **Suite composition (measured): 135 cases = 109 BLOCK / 26 ALLOW, 21 category labels.** Always-BLOCK scores 80.7%. The 26 ALLOW cases are too few to support any false-positive-rate claim.
 - **⚠️ CORRECTION:** this file previously recorded "token handling is correct, no latent bug." **That is wrong** — `resize_token_embeddings` adds a randomly-initialised row that the LoRA config never trains and never saves, and it is re-randomised on every load. See §12 F5.
 - Metric set is inadequate: accuracy / FP count / FN count only. No precision, recall, F1, FPR, FNR, or confusion matrix. Latency reports mean/min/max/stdev/median — **no P95, no P99**, which D3 requires.
@@ -342,7 +342,7 @@ Verified by introspecting `trl.SFTTrainer.__init__` on this machine — `dataset
 
 *(Numbered F4 in the original audit document; renumbered here. The audit's F3 — benign diversity — is recorded in §11.)*
 
-### F5 — CRITICAL — `###END###` is structurally untrainable
+### F5 — RESOLVED 2026-08-17 (E4) — `###END###` was structurally untrainable
 
 `finetune.py` adds `###END###` as a special token and calls `resize_token_embeddings`, appending a **randomly initialised** row to `embed_tokens` and `lm_head`. `LoraConfig.target_modules` covers only `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj` — **`embed_tokens` and `lm_head` are in neither `target_modules` nor `modules_to_save`.** Therefore:
 
@@ -359,7 +359,7 @@ Verified by introspecting `trl.SFTTrainer.__init__` on this machine — `dataset
 >
 > TRL 1.4 has machinery that would fix this class of bug (`trainable_token_indices` + automatic `modules_to_save=["lm_head"]`), but it only fires for tokens TRL itself adds via chat-template cloning — not for tokens added externally as `finetune.py` does.
 
-**Resolved by D5: remove the token, use native `</s>`. Do NOT repair it with `modules_to_save`.** Per D5, do not claim a measured latency improvement from this change without a controlled experiment — the historical v3 no longer exists to compare against.
+**RESOLVED 2026-08-17 by E4.** The token, the `add_special_tokens` call and the `resize_token_embeddings` call are gone from all four pipeline files; termination is native EOS (`</s>`, id 2). Verified without training: tokenizer vocabulary stays at 32,000, and the saved adapter contains **no** `embed_tokens`/`lm_head` tensors — 12,615,680 params total. The structural cause of the ~12× inflation is removed. **No latency improvement is claimed**; that remains a hypothesis until measured.
 
 ### F6 — HIGH — CSIC BLOCK labels are produced by the mechanism a rule-based baseline would use
 
@@ -502,7 +502,7 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **E2** | Envelope neutralization — shared envelope + shape matching | **DONE 2026-08-17** (`reports/e2_e3_clean_dataset.txt`). Strongest incidental baseline 93.72% → 51.16%. |
 | **E3** | Leakage-free grouped split | **DONE 2026-08-17.** Leakage 26.65% → 0.00%; duplicates → 0.00%. |
 | — | **Review the candidate clean dataset** | **BLOCKING — next action.** No training until reviewed. |
-| **E4** | `###END###` removal (D5) | NOT STARTED |
+| **E4** | `###END###` removal (D5) | **DONE 2026-08-17** (`reports/e4_remove_end_token.txt`). Dataset regenerated; E0 metrics byte-identical. |
 | **E5** | Per-category rebalancing | NOT STARTED |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |

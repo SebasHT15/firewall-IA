@@ -54,16 +54,18 @@ ADAPTER_DIR = os.path.expanduser(
 INSTRUCTION = (
     "You are a network security firewall classifier. "
     "Analyze the following HTTP request and respond with exactly: "
-    "ALLOW or BLOCK | <one sentence reason>. Then output ###END###"
+    "ALLOW or BLOCK | <one sentence reason>."
 )
 
-EXTRACT_RE = re.compile(r"(ALLOW|BLOCK)\s*\|\s*(.+?)(?:\s*###END###|\.|$)")
+# Decision contract: "ALLOW | <reason>" / "BLOCK | <reason>".
+# Terminated by native EOS (D5/E4) — no custom stop token.
+# Kept byte-identical to test_model.py's EXTRACT_RE.
+EXTRACT_RE = re.compile(r"\b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)")
 
 # ── Module-level state (populated once at startup) ──────────────────
 tokenizer = None
 model = None
 device = "cuda" if torch.cuda.is_available() else "cpu"
-end_token_id = None
 MODEL_LOADED = False
 
 # GPU runs one inference at a time; serialize concurrent requests.
@@ -72,7 +74,7 @@ gpu_lock = asyncio.Lock()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global tokenizer, model, end_token_id, MODEL_LOADED
+    global tokenizer, model, MODEL_LOADED
 
     bnb_config = BitsAndBytesConfig(
         load_in_4bit=True,
@@ -88,12 +90,9 @@ async def lifespan(app: FastAPI):
         quantization_config=bnb_config,
         device_map="auto",
     )
-    base_model.resize_token_embeddings(len(tokenizer))
-
     model = PeftModel.from_pretrained(base_model, ADAPTER_DIR)
     model.eval()
 
-    end_token_id = tokenizer.convert_tokens_to_ids("###END###")
     MODEL_LOADED = True
     yield
 
@@ -126,7 +125,6 @@ def _classify_raw(request: str):
             max_new_tokens=40,
             do_sample=False,
             pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=end_token_id,
         )
     input_len = inputs["input_ids"].shape[1]
     new_tokens = outputs[0][input_len:]
