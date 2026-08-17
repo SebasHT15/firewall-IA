@@ -693,6 +693,67 @@ Evidence: `reports/e2_e3_clean_dataset.txt` §6.
 
 ---
 
+## D19 — Frozen V4 evaluation methodology
+
+- **Date:** 2026-08-17
+- **Status:** APPROVED
+- **Implementation:** DONE — `test_model.py`, experiment E5, 2026-08-17
+
+**Decision.** The evaluation methodology for the first V4 clean baseline is frozen **before**
+the training run, so metric definitions cannot be chosen after seeing results.
+
+**Three levels, never combined into one headline number:**
+
+| Level | Measures | Source |
+|---|---|---|
+| 1 — Binary security decision | ALLOW vs BLOCK | `datasets/v4_clean/eval.jsonl` |
+| 2 — Attack category / reason | only over correctly-blocked attacks | same |
+| 3 — Latency | model-side inference distribution | same |
+
+**Primary source** is the held-out `datasets/v4_clean/eval.jsonl` (6,206 rows, 3,103 ALLOW /
+3,103 BLOCK, 18 categories). The 135 hand-authored cases are **reclassified as a MANUAL
+DIAGNOSTIC / REGRESSION SUITE**, preserved in full, reachable via `--mode manual`, and
+explicitly **not** the headline metric.
+
+**Positive class is BLOCK**, fixed in code as `POSITIVE_CLASS`. Never switch it silently.
+
+**Binary/category separation.** A reason mismatch on a correctly-blocked attack is
+`binary = CORRECT, category = INCORRECT`. Reason accuracy is computed only over
+already-correctly-blocked examples, so a category mismatch can never reduce binary recall.
+
+**FPR is reported separately and prominently**, normalised over the benign population
+`FP/(FP+TN)`, never buried in overall accuracy. FNR is normalised over the attack population.
+
+**Reason matching is exact after objective normalisation** (casefold, whitespace collapse,
+single trailing period). No synonym table, no keyword heuristic, no partial credit — the model
+is trained on 19 fixed reason strings, so exact match is the intended bar.
+
+**Invalid outputs are never coerced.** An unparseable output is counted as an incorrect
+security decision, mapped to the opposite of expected so it can never earn credit, reported as
+a separate invalid-output rate, and accompanied by a parseable-only view. This is evaluation
+policy and is deliberately distinct from D4's fail-closed *runtime* behaviour — a model
+emitting garbage is not detecting anything.
+
+**Latency** reports count, mean, P50, P95, P99, min, max, stdev; average alone is never
+reported. Scope is **model-side inference only** and is stamped as such — it is not comparable
+to D3's end-to-end P95 ≤ 200 ms budget.
+
+**D18 is enforced by an evidence-status column**: `OK` / `INSUFFICIENT DATA` / `NOT EVALUABLE`.
+Request Smuggling is `NOT EVALUABLE` (zero eval rows). Ten further categories are flagged
+`INSUFFICIENT DATA`, from either the manifest's <100-logical-group list or eval support < 30.
+Every percentage is printed with its numerator and denominator.
+
+**Rationale.** The historical 91% was a single combined number over a suite where a degenerate
+always-BLOCK classifier scored 80.7%, with 26 benign cases and 20-point per-category
+resolution. Freezing definitions in advance, separating the three levels, and attaching an
+evidence status to every category prevents that class of uninterpretable headline from
+recurring.
+
+Verified by `python3.12 test_model.py --mode self-test` (PASS) on controlled fixtures with no
+model. Evidence: `reports/e5_evaluation_methodology.txt`.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -715,6 +776,7 @@ Evidence: `reports/e2_e3_clean_dataset.txt` §6.
 | D16 | Grouped split before rendering | APPROVED | DONE |
 | D17 | Category contribution control — policy B, group cap 2,500, row cap 4,000 | **APPROVED FINAL** | DONE |
 | D18 | INSUFFICIENT DATA / NOT EVALUABLE policy | APPROVED | DONE |
+| D19 | Frozen V4 evaluation methodology | APPROVED | DONE (E5) |
 
 ---
 

@@ -1,0 +1,373 @@
+==============================================================================
+firewall-IA — E5: FROZEN V4 EVALUATION METHODOLOGY
+==============================================================================
+Date (UTC)              : 2026-08-17
+Git commit at E5 start  : 1bf412fb843992399665e96ec034016462feda7f
+Implementation          : test_model.py
+Status                  : FROZEN before the first V4 training run
+
+PURPOSE
+  Define how the first scientifically interpretable V4 clean baseline will be
+  measured — BEFORE any model exists. Freezing the methodology first prevents
+  metric definitions from being chosen after seeing results.
+
+NO MODEL WAS TRAINED. NO MODEL RESULTS APPEAR IN THIS DOCUMENT.
+
+==============================================================================
+1. THREE SEPARATE LEVELS — NEVER ONE HEADLINE NUMBER
+==============================================================================
+  LEVEL 1  BINARY SECURITY DECISION   ALLOW vs BLOCK
+  LEVEL 2  ATTACK CATEGORY / REASON   only over correctly-blocked attacks
+  LEVEL 3  LATENCY                    model-side inference distribution
+
+  These are reported separately and are never combined into a single accuracy
+  figure. The historical "91%" was exactly such a combined number, and it was
+  uninterpretable.
+
+==============================================================================
+2. PRIMARY EVALUATION SOURCE
+==============================================================================
+  PRIMARY   datasets/v4_clean/eval.jsonl
+            6,206 rows — 3,103 ALLOW / 3,103 BLOCK across 18 attack categories.
+            Held out via the E3 grouped split: 0.00% leakage, 0.00% duplicates,
+            no deterministic envelope reveals (E0, WARNING only).
+
+  LEGACY    the 135 hand-authored cases in test_model.py are RECLASSIFIED as a
+            MANUAL DIAGNOSTIC / REGRESSION SUITE. They are preserved in full
+            and are NOT the primary scientific metric.
+
+==============================================================================
+3. LEVEL 1 — BINARY SECURITY DECISION
+==============================================================================
+POSITIVE CLASS: BLOCK. The security question is "did we catch the attack?", so
+the attack class is positive. This convention is fixed in code as
+POSITIVE_CLASS and must never be switched silently.
+
+CONFUSION MATRIX (rows = expected, cols = predicted)
+
+                    pred BLOCK        pred ALLOW
+    exp BLOCK       TP                FN
+    exp ALLOW       FP                TN
+
+DEFINITIONS — stated explicitly so they cannot drift:
+
+  TP   expected BLOCK, predicted BLOCK    attack correctly blocked
+  FN   expected BLOCK, predicted ALLOW    ATTACK MISSED — most serious error
+  FP   expected ALLOW, predicted BLOCK    benign traffic wrongly blocked
+  TN   expected ALLOW, predicted ALLOW    benign traffic correctly allowed
+
+  support                 TP + FP + FN + TN
+  correct decisions       TP + TN
+  accuracy                (TP + TN) / support
+  precision (BLOCK)       TP / (TP + FP)
+  recall (BLOCK)          TP / (TP + FN)
+  F1 (BLOCK)              2PR / (P + R)
+  attack detection rate   TP / (TP + FN)   — identical to recall by definition;
+                          reported under both names because the security
+                          literature uses "detection rate"
+  false positive count    FP
+  false positive RATE     FP / (FP + TN)   — denominator is the BENIGN
+                          population, not all traffic
+  false negative count    FN
+  false negative RATE     FN / (TP + FN)   — denominator is the ATTACK
+                          population, not all traffic
+
+  FPR and FNR are deliberately normalised over their own class populations.
+  Dividing either by total traffic would understate both.
+
+FALSE POSITIVE RATE IS REPORTED SEPARATELY AND PROMINENTLY. For an inline
+gateway it is the operational cost metric, and it must never be buried inside
+overall accuracy. The v4 eval split provides 3,103 benign examples, versus 26
+in the legacy suite — the first population large enough to support an FPR
+statement at all.
+
+==============================================================================
+4. LEVEL 2 — ATTACK CATEGORY / REASON
+==============================================================================
+THE CRITICAL SEPARATION. Given:
+
+    expected   BLOCK | SQL injection payload detected.
+    predicted  BLOCK | Cross-site scripting payload detected.
+
+  binary security decision  = CORRECT   (the attack WAS blocked)
+  category / reason         = INCORRECT
+
+  A category mismatch is NOT a security failure and NEVER reduces binary
+  recall. This is enforced structurally: reason accuracy is computed only over
+  examples that were already counted as correctly blocked, so the two
+  dimensions cannot contaminate each other. Verified by fixture
+  ("binary recall 2/3 (mismatch still blocked)" / "reason accuracy 1/2").
+
+REASON MATCHING POLICY — objective, no subjective mapping:
+  normalize_reason() applies casefold, whitespace collapse, and removal of a
+  single trailing period. A predicted reason either equals a canonical dataset
+  reason under that normalisation, or it does not. There is NO synonym table,
+  NO keyword heuristic, NO partial-credit scoring.
+
+  This is defensible because the model is trained on exactly 19 fixed reason
+  strings, so exact match is the intended behaviour rather than an arbitrary
+  bar. Verified unambiguous: all 6,206 eval labels conform to
+  "DECISION | reason", 19 distinct strings, 0 non-conforming, 0 multi-pipe.
+
+PER-CATEGORY REPORTING — every percentage carries its sample count:
+
+  category
+  support                        expected-BLOCK examples in this category
+  binary recall  num/den         blocked correctly / support
+  reason accuracy num/den        reason matched / blocked correctly
+  invalid outputs
+  evidence status                OK | INSUFFICIENT DATA | NOT EVALUABLE
+
+  A percentage is NEVER printed without its numerator and denominator.
+
+==============================================================================
+5. INSUFFICIENT-DATA POLICY (D18)
+==============================================================================
+NOT EVALUABLE — zero held-out support. No accuracy, recall, or any other
+category-level claim may be made.
+
+    HTTP Request Smuggling     7 train rows, 0 eval rows
+
+  Confirmed present in the manifest as not_evaluable_categories and verified by
+  fixture. Per D18 no samples were generated or moved to make it evaluable, and
+  the grouped split was not weakened.
+
+INSUFFICIENT DATA — flagged from two independent sources, whichever fires:
+  (a) the category appears in the manifest's insufficient_data_categories
+      (fewer than 100 unique LOGICAL GROUPS), mapped to its reason string
+      through the generator's own CATEGORY_SHAPES/HARDCODED_SHAPES tables so
+      the two can never drift apart; or
+  (b) held-out support < MIN_EVAL_SUPPORT (30).
+
+  Ten categories are currently flagged, with their eval support:
+      CRLF injection                112
+      XML external entity            27
+      GraphQL injection              22
+      LDAP injection                 21
+      NoSQL injection                17
+      JWT token manipulation         16
+      XPath injection                11
+      CSRF                            8
+      Insecure deserialization        5
+      HTTP parameter pollution        3
+
+  Note CRLF has 112 eval rows but only 21 unique logical groups — rule (a)
+  catches it where a support-only rule would not. Group scarcity and row
+  scarcity are different failure modes and both are checked.
+
+  Results for these categories are EXPLORATORY. They are printed with raw
+  numerator/denominator and an explicit status column, and must not be
+  presented as robust category-level conclusions.
+
+  Well-supported categories (status OK): SQL injection (817), XSS (708),
+  Path traversal (506), File inclusion (494), Command injection (134),
+  SSTI (88), SSRF (63), Open redirect (51).
+
+==============================================================================
+6. INVALID-OUTPUT POLICY
+==============================================================================
+Parsing uses the E4 contract regex, byte-identical to classifier_api.py:
+
+    \b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)
+
+  The FIRST valid decision is extracted. Defensive against leading/trailing
+  whitespace, a missing trailing period, a missing space before the pipe, and
+  any continuation text after the reason.
+
+  If no decision can be extracted the result is INVALID. It is NOT coerced.
+  (The pre-E5 code silently fell back to "BLOCK if 'BLOCK' appears in the text
+  else ALLOW", which manufactured a decision from garbage. That fallback is
+  removed from the evaluation path.)
+
+  FROZEN TREATMENT: an invalid output is counted as an incorrect security
+  decision and mapped to the OPPOSITE of the expected decision, so it can never
+  earn credit:
+      expected BLOCK + invalid -> FN
+      expected ALLOW + invalid -> FP
+
+  Additionally reported:
+      invalid_outputs, invalid_output_rate
+      a PARSEABLE-ONLY confusion matrix and metric set, so the effect of the
+      mapping is always visible and never hidden.
+
+  RELATIONSHIP TO D4: D4 specifies FAIL-CLOSED runtime behaviour — an unusable
+  classifier response blocks traffic. That is an operational control, NOT
+  evaluation credit. A model emitting garbage is not detecting anything. The
+  two concerns are deliberately kept separate.
+
+==============================================================================
+7. LEVEL 3 — LATENCY
+==============================================================================
+NOT MEASURED IN E5. V4 is untrained, so no latency benchmark was run. The code
+records per-example latency and computes the full distribution, ready for the
+first real run.
+
+  Reported: count, mean, P50, P95, P99, min, max, stdev.
+  Percentiles use nearest-rank. Verified on 1..100 -> p50=50, p95=95, p99=99.
+
+  Average alone is never reported.
+
+  SCOPE DISCIPLINE: test_model.py measures MODEL-SIDE INFERENCE ONLY — the
+  generate() call. It excludes proxy overhead, API overhead and network time,
+  and every emitted record is stamped with that scope string.
+
+  D3's target of end-to-end added latency P95 <= 200 ms is an END-TO-END budget
+  covering proxy + API + model. A model-only number is NOT comparable to it and
+  must not be presented as satisfying or failing it. Decomposed measurement
+  (model-only / model+API / proxy / end-to-end) belongs to a later phase.
+
+==============================================================================
+8. LEGACY MANUAL SUITE
+==============================================================================
+ROLE: MANUAL DIAGNOSTIC / REGRESSION SUITE. Preserved in full, unchanged —
+135 cases (95 systematic + 20 adversarial + 20 false-positive).
+
+  Legitimate uses: known edge cases, qualitative inspection, regression checks
+  between model versions.
+
+  NOT legitimate: the headline V4 metric. Reasons, printed as a banner whenever
+  the mode runs:
+    * composition is 109 BLOCK / 26 ALLOW — an always-BLOCK classifier scores
+      80.7%, so accuracy on it is only ~10 points above a degenerate baseline;
+    * 26 ALLOW cases cannot support an FPR claim (0/26 has a 95% upper bound
+      near 11% by the rule of three);
+    * 5 cases per category gives 20-percentage-point resolution;
+    * its adversarial cases reuse transform families that also appear in
+      training augmentation.
+
+  Access: --mode manual. It is never mixed into --mode dataset output.
+
+==============================================================================
+9. ADVERSARIAL EVALUATION — DEFERRED
+==============================================================================
+NOT IMPLEMENTED, deliberately.
+
+  The current adversarial cases are NOT sufficient evidence of evasion
+  resistance, because their transform families overlap the training-pool
+  transforms used for augmentation in E2/E3 (url_encode, case_variation,
+  sql_comment_inject, whitespace_tab). Measuring them therefore measures
+  learned transforms, not evasion resistance.
+
+  A future adversarial evaluation must distinguish:
+    * SEEN transform families (training pool)
+    * HELD-OUT transform families — reserved and unused per D15:
+      double_url_encode, unicode_escape, html_entity, bash_ifs,
+      mixed_case_percent, param_fragmentation
+    * HELD-OUT base payload identities
+
+  This is future work AFTER the clean baseline exists.
+
+==============================================================================
+10. OUTPUT FORMAT
+==============================================================================
+Human-readable to stdout; machine-readable JSON via --json.
+
+  run_metadata   date_utc, git_commit, mode, adapter_dir, dataset,
+                 dataset_sha256, manifest_version, manifest (version,
+                 generated_utc, caps, artifact hashes), positive_class,
+                 methodology pointer
+  binary         support, correct, accuracy, precision_block, recall_block,
+                 f1_block, attack_detection_rate, false_positives,
+                 false_positive_rate, false_negatives, false_negative_rate,
+                 confusion_matrix, invalid_outputs, invalid_output_rate,
+                 allow_support, block_support, parseable_only{...}
+  categories     per reason: support, binary_recall_num/den/rate,
+                 reason_accuracy_num/den/rate, invalid_outputs,
+                 evidence_status
+  latency        count, scope, mean_ms, p50_ms, p95_ms, p99_ms, min_ms,
+                 max_ms, stdev_ms
+
+  NO CONCLUSIONS ARE GENERATED AUTOMATICALLY. The report ends by pointing back
+  to this document and the evidence-status column.
+
+==============================================================================
+11. STRUCTURAL VERIFICATION PERFORMED
+==============================================================================
+Run: python3.12 test_model.py --mode self-test        RESULT: PASS (exit 0)
+
+  Mock predictions only. Nothing below is a model result.
+
+  PARSER (8 fixtures)      well-formed, extra whitespace, trailing rambling,
+                           missing period, missing space before pipe, garbage,
+                           empty string, None -> all as specified
+  NORMALISATION            case/space/period invariance holds; distinct
+                           reasons remain distinct
+  CONFUSION MATRIX         controlled 2 TP / 1 FN / 1 FP / 3 TN fixture ->
+                           accuracy 5/7, precision 2/3, recall 2/3, F1 2/3,
+                           FPR 1/4, FNR 1/3, detection rate == recall
+  INVALID HANDLING         counted, rate 2/9, BLOCK->FN, ALLOW->FP, earns zero
+                           credit, parseable-only view unaffected
+  CATEGORY SEPARATION      reason mismatch leaves binary recall at 2/3 while
+                           reason accuracy is 1/2 over blocked-only
+  EVIDENCE STATUS          zero support -> NOT EVALUABLE; flagged category ->
+                           INSUFFICIENT DATA
+  PERCENTILES              1..100 -> p50 50, p95 95, p99 99; min/max/mean
+                           correct; single sample stdev 0; empty handled
+  LIVE DATASET             eval.jsonl loads (6,206 rows); all labels parse;
+                           18 BLOCK categories + 3,103 ALLOW; per-category
+                           supports match the dataset exactly; Request
+                           Smuggling absent from eval AND flagged NOT
+                           EVALUABLE; 10 categories flagged INSUFFICIENT DATA;
+                           perfect mock -> accuracy 1.0, 0 FP, 0 FN
+
+  Also verified: importing test_model loads NO model (metric code is testable
+  without a GPU); dataset and manual modes both refuse to run with a clear
+  message while no adapter exists.
+
+==============================================================================
+12. KNOWN LIMITATIONS
+==============================================================================
+  1. NO MODEL RESULTS EXIST. Every number in this document is a definition or a
+     fixture, never a measurement of model behaviour.
+  2. Reason matching is exact-after-normalisation. A semantically reasonable
+     but differently-worded reason scores as incorrect. This is intentional
+     (the model is trained on 19 fixed strings) but it makes reason accuracy a
+     STRICT metric that should not be compared against loosely-scored figures
+     from other work.
+  3. Eleven categories cannot support robust per-category conclusions; one is
+     unevaluable entirely. This is a dataset-scarcity limit, not a metric one.
+  4. Evasion resistance is unmeasured by design (section 9).
+  5. Latency is model-only and not comparable to the D3 end-to-end budget.
+  6. The eval split's benign population is synthetic + CSIC 2010. A low FPR on
+     it does not establish a low FPR on live production traffic.
+  7. CSIC BLOCK labels come from an 11-rule keyword heuristic (audit F6), so
+     the CSIC portion of any per-category result inherits that circularity.
+  8. No statistical confidence intervals are computed. For small-support
+     categories the point estimates are wide; the raw num/den is printed so a
+     reader can compute an interval, but the tool does not.
+
+==============================================================================
+13. INTENTIONALLY DEFERRED
+==============================================================================
+  * V4 training run                     — next phase
+  * Final latency benchmark             — needs a trained model
+  * Held-out adversarial suite (D15)    — after the clean baseline
+  * End-to-end / decomposed latency     — needs the inline pipeline
+  * GGUF / quantized evaluation (D8.3)  — later phase
+  * Rule-based comparison (D9)          — future/optional
+  * Confidence intervals                — considered, not implemented
+
+==============================================================================
+14. STOP CONDITIONS — NONE TRIGGERED
+==============================================================================
+  expected category labels ambiguous          NO — 19 exact strings, 0 non-conforming
+  reason normalisation needs subjective maps  NO — exact match after objective
+                                                   normalisation; no synonym table
+  metric definition conflicts with D18        NO — D18 is enforced by the
+                                                   evidence-status column
+  legacy suite cannot be cleanly separated    NO — separate --mode, data preserved
+  parser cannot separate decision from reason NO — 8 fixtures pass
+
+==============================================================================
+15. STATE
+==============================================================================
+  Model trained             : NO
+  Dataset regenerated       : NO
+  Dataset generation changed: NO
+  E0 / check_dataset.py     : UNCHANGED
+  Legacy 135 cases          : PRESERVED verbatim
+  Files staged / committed  : NO
+
+==============================================================================
+END OF DOCUMENT
+==============================================================================

@@ -11,7 +11,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D18). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D19). Read it before proposing architectural changes.
 > - `reports/` — experiment and audit outputs. Never overwrite a report; add a new one.
 
 ---
@@ -212,11 +212,18 @@ LoRA fine-tune (4-bit NF4, rank=16, alpha=32). Run `python3.12 finetune.py`.
 - **`###END###` removed 2026-08-17 (E4/D5).** No `add_special_tokens`, no `resize_token_embeddings`; termination is native EOS. See §12 F5 and `reports/e4_remove_end_token.txt`.
 
 ### `test_model.py`
-Loads base TinyLlama + LoRA from `model-output-v3`. Runs SYSTEMATIC (5×19 categories) + ADVERSARIAL (20) + FALSE_POSITIVE (20) suites; prints per-category accuracy, false positives/negatives, failures, and a 100-sample latency benchmark.
-- Greedy decode, max 40 new tokens, regex `\b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)` — byte-identical to `classifier_api.py` (E4).
-- **Suite composition (measured): 135 cases = 109 BLOCK / 26 ALLOW, 21 category labels.** Always-BLOCK scores 80.7%. The 26 ALLOW cases are too few to support any false-positive-rate claim.
-- **⚠️ CORRECTION:** this file previously recorded "token handling is correct, no latent bug." **That is wrong** — `resize_token_embeddings` adds a randomly-initialised row that the LoRA config never trains and never saves, and it is re-randomised on every load. See §12 F5.
-- Metric set is inadequate: accuracy / FP count / FN count only. No precision, recall, F1, FPR, FNR, or confusion matrix. Latency reports mean/min/max/stdev/median — **no P95, no P99**, which D3 requires.
+**Evaluation harness — methodology FROZEN in E5 (D19).** Run `python3.12 test_model.py --mode <mode>`.
+
+Three modes, cleanly separated:
+- `--mode dataset` *(default)* — **the primary scientific evaluation.** Runs `datasets/v4_clean/eval.jsonl` (6,206 rows, 3,103 ALLOW / 3,103 BLOCK, 18 categories).
+- `--mode manual` — the legacy 135 hand-authored cases, reclassified as a **MANUAL DIAGNOSTIC / REGRESSION SUITE**. Preserved verbatim, prints a banner explaining why it is not the headline metric.
+- `--mode self-test` — verifies the metric code on fixtures with **no model required**.
+
+Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** and explicitly not comparable to D3's end-to-end budget.
+
+Invalid outputs are never coerced — counted as incorrect, mapped opposite to expected, reported as a separate rate alongside a parseable-only view. D18 is enforced by an `evidence_status` column (`OK` / `INSUFFICIENT DATA` / `NOT EVALUABLE`); every percentage carries its numerator and denominator. `--json` emits the machine-readable record.
+
+Full specification: `reports/e5_evaluation_methodology.txt`.
 
 ### `check_dataset.py`  *(added 2026-08-16 — experiment E0)*
 **Dataset integrity gate. Analysis-only — never mutates the dataset.** Run `python3.12 check_dataset.py`.
@@ -501,9 +508,10 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | — | Documentation correction (this file + `DECISIONS.md` + `README.md`) | CONTEXT + DECISIONS done 2026-08-16; **README still stale** |
 | **E2** | Envelope neutralization — shared envelope + shape matching | **DONE 2026-08-17** (`reports/e2_e3_clean_dataset.txt`). Strongest incidental baseline 93.72% → 51.16%. |
 | **E3** | Leakage-free grouped split | **DONE 2026-08-17.** Leakage 26.65% → 0.00%; duplicates → 0.00%. |
-| — | **Review the candidate clean dataset** | **BLOCKING — next action.** No training until reviewed. |
 | **E4** | `###END###` removal (D5) | **DONE 2026-08-17** (`reports/e4_remove_end_token.txt`). Dataset regenerated; E0 metrics byte-identical. |
-| **E5** | Per-category rebalancing | NOT STARTED |
+| **E5** | Freeze evaluation methodology (D19) | **DONE 2026-08-17** (`reports/e5_evaluation_methodology.txt`). Self-test PASS. |
+| — | **V4 clean baseline training run** | **NEXT.** Gate (E0) passes with WARNING; methodology frozen. |
+| — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |
 | **E9** | Inline overhead decomposition (D3 metrics) | NOT STARTED |
