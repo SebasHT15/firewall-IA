@@ -1,0 +1,308 @@
+# firewall-IA — Project Decision Log
+
+Authoritative record of confirmed project decisions. Companion to `CONTEXT.md` (project memory)
+and `reports/` (experimental evidence).
+
+**Rules for this file**
+
+- One entry per decision. Entries are **append-only**; never rewrite or delete a decision.
+- If a decision is later changed, add a **new** entry that supersedes it and mark the old one
+  `SUPERSEDED BY Dxx`. Preserve the original text.
+- Rationale is drawn only from recorded audit evidence and from the decisions as issued.
+  Do not invent rationale.
+- `Status` values: `APPROVED` · `APPROVED FOR FUTURE WORK` · `CORE REQUIREMENT` ·
+  `FUTURE WORK` · `SUPERSEDED` · `PENDING ADVISOR`.
+- `Implementation` values: `NOT YET` · `IN PROGRESS` · `DONE` · `N/A` ·
+  `OUT OF CURRENT SCOPE`.
+
+**Project identity (context for every decision below):** an inline AI-powered
+application-layer security gateway for HTTP traffic. Stateless at the application-request
+level. Not a conventional stateful network firewall.
+
+---
+
+## D1 — HTTP request representation
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED
+- **Implementation:** NOT YET — belongs to the future clean dataset work
+
+**Decision.** Keep the HTTP envelope, but neutralize dataset shortcuts across classes.
+
+Headers will **not** be stripped. The future regenerated dataset must preserve headers that
+can legitimately carry security-relevant information, including cases such as
+`Origin`/`Referer` and `Content-Length`/`Transfer-Encoding`.
+
+However, non-causal envelope information — `Host`, `User-Agent`, generic cookies and similar
+metadata — must not deterministically reveal ALLOW vs BLOCK. ALLOW and BLOCK examples must
+draw these neutral envelope values from **shared distributions**.
+
+**Rationale.** Audit finding F1: measured across all 99,132 examples, `Host` is a
+near-perfect label predictor — `target.internal.com` is 42,979 BLOCK / 0 ALLOW, and 53 other
+hosts are 26,290 ALLOW / 0 BLOCK. A classifier reading only the `Host` header scores ≈93%,
+higher than the historical 91% attributed to the model. Related confounds: User-Agent is
+present on 100% of CSIC rows and absent from 100% of PayloadsAllTheThings rows; a raw space
+in the request-target occurs in 1,418 BLOCK and 0 ALLOW examples.
+
+Stripping all headers would also remove the headers that are genuinely causal for CSRF
+(`Origin`/`Referer`) and request smuggling (`Content-Length`/`Transfer-Encoding`) — two of the
+weakest categories in the current dataset (46 and 52 examples respectively).
+
+**Verification.** `check_dataset.py` must report no envelope shortcut before this is
+considered satisfied.
+
+---
+
+## D2 — CSIC excluded anomalies
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED FOR FUTURE WORK
+- **Implementation:** N/A for the clean baseline — preserved conceptually
+
+**Decision.** Do **not** reinstate the 18,478 currently excluded CSIC anomalous rows into the
+main clean baseline yet. Preserve them conceptually as a separate future experimental
+dataset. Do not assign weak generic labels to them in the main baseline at this stage.
+
+**Potential future research question:** can the AI classifier detect anomalous traffic that
+the existing CSIC keyword categorizer could not classify?
+
+**Rationale.** Audit finding F6: `categorize_csic_anomalous()` assigns CSIC BLOCK labels with
+an 11-rule keyword heuristic and discards the 18,478 rows (73.7% of CSIC Anomalous) it cannot
+match — structural anomalies such as buffer overflow, integer tampering and cookie poisoning
+with no keyword-detectable payload. Including them with a generic label would add examples
+whose labels cannot be validated from request content. Keeping them separate preserves both
+label quality in the baseline and the future research question intact.
+
+---
+
+## D3 — Latency target
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED
+- **Implementation:** N/A (a target, not a build task)
+
+**Decision.** Initial engineering target: **end-to-end added latency P95 ≤ 200 ms.**
+
+This is a **design target, not an already demonstrated capability.**
+
+Future performance evaluation must measure separately:
+model-only inference · model + API · proxy overhead · end-to-end · P50 · P95 · P99 ·
+throughput.
+
+**Rationale.** The audit recorded that no latency budget existed, which left every
+performance item in the roadmap unfalsifiable. The previously recorded ~800 ms/request figure
+is unverified (no trained model exists) and was in any case confounded by forced 40-token
+generation (F5), so it never measured decision latency. A stated budget is a prerequisite for
+choosing a classifier timeout, which is in turn a prerequisite for D4.
+
+---
+
+## D4 — Failure behavior
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED
+- **Implementation:** OUT OF CURRENT SCOPE — applies when the inline gateway is built
+
+**Decision.** Default architecture decision: **FAIL-CLOSED.**
+
+If the AI classifier times out, crashes, becomes unavailable, or returns an invalid decision,
+traffic is **blocked** by default.
+
+A future fallback mechanism may allow the proxy or a simpler local security mechanism to
+temporarily take over. That fallback is **not** part of the current implementation scope.
+
+**Rationale.** The audit flagged that fail-open vs fail-closed was undefined and that an
+inline gateway which fails open is not a security control. Recording the decision explicitly
+makes it a defensible, documented architectural property rather than an implementation
+accident.
+
+---
+
+## D5 — `###END###`
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED
+- **Implementation:** NOT YET — to be applied before the clean baseline training
+
+**Decision.** Remove the custom `###END###` token. Use the model's native termination
+behaviour instead. **Do not** attempt to repair `###END###` with `modules_to_save`.
+
+Because the historical v3 model no longer exists, **do not claim a measured before/after
+latency improvement from this change** unless a controlled experiment is later performed.
+
+**Rationale.** Audit finding F5: `finetune.py` adds `###END###` and calls
+`resize_token_embeddings`, appending randomly-initialised rows to `embed_tokens` and
+`lm_head`. The LoRA config targets only `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj,
+down_proj`, and `modules_to_save` is unset — so those rows receive no gradient, are never
+saved, and are re-randomised on every load. `eos_token_id=end_token_id` therefore almost
+certainly never fires. The token is structurally untrainable as configured, and TinyLlama's
+native `</s>` already provides termination.
+
+Files affected when implemented: `parse_dataset.py` (INSTRUCTION + all output labels),
+`finetune.py` (`add_special_tokens` / `resize_token_embeddings`), `test_model.py` (extraction
+regex, `eos_token_id`), `classifier_api.py` (must stay byte-identical to `test_model.py`).
+
+---
+
+## D6 — Dataset versioning
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED
+- **Implementation:** NOT YET — migration procedure must be documented and proposed first
+
+**Decision.** Generated `train.jsonl` / `eval.jsonl` should **not** be treated as normal
+long-term Git source files.
+
+The reproducibility strategy is to version:
+
+- the dataset generator
+- the PayloadsAllTheThings commit
+- generation parameters and seed
+- a dataset manifest
+- per-category counts
+- train/eval counts
+- SHA-256 hashes for generated artifacts
+
+and to make generation deterministic.
+
+**Explicit constraint.** Do **NOT** remove the currently tracked JSONL files yet.
+Do **NOT** run `git rm --cached` yet. Document and propose the migration procedure first, so
+historical evidence is not accidentally lost.
+
+**Rationale.** Audit finding F9: `.gitignore` lists both JSONL files and earlier
+documentation stated generated datasets were not versioned, but `git ls-files` confirms both
+are tracked — ~43.5 MB committed without Git LFS. `.gitignore` has no effect on
+already-tracked files. That tracking is currently the **only** reason the 99,132-example
+dataset still exists, since the original v3 dataset and adapter were lost in the reinstall
+precisely because they were gitignored. Until a manifest-based scheme is in place and
+verified, removing the files would repeat that loss.
+
+Separately, `parse_dataset.py` is non-deterministic despite `random.seed(42)` — the random
+stream's consumption order depends on `list(set(payloads))` (varies with `PYTHONHASHSEED`)
+and on unsorted `os.listdir()` / `os.walk()`. Determinism is a prerequisite for the manifest
+scheme to be meaningful.
+
+---
+
+## D7 — Scientific integrity
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED
+- **Implementation:** N/A (a standing principle)
+
+**Decision.** We explicitly accept that removing dataset artifacts may reduce model accuracy.
+Scientific validity takes priority over preserving the historical 91% result. The objective
+is to obtain a valid clean baseline first and improve performance from there.
+
+**Rationale.** Audit findings F1 and F2 established that the current dataset's accuracy
+numbers are uninterpretable: a `Host`-only classifier scores ≈93%, and 26.6% of the eval set
+appears verbatim in train. Any number produced under those conditions measures shortcut
+exploitation and memorisation rather than detection. A lower but valid number is worth more
+than a higher but invalid one.
+
+**Consequence for reporting.** The ~91% figure is historical context only. It is not the
+current baseline and must not be used as a comparison point for future versions
+(see `CONTEXT.md` §3).
+
+---
+
+## D8 — Core project scope
+
+- **Date:** 2026-08-16
+- **Status:** APPROVED, subject to advisor scope confirmation where necessary
+- **Implementation:** IN PROGRESS (item 1)
+
+**Decision.** The mandatory core project is:
+
+1. clean and scientifically defensible dataset
+2. validated AI classifier
+3. GGUF / quantized deployment path
+4. inline HTTP security gateway
+5. security validation
+6. sufficient performance evaluation to establish operational viability
+7. physical deployment on embedded Linux hardware
+
+Deep comparative performance studies and additional architecture extensions are **not**
+mandatory for the core.
+
+**Rationale.** The audit flagged scope risk: the prior roadmap held roughly seven major
+deliverables (V5–V11) while V3 was not yet complete. This decision fixes the mandatory set
+and explicitly demotes the rest, so scope growth is a deliberate act rather than a drift.
+
+**Explicitly non-core:** stateful / session-aware classification, SIEM integration, and the
+conventional rule-based comparison (see D9).
+
+---
+
+## D9 — Conventional rule-based comparison
+
+- **Date:** 2026-08-16
+- **Status:** FUTURE WORK
+- **Implementation:** OUT OF CURRENT SCOPE
+
+**Decision.** A conventional rules/WAF comparison is useful for data analysis and research,
+but it is **not** currently a mandatory success criterion. Treat it as future work / optional
+extension unless the advisor later requires it.
+
+**Do NOT implement OWASP CRS / ModSecurity / Coraza now.**
+
+**Rationale.** Per D8 this is outside the mandatory core. The audit also identified a design
+problem that must be solved before any such comparison is meaningful (F6): CSIC BLOCK labels
+are generated by an 11-rule keyword heuristic, so a rule-based baseline would score near-100%
+on that portion by construction, making the comparison circular. If the comparison is later
+required, it must use an independent, documented, versioned ruleset and must evaluate on data
+that is not labelled by a keyword matcher — which connects it to D2.
+
+**If later required, verify before citing:** current OWASP CRS / ModSecurity / Coraza
+versions, licensing, and packaging on this platform. Do not cite these from memory.
+
+---
+
+## D10 — Embedded deployment
+
+- **Date:** 2026-08-16
+- **Status:** CORE REQUIREMENT
+- **Implementation:** NOT YET — platform selection deferred
+
+**Decision.** Physical embedded deployment is part of the mandatory project (D8 item 7).
+
+The exact platform remains **TBD** between candidates such as Raspberry Pi and NVIDIA Jetson.
+**Do not select the platform yet.**
+
+Selection must be justified later using **measured** requirements:
+memory · compute · latency · throughput · model footprint · power/thermal constraints where
+practical.
+
+**Rationale.** Hardware selection should be evidence-based. Choosing a platform before the
+model footprint and latency characteristics are measured would make the choice a preference
+rather than a finding. The relevant measurements depend on D3's metrics and on the
+quantization work in D8 item 3, neither of which has been performed.
+
+---
+
+## Decision index
+
+| ID | Topic | Status | Implementation |
+|----|-------|--------|----------------|
+| D1 | HTTP request representation — neutralize envelope shortcuts | APPROVED | NOT YET |
+| D2 | CSIC excluded anomalies — keep out of baseline | APPROVED FOR FUTURE WORK | N/A |
+| D3 | Latency target — P95 ≤ 200 ms end-to-end added | APPROVED | N/A |
+| D4 | Failure behavior — FAIL-CLOSED | APPROVED | OUT OF CURRENT SCOPE |
+| D5 | Remove `###END###`, use native termination | APPROVED | NOT YET |
+| D6 | Dataset versioning — manifest-based, no `git rm` yet | APPROVED | NOT YET |
+| D7 | Scientific integrity over the historical 91% | APPROVED | N/A |
+| D8 | Core project scope — 7 mandatory items | APPROVED (advisor confirmation where needed) | IN PROGRESS |
+| D9 | Conventional rule-based comparison | FUTURE WORK | OUT OF CURRENT SCOPE |
+| D10 | Embedded deployment — platform TBD | CORE REQUIREMENT | NOT YET |
+
+---
+
+## Items still requiring advisor decision
+
+Recorded here so they are not silently resolved by implementation.
+
+- Whether dataset-artifact analysis (the envelope ablation, E2) is acceptable as a primary
+  research contribution, given D7 accepts that accuracy may fall.
+- Confirmation of the D8 core scope, particularly whether physical embedded deployment (D10)
+  is required for the grade or is acceptable as documented future work.
+- Whether the conventional rule-based comparison (D9) is ultimately required.
