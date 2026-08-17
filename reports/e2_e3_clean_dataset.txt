@@ -1,0 +1,344 @@
+==============================================================================
+firewall-IA — E2 + E3 CLEAN DATASET CANDIDATE  (FINALIZED, D17 FINAL / D18)
+==============================================================================
+Date (UTC)          : 2026-08-17
+Generator           : parse_dataset_v4.py  (approved policy is the DEFAULT)
+Seed                : 42
+Policy              : D17 FINAL "H2" — policy B
+                        logical-group cap 2,500 per malicious category
+                        rendered-row cap 4,000 BLOCK rows per malicious category
+PayloadsAllTheThings: e961fef231d8327bae83b563fab50aec2e6b77c0
+Artifacts           : datasets/v4_clean/{train,eval}.jsonl
+Manifest            : datasets/manifest_v4_clean.json
+
+REPLACES: the uncapped candidate, preserved unaltered as
+    reports/e2_e3_clean_dataset_uncapped.txt
+    reports/e0_dataset_integrity_v4_clean_uncapped.txt
+    datasets/manifest_v4_clean_uncapped.json
+  The uncapped dataset bytes are not retained: generation is deterministic
+  (verified bit-identical), so it is exactly reproducible with
+      python3.12 parse_dataset_v4.py --cap-per-category 0
+  and its SHA-256 hashes are recorded in the preserved manifest.
+
+STATUS: CANDIDATE. E0 returns WARNING (no blocking failures). NOT a validated
+baseline. No model has been trained on it.
+
+==============================================================================
+0. CORRECTION TO THE PRE-CAP FIGURES REPORTED ON 2026-08-17
+==============================================================================
+The "logical groups" column in §7 of the uncapped report, and the cap
+recommendation derived from it, contained transcription errors. They were not
+read from the manifest. Corrected against
+datasets/manifest_v4_clean_uncapped.json:
+
+  CATEGORY                    REPORTED    ACTUAL
+  -------------------------  ---------  --------
+  Directory Traversal            5,282    10,218
+  SQL Injection                  3,741     1,277
+  File Inclusion                 1,619     2,937
+  XSS Injection                  2,070     2,224
+  Command Injection                406       453
+  SSTI                             268       368
+  Open Redirect                    143       242
+  SSRF                             136       201
+
+  All categories at or below 98 groups were CORRECT (XXE 98, NoSQL 83, JWT 80,
+  LDAP 75, GraphQL 74, CSRF 31, XPath 24, CRLF 21, HPP 20, Deserialization 12,
+  Request Smuggling 7) — those were taken from the generator's own output.
+
+MATERIAL CONSEQUENCES FOR THE D17 DECISION:
+  1. The cap is more aggressive than described: Directory Traversal loses 9,218
+     groups, not ~4,300.
+  2. SQL Injection WAS capped (1,277 -> 1,000). The recommendation implied it
+     would sit above Path Traversal and be unaffected.
+  3. The stated goal ("bring Path Traversal in line with SQL injection") is
+     achieved, but by pinning four categories to the cap rather than two.
+
+  The threshold may warrant re-confirmation on the corrected figures.
+
+==============================================================================
+1. WHAT THE FINAL POLICY DID (D17 FINAL — "H2")
+==============================================================================
+TWO INDEPENDENT LEVERS, controlling two DIFFERENT quantities.
+
+1a. LOGICAL-GROUP CAP = 2,500, POLICY B  — diversity dominance control
+    Applied BEFORE rendering. Policy B means CSIC-derived BLOCK groups count
+    toward the SAME per-category budget as PayloadsAllTheThings/hardcoded
+    groups. Selection is first N by sorted group id (sha256 of the canonical
+    payload) over the merged pool, so it is deterministic, order-independent,
+    and does not prefer either source.
+
+    CAPPED (4 categories):
+      Directory Traversal   10,218 -> 2,500   (-7,718 attack / -0 CSIC)
+      SQL Injection          2,953 -> 2,500     (-203 attack / -250 CSIC)
+      File Inclusion         2,937 -> 2,500     (-437 attack / -0 CSIC)
+      XSS Injection          2,628 -> 2,500     (-110 attack / -18 CSIC)
+
+    PRESERVED AS-IS (15 categories, all below the cap):
+      Command Injection 453 · SSTI 368 · Open Redirect 242 · SSRF 201 ·
+      XXE 98 · NoSQL 83 · JWT 80 · LDAP 75 · GraphQL 74 · CSRF 31 ·
+      XPath 24 · CRLF 21 · HPP 20 · Insecure Deserialization 12 ·
+      Request Smuggling 7
+
+1b. RENDERED-ROW CAP = 4,000  — training contribution control
+    Applied AFTER rendering and deduplication, BEFORE final balancing.
+    Malicious categories only; benign is never row-capped.
+
+    Selection: deterministic, SOURCE-STRATIFIED (quota split between
+    PayloadsAllTheThings and CSIC in proportion to their row counts, by
+    largest remainder, so neither source is deleted first), and BREADTH-FIRST
+    (one row per logical group before any second row).
+
+    ONE category exceeded the cap:
+      SQL injection    rows 5,545 -> 4,000  (-1,545)
+                       groups 2,500 -> 2,500   *** 100% RETENTION ***
+                       CSIC rows 3,699 -> 2,668
+
+    THE KEY METHODOLOGICAL RESULT: the row cap removed 1,545 REDUNDANT
+    RENDERINGS while eliminating ZERO represented logical diversity. Every
+    other category retains 100% of its groups because none exceeded the cap.
+
+1c. WHY BOTH ARE NEEDED
+    A group cap alone cannot control training contribution. A CSIC group is a
+    request SHAPE that collapsed many original records, and every record still
+    renders. Measured at a 2,500-group cap, SQL Injection still produced 5,545
+    rows while Path Traversal produced 2,511. The row cap acts directly on the
+    quantity that determines training contribution.
+
+1d. HARD FLOOR, ENFORCED IN CODE
+    row_cap must be >= group_cap. Below it the breadth-first round robin
+    exhausts its budget on the first pass and group retention pins at exactly
+    row_cap/group_cap (measured: 2000/2500 -> 80.0% in four categories). The
+    generator now REFUSES to run below the floor rather than silently
+    destroying logical diversity.
+
+==============================================================================
+2. FINAL DATASET
+==============================================================================
+  train rows            25,134   (80.20%)
+  eval rows              6,206   (19.80%)
+  TOTAL                 31,340
+  achieved eval ratio   0.1980   (requested 0.20)
+
+  ALLOW                 15,670   (50.00%)
+  BLOCK                 15,670   (50.00%)
+
+  GROUP COUNTS           TRAIN    EVAL
+  --------------------  ------  ------
+  attack                 8,037   1,940
+  benign (synthetic)    15,802   3,983
+  CSIC                   6,577   1,674
+
+  CSIC_ANOMALOUS_RESERVED = 19,165 records — still excluded (D2), not
+  relabelled, still identifiable.
+
+==============================================================================
+3. PER-CATEGORY — LOGICAL GROUPS AND RENDERED ROWS
+==============================================================================
+  CATEGORY                     GROUPS   GROUPS    ROWS   %BLOCK
+                              PRE-CAP  POST-CAP
+  --------------------------  -------  --------  ------  ------
+  ALLOW (benign)                    —         —  15,670       —
+  SQL injection                 2,953     1,074   4,000   25.5%
+  Cross-site scripting          2,628     2,114   3,628   23.2%
+  File inclusion                2,937     2,500   2,595   16.6%
+  Path traversal               10,218     2,500   2,511   16.0%
+  Command injection               453       453     741    4.7%
+  CRLF injection                   21        21     511    3.3%
+  SSTI                            368       368     481    3.1%
+  Open redirect                   242       242     259    1.7%
+  SSRF                            201       201     249    1.6%
+  XXE                              98        98     143    0.9%
+  NoSQL injection                  83        83     114    0.7%
+  JWT                              80        80     111    0.7%
+  LDAP injection                   75        75     101    0.6%
+  GraphQL injection                74        74      97    0.6%
+  CSRF                             31        31      46    0.3%
+  XPath injection                  24        24      40    0.3%
+  HTTP parameter pollution         20        20      20    0.1%
+  Insecure deserialization         12        12      16    0.1%
+  HTTP request smuggling            7         7       7    0.0%
+  --------------------------  -------  --------  ------  ------
+  TOTAL BLOCK                                     15,670  100.0%
+
+  "GROUPS POST-CAP" counts PayloadsAllTheThings/hardcoded attack groups only.
+  SQL Injection shows 1,074 because policy B's merged-pool cap allocated part
+  of its 2,500-group budget to CSIC groups.
+
+  Largest attack-category share of BLOCK : 25.5%   (was 47.3% at cap1000_A)
+  Top-3 combined share                   : 65.2%   (was 70.6%)
+  Effective category count (2^H)         : 7.42    (was 6.36)
+  BLOCK volume spread                    : 571.4:1 (largest 4,000, smallest 7)
+
+  25.5% IS AN OBSERVED OUTCOME OF THIS COMPROMISE, NOT A TARGET OR A STANDARD.
+  It must not be cited as a universal balance threshold.
+
+==============================================================================
+4. E0 RESULT ON THE FINALIZED CANDIDATE
+==============================================================================
+  Command:
+    python3.12 check_dataset.py \
+      --train datasets/v4_clean/train.jsonl \
+      --eval  datasets/v4_clean/eval.jsonl \
+      --out   reports/e0_dataset_integrity_v4_clean.txt
+
+  Exit code 1 = WARNING. BLOCKING FAILURES: 0.
+
+  REQUIRED INVARIANTS — ALL VERIFIED
+    exact train->eval leakage      0 rows / 6,206  =  0.00%   PASS
+    distinct leaked inputs         0                          PASS
+    train duplicate rate           0.00%  (25,134 unique)     PASS
+    eval duplicate rate            0.00%  ( 6,206 unique)     PASS
+    deterministic label reveals    0                          PASS
+
+  TRIVIAL BASELINES (fit on train, scored on eval) — majority = 50.00%
+    BASELINE                                 EVAL ACC   vs MAJORITY
+    --------------------------------------  ---------  ------------
+    Content-Type (header value)                51.16%       +1.16%
+    User-Agent (header value)                  50.47%       +0.47%
+    HTTP method                                50.00%       +0.00%
+    Malformed request-target (raw space)       50.00%       +0.00%
+    Body present/absent                        50.00%       +0.00%
+    Header count                               49.89%       -0.11%
+    User-Agent (present/absent)                49.76%       -0.24%
+    Host (header value)                        49.73%       -0.27%
+    Cookie (present/absent)                    49.65%       -0.35%
+    Header-name set (structural fingerprint)   49.21%       -0.79%
+
+    Every required feature is near majority. Eight of ten sit AT or BELOW it,
+    which is the expected behaviour of a feature carrying no signal.
+    For comparison the historical dataset measured Host at 93.72%.
+
+  WARNINGS (2), both category scarcity:
+    [W1] BLOCK category imbalance 571.4:1 (largest 4,000, smallest 7)
+    [W2] 3 BLOCK categories below 0.10%: Request Smuggling (7),
+         Insecure Deserialization (16), HPP (20)
+
+  THE GATE WAS NOT WEAKENED. check_dataset.py is unmodified.
+
+==============================================================================
+5. DETERMINISM
+==============================================================================
+Regeneration was verified BIT-IDENTICAL under four different hash seeds:
+
+    PYTHONHASHSEED=0        train=OK  eval=OK
+    PYTHONHASHSEED=1        train=OK  eval=OK
+    PYTHONHASHSEED=12345    train=OK  eval=OK
+    PYTHONHASHSEED=random   train=OK  eval=OK
+
+The approved policy is the generator's DEFAULT, so the finalized dataset is
+reproduced by:
+
+    python3.12 parse_dataset_v4.py
+
+The floor guard was verified to fire:
+
+    $ python3.12 parse_dataset_v4.py --row-cap-per-category 2000
+    FATAL: --row-cap-per-category (2000) is below --cap-per-category (2500).
+    This would cap logical-group retention at 80.0% by arithmetic, destroying
+    logical diversity rather than redundancy.
+
+==============================================================================
+6. INSUFFICIENT DATA / NOT EVALUABLE  (D14, D18 — UNCHANGED)
+==============================================================================
+NOT EVALUABLE — zero held-out eval rows. No category-level accuracy, recall or
+any other performance claim may be made:
+
+    HTTP Request Smuggling      7 train rows, 0 eval rows
+
+  Determined from the rendered eval split by the generator and recorded in the
+  manifest under not_evaluable_categories. Per D18 no samples were forced
+  across the split and the grouped split was not weakened.
+
+INSUFFICIENT DATA — under 100 unique logical groups (11 categories, identical
+to every earlier scenario; no cap affects them since all sit far below 2,500):
+
+     7  Request Smuggling          (also NOT EVALUABLE)
+    12  Insecure Deserialization
+    20  HTTP Parameter Pollution
+    21  CRLF Injection
+    24  XPath Injection
+    31  Cross-Site Request Forgery
+    74  GraphQL Injection
+    75  LDAP Injection
+    80  JSON Web Token
+    83  NoSQL Injection
+    98  XXE Injection
+
+  Scarcity is a SOURCE MATERIAL problem — PayloadsAllTheThings provides 56
+  fenced lines for CSRF and 61 for Request Smuggling. It cannot be fixed by
+  generator changes, and per D14 nothing was fabricated to inflate it.
+
+==============================================================================
+7. MANIFEST AND HASHES
+==============================================================================
+  datasets/manifest_v4_clean.json
+
+  train.jsonl  sha256 ffc8b51246119b247fc43fa73df049ae3adaefd58ccbc1f79f0ab0b7575271f8
+               13,934,680 bytes
+  eval.jsonl   sha256 d4e4bd48b4ad67185f29d31f437ac00426cd6c5cc08153b034ebc8c59d0460a9
+                3,439,498 bytes
+
+  The manifest records cap_per_category=2500, cap_policy_variant=B,
+  row_cap_per_category=4000, and row_cap_effect with the per-category
+  before/after row, group and CSIC counts.
+
+  PRESERVED EVIDENCE TRAIL (why H2 was selected):
+    reports/e2_e3_cap_sensitivity.txt        11 group-cap scenarios
+    reports/e2_e3_row_cap_sensitivity.txt     6 row-cap scenarios
+    reports/e2_e3_clean_dataset_uncapped.txt  the uncapped candidate
+    datasets/manifest_v4_clean_uncapped.json
+
+==============================================================================
+8. OPEN ISSUES
+==============================================================================
+  1. DATASET SIZE 31,340 rows, down from 99,132 historical. Valid-and-small is
+     the intended trade (D7), but this remains small for a 1.1B model.
+
+  2. CSIC BLOCK TRAFFIC RETAINED 3,906 of 5,900 rows (66%). This is the price
+     of contribution control and it is real: CSIC is the only non-synthetic
+     attack traffic in the dataset.
+
+  3. REQUEST SMUGGLING NOT EVALUABLE; ten further categories INSUFFICIENT DATA.
+     Needs new source material.
+
+  4. CSIC LABEL CIRCULARITY (audit F6) unchanged — CSIC BLOCK labels come from
+     an 11-rule keyword heuristic, so a rule-based comparison on that subset
+     would be circular. Blocks D9 if ever required; does not block D8.
+
+  5. Content-Type at +1.16 is the highest remaining incidental feature, a
+     residue of shapes whose content type is semantically forced (XML for XXE,
+     JSON for GraphQL). Monitor; do not over-fit the generator to drive it to
+     exactly 50%.
+
+  6. SYNTHETIC BENIGN REALISM — benign traffic is generated, not captured.
+     Proxy capture (CONTEXT.md section 8) remains the stronger long-term fix.
+
+  7. E0 measures EXACT overlap only. Canonical grouping addresses near
+     duplicates by construction, but a minhash/shingle metric would strengthen
+     the guarantee. Not implemented.
+
+  8. ###END### retained pending D5.
+
+==============================================================================
+9. VERDICT
+==============================================================================
+  D17 FINAL applied          : YES — policy B, group 2,500, row 4,000
+  D18 marking applied        : YES — Request Smuggling NOT EVALUABLE
+  Envelope confounds         : NONE (strongest incidental +1.16 over majority)
+  Leakage / duplicates       : 0.00% / 0.00%
+  Deterministic reveals      : 0
+  Logical-group retention    : 100% in every category
+  Determinism                : bit-identical across 4 hash seeds
+  E0 verdict                 : WARNING (no blocking failures)
+
+  Ready for training         : NOT UNTIL REVIEWED. E0 no longer fails, but the
+                               dataset is a CANDIDATE and the scarcity warnings
+                               in section 6 must be disclosed alongside any
+                               metric derived from it.
+
+  finetune.py NOT run. test_model.py NOT modified. ###END### retained.
+
+==============================================================================
+END OF REPORT
+==============================================================================

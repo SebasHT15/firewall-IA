@@ -1,0 +1,502 @@
+==============================================================================
+  SUPERSEDED — PRESERVED AS HISTORICAL EVIDENCE
+==============================================================================
+  This report describes the UNCAPPED v4 clean candidate (no per-category cap).
+  It is SUPERSEDED by reports/e2_e3_clean_dataset.txt, which describes the
+  capped candidate generated under DECISIONS.md D17 (1,000 logical groups per
+  malicious attack category).
+
+  Nothing in this file has been altered. It is retained because it is the
+  measurement that motivated D17.
+
+  Companion preserved artifacts:
+    datasets/manifest_v4_clean_uncapped.json
+    reports/e0_dataset_integrity_v4_clean_uncapped.txt
+
+  The uncapped dataset itself is not retained as bytes: generation is
+  deterministic (verified bit-identical), so it is exactly reproducible with
+     python3.12 parse_dataset_v4.py --cap-per-category 0
+  and its SHA-256 hashes are recorded in the preserved manifest above.
+==============================================================================
+
+==============================================================================
+firewall-IA — E2 + E3: CLEAN DATASET CANDIDATE
+  E2  HTTP envelope neutralization
+  E3  Leakage-free grouped split
+==============================================================================
+Date (UTC)          : 2026-08-17
+Generator           : parse_dataset_v4.py
+Seed                : 42
+PayloadsAllTheThings: e961fef231d8327bae83b563fab50aec2e6b77c0
+Artifacts           : datasets/v4_clean/{train,eval}.jsonl
+Manifest            : datasets/manifest_v4_clean.json
+
+STATUS: CANDIDATE. This is NOT a validated baseline. E0 returns WARNING (not
+PASS) because of category scarcity. The dataset must be reviewed before any
+training run.
+
+==============================================================================
+1. HEADLINE RESULT
+==============================================================================
+E0 gate, historical dataset vs candidate clean dataset. Every number measured
+by check_dataset.py; nothing hardcoded.
+
+  METRIC                              HISTORICAL      CLEAN      MAJORITY
+  ---------------------------------  -----------  ---------  ------------
+  E0 verdict                                FAIL    WARNING            --
+  train->eval leakage                     26.65%      0.00%            --
+  train duplicate rate                    26.24%      0.00%            --
+  eval duplicate rate                     25.37%      0.00%            --
+  deterministic label reveals                  9          0            --
+  ---------------------------------  -----------  ---------  ------------
+  TRIVIAL BASELINES (fit train, score eval)
+  majority class                          49.91%     50.00%            --
+  Host (header value)                     93.72%     49.75%       50.00%
+  Content-Type (header value)             82.62%     50.71%       50.00%
+  Header-name set                         76.84%     49.58%       50.00%
+  Header count                            75.88%     49.88%       50.00%
+  Body present/absent                     74.12%     50.00%       50.00%
+  HTTP method                             74.06%     50.00%       50.00%
+  User-Agent (value)                      67.94%     50.37%       50.00%
+  User-Agent (presence)                   67.94%     50.18%       50.00%
+  Cookie (presence)                       67.14%     49.95%       50.00%
+  malformed request-target                51.60%     50.00%       50.00%
+
+  Strongest non-payload baseline: 93.72% -> 50.71%.
+  Every incidental feature is now within +0.71 / -0.42 points of the majority
+  baseline. Three sit slightly BELOW it, which is the expected behaviour of a
+  feature carrying no signal.
+
+  Interpretation: on the historical dataset, a classifier reading only the Host
+  header outscored the model. On the candidate dataset no incidental envelope
+  feature beats a coin flip. Any accuracy measured on this dataset must
+  therefore come from the request content.
+
+  This is a statement about the DATASET only. No model has been trained on it.
+
+==============================================================================
+2. GENERATOR ARCHITECTURE
+==============================================================================
+parse_dataset_v4.py is a NEW file. parse_dataset.py is deliberately left
+untouched and fully executable: it is the control condition for the E2
+before/after comparison, and deleting it would make that comparison
+unreproducible.
+
+Nine stages, in the order D16 requires:
+
+  1. source extraction        PayloadsAllTheThings + hardcoded + CSIC
+  2. normalization/filtering  quality gate with per-reason accounting
+  3. canonical logical sample encoding/case/whitespace-invariant key
+  4. group identity           sha256 of the canonical key
+  5. train/eval GROUP split   deterministic hash bucket
+  6. shared envelope render   ONE generator for both classes
+  7. training augmentation    TRAIN_TRANSFORMS only, within the group's split
+  8. validation               invariants asserted, build fails otherwise
+  9. JSONL + manifest         SHA-256, counts, limitations
+
+The critical inversion vs the historical generator:
+
+  HISTORICAL:  source -> variants -> shuffle -> random row split
+  CLEAN:       source -> group    -> split   -> render -> augment
+
+==============================================================================
+3. E2 — SHARED ENVELOPE AND SHAPE MATCHING
+==============================================================================
+The historical generator drew ALLOW and BLOCK from different envelope
+distributions. Fixing shortcuts one at a time would not have worked: E0 found
+seven of them, and patching Host alone would have left Content-Type at 82.62%.
+
+The structural fix has two parts.
+
+3a. ONE SHARED ENVELOPE GENERATOR
+  build_envelope() is the only source of Host, User-Agent, Accept*, Connection,
+  X-Requested-With and Cookie values, and it is called by both classes. There
+  is no benign-only or attack-only host, user-agent or cookie anywhere in the
+  file. Envelope values are drawn from an RNG seeded by the sample's GROUP ID,
+  so they are deterministic per sample and statistically independent of label.
+
+  The historical benign-only host pool (api.example.com and friends, 0 BLOCK)
+  and attack-only host (target.internal.com, 0 ALLOW) are gone: both pools were
+  merged into one 32-host list used by everything, including CSIC.
+
+  CSIC records are RE-RENDERED under the shared envelope. Method, path, query
+  and body — the semantic content — are preserved exactly. Only the envelope is
+  redrawn. This removes the `Host: target.com` + single-Konqueror-UA signature
+  that made CSIC origin identifiable.
+
+3b. SHAPE MATCHING
+  A "shape" is the structural envelope of a request: valid methods, path pool,
+  parameter names, content type, special headers. 15 shapes are defined.
+
+  Every attack category maps to one or more shapes. The benign generator then
+  produces benign traffic in the SAME shapes at MATCHED volume. So for every
+  XML-body XXE attack there is benign XML/SOAP traffic; for every Bearer-token
+  JWT attack there is benign authenticated API traffic; for every GraphQL
+  injection there is a benign GraphQL query.
+
+  This is what collapsed Content-Type (82.62% -> 50.71%), header-name set
+  (76.84% -> 49.58%), header count (75.88% -> 49.88%) and body presence
+  (74.12% -> 50.00%) simultaneously, rather than one at a time.
+
+3c. RESIDUAL METHOD CONFOUND — FOUND AND FIXED DURING THIS PHASE
+  The first generation run still showed HTTP method at 56.37% (+6.37). It was
+  investigated rather than accepted, per the E0 instruction.
+
+  Cause: two compounding asymmetries.
+    (i)  A generator bug. Benign volume was matched to attack GROUP count
+         (18,413), but augmentation emits ~2 rendered rows per group, so the
+         shared-envelope population was ~2:1 BLOCK-heavy. The leftover ALLOW
+         mass was CSIC, which is GET/POST-only 2010 traffic. Result: PUT,
+         PATCH, DELETE and HEAD skewed ~70% BLOCK.
+    (ii) CSIC's own method mix differs between its Normal and Anomalous
+         records, and that difference is inherent to the source capture.
+
+  Fixes applied:
+    (i)  Benign demand now matches RENDERED BLOCK ROWS per shape, not groups.
+    (ii) Final class balancing is STRATIFIED BY HTTP METHOD: within each
+         method, both classes are trimmed to min(ALLOW, BLOCK). This forces
+         P(BLOCK | method) = 0.5 exactly and yields 1:1 overall as a
+         by-product. Trimming only; nothing is duplicated (D14).
+
+  Result: HTTP method 56.37% -> 50.00% (+0.00).
+  Cost: 38,743 train rows and 6,800 eval rows trimmed. Recorded in section 8.
+
+==============================================================================
+4. CAUSAL EXCEPTIONS — ENVELOPE FEATURES ALLOWED TO CORRELATE
+==============================================================================
+Per E2 section B, features that constitute part of the attack are NOT
+neutralized. Each is documented in the manifest under
+causal_envelope_exceptions. Measured behaviour on the candidate dataset:
+
+  FEATURE                          ALLOW   BLOCK   PURITY   COVERAGE
+  ------------------------------  ------  ------  -------  ---------
+  Origin header PRESENT               38      46    54.8%         84
+  Origin CROSS-ORIGIN vs Host          0      46   100.0%         46
+  Transfer-Encoding present            0       5   100.0%          5
+  duplicate param name in query        0      13   100.0%         13
+
+  This is the designed behaviour. Header PRESENCE is non-predictive (54.8%),
+  because benign counterparts in the same shape carry same-origin Origin and
+  Referer. Only the cross-origin RELATIONSHIP — which IS the CSRF attack —
+  correlates with BLOCK. Same pattern for smuggling framing headers (benign
+  counterparts carry a single correct Content-Length) and for HPP (benign
+  counterparts use the same parameter names without duplication).
+
+  All three causal reveals fall below E0's 1%-coverage threshold, which is why
+  E0 reports zero deterministic reveals. Their tiny coverage is itself a
+  symptom of the scarcity problem in section 7 — there are only 46 CSRF rows
+  and 5 smuggling rows in the entire dataset.
+
+==============================================================================
+5. SOURCE EXTRACTION AND QUALITY FILTERING
+==============================================================================
+The historical extractor scraped any markdown line containing one of a set of
+characters, which captured prose, table rows, reference links and unresolved
+fuzzer placeholders.
+
+New extraction: fenced code blocks and .txt wordlists ONLY. The prose heuristic
+is removed entirely. Directory and file traversal is sorted for determinism.
+XXE, Request Smuggling and Insecure Deserialization take the whole fenced block
+as one payload, because line-splitting destroys their semantics.
+
+A missing category directory is now a FATAL ERROR, not a silent [SKIP] — the
+failure mode that cost v3 two categories is disarmed.
+
+FULL REJECTION ACCOUNTING (nothing dropped silently):
+
+  REASON                    COUNT    NOTE
+  ----------------------  -------  ------------------------------------------
+  accepted                 33,517
+  fuzzer_placeholder        3,614   {FILE}, {PATH}, FUZZ, ^^, REPLACE_ME, ...
+  markdown_artifact           644   lines starting | # > - * ``` // <!--
+  empty                       556
+  too_long                    373   > 400 chars
+  too_short                   305   < 4 chars
+  no_payload_indicator        315   multi-word text with no structural char
+  control_chars                63   would corrupt the rendered request
+  prose                         9   sentence-shaped, no attack characters
+  ----------------------  -------
+  total scanned            39,396   acceptance rate 85.1%
+
+  The placeholder filter matches uppercase-in-single-braces ({FILE}) and
+  deliberately does NOT match SSTI payloads such as {{7*7}} or {{config}}.
+
+  Payloads are percent-encoded into the request-target. The historical "raw
+  space in request-target" artifact (1,418 BLOCK / 0 ALLOW, 100% pure) is
+  eliminated: E0 now reports a single cell for that feature, i.e. the
+  artifact no longer exists in the data.
+
+==============================================================================
+6. BENIGN GENERATION (D13)
+==============================================================================
+Historical: 240 unique strings replicated ~110x to 26,290 rows.
+Clean:      36,721 unique benign logical samples, 0 replication.
+
+  ALLOW pool composition, historical vs clean:
+    historical  49,566 rows / 23,516 unique inputs  (synthetic side: 240 unique)
+    clean       26,878 rows / 26,878 unique inputs  (100% unique)
+
+Benign traffic is generated parametrically from combinations of shape, path,
+parameter name, and a value generator keyed on parameter semantics
+(BENIGN_VALUES). Values are realistic and type-appropriate: ids are integers,
+emails are addresses, comments are sentences, sort fields are sort fields.
+Benign GraphQL queries and benign XML/SOAP documents are included so those
+shapes are not attack-exclusive.
+
+No external benign dataset was added, per D13.
+
+==============================================================================
+7. CATEGORY COUNTS — BEFORE / AFTER, AND SCARCITY (D14)
+==============================================================================
+No caps and no floors were applied. --cap-per-category exists but defaults to
+OFF. D14 forbids inflating weak categories and forbids inventing thresholds,
+so the natural distribution is emitted and reported as-is.
+
+  CATEGORY                        HISTORICAL   LOGICAL    CLEAN   TRAIN  EVAL
+                                        ROWS    GROUPS     ROWS
+  ------------------------------  ----------  --------  -------  ------  ----
+  ALLOW (benign)                      49,566    36,721   26,878  21,579  5,299
+  Path traversal                      24,176     5,282   10,254   8,171  2,083
+  SQL injection                        7,040     3,741    6,820   5,509  1,311
+  Cross-site scripting                 4,124     2,070    3,818   3,076    742
+  File inclusion                       8,447     1,619    3,050   2,465    585
+  Command injection                    1,469       406      741     607    134
+  CRLF injection                         744        21      511     399    112
+  SSTI                                   697       268      481     393     88
+  Open redirect                          391       143      259     208     51
+  SSRF                                   312       136      249     186     63
+  XXE                                    381        98      143     116     27
+  NoSQL injection                        135        83      114      97     17
+  JWT                                    196        80      111      95     16
+  LDAP injection                         123        75      101      80     21
+  GraphQL injection                      118        74       97      75     22
+  CSRF                                    46        31       46      38      8
+  XPath injection                        301        24       40      29     11
+  HTTP parameter pollution               400        20       20      17      3
+  Insecure deserialization               414        12       16      11      5
+  HTTP request smuggling                  52         7        7       7      0
+  ------------------------------  ----------  --------  -------  ------  ----
+  TOTAL                               99,132    54,678   53,756  43,158 10,598
+
+  Volume spread worsened in ratio terms: 525.6:1 -> 1,464.9:1. This is a
+  CONSEQUENCE of honest filtering, not a regression. The historical counts were
+  inflated by duplicates, prose lines and fuzzer placeholders; removing those
+  hit small categories hardest because they had the least genuine material.
+
+INSUFFICIENT DATA (D14) — reported, not fabricated, not removed:
+
+  Fewer than 100 unique logical source samples:
+        7  HTTP Request Smuggling      <- and ZERO eval rows
+       12  Insecure Deserialization
+       20  HTTP Parameter Pollution
+       21  CRLF Injection
+       24  XPath Injection
+       31  Cross-Site Request Forgery
+       74  GraphQL Injection
+       75  LDAP Injection
+       80  JSON Web Token
+       83  NoSQL Injection
+       98  XXE Injection
+
+  MOST SEVERE: HTTP Request Smuggling has 7 rows, ALL in train, NONE in eval.
+  It is unevaluable on this dataset. Insecure Deserialization (5 eval rows),
+  HPP (3 eval rows) and CSRF (8 eval rows) are close behind.
+
+  No per-category performance claim can be made for any category in this list.
+  This is a source-material problem, not a generator problem: PayloadsAllTheThings
+  has 56 fenced lines and 0 wordlist lines for CSRF, and 61 for Request
+  Smuggling.
+
+==============================================================================
+8. E3 — GROUPED SPLIT
+==============================================================================
+Group identity:
+  attack   sha256 of a canonical key that undoes percent-encoding (3 layers),
+           unicode escapes, HTML entities, inline SQL comments (/**/),
+           ${IFS}, whitespace runs and case. An obfuscated variant therefore
+           canonicalizes to the same group as its base payload.
+  benign   shape | path | parameter | value
+  CSIC     method | path | sorted(param=normalized value), with digits
+           collapsed to '#' and percent-escapes decoded.
+
+  The CSIC key deliberately goes beyond "record identity". Record identity
+  alone would let `cantidad=1` sit in train and `cantidad=2` in eval — an
+  exact-match gate would pass while genuine near-duplicate leakage remained.
+  Collapsing digits puts all variants of one request shape in one group.
+  Effect: 41,900 CSIC records collapse to 8,519 groups.
+
+Split assignment: deterministic hash bucket,
+  sha256(salt || group_id) mod 10000 < 2000 -> eval
+Order-independent and stable regardless of dataset size or iteration order.
+
+  GROUP COUNTS               TRAIN     EVAL
+  ------------------------  ------  -------
+  attack                    14,781    3,664
+  benign (synthetic)        29,309    7,412
+  CSIC                       6,781    1,738
+
+  Requested eval fraction 0.20; ACHIEVED 0.1972 (rows).
+
+INVARIANTS, asserted at generation time (build fails otherwise):
+  [x] no group id appears in both splits
+  [x] no malformed request-target in any rendered row
+  [x] exact train->eval overlap = 0    (verified independently by E0: 0.00%)
+  [x] within-split exact duplicates = 0 (verified by E0: 0.00% / 0.00%)
+
+  261 train and 39 eval rows were dropped as exact duplicates before the
+  invariant check. A further cross-split collision sweep removed rows where two
+  DISTINCT groups happened to render to an identical string.
+
+==============================================================================
+9. TRANSFORM POOLS (D15)
+==============================================================================
+Obfuscation is no longer both training augmentation and adversarial evidence.
+
+  TRAINING POOL — used to generate augmented rows, always within the base
+  group's own split, so no group crosses over:
+    url_encode, case_variation, sql_comment_inject, whitespace_tab
+
+  HELD-OUT POOL — defined, documented, and used to generate NOTHING in this
+  dataset. Reserved exclusively for a future adversarial suite:
+    double_url_encode      percent-encode, then encode each % as %25
+    unicode_escape         escape < > ' " as \uXXXX
+    html_entity            named/numeric HTML entity encoding
+    bash_ifs               spaces -> ${IFS}; backtick exec -> $()
+    mixed_case_percent     randomise hex case in percent-escapes
+    param_fragmentation    split a payload across repeated parameters
+
+  Consequence to disclose: robustness against held-out transforms is
+  UNMEASURED by design. The adversarial suite is not implemented (D15).
+
+==============================================================================
+10. DETERMINISM AND REPRODUCIBILITY
+==============================================================================
+The historical generator was non-deterministic despite random.seed(42):
+list(set(payloads)) iteration order varies with PYTHONHASHSEED, and
+os.listdir()/os.walk() are unsorted.
+
+Fixed:
+  * all directory and file traversal sorted
+  * no reliance on set iteration order for anything that feeds the RNG
+  * per-sample RNG seeded from the sample's group id, not from a global stream,
+    so rendering is independent of processing order
+  * deterministic hash-bucket split instead of a shuffled list
+  * output rows sorted by content hash
+
+VERIFIED: two consecutive runs with PYTHONHASHSEED=random produced
+BIT-IDENTICAL train.jsonl and eval.jsonl.
+
+  train.jsonl  sha256 a03fda5613ec8c8348b1ac793cf1ede7e6c3443267eb49995e4789280ceae053
+               23,711,604 bytes
+  eval.jsonl   sha256 19e57e21f1348511195e5081c86ec040595100a90283c5cf1fccc126ca5a2ad1
+               5,829,449 bytes
+
+==============================================================================
+11. CSIC ANOMALOUS RESERVED (D2)
+==============================================================================
+  CSIC_ANOMALOUS_RESERVED = 19,165 records.
+
+  Kept OUT of the baseline, NOT relabelled, NOT deleted, and identifiable: any
+  CSIC Anomalous record for which csic_category() returns None. Reported as a
+  named field in the manifest.
+
+  (The historical figure was 18,478. The count differs because the keyword
+  categorizer no longer runs against a pre-rendered request string containing
+  the Konqueror User-Agent and cookie headers, so a few hundred records that
+  previously matched on envelope text now fall through to the reserved pool.
+  This is a more honest categorization, not a data loss.)
+
+  These records remain available for the future D2 experiment: can the
+  classifier detect anomalies the keyword categorizer could not classify?
+
+==============================================================================
+12. E0 RESULT ON THE CANDIDATE
+==============================================================================
+  Command:
+    python3.12 check_dataset.py \
+      --train datasets/v4_clean/train.jsonl \
+      --eval  datasets/v4_clean/eval.jsonl \
+      --out   reports/e0_dataset_integrity_v4_clean.txt
+
+  Exit code 1 = WARNING.  (FAIL conditions: none.)
+
+  BLOCKING FAILURES: 0
+    - leakage             0.00%  (threshold 1.00%)  PASS
+    - dataset shortcut    50.71% strongest non-payload baseline
+                                 (thresholds: 80% absolute / +20% margin) PASS
+    - deterministic reveals   0  PASS
+
+  WARNINGS: 2 — both are the category scarcity of section 7:
+    [W1] BLOCK category imbalance 1,464.9:1 (largest 10,254, smallest 7)
+    [W2] 5 BLOCK categories below 0.10% of the dataset
+
+  The gate was NOT weakened to accommodate the new dataset. check_dataset.py is
+  byte-identical to the version that failed the historical dataset; only
+  --train/--eval arguments differ, and those already existed.
+
+==============================================================================
+13. REMAINING SHORTCUTS, CONFOUNDS AND OPEN ISSUES
+==============================================================================
+  1. CATEGORY SCARCITY — the dominant unresolved issue. Request Smuggling is
+     unevaluable (0 eval rows). Ten further categories have under 100 unique
+     logical samples. Per-category metrics are not defensible for these.
+     Requires new source material, not generator changes.
+
+  2. VOLUME SKEW — Path traversal is 19.08% of the dataset and 38% of the BLOCK
+     pool, still dominated by fuzzing wordlists. A cap would help but D14
+     forbids inventing the number; see the recommendation.
+
+  3. CSIC LABEL CIRCULARITY (audit F6) — unchanged. CSIC BLOCK labels are
+     assigned by an 11-rule keyword heuristic, so a rule-based baseline would
+     score near-100% on that subset by construction. Blocks D9 if it is ever
+     required; does not block D8.
+
+  4. Content-Type at 50.71% (+0.71) is the highest remaining incidental
+     feature. Small, but it is the residue of shapes whose content type is
+     semantically forced (XML for XXE, JSON for GraphQL). Monitor; do not
+     over-fit the generator to drive it to exactly 50%.
+
+  5. SYNTHETIC BENIGN REALISM — benign traffic is generated, not captured. Its
+     realism is bounded by the parameter pools in parse_dataset_v4.py. The
+     proxy-capture strategy (CONTEXT.md §8) remains the stronger long-term fix.
+
+  6. NEAR-DUPLICATE LEAKAGE is addressed by canonical grouping but only EXACT
+     overlap is measured by E0. A near-duplicate metric (e.g. shingle/minhash)
+     would strengthen the guarantee. Not implemented.
+
+  7. HELD-OUT TRANSFORM ROBUSTNESS is unmeasured by design (D15).
+
+  8. ###END### retained pending D5.
+
+==============================================================================
+14. DIFFERENCES FROM THE HISTORICAL DATASET — SUMMARY
+==============================================================================
+  Rows                  99,132 -> 53,756  (-45.8%)
+  Unique inputs         73,042 -> 53,756  (100% unique, was 73.7%)
+  ALLOW unique          23,516 -> 26,878
+  Benign synthetic uniq    240 -> 36,721 logical samples
+  Leakage               26.65% -> 0.00%
+  Host baseline         93.72% -> 49.75%
+  Strongest baseline    93.72% -> 50.71%
+  Deterministic reveals      9 -> 0
+  Reproducible               no -> yes (bit-identical, verified)
+  Missing-category mode  silent [SKIP] -> fatal error
+
+  The dataset is smaller because duplicates, prose, placeholders and
+  method-stratification trimming were removed. Smaller and valid is the
+  intended trade (D7).
+
+==============================================================================
+15. VERDICT
+==============================================================================
+  E2 objective (envelope neutralization)  : ACHIEVED
+  E3 objective (leakage-free split)       : ACHIEVED
+  E0 gate                                 : WARNING (no blocking failures)
+  Ready for training                      : NO — review required first
+
+  DO NOT run finetune.py. Per instruction, the clean dataset must be reviewed
+  before any training run, even though E0 no longer fails.
+
+==============================================================================
+END OF REPORT
+==============================================================================

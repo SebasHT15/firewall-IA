@@ -1,0 +1,259 @@
+==============================================================================
+firewall-IA — E0 DATASET INTEGRITY GATE
+==============================================================================
+Generated (UTC)   : 2026-08-17T06:35:57+00:00
+Train file        : datasets/v4_clean/train.jsonl
+Eval file         : datasets/v4_clean/eval.jsonl
+Mode              : ANALYSIS ONLY — no file is modified
+
+Thresholds in force for this run:
+  shortcut accuracy   FAIL >= 0.80   WARN >= 0.65
+  shortcut margin     FAIL >= 0.20   WARN >= 0.10
+  value purity        FAIL >= 0.99 at coverage >= 1.00%
+  train->eval leakage FAIL >= 1.00%    WARN >  0.00%
+  within-split dup    WARN >  10.00%
+  category ratio      WARN >  100:1
+  category min share  WARN <  0.10%
+
+==============================================================================
+1. DATASET SUMMARY
+==============================================================================
+Total examples :   31,340
+  train        :   25,134  (80.20%)
+  eval         :    6,206  (19.80%)
+
+LABEL          TOTAL        %     TRAIN      EVAL
+-------------------------------------------------
+ALLOW         15,670   50.00%    12,567     3,103
+BLOCK         15,670   50.00%    12,567     3,103
+
+==============================================================================
+1b. PER-CATEGORY COUNTS
+==============================================================================
+CATEGORY (reason string)                                TOTAL       %    TRAIN    EVAL
+--------------------------------------------------------------------------------------
+Normal HTTP request with no attack patterns detecte    15,670  50.00%   12,567   3,103
+SQL injection payload detected                          4,000  12.76%    3,183     817
+Cross-site scripting payload detected                   3,628  11.58%    2,920     708
+File inclusion attack detected                          2,595   8.28%    2,101     494
+Path traversal attack detected                          2,511   8.01%    2,005     506
+Command injection payload detected                        741   2.36%      607     134
+CRLF injection payload detected                           511   1.63%      399     112
+Server-side template injection payload detected           481   1.53%      393      88
+Open redirect payload detected                            259   0.83%      208      51
+Server-side request forgery attack detected               249   0.79%      186      63
+XML external entity injection detected                    143   0.46%      116      27
+NoSQL injection payload detected                          114   0.36%       97      17
+JWT token manipulation attack detected                    111   0.35%       95      16
+LDAP injection payload detected                           101   0.32%       80      21
+GraphQL injection payload detected                         97   0.31%       75      22
+CSRF attack pattern detected                               46   0.15%       38       8
+XPath injection payload detected                           40   0.13%       29      11
+HTTP parameter pollution detected                          20   0.06%       17       3
+Insecure deserialization payload detected                  16   0.05%       11       5
+HTTP request smuggling attack detected                      7   0.02%        7       0
+--------------------------------------------------------------------------------------
+distinct categories                                        20
+
+BLOCK category volume spread: largest=4,000  smallest=7  ratio=571.4:1
+
+Categories below 0.10% of the dataset (under-represented — a model cannot be fairly evaluated on these):
+          7  ( 0.02%)  HTTP request smuggling attack detected
+         16  ( 0.05%)  Insecure deserialization payload detected
+         20  ( 0.06%)  HTTP parameter pollution detected
+
+==============================================================================
+2. DUPLICATION (exact input string match)
+==============================================================================
+SPLIT           ROWS    UNIQUE  UNIQUE %  DUPLICATE %
+-----------------------------------------------------
+train         25,134    25,134   100.00%        0.00%
+eval           6,206     6,206   100.00%        0.00%
+combined      31,340    31,340   100.00%        0.00%
+
+==============================================================================
+3. TRAIN -> EVAL LEAKAGE (exact input string match)
+==============================================================================
+Eval rows whose input appears verbatim in train :        0
+Eval rows total                                 :    6,206
+Leakage rate                                    :    0.00%
+Distinct leaked inputs                          :        0
+
+VERDICT: PASS — no exact train/eval overlap.
+
+==============================================================================
+4. ENVELOPE CONFOUND CHECKS
+==============================================================================
+
+--- 4a. Host header by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+gateway.fintrust.co                         1,037      507      530   51.1%
+app.example.com                             1,036      513      523   50.5%
+qa.example.com                              1,015      488      527   51.9%
+api.example.com                             1,015      525      490   51.7%
+files.storagebox.example                    1,013      520      493   51.3%
+staging.example.com                         1,012      524      488   51.8%
+auth.identity.example                       1,009      472      537   53.2%
+hr.enterprise.example                       1,006      513      493   51.0%
+www.example.com                             1,005      502      503   50.0%
+store.retailco.net                          1,001      491      510   50.9%
+secure.bankone.example                      1,000      522      478   52.2%
+dashboard.example.com                         994      487      507   51.0%
+api.logistics.example                         992      496      496   50.0%
+api.travelhub.io                              992      477      515   51.9%
+shop.example.com                              988      487      501   50.7%
+api.devtools.io                               982      487      495   50.4%
+cms.newsdaily.example                         974      514      460   52.8%
+media.cdn.example                             974      488      486   50.1%
+beta.example.com                              970      491      479   50.6%
+portal.example.com                            968      457      511   52.8%
+target.com                                    968      479      489   50.5%
+intranet.corp.local                           964      463      501   52.0%
+10.20.30.40:8000                              962      487      475   50.6%
+booking.flyaway.example                       958      492      466   51.4%
+support.helpdesk.example                      954      463      491   51.5%
+... 7 more values                           6,551    3,325    3,226
+
+--- 4b. User-Agent presence by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+present                                    26,876   13,430   13,446   50.0%
+absent                                      4,464    2,240    2,224   50.2%
+
+--- 4c. User-Agent value by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+<absent>                                    4,464    2,240    2,224   50.2%
+python-requests/2.31.0                      1,581      758      823   52.1%
+axios/1.6.7                                 1,565      745      820   52.4%
+PostmanRuntime/7.36.3                       1,557      796      761   51.1%
+Mozilla/5.0 (Macintosh; Intel Mac OS X      1,535      750      785   51.1%
+Mozilla/5.0 (X11; Linux x86_64; rv:124.     1,525      759      766   50.2%
+Apache-HttpClient/5.3 (Java/17)             1,514      730      784   51.8%
+Wget/1.21.4                                 1,509      807      702   53.5%
+MobileApp/3.1.0 (Android 13)                1,497      758      739   50.6%
+Mozilla/5.0 (Windows NT 10.0; Win64; x6     1,494      771      723   51.6%
+... 9 more values                          13,099    6,556    6,543
+
+--- 4d. Request-format artifact: raw space in request-target ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+raw_space_in_target=False                  31,340   15,670   15,670   50.0%
+
+--- 4e. HTTP method by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+GET                                        10,326    5,163    5,163   50.0%
+POST                                       10,186    5,093    5,093   50.0%
+PUT                                         3,432    1,716    1,716   50.0%
+PATCH                                       3,244    1,622    1,622   50.0%
+DELETE                                      2,204    1,102    1,102   50.0%
+HEAD                                        1,948      974      974   50.0%
+
+--- 4f. Cookie presence by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+present                                    17,311    8,656    8,655   50.0%
+absent                                     14,029    7,014    7,015   50.0%
+
+--- 4g. Header-name set (structural fingerprint) by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+('content-type', 'cookie', 'host', 'use     1,788      869      919   51.4%
+('cookie', 'host', 'user-agent')            1,574      808      766   51.3%
+('content-type', 'host', 'user-agent')      1,449      701      748   51.6%
+('accept', 'content-type', 'cookie', 'h     1,408      720      688   51.1%
+('host', 'user-agent')                      1,266      627      639   50.5%
+('accept', 'cookie', 'host', 'user-agen     1,201      573      628   52.3%
+('accept', 'content-type', 'host', 'use     1,144      589      555   51.5%
+('accept', 'host', 'user-agent')            1,029      516      513   50.1%
+('accept-language', 'content-type', 'co       647      309      338   52.2%
+('accept-language', 'cookie', 'host', '       524      272      252   51.9%
+('accept', 'accept-language', 'content-       514      277      237   53.9%
+('accept-language', 'content-type', 'ho       504      250      254   50.4%
+... 351 more values                        18,292    9,159    9,133
+
+--- Deterministic label reveals (purity >= 99% at coverage >= 1.00%) ---
+  none detected
+
+==============================================================================
+5. TRIVIAL BASELINES (fit on TRAIN, scored on EVAL)
+==============================================================================
+A trivial baseline uses ONE non-payload feature and never reads the
+request target, query string, or body. If one of these approaches the
+model's accuracy, the dataset — not the model — is doing the work.
+
+BASELINE                                        EVAL ACC   vs MAJ   COVER   CELLS
+---------------------------------------------------------------------------------
+majority class (always ALLOW)                    50.00%        —       —       —
+Content-Type (header value)                      51.16%   +1.16%  100.0%       5
+User-Agent (header value)                        50.47%   +0.47%  100.0%      19
+HTTP method                                      50.00%   +0.00%  100.0%       6
+Malformed request-target (raw space)             50.00%   +0.00%  100.0%       1
+Body present/absent                              50.00%   +0.00%  100.0%       2
+Header count                                     49.89%   -0.11%  100.0%       9
+User-Agent (present/absent)                      49.76%   -0.24%  100.0%       2
+Host (header value)                              49.73%   -0.27%  100.0%      32
+Cookie (present/absent)                          49.65%   -0.35%  100.0%       2
+Header-name set (structural fingerprint)         49.21%   -0.79%   99.8%     350
+
+--- Generic per-header scan (every header name observed) ---
+HEADER                                    EVAL ACC   vs MAJ   CELLS  NOTE
+------------------------------------------------------------------------------
+content-type                               51.16%   +1.16%       5  
+accept                                     51.08%   +1.08%       5  
+accept-language                            50.52%   +0.52%       4  
+user-agent                                 50.47%   +0.47%      19  
+origin                                     50.10%   +0.10%      27  security-relevant, excluded from gate (D1)
+referer                                    50.10%   +0.10%      37  security-relevant, excluded from gate (D1)
+x-requested-with                           50.03%   +0.03%       2  
+cookie                                     50.00%   +0.00%  13,884  
+accept-encoding                            50.00%   +0.00%       3  
+authorization                              50.00%   +0.00%     138  
+content-length                             50.00%   +0.00%       6  security-relevant, excluded from gate (D1)
+transfer-encoding                          50.00%   +0.00%       2  security-relevant, excluded from gate (D1)
+host                                       49.73%   -0.27%      32  
+connection                                 49.16%   -0.84%       3  
+
+Strongest non-payload baseline: Content-Type (header value) -> 51.16% (+1.16% vs majority class)
+
+==============================================================================
+6. REPRODUCIBILITY INFORMATION
+==============================================================================
+Artifact hashes (SHA-256):
+  train.jsonl              ffc8b51246119b247fc43fa73df049ae3adaefd58ccbc1f79f0ab0b7575271f8
+                           (13,934,680 bytes)
+  eval.jsonl               d4e4bd48b4ad67185f29d31f437ac00426cd6c5cc08153b034ebc8c59d0460a9
+                           (3,439,498 bytes)
+  parse_dataset.py         fadb9dbcdbabe4101eaf0663a670e4e269a6860ad86b8d52001d5c185334b57d
+                           (58,208 bytes)
+  csic_database.csv        c420f0bc0464376de75b6c419a0ac226fe69fe12c8ac4908843273721e44e637
+                           (29,539,583 bytes)
+
+PayloadsAllTheThings path   : /home/sebas/PayloadsAllTheThings
+PayloadsAllTheThings commit : e961fef231d8327bae83b563fab50aec2e6b77c0
+firewall-IA commit          : def0c92f67c4f17b23c7e616fde43c0f08cbaa9d (dirty)
+
+Python                      : 3.12.13 (/usr/bin/python3.12)
+Platform                    : Linux-7.0.0-22-generic-x86_64-with-glibc2.43
+PYTHONHASHSEED              : <unset — set this before regenerating if determinism is required>
+
+==============================================================================
+7. FINAL STATUS
+==============================================================================
+
+    INTEGRITY RESULT: WARNING
+
+WARNINGS (2) — not blocking, but affect interpretation:
+------------------------------------------------------------------------------
+  [W1] Severe per-category imbalance in BLOCK: 571.4:1 (largest 4,000, smallest 7); threshold 100:1
+
+  [W2] 3 BLOCK categories below 0.10% of the dataset: HTTP request smuggling attack detected (7), Insecure deserialization payload detected (16), HTTP parameter pollution detected (20)
+
+Dataset is usable, but the warnings above must be disclosed alongside any
+metric derived from it.
+
+==============================================================================
+END OF REPORT — exit code 1
+==============================================================================

@@ -11,7 +11,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D10). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D18). Read it before proposing architectural changes.
 > - `reports/` — experiment and audit outputs. Never overwrite a report; add a new one.
 
 ---
@@ -402,17 +402,106 @@ This is currently the *only* reason the 99,132-example dataset still exists, so 
 
 ---
 
+## 12b. Candidate clean dataset (v4) — E2 + E3, 2026-08-17
+
+**Status: CANDIDATE. Not a validated baseline.** E0 returns WARNING (no blocking failures).
+It must be reviewed before any training run. Full report: `reports/e2_e3_clean_dataset.txt`.
+
+- Generator: **`parse_dataset_v4.py`** (new file). `parse_dataset.py` is left untouched and executable — it is the control condition for the E2 before/after comparison.
+- Artifacts: `datasets/v4_clean/{train,eval}.jsonl` — **25,134 / 6,206 rows** (31,340 total), eval ratio 0.1980, exactly 1:1 ALLOW/BLOCK. Generated under **D17 FINAL** (policy B · group cap 2,500 · row cap 4,000).
+- Evidence trail preserved: `reports/e2_e3_clean_dataset_uncapped.txt`, `reports/e0_dataset_integrity_v4_clean_uncapped.txt`, `datasets/manifest_v4_clean_uncapped.json`, plus the two sensitivity analyses that selected the final policy — `reports/e2_e3_cap_sensitivity.txt` and `reports/e2_e3_row_cap_sensitivity.txt`. Every scenario is exactly reproducible from the generator flags.
+
+### D17 FINAL — two independent contribution levers
+
+The finalized methodology distinguishes **two different quantities** that were previously conflated:
+
+| Lever | Setting | Applied | Controls |
+|---|---|---|---|
+| Cap policy | **B — source-agnostic** | — | CSIC-derived BLOCK groups count toward the same per-category budget as PayloadsAllTheThings/hardcoded |
+| **Logical-group cap** | **2,500 / malicious category** | *before* rendering | **source/category DIVERSITY dominance** — how many distinct source payloads a category may contribute |
+| **Rendered-row cap** | **4,000 BLOCK rows / malicious category** | *after* rendering + dedup, *before* balancing | **final training CONTRIBUTION** — how much a category actually contributes to training |
+
+**Both are required.** A group cap alone cannot control contribution: a CSIC group is a request *shape* that collapsed many original records, and every record still renders. Measured at a 2,500-group cap, SQL Injection still produced 5,545 rows while Path Traversal produced 2,511 — a group cap cannot reach that redundancy.
+
+**Row selection** is deterministic, source-stratified (proportional by largest remainder, so neither PayloadsAllTheThings nor CSIC is deleted first), and **breadth-first** — one row per logical group before any second row. It therefore spends the budget on breadth before depth and removes redundant *renderings* before it removes logical *diversity*. Measured at the final settings: SQL Injection 5,545 → 4,000 rows at **100% logical-group retention**, and 100% retention in every other category.
+
+**Hard floor, enforced in code:** `row_cap ≥ group_cap`. Below it, retention pins at exactly `row_cap/group_cap` by arithmetic (measured: 2000/2500 → 80.0% in four categories). The generator now refuses to run rather than silently destroying diversity.
+
+> **25.5% largest-category share is an observed outcome of this compromise, not a target or a standard.** Do not cite it as a balance threshold.
+- Manifest: `datasets/manifest_v4_clean.json` (SHA-256, counts, rejection reasons, limitations).
+- The historical `train.jsonl` / `eval.jsonl` at repo root are **unchanged**.
+
+### What E0 measures on it
+
+| Metric | Historical | Candidate |
+|---|---:|---:|
+| E0 verdict | FAIL | WARNING |
+| train→eval leakage | 26.65% | **0.00%** |
+| within-split duplicates | 26.24% / 25.37% | **0.00% / 0.00%** |
+| deterministic label reveals | 9 | **0** |
+| `Host` baseline | 93.72% | **49.73%** |
+| `Content-Type` baseline | 82.62% | 51.16% |
+| header-name set | 76.84% | 49.21% |
+| header count | 75.88% | 49.89% |
+| body presence | 74.12% | 50.00% |
+| HTTP method | 74.06% | 50.00% |
+| User-Agent (value) | 67.94% | 50.47% |
+| User-Agent (presence) | 67.94% | 49.76% |
+| Cookie presence | 67.14% | 49.65% |
+| majority baseline | 49.91% | 50.00% |
+
+Eight of eleven incidental features sit **at or below** the majority baseline; the strongest is Content-Type at +1.16. **On this dataset no incidental envelope feature beats a coin flip.** This is a statement about the dataset only — no model has been trained on it.
+
+### How (structural, not shortcut-by-shortcut)
+
+1. **One shared envelope generator** for both classes — no benign-only or attack-only host, UA or cookie exists anywhere. CSIC records are re-rendered under it (semantics preserved, envelope redrawn), which kills the `target.com` + Konqueror signature.
+2. **Shape matching** — 15 request "shapes" (method set, paths, params, content type, special headers). Every attack shape gets benign traffic in the *same* shape at *matched volume*. This collapsed Content-Type, header-set, header-count and body-presence simultaneously.
+3. **Method-stratified class balancing** — within each HTTP method both classes are trimmed to the minimum, forcing `P(BLOCK | method) = 0.5`. Trimming only; nothing duplicated.
+
+### Causal exceptions (deliberately allowed to correlate)
+
+Measured: Origin **presence** 54.8% pure (non-predictive, because benign counterparts carry same-origin Origin/Referer), but Origin **cross-origin** 100% BLOCK — that relationship *is* the CSRF attack. Same pattern for smuggling framing headers and HPP duplicate parameters. All documented in the manifest under `causal_envelope_exceptions`.
+
+### Reproducibility
+
+Two consecutive runs with `PYTHONHASHSEED=random` produced **bit-identical** output — the historical generator could not do this. Sorted traversal, no set-iteration dependence, per-sample RNG seeded from group id, deterministic hash-bucket split.
+
+### D17 FINAL — what the caps did
+
+Group cap 2,500 (policy B, merged PATT+CSIC pool): Directory Traversal 10,218→2,500, SQL Injection 2,953→2,500, File Inclusion 2,937→2,500, XSS 2,628→2,500. Row cap 4,000: only SQL Injection exceeded it — **5,545 → 4,000 rows at 100% logical-group retention (2,500 → 2,500)**.
+
+Largest attack-category share of BLOCK: **47.3% → 25.5%**. Top-3 combined 70.6% → 65.2%. Effective category count 6.36 → 7.42. Rows per represented logical group now 1.00–1.67 in every category — the redundancy that made row counts a misleading diversity proxy is gone.
+
+Policy A was retired because it could not control dominance at any cap (SQL never fell below 36.5% of BLOCK) and cap1000_A was Pareto-dominated — smaller *and* more dominated than the policy-B alternatives. See `reports/e2_e3_cap_sensitivity.txt`.
+
+CSIC BLOCK traffic retained: 3,906 of 5,900 rows (66%). This is the price paid for contribution control, and it is real: CSIC is the only non-synthetic attack traffic in the dataset.
+
+### ⚠️ The dominant unresolved issue: category scarcity
+
+**Request Smuggling is NOT EVALUABLE (D18)** — 7 train rows, **zero eval rows**. No category-level accuracy, recall, or other performance claim may be made for it. Recorded in the manifest under `not_evaluable_categories`, determined from the rendered split rather than asserted by hand.
+
+**11 categories are marked INSUFFICIENT DATA** (<100 unique logical groups): Request Smuggling (7), Insecure Deserialization (12), HPP (20), CRLF (21), XPath (24), CSRF (31), GraphQL (74), LDAP (75), JWT (80), NoSQL (83), XXE (98). Neither cap affects any of them — all sit far below 2,500.
+
+This is a *source material* problem (PayloadsAllTheThings has 56 fenced lines for CSRF, 61 for smuggling), not a generator problem, and per D14 nothing was fabricated to inflate them.
+
+### Size caution
+
+The finalized dataset is 31,340 rows, down from 53,756 uncapped and 99,132 historical. Method-stratified balancing trims hard once BLOCK shrinks (34,248 train + 5,567 eval rows trimmed). Smaller and valid is the intended trade (D7), but this remains a small dataset for a 1.1B model — worth weighing before training.
+
+---
+
 ## 13. Current ordered plan
 
-Supersedes the v4 plan in §7. Decisions D1–D10 are recorded in `DECISIONS.md`.
+Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`.
 
 | Step | Experiment | Status |
 |------|-----------|--------|
 | **E0** | Dataset integrity gate (`check_dataset.py`) | **DONE 2026-08-16** — current dataset reports **FAIL**, as expected |
 | **E1** | Port `finetune.py` to TRL 1.4 / transformers 5.8; smoke-test | **DONE 2026-08-17 — PASS** (`reports/e1_training_pipeline_smoke.txt`). Tooling unblocked. |
 | — | Documentation correction (this file + `DECISIONS.md` + `README.md`) | CONTEXT + DECISIONS done 2026-08-16; **README still stale** |
-| **E2** | Envelope ablation — regenerate under D1, train, compare | **NOT STARTED** — the decisive experiment |
-| **E3** | Leakage-free split (dedup + payload-keyed group split) | NOT STARTED |
+| **E2** | Envelope neutralization — shared envelope + shape matching | **DONE 2026-08-17** (`reports/e2_e3_clean_dataset.txt`). Strongest incidental baseline 93.72% → 51.16%. |
+| **E3** | Leakage-free grouped split | **DONE 2026-08-17.** Leakage 26.65% → 0.00%; duplicates → 0.00%. |
+| — | **Review the candidate clean dataset** | **BLOCKING — next action.** No training until reviewed. |
 | **E4** | `###END###` removal (D5) | NOT STARTED |
 | **E5** | Per-category rebalancing | NOT STARTED |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
