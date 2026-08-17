@@ -20,6 +20,14 @@
 | Working tree | clean |
 | Commits created / history rewritten | **none** |
 
+> **STATUS UPDATE 2026-08-17 —** the remote work in section 2 has since been completed by the
+> user: `develop` is published and tracking `origin/develop`, and the obsolete `API` and
+> `training` remote branches were deleted. Section 2 is retained as a record of what was run.
+>
+> Note: local remote-tracking refs `origin/API` and `origin/training` may still appear until
+> `git fetch --prune` is run from an authenticated session. Their presence locally does not
+> mean the remote branches still exist.
+
 ### Verification that `training` was safe to delete
 
 - `git log API..training` → **empty** (no unique commits)
@@ -154,9 +162,28 @@ GitHub ships `bug` and `documentation` by default — reuse those two.
 
 ## 7. Issues
 
-Issue numbers are assigned by GitHub. Branch names below use `<N>` — substitute the real
-number once created. Create the COMPLETED issues first so the numbering roughly follows the
-project's actual order.
+> ### ⚠️ SUPERSEDED 2026-08-17 — this section is retained for context only
+>
+> The backlog below (`C1`–`C7`, `N1`–`N21`) was the **first draft**. The approved structure is
+> now **`H1`–`H4` historical · `N1`–`N20` current/upcoming · `F1`–`F5` future-work**, which
+> consolidates the seven historical items into four and renumbers the rest.
+>
+> **The authoritative, ready-to-execute definition is `scripts/github_bootstrap.sh`.**
+> It creates every label, milestone and issue, captures the real issue numbers as GitHub
+> assigns them, and writes dependency references (`Depends on #N`) using those real numbers —
+> nothing is invented. Run it after installing and authenticating `gh`:
+>
+> ```bash
+> sudo apt install gh && gh auth login
+> DRY_RUN=1 bash scripts/github_bootstrap.sh   # preview, changes nothing
+> bash scripts/github_bootstrap.sh             # create
+> ```
+>
+> Existing labels, milestones and issues are detected and reused, never duplicated or
+> overwritten. Nothing is ever deleted.
+>
+> The material below remains accurate as *content* — the acceptance criteria and evidence
+> references were carried into the script — but the identifiers and grouping are stale.
 
 ### 7.1 COMPLETED / HISTORICAL
 
@@ -403,11 +430,40 @@ pool reserved in D15 (`double_url_encode`, `unicode_escape`, `html_entity`, `bas
 
 ## 8. After Issues exist
 
-Once **N1** has a real number, create the branch and begin:
+`scripts/github_bootstrap.sh` prints the full `logical id → real issue number` map when it
+finishes, and ends by printing the exact branch command with N1's real number substituted.
+
+Once **N1 — Train V4 clean baseline** has a real number:
 
 ```bash
 git checkout develop
-git checkout -b feature/<N1>-v4-clean-training
+git checkout -b feature/<N1-number>-v4-clean-training
 ```
 
-Do not create the branch before the Issue number is known.
+Do not create the branch before the Issue number is known — the branch name must carry it.
+
+### Dependency map (logical ids; substitute real numbers after creation)
+
+```
+H1 H2 H3 H4  (historical, closed)
+      └──────► N1  Train V4 clean baseline
+                ├──► N2  Evaluate V4 clean security metrics
+                ├──► N3  Benchmark V4 model inference latency
+                └──► N4  Merge LoRA and export GGUF        (also needs N2)
+                          └──► N5  Quantize to Q4_K_M
+                                └──► N6  Integrate llama.cpp inference
+                                      ├──► N7  Compare quantized security   (N5+N6)
+                                      ├──► N8  Benchmark quantized latency  (N5+N6)
+                                      └──► N9  FastAPI control plane
+                                            └──► N10 mitmproxy data plane
+                                                  └──► N11 fail-closed enforcement
+                                                        └──► N12 end-to-end gateway latency (N10+N11)
+
+N8 + N12 ──► N13 embedded requirements
+              └──► N14 platform selection
+                    └──► N15 embedded deployment
+                          └──► N16 embedded benchmark
+
+N17–N20 (M5 documentation) have no hard blockers; N18/N19 are most useful after N16.
+F1–F5 are future-work with no milestone and are not on the critical path.
+```
