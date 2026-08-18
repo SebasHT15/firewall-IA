@@ -11,7 +11,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D19). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D24). Read it before proposing architectural changes.
 > - `reports/` — experiment and audit outputs. Never overwrite a report; add a new one.
 
 ---
@@ -31,7 +31,140 @@ Stack confirmed working in 3.12 (2026-05-24): torch 2.6.0+cu124 (CUDA True on RT
 
 ---
 
-## 3. Current State (as of 2026-05-24)
+## 3. CURRENT STATE — V4 CLEAN BASELINE ESTABLISHED (2026-08-18)
+
+**This section supersedes §3-historical below for "where are we now?". Sections 3-historical
+through 12b are retained as the audit trail that explains how we got here.**
+
+Issue **#7 — Train V4 clean baseline** is **complete and merged** (PR #32). The project now
+has its first scientifically interpretable baseline.
+
+### Model
+
+| | |
+|---|---|
+| Adapter | `model-output-v4-clean/` (gitignored) |
+| Best checkpoint | `checkpoint-2200`, `eval_loss` 0.463187 — restored by `load_best_model_at_end` |
+| Training | 3144/3144 steps, 4 epochs, `train_loss` 0.4696 |
+| Runtime | 7782.9 s (129.7 min) |
+| Peak GPU | 1.98 GiB allocated / 4.59 GiB reserved |
+| Failures | 0 NaN, 0 Inf, 0 OOM |
+| Adapter structure | 12,615,680 LoRA params, 308 tensors, ~48.2 MiB |
+| `embed_tokens` / `lm_head` | **absent** — E4 custom-token resize fix holds under full training |
+
+`eval_loss` bottomed at step 2200 and rose to 0.4669 by 3144 — mild overfitting in the final
+~30%. The best checkpoint was selected automatically; a shorter schedule was **not** explored
+and must not be assumed better without an experiment.
+
+### Dataset used
+
+`datasets/v4_clean/` — 25,134 train / 6,206 eval / 31,340 total, 15,670 ALLOW / 15,670 BLOCK.
+Hashes verified against `datasets/manifest_v4_clean.json` before training:
+
+```
+train.jsonl  4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b
+eval.jsonl   61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859
+```
+
+E0 immediately before training: 0.00% leakage, 0.00% duplicates in both splits, 0
+deterministic label reveals, **0 blocking failures**. WARNING persists for category scarcity
+only.
+
+### Formal evaluation (frozen E5 methodology, D19)
+
+Held-out split, 6,206 rows (3,103 ALLOW / 3,103 BLOCK). Confusion matrix
+**TP 3,011 · FN 92 · FP 2 · TN 3,101**.
+
+| Metric | Value |
+|---|---|
+| Accuracy | 98.49% |
+| Precision (BLOCK) | 99.93% |
+| Recall / attack detection | 97.04% |
+| F1 (BLOCK) | 98.46% |
+| False positive rate | 0.06% |
+| False negative rate | 2.96% |
+| Invalid output rate | 0.00% |
+
+The error profile is strongly asymmetric — 92 false negatives against 2 false positives.
+Operationally that is the safer direction for an inline gateway, but ~3% of attacks pass.
+
+### Category failure concentration
+
+**91 of 92 false negatives (98.9%) sit in two categories:**
+
+| Category | FN | Binary recall |
+|---|---:|---|
+| SQL injection | 74 | 743/817 = 90.94% |
+| Command injection | 17 | 117/134 = 87.31% |
+| SSRF | 1 | 62/63 = 98.41% |
+
+Every other evaluable category missed zero attacks. XSS, path traversal, file inclusion and
+SSTI are at 100% binary recall.
+
+**Do not conclude from this that SQLi and command injection need more training data.** That
+is one hypothesis among several — label noise in the CSIC-derived subset (audit F6) and
+payload-family gaps are equally plausible. Issue #8 must analyse the actual failures first
+(**D21**).
+
+### Evidence status (D18)
+
+- **NOT EVALUABLE (1):** HTTP request smuggling — zero held-out examples. No claim permitted.
+- **INSUFFICIENT DATA (10):** HPP (3), insecure deserialization (5), CSRF (8), XPath (11),
+  JWT (16), NoSQL (17), LDAP (21), GraphQL (22), XXE (27), CRLF (112 rows but only 21 unique
+  logical groups). Their per-category numbers are exploratory only.
+
+### Latency — model-side only
+
+| | mean | P50 | P95 | P99 | min | max | stdev |
+|---|---|---|---|---|---|---|---|
+| ms | 229.1 | 241.8 | 270.8 | 286.6 | 163.1 | 467.5 | 31.8 |
+
+Peak evaluation VRAM 2,476 MiB. Generated tokens (n=300 sample): mean 11.58, P95 13; native
+EOS terminated 100% of generations, none hit the 40-token cap.
+
+**These are HuggingFace model-side inference times, NOT end-to-end gateway latency.** D3
+(P95 end-to-end added latency ≤ 200 ms) has **not** been measured and is neither passed nor
+failed. But model-side P95 alone already exceeds the entire future budget, so the current HF
+path is not a viable final backend without optimization — see **D23**.
+
+### Legacy manual suite (diagnostic only)
+
+135 cases: accuracy 91.85%, recall 95.41%, FPR 23.08% — but that FPR is 6 errors out of only
+26 benign cases, against 0.06% on 3,103 benign rows in the formal split. Not equivalent to the
+formal evaluation and never the headline. It remains useful as a possible distribution-shift
+warning.
+
+### Current limitations
+
+Single run, single seed, no confidence intervals · evasion resistance unmeasured by design
+(D15) · benign population is synthetic + CSIC 2010, so the 0.06% FPR does not transfer to
+production traffic · CSIC label circularity (F6) · reason matching is deliberately strict ·
+the eval split also drove checkpoint selection, so it is a held-out evaluation/validation
+split and **not** an untouched final test set (**D24**) · latency is model-side, laptop-class,
+batch size 1.
+
+### Immediate roadmap
+
+1. **Issue #8** — analyse V4 security failures (the 92 false negatives)
+2. **Issue #9** — controlled inference benchmark
+3. **Real HTTP laboratory validation** (**D22**)
+4. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
+5. GGUF / Q4_K_M / llama.cpp
+6. Quantized security regression
+7. Inline gateway
+8. End-to-end latency
+9. Embedded deployment
+
+**Dataset expansion is NOT approved simply because the dataset has ~31k rows** (**D21**). More
+data will be considered only on evidence from failure analysis, demonstrated independent
+diversity gaps, or real-traffic validation. Independent diversity matters more than row count.
+
+---
+
+## 3-historical. State before the V4 baseline (as of 2026-05-24)
+
+> Retained as the audit trail. **Superseded by §3 above** — the statements below about "no
+> trained model" and "no experimental baseline" were true on 2026-08-16 and are no longer.
 
 ### What survived the reinstall / what was lost
 
@@ -47,9 +180,9 @@ Stack confirmed working in 3.12 (2026-05-24): torch 2.6.0+cu124 (CUDA True on RT
 | v3 (original) | gone | Lost; reported ~91% acc, not reproducible bit-for-bit |
 | **v3-rebuild** | `~/Desktop/firewall-IA/model-output-v3/` | **DOES NOT EXIST ON DISK** (verified 2026-08-16). Not trained. |
 
-**CORRECTION (2026-08-16 audit): there is currently NO trained model anywhere in this project.** `model-output-v3/` is absent from disk. `finetune.py` has never successfully run on the current machine, and cannot (see §12, F4). `classifier_api.py` and `test_model.py` both fail at load time because `ADAPTER_DIR` does not exist.
+**CORRECTION (2026-08-16 audit; RESOLVED 2026-08-18 by Issue #7): at that time there was NO trained model anywhere in this project.** `model-output-v3/` is absent from disk. `finetune.py` has never successfully run on the current machine, and cannot (see §12, F4). `classifier_api.py` and `test_model.py` both fail at load time because `ADAPTER_DIR` does not exist.
 
-**Consequence: the project has NO current experimental baseline.** The roadmap has not reached the end of V3.
+**Consequence at that time: the project had NO experimental baseline.** That is no longer true — see §3.
 
 ### Status of the historical ~91% result
 
@@ -510,7 +643,11 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **E3** | Leakage-free grouped split | **DONE 2026-08-17.** Leakage 26.65% → 0.00%; duplicates → 0.00%. |
 | **E4** | `###END###` removal (D5) | **DONE 2026-08-17** (`reports/e4_remove_end_token.txt`). Dataset regenerated; E0 metrics byte-identical. |
 | **E5** | Freeze evaluation methodology (D19) | **DONE 2026-08-17** (`reports/e5_evaluation_methodology.txt`). Self-test PASS. |
-| — | **V4 clean baseline training run** | **NEXT.** Gate (E0) passes with WARNING; methodology frozen. |
+| **#7** | **V4 clean baseline training run** | **DONE 2026-08-18 — merged (PR #32).** See §3 and `reports/v4_clean_baseline_results.txt`. |
+| **#8** | Security / error analysis of the 92 false negatives | **NEXT** |
+| **#9** | Controlled inference benchmark | **NEXT** |
+| — | Real HTTP laboratory validation (D22) | Planned — external validation gate |
+| — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending #8/#9 |
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |
@@ -528,9 +665,9 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 1. Read this file first, then `DECISIONS.md`.
 2. **Use `python3.12`, not `python3`** (see §2). This is the #1 gotcha post-reinstall.
 3. Read `parse_dataset.py`, `finetune.py`, `test_model.py` for current config — and read §12 first, so you know which of their behaviours are already-identified defects rather than things to rediscover.
-4. Check training status: `ls ~/Desktop/firewall-IA/model-output-v3/ 2>/dev/null || echo "not trained yet"`. **As of 2026-08-16 this is "not trained yet" and there is no baseline.**
-5. Confirm dataset: `wc -l ~/Desktop/firewall-IA/train.jsonl` (expect ~79,305).
-6. **Run the integrity gate: `python3.12 check_dataset.py`.** No training starts while it reports FAIL. Compare against `reports/e0_dataset_integrity_current.txt` to see what changed.
+4. Check training status: `ls ~/Desktop/firewall-IA/model-output-v4-clean/`. **As of 2026-08-18 the V4-clean baseline EXISTS** (best checkpoint 2200). `model-output-v3/` never existed and is not the current model.
+5. Confirm dataset: `wc -l datasets/v4_clean/train.jsonl` (expect 25,134) and `datasets/v4_clean/eval.jsonl` (expect 6,206). The root `train.jsonl`/`eval.jsonl` are the HISTORICAL leaky corpus — do not train on them.
+6. **Run the integrity gate:** `python3.12 check_dataset.py --train datasets/v4_clean/train.jsonl --eval datasets/v4_clean/eval.jsonl`. No training starts while it reports FAIL. WARNING (category scarcity) is expected and acceptable.
 7. Confirm no missing categories: run `parse_dataset.py` only if regenerating, and check for `[SKIP]` lines. `[SKIP]` is an ERROR, not a warning.
 8. Verify PayloadsAllTheThings is at the recorded commit `e961fef231d8327bae83b563fab50aec2e6b77c0` (§6) if categories look off.
 
