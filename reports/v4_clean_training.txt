@@ -1,0 +1,216 @@
+==============================================================================
+firewall-IA — V4 CLEAN BASELINE TRAINING RUN
+Issue #7 — Train V4 clean baseline
+==============================================================================
+Date (UTC)        : 2026-08-17T20:07:17+00:00
+Git branch        : feature/7-v4-clean-training
+Git commit (HEAD) : 2a188aa24740977a72a00b74c621dfa9db8ae3a4
+Working tree      : DIRTY — finetune.py path change (Issue #7)
+Uncommitted files : M finetune.py
+?? reports/v4_clean_training.txt
+
+STATUS: metadata recorded BEFORE training. Results appended after the run.
+
+==============================================================================
+1. ENVIRONMENT
+==============================================================================
+  Python           : 3.12.13  (/usr/bin/python3.12)
+  Platform         : Linux-7.0.0-29-generic-x86_64-with-glibc2.43
+  torch            : 2.6.0+cu124
+  transformers     : 5.8.0
+  trl              : 1.4.0
+  peft             : 0.19.1
+  bitsandbytes     : 0.49.2
+  accelerate       : 1.13.0
+  datasets         : 4.8.5
+  CUDA (torch)     : 12.4
+  cuDNN            : 90100
+  GPU              : NVIDIA GeForce RTX 4090 Laptop GPU
+  GPU VRAM         : 15.55 GiB
+  bf16 supported   : True
+  NVIDIA driver    : 595.84
+
+==============================================================================
+2. DATASET IDENTITY (frozen — verified before training)
+==============================================================================
+  manifest              : datasets/manifest_v4_clean.json
+  manifest version      : v4-clean-candidate
+  manifest generated    : 2026-08-17T06:49:20+00:00
+  generator             : parse_dataset_v4.py  seed=42
+  PayloadsAllTheThings  : e961fef231d8327bae83b563fab50aec2e6b77c0
+  policy                : cap=2500 groups, row_cap=4000 rows, variant=B
+  train.jsonl
+    path      : datasets/v4_clean/train.jsonl
+    rows      : 25,134   (manifest 25,134)   MATCH
+    bytes     : 13,130,392   (manifest 13,130,392)   MATCH
+    sha256    : 4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b
+                (manifest 4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b)   MATCH
+  eval.jsonl
+    path      : datasets/v4_clean/eval.jsonl
+    rows      : 6,206   (manifest 6,206)   MATCH
+    bytes     : 3,240,906   (manifest 3,240,906)   MATCH
+    sha256    : 61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859
+                (manifest 61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859)   MATCH
+  TOTAL rows            : 31,340
+  ALLOW / BLOCK         : 15,670 / 15,670
+  NOT EVALUABLE (D18)   : ['BLOCK | HTTP request smuggling attack detected.']
+
+  E0 integrity gate re-run immediately before training:
+    exit code 1 = WARNING (category scarcity only), 0 blocking failures
+    train->eval leakage      0 rows / 6,206 = 0.00%
+    train duplicates        0.00%   (25,134 unique / 25,134)
+    eval duplicates         0.00%   ( 6,206 unique /  6,206)
+    combined duplicates     0.00%   (31,340 unique / 31,340)
+    deterministic reveals   none detected
+    check_dataset.py        UNMODIFIED (verified against HEAD); no threshold weakened
+
+==============================================================================
+3. FROZEN TRAINING CONFIGURATION (audited before running)
+==============================================================================
+  base model             TinyLlama/TinyLlama-1.1B-Chat-v1.0
+  load_in_4bit           True
+  bnb_4bit_quant_type    nf4
+  double quantization    True
+  bnb_4bit_compute_dtype torch.bfloat16          (D11)
+  LoRA r                 16
+  LoRA alpha             32
+  LoRA dropout           0.05
+  target_modules         q_proj k_proj v_proj o_proj gate_proj up_proj down_proj
+  bias / task_type       none / CAUSAL_LM
+  epochs                 4
+  per_device_train_bs    4
+  gradient_accumulation  8       (effective batch 32)
+  per_device_eval_bs     2
+  gradient_checkpointing True
+  learning_rate          2e-4
+  lr_scheduler_type      cosine
+  warmup_ratio           0.05
+  optim                  paged_adamw_8bit
+  max_length             512
+  bf16 / fp16            True / False            (D11)
+  eval_strategy          steps @ 200
+  save_strategy          steps @ 200
+  save_total_limit       2                       (D12)
+  load_best_model_at_end True
+  dataset_text_field     text
+
+  AUDIT RESULT: all 21 frozen parameters verified present and unchanged.
+  E4 native-EOS verified intact by AST inspection: zero executable calls to
+  add_special_tokens or resize_token_embeddings (the only textual matches are
+  inside the module docstring, lines 74-75). No custom end_token_id. No
+  eos_token_id override. Tokenizer vocabulary is not resized.
+
+==============================================================================
+4. CODE CHANGE MADE FOR ISSUE #7
+==============================================================================
+  finetune.py — dataset paths and output directory ONLY:
+    TRAIN_FILE  ~/Desktop/firewall-IA/train.jsonl
+             -> ~/Desktop/firewall-IA/datasets/v4_clean/train.jsonl
+    EVAL_FILE   ~/Desktop/firewall-IA/eval.jsonl
+             -> ~/Desktop/firewall-IA/datasets/v4_clean/eval.jsonl
+    OUTPUT_DIR  ~/Desktop/firewall-IA/model-output-v3
+             -> ~/Desktop/firewall-IA/model-output-v4-clean
+
+  No hyperparameter, no LoRA setting, no quantization setting and no E4
+  behaviour was modified. Verified by inspecting the diff.
+
+  model-output-v4-clean/ did not exist before this run — nothing overwritten.
+  Pre-existing model-output-e1-smoke/ left untouched.
+
+==============================================================================
+5. TRAINING COMMAND
+==============================================================================
+  cd ~/Desktop/firewall-IA && python3.12 finetune.py
+
+  Scale: 25,134 train rows / effective batch 32 = 785 optimizer steps per
+  epoch x 4 epochs = 3,140 total steps. Eval and save every 200 steps.
+  Free disk before run: /dev/nvme1n1p3  843G  208G  593G  26% /home
+
+==============================================================================
+RESULTS APPENDED BELOW AFTER THE RUN
+==============================================================================
+
+==============================================================================
+6. TRAINING RESULTS
+==============================================================================
+STATUS: COMPLETED SUCCESSFULLY
+
+  total steps            3144 / 3144   (786 optimizer steps/epoch x 4 epochs)
+  epochs completed       4.0
+  train_loss (final)     0.4696
+  train_runtime          7651 s
+  train_samples_per_sec  13.14
+  train_steps_per_sec    0.411
+  wall-clock (script)    7782.9 s  = 129.7 min
+  peak GPU allocated     1.98 GiB
+  peak GPU reserved      4.59 GiB
+  eval checkpoints       17
+  NaN / Inf events       0
+  OOM events             0
+  Traceback / CUDA error 0
+  disk after run         592 GB free
+
+  LOSS TRAJECTORY (selected)
+    step  200   loss 0.5319   eval_loss 0.535288
+    step 2200   ...           eval_loss 0.463187   <-- MINIMUM
+    step 3144   loss 0.4696   eval_loss 0.466912
+    explicit post-training evaluate(): eval_loss 0.463187
+
+  BEST CHECKPOINT
+    model-output-v4-clean/checkpoint-2200
+    best_metric (eval_loss) = 0.46318724751472473
+    Selected automatically by load_best_model_at_end=True and restored before
+    the final save, so the top-level adapter IS the best checkpoint.
+
+    OBSERVATION: eval_loss reached its minimum at step 2200 (epoch ~2.8) and
+    rose slightly by step 3144. Mild overfitting in the final ~30% of training.
+    Recorded as an observation only. No hyperparameter was changed and no
+    retraining was performed — this run establishes the baseline.
+
+  CHECKPOINT RETENTION (D12)
+    retained: checkpoint-2200, checkpoint-3144   (limit 2, honoured)
+    ~53 MB per checkpoint; 157 MB total directory.
+    For contrast, the pre-D12/pre-E4 configuration would have produced ~15
+    checkpoints at ~302 MB each.
+
+  WARNINGS OBSERVED
+    - "warmup_ratio is deprecated ... use warmup_steps" (transformers).
+      NOT acted on: warmup_ratio=0.05 is a frozen parameter for this baseline.
+    - "tokenizer has new PAD/BOS/EOS tokens ... Updated tokens {pad_token_id: 2}"
+      Expected; pad_token is deliberately set to eos_token.
+    - "Both max_new_tokens and max_length are set" during evaluation. Benign;
+      max_new_tokens=40 takes precedence as intended.
+
+==============================================================================
+7. POST-TRAINING ADAPTER VERIFICATION
+==============================================================================
+  [PASS] final/best adapter exists      model-output-v4-clean/
+  [PASS] adapter reload                 PeftModel.from_pretrained OK
+  [PASS] LoRA parameter count           12,615,680 across 308 tensors
+  [PASS] adapter artifact size          48.2 MiB (50,503,544 bytes)
+  [PASS] PEFT state                     r=16, alpha=32, dropout=0.05,
+                                        bias=none, task_type=CAUSAL_LM,
+                                        7 target modules,
+                                        modules_to_save=None,
+                                        trainable_token_indices=None
+  [PASS] embed_tokens / lm_head         ABSENT from the saved adapter
+  [PASS] minimal generation sanity      terminates on native EOS
+
+  E4 CONFIRMED UNDER FULL TRAINING
+    tokenizer length stays 32,000 (not resized); total model params
+    628,221,952 vs 628,226,048 in the E1 smoke run — exactly 4,096 fewer,
+    i.e. the one extra vocabulary row across embed_tokens + lm_head is gone.
+    The saved adapter contains ONLY LoRA tensors.
+
+    SIZE CAVEAT, stated precisely: 48.2 MiB here vs ~298 MB in E1 is a 6.2x
+    reduction, but the two artifacts were saved in different dtypes (this one
+    at 4.00 bytes/param = fp32; the E1 artifact at ~2 bytes/param = bf16). The
+    like-for-like structural saving is the 131,076,096 embedding/head
+    parameters that are simply absent. Do not attribute the whole 6.2x to E4.
+
+  NOT DONE (out of scope for Issue #7): LoRA merge, GGUF export, quantization.
+  The trained adapter was not modified.
+
+==============================================================================
+END OF TRAINING RECORD
+==============================================================================

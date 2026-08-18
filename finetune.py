@@ -116,9 +116,15 @@ from trl import SFTConfig, SFTTrainer
 
 # ── Configuración ──────────────────────────────────────────────
 MODEL_NAME   = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-TRAIN_FILE = os.path.expanduser("~/Desktop/firewall-IA/train.jsonl")
-EVAL_FILE  = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
-OUTPUT_DIR   = os.path.expanduser("~/Desktop/firewall-IA/model-output-v3")
+
+# V4 CLEAN BASELINE (Issue #7). Points at the frozen, leakage-free E2/E3/E4
+# dataset — NOT the historical root train.jsonl/eval.jsonl, which retain the
+# envelope shortcuts and 26.65% train/eval leakage found in the audit.
+# Identity is pinned by datasets/manifest_v4_clean.json; verify the SHA-256
+# hashes before training.
+TRAIN_FILE = os.path.expanduser("~/Desktop/firewall-IA/datasets/v4_clean/train.jsonl")
+EVAL_FILE  = os.path.expanduser("~/Desktop/firewall-IA/datasets/v4_clean/eval.jsonl")
+OUTPUT_DIR   = os.path.expanduser("~/Desktop/firewall-IA/model-output-v4-clean")
 MAX_SEQ_LEN  = 512
 
 # E1 smoke-test settings. Separate output dir — never touches model-output-v3.

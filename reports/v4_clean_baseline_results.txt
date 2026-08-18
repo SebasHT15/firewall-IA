@@ -1,0 +1,342 @@
+==============================================================================
+firewall-IA — V4 CLEAN BASELINE RESULTS
+First scientifically interpretable baseline
+==============================================================================
+Issue                : #7 — Train V4 clean baseline
+Branch               : feature/7-v4-clean-training
+Date (UTC)           : 2026-08-17
+Evaluation           : frozen E5 methodology (D19), unchanged after seeing results
+
+STATUS: BASELINE ESTABLISHED. Numbers below are measurements, not conclusions.
+
+==============================================================================
+1. RUN METADATA
+==============================================================================
+  Git branch            feature/7-v4-clean-training
+  Git commit (HEAD)     2a188aa  docs(git): finalize GitHub issue and milestone workflow
+  Working tree          finetune.py modified (dataset paths + output dir, Issue #7)
+  Adapter               model-output-v4-clean/  (best checkpoint restored)
+  Python                3.12.13
+  torch                 2.6.0+cu124        CUDA 12.4
+  transformers          5.8.0
+  trl                   1.4.0
+  peft                  0.19.1
+  bitsandbytes          0.49.2
+  accelerate            1.13.0
+  datasets              4.8.5
+  GPU                   NVIDIA GeForce RTX 4090 Laptop GPU, 15.99 GiB
+  Driver                595.84
+
+==============================================================================
+2. DATASET IDENTITY (verified against the frozen manifest BEFORE training)
+==============================================================================
+  manifest              datasets/manifest_v4_clean.json  (v4-clean-candidate)
+  generator             parse_dataset_v4.py   seed 42
+  PayloadsAllTheThings  e961fef231d8327bae83b563fab50aec2e6b77c0
+  policy                cap 2,500 logical groups + 4,000 rendered BLOCK rows,
+                        source-agnostic variant B  (D17 FINAL)
+
+  train.jsonl  25,134 rows  13,130,392 B
+               sha256 4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b
+  eval.jsonl    6,206 rows   3,240,906 B
+               sha256 61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859
+  TOTAL        31,340 rows   ALLOW 15,670 / BLOCK 15,670
+
+  ALL HASHES, SIZES AND COUNTS MATCHED THE MANIFEST EXACTLY.
+
+  E0 gate re-run immediately before training:
+    exit 1 = WARNING (category scarcity only), 0 blocking failures
+    leakage 0.00% · train dup 0.00% · eval dup 0.00% · combined dup 0.00%
+    deterministic label reveals: none detected
+    check_dataset.py unmodified; no threshold weakened
+
+==============================================================================
+3. TRAINING CONFIGURATION  (frozen — all 21 parameters audited unchanged)
+==============================================================================
+  base model             TinyLlama/TinyLlama-1.1B-Chat-v1.0
+  quantization           4-bit NF4 + double quant, compute dtype bfloat16
+  LoRA                   r=16, alpha=32, dropout=0.05, bias=none
+  target modules         q_proj k_proj v_proj o_proj gate_proj up_proj down_proj
+  epochs                 4
+  batch / accum          4 x 8  (effective 32)
+  learning rate          2e-4, cosine, warmup_ratio 0.05
+  optimizer              paged_adamw_8bit
+  max_length             512
+  precision              bf16=True, fp16=False        (D11)
+  eval / save            every 200 steps
+  save_total_limit       2                            (D12)
+  load_best_model_at_end True
+  termination            native EOS </s> (id 2)       (D5 / E4)
+
+  ONLY CHANGE FOR ISSUE #7: TRAIN_FILE, EVAL_FILE and OUTPUT_DIR repointed to
+  datasets/v4_clean/ and model-output-v4-clean/. No hyperparameter touched.
+
+==============================================================================
+4. TRAINING SUMMARY
+==============================================================================
+  steps                  3144 / 3144      epochs 4.0
+  train_loss             0.4696
+  best eval_loss         0.463187  at step 2200
+  final eval_loss        0.466912  at step 3144
+  duration               7782.9 s (129.7 min); train_runtime 7651 s
+  throughput             13.14 samples/s, 0.411 steps/s
+  peak GPU allocated     1.98 GiB      peak reserved 4.59 GiB
+  NaN / Inf / OOM        0 / 0 / 0
+
+  BEST CHECKPOINT        model-output-v4-clean/checkpoint-2200
+                         restored by load_best_model_at_end before final save,
+                         so the top-level adapter is the best model.
+
+  ADAPTER                308 tensors, 12,615,680 params, 48.2 MiB
+                         embed_tokens / lm_head ABSENT (E4 confirmed)
+
+==============================================================================
+5. LEVEL 1 — BINARY SECURITY METRICS   (positive class = BLOCK)
+==============================================================================
+PRIMARY RESULT. Source: datasets/v4_clean/eval.jsonl, all 6,206 held-out rows.
+
+  support                6,206      (BLOCK 3,103 / ALLOW 3,103)
+  correct                6,112
+  accuracy               98.49%
+  precision (BLOCK)      99.93%
+  recall (BLOCK)         97.04%
+  F1 (BLOCK)             98.46%
+  attack detection rate  97.04%     (= recall, by definition)
+  false positives        2
+  false positive rate    0.06%      [FP / (FP+TN)] — benign traffic wrongly blocked
+  false negatives        92
+  false negative rate    2.96%      [FN / (TP+FN)] — attacks missed
+  invalid outputs        0          (0.00%)
+
+  CONFUSION MATRIX (rows = expected, cols = predicted)
+                     pred BLOCK    pred ALLOW
+      exp BLOCK           3,011            92        (TP / FN)
+      exp ALLOW               2         3,101        (FP / TN)
+
+  Parseable-only view is identical (0 invalid outputs), so the invalid-output
+  mapping policy had no effect on this run.
+
+  WHAT THIS NUMBER IS, AND IS NOT
+    On this dataset no incidental envelope feature beats a coin flip (E0: the
+    strongest, Content-Type, reaches 51.16% against a 50.00% majority
+    baseline). Host — which scored 93.72% on the historical dataset — reaches
+    49.73% here. The 98.49% therefore cannot be produced by the envelope
+    shortcuts that invalidated the historical 91%.
+
+    It is NOT evidence of evasion resistance (untested by design, D15), NOT
+    end-to-end gateway performance, and NOT transferable to live production
+    traffic, whose benign distribution differs from this synthetic + CSIC-2010
+    mixture.
+
+==============================================================================
+6. LEVEL 2 — ATTACK CATEGORY / REASON METRICS
+==============================================================================
+Reason accuracy is measured ONLY over correctly-blocked attacks. A category
+mismatch is NOT a binary failure and never reduces the recall in section 5.
+
+  CATEGORY                          SUPPORT   BINARY RECALL      REASON ACCURACY   STATUS
+  --------------------------------  -------  -----------------  -----------------  -----------------
+  SQL injection                         817  743/817   90.94%   737/743   99.19%   OK
+  Cross-site scripting                  708  708/708  100.00%   702/708   99.15%   OK
+  Path traversal                        506  506/506  100.00%   490/506   96.84%   OK
+  File inclusion                        494  494/494  100.00%   492/494   99.60%   OK
+  Command injection                     134  117/134   87.31%   111/117   94.87%   OK
+  CRLF injection                        112  112/112  100.00%   112/112  100.00%   INSUFFICIENT DATA
+  Server-side template injection         88    88/88  100.00%    88/88   100.00%   OK
+  Server-side request forgery            63    62/63    98.41%    55/62    88.71%   OK
+  Open redirect                          51    51/51   100.00%    50/51    98.04%   OK
+  XML external entity injection          27    27/27   100.00%    27/27   100.00%   INSUFFICIENT DATA
+  GraphQL injection                      22    22/22   100.00%    22/22   100.00%   INSUFFICIENT DATA
+  LDAP injection                         21    21/21   100.00%    18/21    85.71%   INSUFFICIENT DATA
+  NoSQL injection                        17    17/17   100.00%    15/17    88.24%   INSUFFICIENT DATA
+  JWT token manipulation                 16    16/16   100.00%    16/16   100.00%   INSUFFICIENT DATA
+  XPath injection                        11    11/11   100.00%     6/11    54.55%   INSUFFICIENT DATA
+  CSRF                                    8      8/8   100.00%      8/8   100.00%   INSUFFICIENT DATA
+  Insecure deserialization                5      5/5   100.00%      2/5     40.00%   INSUFFICIENT DATA
+  HTTP parameter pollution                3      3/3   100.00%      2/3     66.67%   INSUFFICIENT DATA
+  HTTP request smuggling                  0    0/0        n/a     0/0         n/a   NOT EVALUABLE
+  --------------------------------  -------  -----------------  -----------------  -----------------
+
+  WHERE THE 92 FALSE NEGATIVES ARE
+    SQL injection      74 of 92  (80.4%)
+    Command injection  17 of 92  (18.5%)
+    SSRF                1 of 92
+    Every other evaluable category: 0 missed attacks.
+
+    SQL injection is both the largest category (817 eval rows, 26.3% of the
+    BLOCK population) and the weakest by binary recall (90.94%). It is also
+    the category most heavily drawn from CSIC, whose BLOCK labels come from an
+    11-rule keyword heuristic (audit F6). Whether the misses concentrate in
+    the CSIC-derived subset is NOT determined here and would need a separate
+    analysis.
+
+  REASON ACCURACY OBSERVATION
+    Where the model blocks, it usually names the attack correctly (99%+ for
+    the four largest categories). The visible exceptions are small-support
+    categories where a handful of items dominates the percentage — see below.
+
+==============================================================================
+7. INSUFFICIENT-DATA AND NOT-EVALUABLE WARNINGS (D18)
+==============================================================================
+NOT EVALUABLE (1) — zero held-out support. No accuracy, recall or any other
+category-level claim may be made:
+
+    HTTP request smuggling        7 train rows, 0 eval rows
+
+  Per D18 no samples were generated or moved to make it evaluable, and the
+  grouped split was not weakened.
+
+INSUFFICIENT DATA (10) — results are EXPLORATORY ONLY. Raw numerator and
+denominator are given so the reader can judge the evidence directly:
+
+    HTTP parameter pollution      support   3   reason 2/3    (66.67%)
+    Insecure deserialization      support   5   reason 2/5    (40.00%)
+    CSRF                          support   8   reason 8/8   (100.00%)
+    XPath injection               support  11   reason 6/11   (54.55%)
+    JWT token manipulation        support  16   reason 16/16 (100.00%)
+    NoSQL injection               support  17   reason 15/17  (88.24%)
+    LDAP injection                support  21   reason 18/21  (85.71%)
+    GraphQL injection             support  22   reason 22/22 (100.00%)
+    XML external entity           support  27   reason 27/27 (100.00%)
+    CRLF injection                support 112   reason 112/112 (100.00%)
+
+  CRLF is flagged despite 112 eval rows because it has only 21 unique LOGICAL
+  GROUPS — group scarcity, not row scarcity. Its 100% is measured over many
+  renderings of very few distinct payloads.
+
+  A "100.00%" on support 8 and a "40.00%" on support 5 are equally unreliable.
+  Neither should appear in a summary table without its denominator.
+
+==============================================================================
+8. INVALID OUTPUTS
+==============================================================================
+  invalid outputs        0 of 6,206     (0.00%)
+
+  Every generation produced a parseable decision under the frozen E5 contract
+  regex. The invalid-output mapping policy (map to the opposite of expected so
+  garbage earns no credit) was therefore never exercised, and the
+  parseable-only confusion matrix is identical to the primary one.
+
+==============================================================================
+9. LEVEL 3 — MODEL-SIDE INFERENCE LATENCY
+==============================================================================
+  SCOPE: MODEL-SIDE INFERENCE ONLY. This is the generate() call on the
+  HuggingFace + PEFT 4-bit path. It EXCLUDES proxy overhead, API overhead and
+  network time. It is NOT end-to-end inline gateway latency.
+
+  count       6,206
+  mean        229.1 ms
+  P50         241.8 ms
+  P95         270.8 ms
+  P99         286.6 ms
+  min         163.1 ms
+  max         467.5 ms
+  stdev        31.8 ms
+
+  peak VRAM during evaluation   2,476 MiB   (external nvidia-smi sampling)
+
+  GENERATED TOKENS (n=300 random eval sample, seed 42)
+    mean 11.58 · P50 13 · P95 13 · P99 13 · min 9 · max 13   (cap 40)
+    0 of 300 generations hit the 40-token cap — native EOS terminated 100%.
+
+  *** REQUIRED FLAG ***
+  Model-side P95 alone is 270.8 ms, which ALREADY EXCEEDS the entire D3
+  end-to-end added-latency budget of P95 <= 200 ms — before any proxy, API or
+  network cost is added. The current HuggingFace inference path will require
+  optimization (GGUF / Q4_K_M / llama.cpp, milestone M2) before an inline
+  gateway can plausibly meet D3.
+
+  D3 IS NOT EVALUATED HERE AND IS NOT CLAIMED TO PASS OR FAIL. D3 is an
+  end-to-end budget; this is a model-only measurement. The comparison above is
+  a one-sided lower bound: end-to-end latency cannot be lower than model
+  latency, so exceeding the budget model-side is already decisive for the
+  current path.
+
+  Per the Issue #7 scope, no optimization was attempted in this run.
+
+==============================================================================
+10. LEGACY MANUAL SUITE (diagnostic only — NOT the headline metric)
+==============================================================================
+  Run separately via `test_model.py --mode manual`. Kept strictly apart from
+  section 5. Reported here for regression continuity only.
+
+  support                135      (BLOCK 109 / ALLOW 26)
+  accuracy               91.85%
+  precision (BLOCK)      94.55%
+  recall (BLOCK)         95.41%
+  F1 (BLOCK)             94.98%
+  false positives        6        FPR 23.08%
+  false negatives        5        FNR  4.59%
+  invalid outputs        0
+
+  confusion matrix   exp BLOCK  104 / 5      exp ALLOW  6 / 20
+
+  WHY THIS IS NOT THE HEADLINE
+    An always-BLOCK classifier scores 80.7% on this suite. The 26 ALLOW cases
+    cannot support a false-positive-rate claim: the 23.08% FPR here rests on 6
+    errors out of 26 items, whereas the formal split measures 0.06% on 3,103
+    benign rows. The suite's adversarial cases also reuse transform families
+    present in training augmentation, so they are not evidence of evasion
+    resistance.
+
+    The divergence between 23.08% (n=26) and 0.06% (n=3,103) is exactly the
+    reason D19 demoted this suite. The 6 legacy false positives are worth
+    inspecting qualitatively as edge cases; they are not a rate.
+
+==============================================================================
+11. KNOWN LIMITATIONS
+==============================================================================
+  1. Single training run, single seed. No variance estimate, no confidence
+     intervals. Point estimates only.
+  2. Evasion resistance UNMEASURED by design (D15). Held-out transform
+     families generate nothing in this dataset.
+  3. Benign population is synthetic + CSIC 2010. A 0.06% FPR here does not
+     establish a low FPR on live production traffic.
+  4. CSIC BLOCK labels come from an 11-rule keyword heuristic (audit F6). The
+     CSIC-derived portion of every per-category result inherits that
+     circularity, and SQL injection is the most affected category.
+  5. Reason matching is exact-after-normalisation, deliberately strict. Reason
+     accuracy is not comparable to loosely-scored figures elsewhere.
+  6. 11 categories cannot support robust per-category conclusions; 1 is
+     unevaluable entirely.
+  7. Latency is model-side only, on laptop-class hardware, at batch size 1.
+  8. eval_loss minimum at step 2200 with a rise by 3144 indicates mild
+     overfitting; the best checkpoint was selected automatically, but a
+     shorter schedule was not explored and must not be inferred as better
+     without an experiment.
+
+==============================================================================
+12. OBSERVATIONS
+==============================================================================
+  1. The first interpretable baseline exists: 98.49% accuracy with a 0.06%
+     false-positive rate on 3,103 benign held-out rows, on a dataset where no
+     incidental envelope feature exceeds 51.16% against a 50.00% majority.
+
+  2. The error profile is strongly asymmetric — 92 false negatives against 2
+     false positives. For an inline gateway this is the safer direction
+     operationally (benign traffic is rarely broken), but it means roughly 3%
+     of attacks pass. Whether that trade is acceptable is a project decision,
+     not a measurement.
+
+  3. False negatives are highly concentrated: 80.4% in SQL injection and
+     18.5% in Command injection. Two categories account for 98.9% of all
+     missed attacks. This is a specific, actionable finding for future work.
+
+  4. Binary detection and reason naming are largely decoupled — several
+     categories show 100% binary recall with imperfect reason accuracy. The
+     E5 separation was necessary; a combined metric would have hidden this.
+
+  5. Zero invalid outputs across 6,206 generations, and native EOS terminated
+     100% of sampled generations at 9-13 tokens. The E4 output contract holds
+     under a trained model.
+
+  6. Model-side P95 (270.8 ms) already exceeds the whole end-to-end D3 budget
+     (200 ms). Quantization work in M2 is not an optimization nicety; it is on
+     the critical path to a viable inline gateway.
+
+  NO THESIS CONCLUSIONS ARE DRAWN HERE. These are measurements under stated
+  conditions, with the limitations in section 11 attached.
+
+==============================================================================
+END OF BASELINE REPORT
+==============================================================================

@@ -1,0 +1,289 @@
+{
+  "run_metadata": {
+    "date_utc": "2026-08-18T00:03:00+00:00",
+    "git_commit": "2a188aa24740977a72a00b74c621dfa9db8ae3a4",
+    "mode": "dataset",
+    "adapter_dir": "model-output-v4-clean",
+    "dataset": "/home/sebas/Desktop/firewall-IA/datasets/v4_clean/eval.jsonl",
+    "dataset_sha256": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859",
+    "manifest_version": "v4-clean-candidate",
+    "manifest": {
+      "version": "v4-clean-candidate",
+      "generated_utc": "2026-08-17T06:49:20+00:00",
+      "cap_per_category": 2500,
+      "row_cap_per_category": 4000,
+      "artifact_sha256": {
+        "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+        "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
+      }
+    },
+    "positive_class": "BLOCK",
+    "methodology": "reports/e5_evaluation_methodology.txt"
+  },
+  "binary": {
+    "support": 6206,
+    "correct": 6112,
+    "accuracy": 0.984853367708669,
+    "precision_block": 0.9993362097577165,
+    "recall_block": 0.97035127296165,
+    "f1_block": 0.9846304774362328,
+    "attack_detection_rate": 0.97035127296165,
+    "false_positives": 2,
+    "false_positive_rate": 0.0006445375443119562,
+    "false_negatives": 92,
+    "false_negative_rate": 0.029648727038349983,
+    "confusion_matrix": {
+      "TP": 3011,
+      "FP": 2,
+      "FN": 92,
+      "TN": 3101
+    },
+    "allow_support": 3103,
+    "block_support": 3103,
+    "invalid_outputs": 0,
+    "invalid_output_rate": 0.0,
+    "parseable_only": {
+      "support": 6206,
+      "correct": 6112,
+      "accuracy": 0.984853367708669,
+      "precision_block": 0.9993362097577165,
+      "recall_block": 0.97035127296165,
+      "f1_block": 0.9846304774362328,
+      "attack_detection_rate": 0.97035127296165,
+      "false_positives": 2,
+      "false_positive_rate": 0.0006445375443119562,
+      "false_negatives": 92,
+      "false_negative_rate": 0.029648727038349983,
+      "confusion_matrix": {
+        "TP": 3011,
+        "FP": 2,
+        "FN": 92,
+        "TN": 3101
+      },
+      "allow_support": 3103,
+      "block_support": 3103
+    }
+  },
+  "categories": {
+    "HTTP request smuggling attack detected.": {
+      "support": 0,
+      "binary_recall_num": 0,
+      "binary_recall_den": 0,
+      "binary_recall": null,
+      "reason_accuracy_num": 0,
+      "reason_accuracy_den": 0,
+      "reason_accuracy": null,
+      "invalid_outputs": 0,
+      "evidence_status": "NOT EVALUABLE"
+    },
+    "NoSQL injection payload detected.": {
+      "support": 17,
+      "binary_recall_num": 17,
+      "binary_recall_den": 17,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 15,
+      "reason_accuracy_den": 17,
+      "reason_accuracy": 0.8823529411764706,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "Cross-site scripting payload detected.": {
+      "support": 708,
+      "binary_recall_num": 708,
+      "binary_recall_den": 708,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 702,
+      "reason_accuracy_den": 708,
+      "reason_accuracy": 0.9915254237288136,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "Path traversal attack detected.": {
+      "support": 506,
+      "binary_recall_num": 506,
+      "binary_recall_den": 506,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 490,
+      "reason_accuracy_den": 506,
+      "reason_accuracy": 0.9683794466403162,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "HTTP parameter pollution detected.": {
+      "support": 3,
+      "binary_recall_num": 3,
+      "binary_recall_den": 3,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 2,
+      "reason_accuracy_den": 3,
+      "reason_accuracy": 0.6666666666666666,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "Insecure deserialization payload detected.": {
+      "support": 5,
+      "binary_recall_num": 5,
+      "binary_recall_den": 5,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 2,
+      "reason_accuracy_den": 5,
+      "reason_accuracy": 0.4,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "GraphQL injection payload detected.": {
+      "support": 22,
+      "binary_recall_num": 22,
+      "binary_recall_den": 22,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 22,
+      "reason_accuracy_den": 22,
+      "reason_accuracy": 1.0,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "SQL injection payload detected.": {
+      "support": 817,
+      "binary_recall_num": 743,
+      "binary_recall_den": 817,
+      "binary_recall": 0.9094247246022031,
+      "reason_accuracy_num": 737,
+      "reason_accuracy_den": 743,
+      "reason_accuracy": 0.9919246298788694,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "Open redirect payload detected.": {
+      "support": 51,
+      "binary_recall_num": 51,
+      "binary_recall_den": 51,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 50,
+      "reason_accuracy_den": 51,
+      "reason_accuracy": 0.9803921568627451,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "CRLF injection payload detected.": {
+      "support": 112,
+      "binary_recall_num": 112,
+      "binary_recall_den": 112,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 112,
+      "reason_accuracy_den": 112,
+      "reason_accuracy": 1.0,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "Command injection payload detected.": {
+      "support": 134,
+      "binary_recall_num": 117,
+      "binary_recall_den": 134,
+      "binary_recall": 0.8731343283582089,
+      "reason_accuracy_num": 111,
+      "reason_accuracy_den": 117,
+      "reason_accuracy": 0.9487179487179487,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "JWT token manipulation attack detected.": {
+      "support": 16,
+      "binary_recall_num": 16,
+      "binary_recall_den": 16,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 16,
+      "reason_accuracy_den": 16,
+      "reason_accuracy": 1.0,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "LDAP injection payload detected.": {
+      "support": 21,
+      "binary_recall_num": 21,
+      "binary_recall_den": 21,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 18,
+      "reason_accuracy_den": 21,
+      "reason_accuracy": 0.8571428571428571,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "XPath injection payload detected.": {
+      "support": 11,
+      "binary_recall_num": 11,
+      "binary_recall_den": 11,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 6,
+      "reason_accuracy_den": 11,
+      "reason_accuracy": 0.5454545454545454,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "Server-side template injection payload detected.": {
+      "support": 88,
+      "binary_recall_num": 88,
+      "binary_recall_den": 88,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 88,
+      "reason_accuracy_den": 88,
+      "reason_accuracy": 1.0,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "CSRF attack pattern detected.": {
+      "support": 8,
+      "binary_recall_num": 8,
+      "binary_recall_den": 8,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 8,
+      "reason_accuracy_den": 8,
+      "reason_accuracy": 1.0,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "XML external entity injection detected.": {
+      "support": 27,
+      "binary_recall_num": 27,
+      "binary_recall_den": 27,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 27,
+      "reason_accuracy_den": 27,
+      "reason_accuracy": 1.0,
+      "invalid_outputs": 0,
+      "evidence_status": "INSUFFICIENT DATA"
+    },
+    "Server-side request forgery attack detected.": {
+      "support": 63,
+      "binary_recall_num": 62,
+      "binary_recall_den": 63,
+      "binary_recall": 0.9841269841269841,
+      "reason_accuracy_num": 55,
+      "reason_accuracy_den": 62,
+      "reason_accuracy": 0.8870967741935484,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    },
+    "File inclusion attack detected.": {
+      "support": 494,
+      "binary_recall_num": 494,
+      "binary_recall_den": 494,
+      "binary_recall": 1.0,
+      "reason_accuracy_num": 492,
+      "reason_accuracy_den": 494,
+      "reason_accuracy": 0.9959514170040485,
+      "invalid_outputs": 0,
+      "evidence_status": "OK"
+    }
+  },
+  "latency": {
+    "count": 6206,
+    "scope": "model-side inference only (NOT end-to-end gateway latency)",
+    "mean_ms": 229.05204269093744,
+    "p50_ms": 241.78287500035367,
+    "p95_ms": 270.8449040001142,
+    "p99_ms": 286.5599850010767,
+    "min_ms": 163.1099819969677,
+    "max_ms": 467.52601399930427,
+    "stdev_ms": 31.84635548784965
+  }
+}
