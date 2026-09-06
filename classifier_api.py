@@ -1,163 +1,157 @@
 """
-firewall-IA — classification engine (control plane).
+firewall-IA — Control Plane (HTTP classification service).
 
-Wraps the v3 QLoRA-fine-tuned TinyLlama classifier behind an HTTP API.
-Inference logic mirrors test_model.py's classify() exactly (prompt format,
-generation params, extraction regex) — do not alter, the model's correctness
-depends on matching training.
+A thin HTTP surface over `inference_core`. It does not build prompts, load
+models, generate or parse: every decision comes from the same V4 pipeline the
+evaluation harness uses (`test_model.py`), so runtime and evaluation cannot
+drift apart.
 
-RUN (single worker is MANDATORY — one GPU, model loaded once):
-    python3.12 -m uvicorn classifier_api:app --host 0.0.0.0 --port 8000 --workers 1
+SCOPE (Issue #15) — classification only. This service REPORTS its result,
+including the fact that a model output was unparseable (`status: "invalid"`).
+It does NOT enforce anything. The fail-closed policy of D4 belongs to the
+future Data Plane (Issues #16/#17), which will decide what to do with an
+`invalid` result, a 5xx, or a timeout.
 
-The ML stack is installed for python3.12 on this machine, NOT the default
-python3. Use python3.12 to launch.
+An unparseable model output is NEVER coerced into a decision — not to ALLOW,
+not to BLOCK. See `inference_core.parse_prediction`.
+
+RUN (single worker: one GPU, model loaded once at startup):
+    python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
 
 Point at a different adapter without editing this file:
-    FIREWALL_ADAPTER_DIR=/path/to/adapter python3.12 -m uvicorn classifier_api:app --workers 1
-
-TEST:
-    curl localhost:8000/health
-
-    # benign request -> expect ALLOW
-    curl -X POST localhost:8000/classify \
-        -H 'Content-Type: application/json' \
-        -d '{"request":"GET /index.html HTTP/1.1\nHost: example.com"}'
-
-    # attack payload (SQL injection) -> expect BLOCK
-    curl -X POST localhost:8000/classify \
-        -H 'Content-Type: application/json' \
-        -d '{"request":"GET /api/users?id=1'"'"' OR '"'"'1'"'"'='"'"'1 HTTP/1.1\nHost: target.com"}'
+    FIREWALL_ADAPTER_DIR=/path/to/adapter python3.12 -m uvicorn classifier_api:app
 """
 
-import asyncio
-import os
-import re
+import logging
+import threading
 import time
 from contextlib import asynccontextmanager
+from typing import Literal, Optional
 
-import torch
-from fastapi import FastAPI
-from peft import PeftModel
-from pydantic import BaseModel
-from transformers import (
-    AutoModelForCausalLM,
-    AutoTokenizer,
-    BitsAndBytesConfig,
-)
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, ConfigDict, Field
 
-# ── Configuration ──────────────────────────────────────────────────
-BASE_MODEL = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-ADAPTER_DIR = os.path.expanduser(
-    os.environ.get("FIREWALL_ADAPTER_DIR", "~/Desktop/firewall-IA/model-output-v3")
-)
+import inference_core as core
 
-INSTRUCTION = (
-    "You are a network security firewall classifier. "
-    "Analyze the following HTTP request and respond with exactly: "
-    "ALLOW or BLOCK | <one sentence reason>."
-)
+log = logging.getLogger("firewall.control_plane")
 
-# Decision contract: "ALLOW | <reason>" / "BLOCK | <reason>".
-# Terminated by native EOS (D5/E4) — no custom stop token.
-# Kept byte-identical to test_model.py's EXTRACT_RE.
-EXTRACT_RE = re.compile(r"\b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)")
-
-# ── Module-level state (populated once at startup) ──────────────────
-tokenizer = None
-model = None
-device = "cuda" if torch.cuda.is_available() else "cpu"
-MODEL_LOADED = False
-
-# GPU runs one inference at a time; serialize concurrent requests.
-gpu_lock = asyncio.Lock()
+# One GPU, one model: generate() runs one request at a time. The endpoints are
+# declared `def` (not `async def`), so FastAPI runs them in its worker
+# threadpool and this plain lock is all the serialization needed — no queue,
+# no scheduler, no async plumbing.
+_GPU_LOCK = threading.Lock()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global tokenizer, model, MODEL_LOADED
-
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.float16,
+    """Load the model exactly once, at startup."""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s %(levelname)-7s %(name)s: %(message)s",
     )
-
-    tokenizer = AutoTokenizer.from_pretrained(ADAPTER_DIR)
-    tokenizer.pad_token = tokenizer.eos_token
-
-    base_model = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL,
-        quantization_config=bnb_config,
-        device_map="auto",
-    )
-    model = PeftModel.from_pretrained(base_model, ADAPTER_DIR)
-    model.eval()
-
-    MODEL_LOADED = True
+    log.info("startup: loading adapter %s", core.DEFAULT_ADAPTER_DIR)
+    t0 = time.perf_counter()
+    try:
+        app.state.tokenizer, app.state.model = core.load_model(core.DEFAULT_ADAPTER_DIR)
+        app.state.device = core.resolve_device()
+        log.info("startup: model ready on %s in %.1f s",
+                 app.state.device, time.perf_counter() - t0)
+    except Exception:
+        # Stay up so /health can report the failure and the operator (or the
+        # future Data Plane) can see an unready control plane rather than a
+        # connection refused. /classify returns 503 while in this state.
+        log.exception("startup: model failed to load — /classify will return 503")
     yield
+    log.info("shutdown")
 
 
-app = FastAPI(title="firewall-IA classifier", lifespan=lifespan)
+app = FastAPI(title="firewall-IA control plane", version="1.0.0", lifespan=lifespan)
+
+# Populated by lifespan; declared here so /health works even if loading failed.
+app.state.tokenizer = None
+app.state.model = None
+app.state.device = None
 
 
+# ── Schemas ────────────────────────────────────────────────────────────────
 class ClassifyRequest(BaseModel):
-    request: str
+    """Raw HTTP request text, exactly the representation the model was trained
+    on (D1). Never structured method/path/header fields — that would be a
+    second serialization, different from the one used in evaluation."""
+
+    request: str = Field(..., min_length=1)
 
 
 class ClassifyResponse(BaseModel):
-    decision: str
-    reason: str
-    raw_output: str
-    latency_ms: float
+    # `model_` is a pydantic-protected prefix; the field name is part of the
+    # agreed contract, so opt out of the namespace check rather than rename it.
+    model_config = ConfigDict(protected_namespaces=())
+
+    status: Literal["ok", "invalid"]
+    decision: Optional[Literal["ALLOW", "BLOCK"]] = None
+    reason: Optional[str] = None
+    model_latency_ms: float
 
 
-def _classify_raw(request: str):
-    """Replicates test_model.py classify() 1:1, returning structured parts."""
-    prompt = (
-        f"<|system|>\n{INSTRUCTION}</s>\n"
-        f"<|user|>\n{request}</s>\n"
-        f"<|assistant|>\n"
+class HealthResponse(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+
+    status: Literal["ok"]
+    model_loaded: bool
+    adapter_dir: str
+
+
+# ── Endpoints ──────────────────────────────────────────────────────────────
+@app.get("/health", response_model=HealthResponse)
+def health() -> HealthResponse:
+    """Liveness plus model readiness. Always 200 while the process is up;
+    `model_loaded` carries the readiness signal."""
+    return HealthResponse(
+        status="ok",
+        model_loaded=app.state.model is not None,
+        adapter_dir=core.DEFAULT_ADAPTER_DIR,
     )
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    with torch.no_grad():
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=40,
-            do_sample=False,
-            pad_token_id=tokenizer.eos_token_id,
-        )
-    input_len = inputs["input_ids"].shape[1]
-    new_tokens = outputs[0][input_len:]
-    response = tokenizer.decode(new_tokens, skip_special_tokens=True)
-
-    match = EXTRACT_RE.search(response)
-    if match:
-        decision = match.group(1)
-        reason = match.group(2).strip()
-    else:
-        reason = response.split("\n")[0].strip()
-        decision = "BLOCK" if "BLOCK" in response.upper() else "ALLOW"
-
-    return decision, reason, response
 
 
 @app.post("/classify", response_model=ClassifyResponse)
-async def classify(body: ClassifyRequest):
-    async with gpu_lock:
-        t0 = time.perf_counter()
-        decision, reason, raw_output = await asyncio.get_event_loop().run_in_executor(
-            None, _classify_raw, body.request
-        )
-        latency_ms = (time.perf_counter() - t0) * 1000
+def classify(body: ClassifyRequest) -> ClassifyResponse:
+    """Classify one raw HTTP request.
+
+    Returns `status: "ok"` with a decision and reason, or `status: "invalid"`
+    with both null when the model output does not satisfy the contract. The
+    caller decides what to do with an invalid result (D4 fail-closed lives in
+    the Data Plane, not here).
+    """
+    if app.state.model is None:
+        log.error("classify: rejected, model not loaded")
+        raise HTTPException(status_code=503, detail="Model not loaded")
+
+    # Request bodies are attacker-controlled and are not logged by default.
+    log.info("classify: received request (%d bytes)", len(body.request))
+
+    try:
+        with _GPU_LOCK:
+            raw, model_latency_ms = core.classify_raw(
+                app.state.tokenizer, app.state.model, body.request, app.state.device
+            )
+    except Exception:
+        log.exception("classify: inference failed")   # traceback to the log ...
+        raise HTTPException(status_code=500, detail="Inference failed")  # ... not to the client
+
+    decision, reason, status = core.parse_prediction(raw)
+
+    if status == "ok":
+        log.info("classify: status=ok decision=%s reason=%r model_latency_ms=%.1f",
+                 decision, reason, model_latency_ms)
+    else:
+        # Not coerced. The raw output is logged (it is model output, not the
+        # request body) because it is the only way to diagnose the failure.
+        log.warning("classify: status=invalid model_latency_ms=%.1f raw=%r",
+                    model_latency_ms, raw[:200])
 
     return ClassifyResponse(
+        status=status,
         decision=decision,
         reason=reason,
-        raw_output=raw_output,
-        latency_ms=latency_ms,
+        model_latency_ms=model_latency_ms,
     )
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "model_loaded": MODEL_LOADED}
