@@ -145,15 +145,28 @@ batch size 1.
 
 ### Immediate roadmap
 
-1. **Issue #8** — analyse V4 security failures (the 92 false negatives)
-2. **Issue #9** — controlled inference benchmark
-3. **Real HTTP laboratory validation** (**D22**)
-4. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
-5. GGUF / Q4_K_M / llama.cpp
-6. Quantized security regression
-7. Inline gateway
-8. End-to-end latency
-9. Embedded deployment
+**Done since the V4 baseline:** Issue #15 — FastAPI Control Plane, implemented and
+validated (see §5). This partially advances M3 ahead of M2 by deliberate decision
+(**D26**); it does not make HF/PEFT the deployment backend, and **D23** still holds.
+
+**Issue numbering (reconciled against the tracker):** GitHub **#8** is *Evaluate V4 clean
+security metrics* — the evaluation was executed and archived in `reports/v4_clean_eval.json`,
+though the issue is still open. GitHub **#15** is the FastAPI Control Plane. Earlier text in
+this file described #8 as "analyse the 92 false negatives"; that failure analysis is real
+outstanding work (**D21**) but is not what issue #8 says, and it has no dedicated issue yet.
+
+1. **Issue #8** — V4 clean security evaluation (metrics produced; issue open)
+2. **Issue #9** — controlled inference benchmark, honouring the cold-start /
+   steady-state separation recorded in §5
+3. **Failure analysis of the 92 false negatives** (**D21**) — untracked
+4. **Real HTTP laboratory validation** (**D22**)
+5. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
+6. GGUF / Q4_K_M / llama.cpp (**Issues #10–#12**)
+7. Quantized security regression
+8. Inline gateway — **Issue #16** mitmproxy data plane, **Issue #17** fail-closed
+   enforcement (neither started)
+9. End-to-end latency (**Issue #18**)
+10. Embedded deployment
 
 **Dataset expansion is NOT approved simply because the dataset has ~31k rows** (**D21**). More
 data will be considered only on evidence from failure analysis, demonstrated independent
@@ -261,16 +274,98 @@ The final 1:1 random trim (seed=42) did **not** mitigate this — it only balanc
 
 ---
 
-## 5. The API (built this session by Claude Code)
+## 5. Control Plane — IMPLEMENTED AND VALIDATED (Issue #15, 2026-09-05)
 
-`classifier_api.py` — a FastAPI service wrapping the v3 model as the **classification engine (control plane)**. A future proxy (data plane) will consume it. Status: **built, not yet validated** (no adapter existed when built).
+**This section replaces the earlier description of `classifier_api.py`, which referred to
+the v3 model, an `eos_token_id=end_token_id` override removed in E4, and a "built, not yet
+validated" status. All three were obsolete.** The old `classifier_api.py` was deleted and
+rewritten from scratch; git retains the history.
 
-- Adapter path is configurable: `ADAPTER_DIR = os.path.expanduser(os.environ.get("FIREWALL_ADAPTER_DIR", "~/Desktop/firewall-IA/model-output-v3"))`. Set `FIREWALL_ADAPTER_DIR` to point at different model versions without editing code.
-- Replicates `test_model.py` inference EXACTLY: same prompt template, same generation params (`max_new_tokens=40`, `do_sample=False`, `eos_token_id=end_token_id`), same extraction regex.
-- Endpoints: `POST /classify` (body `{"request": "<raw HTTP text>"}` → `{decision, reason, raw_output, latency_ms}`) and `GET /health`.
-- Input is RAW HTTP TEXT, never structured fields — the model was trained on raw text.
-- GPU concurrency: `generate` must be serialized (asyncio.Lock or single worker) so concurrent requests don't corrupt inference.
-- **Validation step pending:** once the adapter exists, run the API and confirm its decisions match `test_model.py` on the same requests.
+### Architecture
+
+```
+test_model.py  -->  inference_core.py  <--  classifier_api.py
+```
+
+`inference_core.py` is the **single owner** of the shared V4 runtime pipeline:
+
+- the decision contract (`INSTRUCTION`, `EXTRACT_RE`, `MAX_NEW_TOKENS`)
+- prompt construction (`build_prompt`) — identical to `finetune.py:format_example()`
+  minus the answer the model is asked to produce
+- model loading (`load_model`) and device resolution (`resolve_device`)
+- generation (`classify_raw`) — greedy, native EOS, `max_new_tokens=40` as a safety bound
+- parsing (`parse_prediction`) and reason normalisation (`normalize_reason`)
+
+It imports nothing from this project — no scoring, no manifest handling, no dataset code,
+no CLI. `split_output()` stayed in `test_model.py` because it parses dataset labels, which
+is an evaluation concern. There is exactly one implementation of the contract, verified by
+object identity (`test_model.parse_prediction is inference_core.parse_prediction`).
+
+The active adapter is `model-output-v4-clean`, resolved relative to the repository root and
+overridable via `FIREWALL_ADAPTER_DIR`. The default no longer points at the absent
+`model-output-v3`.
+
+### Control Plane
+
+`classifier_api.py` — FastAPI, thin. HTTP -> validation -> `inference_core` -> response.
+It re-implements nothing.
+
+- `GET /health` -> `{status, model_loaded, adapter_dir}`. Always 200 while the process is
+  up; `model_loaded` carries readiness (**D28**).
+- `POST /classify` -> body `{"request": "<raw HTTP request text>"}`. Raw HTTP text, never
+  structured method/path/header fields (**D1**).
+- Response: `status` is `"ok"` or `"invalid"`. `decision` is `ALLOW`/`BLOCK` **only** when
+  `status == "ok"`; on `"invalid"` both `decision` and `reason` are null.
+- **An invalid output is never coerced** — not to ALLOW, not to BLOCK (**D25**).
+- `model_latency_ms` is **model-side inference only**, the same scope the V4 evaluation
+  uses. It is NOT end-to-end latency; no data plane exists to measure end to end.
+- Errors: `422` malformed body, `503` model unavailable, `500` inference failure. No
+  traceback reaches the client.
+- The model is loaded once at startup via a FastAPI lifespan. One GPU, one inference at a
+  time, serialized with a `threading.Lock`; endpoints are `def`, so FastAPI runs them in
+  its threadpool. No queue, no scheduler.
+- Runtime config is the V4 evaluation config: 4-bit nf4 with `bfloat16` compute dtype and
+  **no** double quantization (**D27**).
+- Request bodies are not logged.
+
+### Security posture
+
+- The Control Plane **reports**; it does not enforce. It surfaces `invalid`, `503` and
+  `500`, and nothing acts on them.
+- The future Data Plane is responsible for applying **fail-closed** (**D4**) when it
+  receives an invalid result, an error, or a timeout.
+- **mitmproxy is not implemented.** There is no inline interception, no enforcement, and
+  no classifier timeout.
+
+### Validation evidence
+
+- Extraction parity: AST equivalence against `git HEAD` for `parse_prediction`,
+  `normalize_reason` and the contract constants; `build_prompt` byte-identical to the
+  original inline template.
+- Real-inference A/B on 30 fixed eval rows, pre-extraction code vs `inference_core`:
+  **0/30 raw-output mismatches, 0/30 parsed-tuple mismatches**.
+- `test_model.py --mode self-test`: PASS (48 checks).
+- 37 unit tests pass, including a regression test that an unparseable output can never
+  become ALLOW.
+- Live: model loaded in 2.4 s on CUDA; `/health` 200; real ALLOW and BLOCK rows from
+  `datasets/v4_clean/eval.jsonl` classified in agreement with their labels; 0 invalid
+  outputs in 92 requests; 30/30 deterministic on repeat.
+
+### Latency observed — preliminary, NOT a benchmark
+
+- **Cold start:** the first inference after process start measured **512.8 ms** (CUDA
+  warm-up).
+- **Steady state:** n=30 measured with the model already warm — **P50 232.5 ms, mean
+  211.5 ms, min 159.5 ms, max 241.9 ms**. The 512.8 ms warm-up sample was measured
+  separately and is **not** included in these statistics.
+
+This is runtime evidence, not a performance result. It is a small functional sample and is
+**not** comparable to the formal model-side P95 of 270.8 ms, which is a different statistic
+over the full 6,206-row split. **Do not claim the P95 improved.**
+
+**Rule for the Issue #9 benchmark:** report cold-start and steady-state as two separate
+sets. The warm-up sample must not be silently discarded, and must not be pooled into
+steady-state statistics without saying so explicitly.
 
 ---
 

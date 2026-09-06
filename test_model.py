@@ -1,33 +1,23 @@
 import argparse
 import json
 import os
-import re
 import statistics
 import sys
-import time
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from peft import PeftModel
-
-# ── Configuración ──────────────────────────────────────────────
-BASE_MODEL  = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-ADAPTER_DIR = os.path.expanduser("~/Desktop/firewall-IA/model-output-v3")
-EVAL_FILE = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
-
-INSTRUCTION = (
-    "You are a network security firewall classifier. "
-    "Analyze the following HTTP request and respond with exactly: "
-    "ALLOW or BLOCK | <one sentence reason>."
+# ── Inference core ─────────────────────────────────────────────
+# The V4 runtime pipeline — decision contract, prompt, model loading,
+# generation and parsing — lives in inference_core.py and is shared with the
+# FastAPI control plane, so evaluation and runtime cannot drift apart (#15).
+from inference_core import (
+    DEFAULT_ADAPTER_DIR as ADAPTER_DIR,
+    classify_raw,
+    load_model,
+    normalize_reason,
+    parse_prediction,
+    resolve_device,
 )
-
-# Decision contract: "ALLOW | <reason>" / "BLOCK | <reason>".
-# Terminated by native EOS (D5/E4) — no custom stop token.
-# Defensive against leading/trailing whitespace, a trailing period, and any
-# continuation text the model emits after the reason.
-EXTRACT_RE = re.compile(r"\b(ALLOW|BLOCK)\b\s*\|\s*(.+?)\s*(?:\.|\n|$)")
 
 # ── Test cases: (request, expected_label, category, description) ──
 # SYSTEMATIC: 5 cases per category × 19 categories = 95 BLOCK
@@ -663,38 +653,10 @@ POSITIVE_CLASS = "BLOCK"
 MIN_EVAL_SUPPORT = 30
 
 
-# ── Prediction parsing ─────────────────────────────────────────────────────
-def parse_prediction(text):
-    """Parse raw decoder output into (decision, reason, status).
-
-    POLICY (frozen): extract the FIRST valid ALLOW/BLOCK decision using the E4
-    contract regex. If no decision can be extracted, the result is INVALID —
-    it is NOT coerced into a decision. Invalid outputs are counted explicitly
-    and reported separately (see score_binary).
-
-    status is "ok" or "invalid".
-    """
-    if text is None:
-        return None, None, "invalid"
-    m = EXTRACT_RE.search(text)
-    if not m:
-        return None, None, "invalid"
-    return m.group(1).upper(), m.group(2).strip(), "ok"
-
-
-def normalize_reason(reason):
-    """Canonical form for reason comparison.
-
-    Objective normalisation only — casefold, collapse whitespace, strip a
-    single trailing period. NO synonym table, NO keyword heuristics, NO
-    subjective mapping. A predicted reason either matches a canonical dataset
-    reason exactly under this normalisation, or it does not.
-    """
-    if reason is None:
-        return ""
-    return re.sub(r"\s+", " ", reason.strip().casefold()).rstrip(".").strip()
-
-
+# ── Dataset label parsing ──────────────────────────────────────────────────
+# parse_prediction() and normalize_reason() are the shared contract and live
+# in inference_core.py. split_output() parses DATASET labels, which is an
+# evaluation concern only, so it stays here.
 def split_output(output):
     """Split a dataset label 'DECISION | reason' into its two parts."""
     decision, _, reason = output.partition("|")
@@ -912,39 +874,6 @@ def sha256_file(path):
     return h.hexdigest()
 
 
-# ── Model ──────────────────────────────────────────────────────────────────
-def load_model(adapter_dir):
-    """Load base TinyLlama + LoRA adapter. No tokenizer resize, no custom stop
-    token (removed in E4 / D5)."""
-    print(f"Loading model from {adapter_dir} ...")
-    bnb_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=torch.bfloat16,
-    )
-    tok = AutoTokenizer.from_pretrained(adapter_dir)
-    tok.pad_token = tok.eos_token
-    base = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL, quantization_config=bnb_config, device_map="auto")
-    mdl = PeftModel.from_pretrained(base, adapter_dir)
-    mdl.eval()
-    return tok, mdl
-
-
-def classify_raw(tok, mdl, request, device, max_new_tokens=40):
-    prompt = (f"<|system|>\n{INSTRUCTION}</s>\n"
-              f"<|user|>\n{request}</s>\n"
-              f"<|assistant|>\n")
-    inputs = tok(prompt, return_tensors="pt").to(device)
-    t0 = time.perf_counter()
-    with torch.no_grad():
-        out = mdl.generate(**inputs, max_new_tokens=max_new_tokens,
-                           do_sample=False, pad_token_id=tok.eos_token_id)
-    dt = (time.perf_counter() - t0) * 1000
-    new = out[0][inputs["input_ids"].shape[1]:]
-    return tok.decode(new, skip_special_tokens=True), dt
-
-
 # ── Reporting ──────────────────────────────────────────────────────────────
 def pct(x):
     return "n/a" if x is None else f"{100 * x:.2f}%"
@@ -1049,7 +978,7 @@ def evaluate_dataset(args):
                    if split_output(r["output"])[0] == "BLOCK"} | not_evaluable
 
     tok, mdl = load_model(args.adapter)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = resolve_device()
 
     records, lat = [], []
     for i, r in enumerate(rows, 1):
@@ -1097,7 +1026,7 @@ def evaluate_manual(args):
     print("  are NOT evidence of evasion resistance.")
     print("=" * 78)
     tok, mdl = load_model(args.adapter)
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    device = resolve_device()
     records, lat, per_cat = [], [], defaultdict(lambda: {"n": 0, "ok": 0})
     for request, expected, category, desc in ALL_CASES:
         raw, dt = classify_raw(tok, mdl, request, device)

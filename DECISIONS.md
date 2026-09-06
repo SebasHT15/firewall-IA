@@ -888,6 +888,144 @@ Precision of language here is cheap; retracting an overstated claim later is not
 
 ---
 
+## D25 — Control Plane contract and invalid-output handling
+
+- **Date:** 2026-09-05
+- **Status:** APPROVED
+- **Implementation:** DONE — `classifier_api.py` + `inference_core.py`, Issue #15
+
+**Decision.** The Control Plane reports a classification; it does not enforce one.
+
+`POST /classify` returns `status: "ok"` or `status: "invalid"`.
+
+- `ALLOW` / `BLOCK` exist **only** for outputs that satisfy the E4 contract regex. When
+  `status == "ok"`, `decision` and `reason` are populated.
+- When the model output cannot be parsed, `status` is `"invalid"` and **both `decision`
+  and `reason` are null**. The output is **NOT coerced** — not to `ALLOW`, not to
+  `BLOCK`, and not by any heuristic that guesses what the model meant.
+- The future Data Plane is responsible for applying **fail-closed** when it receives an
+  `invalid` result, an error response, or a timeout.
+
+**D4 remains in force.** D25 does **not** supersede it. D4 decides *what happens to
+traffic* when the classifier is unusable (it is blocked); D25 decides *where that
+decision is taken* (the Data Plane) and *what the Control Plane must report* so the
+Data Plane can take it. D25 refines the separation of responsibilities between the two
+planes; it changes nothing about the fail-closed policy itself.
+
+**Rationale.** Coercion destroys the information the Data Plane needs. The deleted legacy
+`classifier_api.py` mapped any unparseable output to `"BLOCK" if "BLOCK" in output else
+"ALLOW"`, so a garbled or truncated generation silently became **ALLOW** — fail-open, and
+indistinguishable from a genuine ALLOW decision at the caller. Reporting invalidity
+explicitly is also what makes the evaluation and the runtime agree: `parse_prediction()`
+has never coerced (frozen E5 policy), and the Control Plane now uses that same function.
+
+Evidence: real-inference A/B parity over 30 held-out rows (0/30 mismatches) and 14 unit
+assertions that an unparseable output can never surface as `ALLOW`.
+
+---
+
+## D26 — HF/PEFT Control Plane baseline before llama.cpp optimization
+
+- **Date:** 2026-09-05
+- **Status:** APPROVED
+- **Implementation:** DONE — Issue #15
+
+**Decision.** The Control Plane was deliberately implemented on the **current
+HuggingFace/PEFT backend**, before any GGUF / llama.cpp work, to establish a functional
+and integrable baseline for the inline gateway.
+
+This **partially advances M3 ahead of M2**, inverting the previously recorded order in
+which the FastAPI control plane (issue #15) depended on llama.cpp integration (issue #12).
+
+**This does NOT make HF/PEFT the deployment backend.** GGUF export, Q4_K_M quantization
+and llama.cpp inference remain pending and remain on the critical deployment path.
+
+No multi-backend abstraction, factory or plugin layer was built. `inference_core.py` is
+kept as the only place that loads a model and generates, so a future backend can replace
+it without rewriting FastAPI — but no interface was designed for a second backend that
+does not yet exist.
+
+**Relationship to D23.** D23 concluded that the measured model-side P95 of 270.8 ms
+already exceeds the entire 200 ms end-to-end budget of D3, and that GGUF/Q4_K_M/llama.cpp
+optimization is therefore on the critical path rather than an optional refinement, so M2
+precedes a *viable* M3. **That conclusion still holds and D23 is NOT superseded.** D26
+only separates two things D23 did not distinguish: building the control plane, and
+deploying it. A control plane can be built, tested and integrated on a backend that is
+too slow to ship, and doing so de-risks the mitmproxy work without waiting for
+quantization. D23 continues to govern what may eventually be deployed.
+
+**Rationale.** The control plane is mostly HTTP plumbing over an inference call. Blocking
+it on quantization would have left the whole gateway path unexercised while the backend
+was optimized, and would have delayed discovery of contract problems — of which one
+(silent ALLOW coercion, see D25) was real and is now fixed.
+
+---
+
+## D27 — Canonical V4 runtime inference configuration
+
+- **Date:** 2026-09-05
+- **Status:** APPROVED
+- **Implementation:** DONE — `inference_core.load_model()`
+
+**Decision.** The canonical **runtime** quantization configuration is:
+
+```
+load_in_4bit=True
+bnb_4bit_quant_type="nf4"
+bnb_4bit_compute_dtype=torch.bfloat16
+```
+
+with **no double quantization** at runtime.
+
+This is exactly the configuration used by the V4 evaluation pipeline that produced the
+baseline in `reports/v4_clean_eval.json`, and it is the configuration against which the
+Control Plane was verified for parity. It now has a single definition, in
+`inference_core.load_model()`, shared by the evaluation harness and the Control Plane.
+
+**Training configuration may differ, and does.** `finetune.py` additionally sets
+`bnb_4bit_use_double_quant=True`. That value is **not** mirrored into runtime, and
+`finetune.py` is **not** being modified. Training and inference configurations do not have
+to be identical; what matters is that runtime matches the configuration under which the
+published metrics were measured.
+
+**Rationale.** Before this decision three different quantization configurations existed in
+the repository, and the deleted legacy `classifier_api.py` used `float16` as its compute
+dtype — a value D11 had already moved away from. Serving under a configuration different
+from the one the metrics were measured under would make any discrepancy between the API
+and the evaluation unexplainable. Changing this configuration requires an experiment, not
+a preference.
+
+---
+
+## D28 — Control Plane readiness behaviour
+
+- **Date:** 2026-09-05
+- **Status:** APPROVED
+- **Implementation:** DONE — `classifier_api.py`
+
+**Decision.** The FastAPI process **stays alive even if the model fails to load** at
+startup. In that state:
+
+- `GET /health` returns **200** with `model_loaded: false`
+- `POST /classify` returns **503**
+
+The failure is logged with its traceback at startup.
+
+This lets a caller distinguish three different conditions that would otherwise collapse
+into one: *service absent* (connection refused), *service up but not ready*
+(`model_loaded: false`, 503), and *service ready* (`model_loaded: true`).
+
+The future Data Plane must treat "up but not ready" as an unusable classifier and apply
+**fail-closed** per **D4**, exactly as it would for an `invalid` result or a timeout. A
+readable readiness signal is not permission to fail open.
+
+**Rationale.** An inline gateway needs to tell "the classifier is broken" apart from "the
+classifier is not there", because the two have different operational responses even though
+both must block traffic. Exiting on a load failure would surface only as a refused
+connection and would hide the reason, which is recoverable information the operator needs.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -916,6 +1054,10 @@ Precision of language here is cheap; retracting an overstated claim later is not
 | D22 | Real HTTP laboratory validation gate | APPROVED | NOT YET |
 | D23 | Current HF inference path is not the deployment target | APPROVED | N/A |
 | D24 | Evaluation-set terminology | APPROVED | N/A |
+| D25 | Control Plane contract — `status` ok/invalid, never coerced | APPROVED | **DONE (#15)** |
+| D26 | HF/PEFT control-plane baseline before llama.cpp | APPROVED | **DONE (#15)** |
+| D27 | Canonical V4 runtime inference configuration | APPROVED | **DONE (#15)** |
+| D28 | Control Plane readiness behaviour — 200/`model_loaded`, 503 | APPROVED | **DONE (#15)** |
 
 ---
 

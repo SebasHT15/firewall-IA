@@ -35,37 +35,123 @@ embedded Linux hardware and validated against real traffic in an authorized labo
 HTTP Client
     |
     v
-Inline Gateway  ......................  PLANNED  (mitmproxy data plane)
+Data Plane — inline gateway ..........  NOT BUILT     (mitmproxy; would enforce fail-closed)
     |
     v
-Classifier  ..........................  IMPLEMENTED  (TinyLlama + QLoRA adapter)
+Control Plane — POST /classify .......  IMPLEMENTED   (FastAPI, classifier_api.py)
     |
     v
-ALLOW / BLOCK  .......................  IMPLEMENTED  (decision contract)
+inference_core — V4 pipeline .........  IMPLEMENTED   (TinyLlama + model-output-v4-clean)
     |
     v
-Destination Server
+status=ok -> ALLOW | BLOCK           .  IMPLEMENTED   (reported to the caller,
+status=invalid -> no decision                          NOT enforced on any traffic)
 ```
 
 **Implemented today**
 
 - Dataset generation, integrity gating and the frozen V4-clean dataset
 - QLoRA fine-tuning pipeline (transformers 5.8 / TRL 1.4)
-- The trained V4-clean classifier adapter
+- The trained V4-clean classifier adapter (`model-output-v4-clean/`)
 - Frozen evaluation methodology and harness
-- A FastAPI control-plane service (`classifier_api.py`) — written and now runnable,
-  but not yet integrated into a gateway
+- `inference_core.py` — the single owner of the V4 inference pipeline, imported by both
+  the evaluation harness (`test_model.py`) and the control plane (`classifier_api.py`)
+- **FastAPI control plane (`classifier_api.py`)** — implemented and executed against the
+  real V4 model. `GET /health` and `POST /classify` verified end to end. It classifies
+  and reports; it does not enforce anything. See [Control Plane](#control-plane-issue-15).
 
 **Planned, not built**
 
 - Inline interception data plane (mitmproxy)
-- GGUF export, Q4_K_M quantization, llama.cpp inference
 - Fail-closed enforcement in a live path
+- Classifier timeout
+- GGUF export, Q4_K_M quantization, llama.cpp inference
 - End-to-end gateway latency measurement
+- Fast path, suspicious score, asynchronous classification
+- Concurrency / load validation
 - Embedded Linux deployment
 - Real HTTP laboratory validation
 
 Nothing in the "planned" list should be read as working today.
+
+---
+
+## Control Plane (Issue #15)
+
+`classifier_api.py` exposes the V4 classifier over HTTP. It **classifies and reports —
+it does not enforce**. Nothing intercepts or blocks traffic yet: the data plane
+(mitmproxy) and inline fail-closed enforcement are not built.
+
+```
+test_model.py  -->  inference_core.py  <--  classifier_api.py
+```
+
+`inference_core.py` is the **single owner** of the V4 inference pipeline: the decision
+contract (`INSTRUCTION`, `EXTRACT_RE`), the prompt template, model loading, generation
+and parsing. Both the evaluation harness and the control plane import it, so runtime and
+evaluation cannot drift apart. The previous `classifier_api.py` — which targeted the
+absent `model-output-v3`, used a different quantization compute dtype, and silently
+coerced unparseable output to ALLOW — was deleted and rewritten against this core.
+
+The active adapter is `model-output-v4-clean/`, resolved relative to the repository and
+overridable with `FIREWALL_ADAPTER_DIR`. The model is loaded once at startup.
+
+### Endpoints
+
+`GET /health` — always 200 while the process is up; `model_loaded` carries readiness.
+
+```json
+{"status": "ok", "model_loaded": true, "adapter_dir": ".../model-output-v4-clean"}
+```
+
+`POST /classify` — body `{"request": "<raw HTTP request text>"}`, the same representation
+used in training and evaluation (D1), never structured method/path/header fields.
+
+```json
+{"status": "ok", "decision": "BLOCK", "reason": "Cross-site scripting payload detected", "model_latency_ms": 223.25}
+{"status": "invalid", "decision": null, "reason": null, "model_latency_ms": 12.5}
+```
+
+An unparseable model output is **never coerced** into a decision — not to ALLOW, not to
+BLOCK. It is reported as `status: "invalid"` with a null decision and null reason (D25).
+Other responses: `422` malformed body, `503` model not loaded (D28), `500` inference
+failure — no traceback is ever returned to the client.
+
+`model_latency_ms` is **model-side inference only**, the same scope the V4 evaluation
+uses. It is not end-to-end latency; there is no data plane to measure end to end.
+
+### Running it
+
+```bash
+python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
+curl -s http://127.0.0.1:8000/health
+```
+
+### Runtime evidence
+
+Executed against the real V4 adapter on an RTX 4090 Laptop GPU:
+
+- Model loaded once at startup, in 2.4 s on CUDA
+- `GET /health` -> 200, `model_loaded: true`, correct adapter path
+- A real ALLOW row and a real BLOCK row from `datasets/v4_clean/eval.jsonl` classified
+  in agreement with their labels
+- 30 fixed eval rows (15 ALLOW / 15 BLOCK): 0 invalid outputs, and 30/30 identical
+  answers on repeat — greedy decoding is deterministic
+- Request bodies are not written to the log
+- 37 unit tests pass, including a regression test that an unparseable output can never
+  become ALLOW
+
+**Latency — preliminary, not a benchmark.** The first inference after process start
+measured **512.8 ms** (CUDA warm-up / cold start). Steady-state, with the model already
+warm: **n=30, P50 232.5 ms, mean 211.5 ms, min 159.5 ms, max 241.9 ms**. The 512.8 ms
+warm-up sample was measured separately and is **not** included in those statistics.
+
+Read this as runtime evidence that the control plane works, and as a preliminary
+steady-state signal — **not** as a performance result. It is a small functional sample
+and is **not** comparable to the formal model-side P95 of 270.8 ms, which is a different
+statistic measured over the full 6,206-row split. The controlled benchmark is Issue #9.
+It must report cold-start and steady-state as **separate** sets: the warm-up sample is
+neither to be silently discarded nor pooled into steady-state statistics without saying so.
 
 ---
 
@@ -79,9 +165,10 @@ Nothing in the "planned" list should be read as working today.
 | Native EOS cleanup (E4) | Complete |
 | Evaluation methodology (E5) | Complete |
 | V4 clean training (Issue #7) | Complete |
-| Formal V4 evaluation | Complete |
+| V4 security evaluation (Issue #8) | Evaluation executed; issue still open |
+| FastAPI control plane (Issue #15) | Implemented and validated; issue still open |
 | Controlled inference benchmark (Issue #9) | Next |
-| Security error analysis (Issue #8) | Next |
+| Failure analysis of the 92 false negatives | Not yet tracked by a dedicated issue |
 | Real HTTP laboratory validation | Planned |
 | GGUF / Q4_K_M | Planned |
 | llama.cpp inference | Planned |
@@ -167,6 +254,15 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - **No physical embedded validation exists yet.**
 - **CSIC BLOCK labels come from a keyword heuristic**, so the CSIC-derived portion of
   per-category results inherits that circularity.
+- **The control plane reports; it does not enforce.** `POST /classify` returns
+  `status: "invalid"` for unparseable model output, and 5xx on failure. Nothing acts on
+  that yet — fail-closed (D4) belongs to the data plane, which is not built.
+- **No classifier timeout has been derived.** D3 makes the latency budget a prerequisite
+  for choosing one, and the value is still undecided.
+- **Concurrency is serialized but unvalidated.** One GPU, one inference at a time;
+  behaviour under simultaneous load has not been measured.
+- **Cold-start latency is materially higher than steady state**, and the two must never
+  be pooled — see [Control Plane](#control-plane-issue-15).
 
 ---
 
@@ -191,10 +287,24 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 
 **M1 — next**
 
-- Issue #8 — security / error analysis of the 92 false negatives
+- Issue #8 — V4 clean security evaluation. The metrics were produced and archived
+  (`reports/v4_clean_eval.json`); the issue itself is still open.
 - Issue #9 — controlled inference benchmark
+- Failure analysis of the 92 false negatives (D21) — outstanding work, not currently
+  tracked by a dedicated issue
 - Real HTTP laboratory validation
 - Decision gate: a targeted V4.1 only if the evidence requires it, otherwise proceed to M2
+
+**M3 — partially started ahead of M2 (D26)**
+
+- Issue #15 — FastAPI control plane: **implemented and validated**
+- Issue #16 — mitmproxy inline data plane: not started
+- Issue #17 — fail-closed enforcement: not started
+- Issue #18 — end-to-end gateway latency: not started
+
+The control plane was built on the current HuggingFace/PEFT backend to establish a
+functional, integrable baseline. That does **not** make HF/PEFT the deployment backend —
+D23 still holds, and GGUF/llama.cpp remains on the critical path.
 
 ---
 
@@ -226,7 +336,8 @@ Commit format is `type(scope): description` — types `feat` `fix` `perf` `refac
 | [`reports/`](reports/) | Every experiment record — E0 through the V4 baseline |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | Dataset identity: hashes, seed, source commit, generation policy |
 | [`CONTEXT.md`](CONTEXT.md) | Current technical state and immediate roadmap |
-| [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D24) |
+| [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D28) |
+| [`requirements.txt`](requirements.txt) | Direct dependencies, pinned to the verified environment |
 
 Dataset generation is deterministic and verified bit-identical across `PYTHONHASHSEED`
 values. Environment: Python 3.12, torch 2.6.0+cu124, transformers 5.8.0, TRL 1.4.0,

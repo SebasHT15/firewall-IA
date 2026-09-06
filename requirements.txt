@@ -1,0 +1,52 @@
+# firewall-IA — direct dependencies
+#
+# Pinned to the environment in which the V4-clean baseline was trained and evaluated,
+# and in which the FastAPI control plane (Issue #15) was implemented and validated.
+# Every version here was read from `python3.12 -m pip show <pkg>` on that machine —
+# none was chosen, inferred or copied from documentation.
+#
+# Python 3.12.13. Use `python3.12` explicitly: on this machine `python3` resolves to
+# 3.14, which does not have the ML stack installed.
+#
+# This file lists DIRECT dependencies only — what this repository imports or invokes.
+# It is deliberately NOT a `pip freeze` of the whole environment.
+#
+#     python3.12 -m pip install -r requirements.txt
+
+# ── Model / inference runtime ──────────────────────────────────────────────
+# Required by inference_core.py, and therefore by both test_model.py and
+# classifier_api.py.
+#
+# torch: the verified build is 2.6.0+cu124 (CUDA 12.4), installed from
+#   https://download.pytorch.org/whl/cu124
+# The plain PyPI wheel is CPU-only and will not reproduce the measured GPU behaviour.
+torch==2.6.0
+transformers==5.8.0
+peft==0.19.1
+
+# Not imported by name, but required at runtime and the service will not start
+# without them: accelerate backs `device_map="auto"`, bitsandbytes backs 4-bit
+# BitsAndBytesConfig loading.
+accelerate==1.13.0
+bitsandbytes==0.49.2
+
+# ── Control Plane (classifier_api.py) ──────────────────────────────────────
+# uvicorn is not imported; it is the ASGI server the service is launched with:
+#   python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
+fastapi==0.136.3
+pydantic==2.13.4
+uvicorn==0.48.0
+
+# ── Tests (tests/) ─────────────────────────────────────────────────────────
+# Not imported directly: fastapi.testclient.TestClient requires httpx at runtime.
+# The tests use the standard library's unittest — pytest is NOT required:
+#   python3.12 -m unittest discover -s tests -v
+httpx==0.28.1
+
+# ── Dataset generation and training ────────────────────────────────────────
+# Needed only to regenerate the dataset (parse_dataset_v4.py, parse_dataset.py) or to
+# retrain (finetune.py). Not needed to run the control plane or the evaluation harness.
+# check_dataset.py needs nothing beyond the standard library.
+pandas==3.0.2
+datasets==4.8.5
+trl==1.4.0
