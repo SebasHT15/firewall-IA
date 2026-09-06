@@ -67,7 +67,7 @@ status=invalid -> no decision                          NOT enforced on any traff
 - Classifier timeout
 - GGUF export, Q4_K_M quantization, llama.cpp inference
 - End-to-end gateway latency measurement
-- Fast path, suspicious score, asynchronous classification
+- Fast path, suspicious score, asynchronous classification (Issues #35–#38 — designed, not built)
 - Concurrency / load validation
 - Embedded Linux deployment
 - Real HTTP laboratory validation
@@ -165,9 +165,14 @@ neither to be silently discarded nor pooled into steady-state statistics without
 | Native EOS cleanup (E4) | Complete |
 | Evaluation methodology (E5) | Complete |
 | V4 clean training (Issue #7) | Complete |
-| V4 security evaluation (Issue #8) | Evaluation executed; issue still open |
-| FastAPI control plane (Issue #15) | Implemented and validated; issue still open |
+| V4 security evaluation (Issue #8) | Complete |
+| FastAPI control plane (Issue #15) | Complete |
 | Controlled inference benchmark (Issue #9) | Next |
+| Inline data plane (Issue #16) | Planned |
+| Fail-closed enforcement (Issue #17) | Planned |
+| Heuristic suspicious scoring (Issue #35) | Planned |
+| Benign fast path (Issue #36) | Planned |
+| Async fast-path validation (Issue #37) | Planned |
 | Failure analysis of the 92 false negatives | Not yet tracked by a dedicated issue |
 | Real HTTP laboratory validation | Planned |
 | GGUF / Q4_K_M | Planned |
@@ -287,8 +292,8 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 
 **M1 — next**
 
-- Issue #8 — V4 clean security evaluation. The metrics were produced and archived
-  (`reports/v4_clean_eval.json`); the issue itself is still open.
+- Issue #8 — V4 clean security evaluation: **complete**, metrics archived in
+  `reports/v4_clean_eval.json`
 - Issue #9 — controlled inference benchmark
 - Failure analysis of the 92 false negatives (D21) — outstanding work, not currently
   tracked by a dedicated issue
@@ -297,10 +302,24 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 
 **M3 — partially started ahead of M2 (D26)**
 
-- Issue #15 — FastAPI control plane: **implemented and validated**
+- Issue #15 — FastAPI control plane: **complete**
 - Issue #16 — mitmproxy inline data plane: not started
 - Issue #17 — fail-closed enforcement: not started
-- Issue #18 — end-to-end gateway latency: not started
+- Issue #18 — end-to-end gateway latency (no-fast-path baseline): not started
+
+Latency-reduction layer — **designed, not built** (D29, D30):
+
+- Issue #35 — heuristic suspicious scoring: not started
+- Issue #36 — benign fast-path ALLOW: not started
+- Issue #37 — asynchronous model validation of fast-path traffic: not started
+- Issue #38 — fast-path calibration and benchmark: not started
+
+The fast path is an **allow-only** optimization: traffic scored clearly benign skips
+synchronous inference, everything else still goes to the model, and there is **no
+heuristic fast BLOCK** (D29). Fast-path traffic is re-classified afterwards, off the
+critical path, so heuristic false ALLOWs are measured rather than invisible — this is
+evidence collection, **not** online learning, and the model is never updated
+automatically (D30).
 
 The control plane was built on the current HuggingFace/PEFT backend to establish a
 functional, integrable baseline. That does **not** make HF/PEFT the deployment backend —
@@ -336,7 +355,7 @@ Commit format is `type(scope): description` — types `feat` `fix` `perf` `refac
 | [`reports/`](reports/) | Every experiment record — E0 through the V4 baseline |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | Dataset identity: hashes, seed, source commit, generation policy |
 | [`CONTEXT.md`](CONTEXT.md) | Current technical state and immediate roadmap |
-| [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D28) |
+| [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D30) |
 | [`requirements.txt`](requirements.txt) | Direct dependencies, pinned to the verified environment |
 
 Dataset generation is deterministic and verified bit-identical across `PYTHONHASHSEED`

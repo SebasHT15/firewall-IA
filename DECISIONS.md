@@ -1026,6 +1026,84 @@ connection and would hide the reason, which is recoverable information the opera
 
 ---
 
+## D29 — Heuristic suspicious scoring and benign fast path
+
+- **Date:** 2026-09-06
+- **Status:** APPROVED
+- **Implementation:** NOT YET — issues #35 (scoring), #36 (fast path), #38 (calibration)
+
+**Decision.** The gateway will compute a fast, explainable **suspicious score** for each
+request before deciding whether that request needs synchronous model inference.
+
+- Only traffic scored **sufficiently benign** may take a **FAST ALLOW** path and be served
+  without waiting for the model.
+- Every remaining request goes to the model and is classified as it is today.
+- **There is no heuristic fast BLOCK in the first version.** The score may allow a request;
+  it may never block one on its own. A blocking decision requires the model.
+- There is exactly one benign gate. A request that fails the benign threshold goes to the
+  model; no second, looser threshold may allow it instead.
+- Scoring signals, weights and thresholds must be **configurable and measurable**, and the
+  fast path must be switchable off so the gateway can be compared against its own
+  no-fast-path baseline.
+
+**The purpose is latency, not security.** The fast path does not replace the model's
+security classification; it decides only whether that classification has to happen *before*
+the response instead of after (see **D30**). Any latency gain must be weighed against the
+measured disagreement rate before the fast path is kept.
+
+**Rationale.** **D23** records that model-side P95 (270.8 ms) already exceeds the entire
+200 ms end-to-end budget of **D3**, so the average path has to get shorter somehow.
+Quantization (M2) attacks the cost of each inference; the fast path attacks how often
+inference is needed at all. They are independent and can both apply.
+
+The asymmetry — allow-only, never block — is deliberate. A heuristic false ALLOW is
+recoverable and measurable through D30's deferred validation; a heuristic false BLOCK
+breaks legitimate traffic with no model judgement behind it and no signal that it happened.
+The V4 error profile is already asymmetric in the same direction (92 false negatives
+against 2 false positives), and this keeps the heuristic layer from adding a *new* class of
+false positive on top.
+
+This is **not** a second ML model, **not** online learning, and **not** an open-ended rule
+catalogue. The initial signal set stays small, cheap and explainable.
+
+---
+
+## D30 — Deferred model validation for fast-path traffic
+
+- **Date:** 2026-09-06
+- **Status:** APPROVED
+- **Implementation:** NOT YET — issue #37
+
+**Decision.** Requests served through the **FAST ALLOW** path of **D29** are classified by
+the model **afterwards**, asynchronously and outside the critical path.
+
+- The served response never waits for that classification.
+- For each validated request the system records the **fast-path decision**, the **model
+  decision**, and whether they **agree**.
+- Disagreements — the model returns BLOCK where the heuristic allowed — are counted and
+  individually inspectable.
+- A request that has already been served is **never retroactively blocked**.
+- A failure in the validation path never affects the request that was already served.
+
+The output is **evidence**: it measures the real cost of the fast path and curates
+candidate data for a future model revision.
+
+**There is no online learning.** The model, its adapter and its weights are never updated
+automatically by this mechanism. Any model change remains a deliberate, evaluated action
+under the existing training and evaluation decisions (**D19**, **D21**).
+
+**Rationale.** Without deferred validation, a heuristic false ALLOW is invisible: the
+request is served and nothing ever checks it. D29 is only defensible if the traffic it
+waves through is still measured, so the disagreement rate becomes a number that can be
+weighed against the latency gain rather than an assumption. It also produces exactly the
+kind of evidence **D21** requires before any dataset expansion is considered — real traffic
+the current system judged, rather than more synthetic rows.
+
+Retroactive blocking is excluded because it is not achievable: the response has already
+been delivered. Pretending otherwise would misrepresent the security property.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -1058,6 +1136,8 @@ connection and would hide the reason, which is recoverable information the opera
 | D26 | HF/PEFT control-plane baseline before llama.cpp | APPROVED | **DONE (#15)** |
 | D27 | Canonical V4 runtime inference configuration | APPROVED | **DONE (#15)** |
 | D28 | Control Plane readiness behaviour — 200/`model_loaded`, 503 | APPROVED | **DONE (#15)** |
+| D29 | Heuristic suspicious scoring and benign fast path (allow-only) | APPROVED | NOT YET (#35, #36, #38) |
+| D30 | Deferred model validation for fast-path traffic — no online learning | APPROVED | NOT YET (#37) |
 
 ---
 

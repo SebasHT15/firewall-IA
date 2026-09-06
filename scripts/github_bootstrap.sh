@@ -2,7 +2,8 @@
 # firewall-IA — GitHub project bootstrap
 #
 # Creates the labels, milestones and issues for the course Git/GitHub workflow.
-# Prepared 2026-08-17. Nothing here touches source code, commits or history.
+# Prepared 2026-08-17. Last synced with the live tracker 2026-09-06.
+# Nothing here touches source code, commits or history.
 #
 # PREREQUISITES
 #   sudo apt install gh          # or: https://cli.github.com
@@ -310,6 +311,7 @@ $(dep N1)
 - [ ] Peak memory recorded if practical
 - [ ] Hardware and precision recorded
 - [ ] No claim that model latency equals end-to-end gateway latency; the D3 P95 <= 200 ms target is an end-to-end budget and is not evaluated here
+- [ ] Cold-start / first-inference latency reported as a separate set from steady-state, never pooled and never silently discarded
 
 ## Recommended branch
 \`perf/<this-issue-number>-v4-inference-benchmark\`"
@@ -400,17 +402,19 @@ $(dep N5 N6)
 # ── M3 ────────────────────────────────────────────────────────────────────
 mkissue N9 "Integrate FastAPI control plane" "M3 — Inline Gateway" "feature,priority:high" \
 "## Objective
-Bring \`classifier_api.py\` into service as the control plane. It has been written but never executed, because no adapter existed.
+Bring the control plane into service on the current HF/PEFT backend, establishing a functional and integrable baseline.
 
-$(dep N6)
+**Depends on:** none. Per **D26** this deliberately precedes llama.cpp (N6), inverting the original ordering. D23 is not superseded: HF/PEFT is not the deployment backend.
 
 ## Acceptance criteria
 - [ ] Classifier endpoint works end to end
 - [ ] Output contract enforced
-- [ ] Invalid model responses handled explicitly, not silently coerced
-- [ ] Inference backend configurable (HF adapter vs llama.cpp)
+- [ ] Invalid model responses handled explicitly, not silently coerced (**D25**)
 - [ ] Basic API test passes
-- [ ] Generation/parsing behaviour stays equivalent to \`test_model.py\`
+- [ ] Generation/parsing behaviour stays equivalent to \`test_model.py\`, verified by real-inference A/B rather than by inspection
+
+## Note
+Backend configurability (HF adapter vs llama.cpp) belongs to N6, not here. Building an abstraction for a backend that does not yet exist would be speculative; \`inference_core.py\` is instead the single place a backend is swapped.
 
 ## Out of scope here
 Auth, telemetry, SIEM integration.
@@ -472,9 +476,108 @@ $(dep N10 N11)
 - [ ] Model / model+API / proxy overhead separated where practical
 - [ ] Throughput and requests-per-second recorded
 - [ ] D3 target evaluated correctly — against END-TO-END added latency, not model-side
+- [ ] Cold-start / first-inference latency reported as a separate set from steady-state, never pooled and never silently discarded
+- [ ] Measured with the benign fast path (N22) absent or disabled, so this run is the no-fast-path baseline N24 calibrates against
 
 ## Recommended branch
 \`perf/<this-issue-number>-gateway-latency\`"
+
+# ── M3 latency-reduction layer (D29, D30) ─────────────────────────────────
+mkissue N21 "Implement heuristic suspicious scoring" "M3 — Inline Gateway" "feature,research,priority:high" \
+"## Objective
+Add a fast, explainable, non-ML scoring function estimating how suspicious a raw HTTP request looks, so the gateway can later decide whether a request needs synchronous model inference.
+
+**Depends on:** none. The module is standalone and verifiable against the existing eval split, so it does not need the data plane and can proceed in parallel with it.
+
+## Scope
+Standalone module; deterministic score plus a per-signal breakdown; cheap explainable signals (character-class distribution, out-of-range symbols, structural/length anomalies, encoding artefacts); configuration in one place.
+
+## Out of scope
+A second ML model. Online learning. Routing decisions. Blocking on the score. An exhaustive rule catalogue.
+
+## Acceptance criteria
+- [ ] Scoring module imports neither the data plane nor the control plane
+- [ ] Returns a score AND a per-signal breakdown
+- [ ] Deterministic across runs and processes for a fixed input set
+- [ ] Every signal individually observable, so a score can be explained
+- [ ] Weights and thresholds in one configurable place, not scattered literals
+- [ ] Unit tests per signal and for the aggregate
+- [ ] Score distribution measured over \`datasets/v4_clean/eval.jsonl\`, reported per label with counts
+- [ ] Separability stated in numbers, not adjectives
+- [ ] No change to model, adapter, dataset or the /classify contract
+- [ ] Nothing in the request path consumes the score in this issue
+
+## Recommended branch
+\`feature/<this-issue-number>-suspicious-scoring\`"
+
+mkissue N22 "Implement benign fast-path ALLOW" "M3 — Inline Gateway" "feature,performance,priority:high" \
+"## Objective
+Allow a request immediately, without waiting for model inference, when the suspicious score says it is clearly benign (**D29**).
+
+$(dep N21 N10 N11)
+
+## Out of scope
+**Heuristic fast BLOCK — explicitly not in this version.** The score may allow; it may never block on its own. Async re-validation is N23; threshold calibration is N24.
+
+## Acceptance criteria
+- [ ] One explicit configurable threshold decides FAST_PATH vs MODEL_PATH
+- [ ] Exactly one benign gate: failing it sends the request to the model, and no second looser threshold may allow it
+- [ ] No request is blocked on the score alone
+- [ ] Path taken recorded per request and observable
+- [ ] Feature can be disabled by configuration, restoring model-path-only behaviour
+- [ ] Percentage and count per path measured over a defined traffic set
+- [ ] Latency per path as P50/P95/P99, cold-start separated from steady-state
+- [ ] Fail-closed behaviour from N11 unchanged for model-path traffic
+- [ ] Tests: below threshold -> FAST_PATH, above -> MODEL_PATH, disabled -> always MODEL_PATH
+
+## Recommended branch
+\`feature/<this-issue-number>-benign-fast-path\`"
+
+mkissue N23 "Add asynchronous model validation for fast-path traffic" "M3 — Inline Gateway" "feature,testing,priority:medium" \
+"## Objective
+Classify fast-path-allowed requests by the model afterwards, off the critical path, and record whether the model agrees with the heuristic (**D30**).
+
+$(dep N22 N9)
+
+## Out of scope
+**Online learning — model weights are never updated automatically.** Retroactive blocking of an already-served request. Automatic threshold tuning. Retraining.
+
+## Acceptance criteria
+- [ ] Runs outside the critical path; the served response never waits for it
+- [ ] Each record carries fast_path_decision, model_decision, agreement, the score and a timestamp
+- [ ] Disagreements (model BLOCK over fast ALLOW) counted as a rate with numerator and denominator
+- [ ] Validation-path failure handled and logged, provably not affecting the served request
+- [ ] An already-served request is never retroactively blocked
+- [ ] The model is never modified by this mechanism
+- [ ] Measured overhead shows the fast path is not materially slowed
+- [ ] Backlog bounded with defined, tested behaviour when full — dropping is acceptable only if counted
+- [ ] Tests: agreement, disagreement, control-plane failure, backlog saturation
+
+## Recommended branch
+\`feature/<this-issue-number>-async-fast-path-validation\`"
+
+mkissue N24 "Calibrate and benchmark the fast path" "M3 — Inline Gateway" "performance,testing,priority:medium" \
+"## Objective
+Measure what the fast path buys and what it costs, and choose its threshold from data.
+
+$(dep N12 N22 N23)
+
+## Note
+Deliberately separate from N12. Folding it in would make the first D3 measurement wait on N21-N23, and the no-fast-path baseline must exist before anything is calibrated against it. It also mixes a security metric (disagreement rate) into a pure latency measurement.
+
+## Acceptance criteria
+- [ ] Baseline measured with the fast path disabled, on the same traffic set as the enabled run
+- [ ] Fast-path-enabled run measured on that same traffic set
+- [ ] Percentage and count per path
+- [ ] Disagreement rate with numerator and denominator; every model-BLOCK-over-fast-ALLOW case listed
+- [ ] P50/P95/P99 for baseline, enabled overall, FAST_PATH only, MODEL_PATH only — never an average alone
+- [ ] Cold-start reported as a separate set from steady-state, neither pooled nor silently discarded
+- [ ] Result stated against D3 as end-to-end ADDED latency, not model-side
+- [ ] A threshold recommended, with the measurement that justifies it
+- [ ] A stated keep/drop conclusion weighing latency gain against disagreement rate
+
+## Recommended branch
+\`perf/<this-issue-number>-fast-path-calibration\`"
 
 # ── M4 ────────────────────────────────────────────────────────────────────
 mkissue N13 "Define embedded hardware requirements" "M4 — Embedded Deployment" "research,embedded,priority:high" \
@@ -661,11 +764,12 @@ Design constraint to respect from the start: do not log attacker-controlled payl
 
 # ── SUMMARY ───────────────────────────────────────────────────────────────
 say "SUMMARY — logical id -> real issue number"
-for id in H1 H2 H3 H4 N1 N2 N3 N4 N5 N6 N7 N8 N9 N10 N11 N12 N13 N14 N15 N16 N17 N18 N19 N20 F1 F2 F3 F4 F5; do
+for id in H1 H2 H3 H4 N1 N2 N3 N4 N5 N6 N7 N8 N9 N10 N11 N12 N13 N14 N15 N16 N17 N18 N19 N20 N21 N22 N23 N24 F1 F2 F3 F4 F5; do
   printf '  %-4s #%s\n' "$id" "${NUM[$id]:-not-created}"
 done
 
 say "NEXT"
-echo "  The next active issue is N1 (Train V4 clean baseline) = #${NUM[N1]:-?}"
+echo "  Done: N1 (V4 training), N2 (V4 evaluation), N9 (FastAPI control plane)."
+echo "  The next active issue is N10 (Integrate mitmproxy inline data plane) = #${NUM[N10]:-?}"
 echo "  Create its branch with:"
-echo "      git checkout develop && git checkout -b feature/${NUM[N1]:-N}-v4-clean-training"
+echo "      git checkout develop && git checkout -b feature/${NUM[N10]:-N}-mitmproxy-data-plane"
