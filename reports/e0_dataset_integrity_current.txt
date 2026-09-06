@@ -1,0 +1,286 @@
+==============================================================================
+firewall-IA — E0 DATASET INTEGRITY GATE
+==============================================================================
+Generated (UTC)   : 2026-08-17T04:21:33+00:00
+Train file        : /home/sebas/Desktop/firewall-IA/train.jsonl
+Eval file         : /home/sebas/Desktop/firewall-IA/eval.jsonl
+Mode              : ANALYSIS ONLY — no file is modified
+
+Thresholds in force for this run:
+  shortcut accuracy   FAIL >= 0.80   WARN >= 0.65
+  shortcut margin     FAIL >= 0.20   WARN >= 0.10
+  value purity        FAIL >= 0.99 at coverage >= 1.00%
+  train->eval leakage FAIL >= 1.00%    WARN >  0.00%
+  within-split dup    WARN >  10.00%
+  category ratio      WARN >  100:1
+  category min share  WARN <  0.10%
+
+==============================================================================
+1. DATASET SUMMARY
+==============================================================================
+Total examples :   99,132
+  train        :   79,305  (80.00%)
+  eval         :   19,827  (20.00%)
+
+LABEL          TOTAL        %     TRAIN      EVAL
+-------------------------------------------------
+ALLOW         49,566   50.00%    39,634     9,932
+BLOCK         49,566   50.00%    39,671     9,895
+
+==============================================================================
+1b. PER-CATEGORY COUNTS
+==============================================================================
+CATEGORY (reason string)                                TOTAL       %    TRAIN    EVAL
+--------------------------------------------------------------------------------------
+Normal HTTP request with no attack patterns detecte    49,566  50.00%   39,634   9,932
+Path traversal attack detected                         24,176  24.39%   19,276   4,900
+File inclusion attack detected                          8,447   8.52%    6,809   1,638
+SQL injection payload detected                          7,040   7.10%    5,679   1,361
+Cross-site scripting payload detected                   4,124   4.16%    3,297     827
+Command injection payload detected                      1,469   1.48%    1,176     293
+CRLF injection payload detected                           744   0.75%      582     162
+Server-side template injection payload detected           697   0.70%      545     152
+Insecure deserialization payload detected                 414   0.42%      325      89
+HTTP parameter pollution detected                         400   0.40%      318      82
+Open redirect payload detected                            391   0.39%      314      77
+XML external entity injection detected                    381   0.38%      313      68
+Server-side request forgery attack detected               312   0.31%      248      64
+XPath injection payload detected                          301   0.30%      244      57
+JWT token manipulation attack detected                    196   0.20%      170      26
+NoSQL injection payload detected                          135   0.14%      104      31
+LDAP injection payload detected                           123   0.12%      100      23
+GraphQL injection payload detected                        118   0.12%       88      30
+HTTP request smuggling attack detected                     52   0.05%       46       6
+CSRF attack pattern detected                               46   0.05%       37       9
+--------------------------------------------------------------------------------------
+distinct categories                                        20
+
+BLOCK category volume spread: largest=24,176  smallest=46  ratio=525.6:1
+
+Categories below 0.10% of the dataset (under-represented — a model cannot be fairly evaluated on these):
+         46  ( 0.05%)  CSRF attack pattern detected
+         52  ( 0.05%)  HTTP request smuggling attack detected
+
+==============================================================================
+2. DUPLICATION (exact input string match)
+==============================================================================
+SPLIT           ROWS    UNIQUE  UNIQUE %  DUPLICATE %
+-----------------------------------------------------
+train         79,305    58,499    73.76%       26.24%
+eval          19,827    14,796    74.63%       25.37%
+combined      99,132    73,042    73.68%       26.32%
+
+Most-replicated train inputs (first line shown):
+     171x  GET /ui/dropdown?action=drop&item=table HTTP/1.1
+     105x  POST /api/surveys/submit HTTP/1.1
+     105x  POST /admin/roles HTTP/1.1
+     103x  GET /api/drop-shipment/suppliers HTTP/1.1
+     101x  GET /api/products/789/reviews HTTP/1.1
+
+==============================================================================
+3. TRAIN -> EVAL LEAKAGE (exact input string match)
+==============================================================================
+Eval rows whose input appears verbatim in train :    5,283
+Eval rows total                                 :   19,827
+Leakage rate                                    :   26.65%
+Distinct leaked inputs                          :      253
+
+VERDICT: FAIL — eval is contaminated by train.
+
+Examples of leaked inputs (first line shown):
+     39x in eval  |  GET /ui/dropdown?action=drop&item=table HTTP/1.1
+     38x in eval  |  POST /api/comments HTTP/1.1
+     37x in eval  |  GET /api/recommendations/similar?product_id=42&limit=5 HTTP/
+     33x in eval  |  GET /search?q=delete+old+photos+from+icloud HTTP/1.1
+     32x in eval  |  GET /api/files/d41d8cd98f00b204e9800998ecf8427e HTTP/1.1
+
+==============================================================================
+4. ENVELOPE CONFOUND CHECKS
+==============================================================================
+
+--- 4a. Host header by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+target.internal.com                        42,979        0   42,979  100.0%
+target.com                                 29,863   23,276    6,587   77.9%
+api.example.com                             5,343    5,343        0  100.0%
+app.example.com                             3,119    3,119        0  100.0%
+api.shop.com                                2,211    2,211        0  100.0%
+api.app.com                                 1,314    1,314        0  100.0%
+example.com                                 1,188    1,188        0  100.0%
+shop.example.com                            1,092    1,092        0  100.0%
+blog.example.com                            1,019    1,019        0  100.0%
+docs.example.com                              783      783        0  100.0%
+storage.example.com                           653      653        0  100.0%
+support.example.com                           647      647        0  100.0%
+billing.example.com                           545      545        0  100.0%
+analytics.example.com                         539      539        0  100.0%
+api.chat.com                                  537      537        0  100.0%
+ci.example.com                                448      448        0  100.0%
+cdn.example.com                               426      426        0  100.0%
+db-gui.example.com                            326      326        0  100.0%
+monitoring.example.com                        322      322        0  100.0%
+api.calendar.com                              320      320        0  100.0%
+auth.example.com                              320      320        0  100.0%
+automation.example.com                        318      318        0  100.0%
+api.forum.com                                 235      235        0  100.0%
+logistics.example.com                         229      229        0  100.0%
+api.blog.com                                  225      225        0  100.0%
+... 30 more values                          4,131    4,131        0
+
+--- 4b. User-Agent presence by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+absent                                     68,493   25,514   42,979   62.7%
+present                                    30,639   24,052    6,587   78.5%
+
+--- 4c. User-Agent value by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+<absent>                                   68,493   25,514   42,979   62.7%
+Mozilla/5.0 (compatible; Konqueror/3.5;    29,863   23,276    6,587   77.9%
+MyApp/2.3.1 (iPhone; iOS 17.2)                222      222        0  100.0%
+ShopApp/1.0 (iPhone; iOS 16.5)                119      119        0  100.0%
+MyApp/2.3.1 (Android 14; Pixel 8)             113      113        0  100.0%
+MyApp/2.3.1 (iPhone; iOS 17.2; Scale/3.       109      109        0  100.0%
+MyApp/2.0.0 (Android 12; OnePlus 9)           107      107        0  100.0%
+MyApp/3.1.0 (Android 13; Samsung Galaxy       106      106        0  100.0%
+
+--- 4d. Request-format artifact: raw space in request-target ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+raw_space_in_target=False                  97,714   49,566   48,148   50.7%
+raw_space_in_target=True                    1,418        0    1,418  100.0%
+
+--- 4e. HTTP method by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+GET                                        47,040   34,716   12,324   73.8%
+POST                                       24,166   12,562   11,604   52.0%
+DELETE                                      9,494      874    8,620   90.8%
+PATCH                                       9,271      660    8,611   92.9%
+PUT                                         9,158      754    8,404   91.8%
+<unparsed>                                      3        0        3  100.0%
+
+--- 4f. Cookie presence by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+absent                                     69,269   26,290   42,979   62.0%
+present                                    29,863   23,276    6,587   77.9%
+
+--- 4g. Header-name set (structural fingerprint) by label ---
+VALUE                                       TOTAL    ALLOW    BLOCK   PURITY
+----------------------------------------------------------------------------
+('content-type', 'host')                   42,424    8,143   34,281   80.8%
+('host',)                                  25,194   16,499    8,695   65.5%
+('cookie', 'host', 'user-agent')           21,735   18,106    3,629   83.3%
+('content-type', 'cookie', 'host', 'use     8,128    5,170    2,958   63.6%
+('authorization', 'host')                     434      434        0  100.0%
+('host', 'user-agent')                        341      341        0  100.0%
+('content-type', 'host', 'user-agent')        326      326        0  100.0%
+('host', 'x-api-key')                         207      207        0  100.0%
+('content-type', 'host', 'stripe-signat       116      116        0  100.0%
+('content-type', 'host', 'x-github-even       115      115        0  100.0%
+('accept', 'host', 'user-agent')              109      109        0  100.0%
+('host', 'set-cookie')                          3        0        3  100.0%
+
+--- Deterministic label reveals (purity >= 99% at coverage >= 1.00%) ---
+  ! Host = 'target.internal.com' -> BLOCK (100.0% pure over 42,979 rows, 43.36% of dataset)
+  ! Host = 'api.example.com' -> ALLOW (100.0% pure over 5,343 rows, 5.39% of dataset)
+  ! Host = 'app.example.com' -> ALLOW (100.0% pure over 3,119 rows, 3.15% of dataset)
+  ! Host = 'api.shop.com' -> ALLOW (100.0% pure over 2,211 rows, 2.23% of dataset)
+  ! Host = 'api.app.com' -> ALLOW (100.0% pure over 1,314 rows, 1.33% of dataset)
+  ! Host = 'example.com' -> ALLOW (100.0% pure over 1,188 rows, 1.20% of dataset)
+  ! Host = 'shop.example.com' -> ALLOW (100.0% pure over 1,092 rows, 1.10% of dataset)
+  ! Host = 'blog.example.com' -> ALLOW (100.0% pure over 1,019 rows, 1.03% of dataset)
+  ! request-format artifact = 'raw_space_in_target=True' -> BLOCK (100.0% pure over 1,418 rows, 1.43% of dataset)
+
+==============================================================================
+5. TRIVIAL BASELINES (fit on TRAIN, scored on EVAL)
+==============================================================================
+A trivial baseline uses ONE non-payload feature and never reads the
+request target, query string, or body. If one of these approaches the
+model's accuracy, the dataset — not the model — is doing the work.
+
+BASELINE                                        EVAL ACC   vs MAJ   COVER   CELLS
+---------------------------------------------------------------------------------
+majority class (always BLOCK)                    49.91%        —       —       —
+Host (header value)                              93.72%  +43.81%  100.0%      55
+Content-Type (header value)                      82.62%  +32.72%  100.0%       5
+Header-name set (structural fingerprint)         76.84%  +26.94%  100.0%      12
+Header count                                     75.88%  +25.97%  100.0%       4
+Body present/absent                              74.12%  +24.21%  100.0%       2
+HTTP method                                      74.06%  +24.15%  100.0%       6
+User-Agent (present/absent)                      67.94%  +18.03%  100.0%       2
+User-Agent (header value)                        67.94%  +18.03%  100.0%       8
+Cookie (present/absent)                          67.14%  +17.23%  100.0%       2
+Malformed request-target (raw space)             51.60%   +1.69%  100.0%       2
+
+--- Generic per-header scan (every header name observed) ---
+HEADER                                    EVAL ACC   vs MAJ   CELLS  NOTE
+------------------------------------------------------------------------------
+host                                       93.72%  +43.81%      55  
+content-type                               82.62%  +32.72%       5  
+user-agent                                 67.94%  +18.03%       8  
+authorization                              50.33%   +0.42%       4  
+x-api-key                                  50.10%   +0.20%       3  
+accept                                     50.04%   +0.13%       2  
+stripe-signature                           50.03%   +0.13%       2  
+x-github-event                             50.03%   +0.13%       2  
+x-hub-signature-256                        50.03%   +0.13%       2  
+cookie                                     49.91%   +0.00%  23,956  
+set-cookie                                 49.91%   +0.00%       2  
+
+Strongest non-payload baseline: Host (header value) -> 93.72% (+43.81% vs majority class)
+
+==============================================================================
+6. REPRODUCIBILITY INFORMATION
+==============================================================================
+Artifact hashes (SHA-256):
+  train.jsonl              94fc5e3a93d5a78d8272bc95a5932ae1b75c410701046a67b13283656bb06936
+                           (36,460,219 bytes)
+  eval.jsonl               2d01fd0266ffb15a148d17af4275af1efd69ca932388dbb50a7bb19d92f6f8da
+                           (9,092,901 bytes)
+  parse_dataset.py         fadb9dbcdbabe4101eaf0663a670e4e269a6860ad86b8d52001d5c185334b57d
+                           (58,208 bytes)
+  csic_database.csv        c420f0bc0464376de75b6c419a0ac226fe69fe12c8ac4908843273721e44e637
+                           (29,539,583 bytes)
+
+PayloadsAllTheThings path   : /home/sebas/PayloadsAllTheThings
+PayloadsAllTheThings commit : e961fef231d8327bae83b563fab50aec2e6b77c0
+firewall-IA commit          : ef8da2b8c021dca4e1e2e3eb013a6f534fa12fba (dirty)
+
+Python                      : 3.12.13 (/usr/bin/python3.12)
+Platform                    : Linux-7.0.0-22-generic-x86_64-with-glibc2.43
+PYTHONHASHSEED              : <unset — set this before regenerating if determinism is required>
+
+==============================================================================
+7. FINAL STATUS
+==============================================================================
+
+    INTEGRITY RESULT: FAIL
+
+BLOCKING FAILURES (3) — evidence:
+------------------------------------------------------------------------------
+  [F1] TRAIN/EVAL LEAKAGE: 26.65% of eval (5,283 rows) appears verbatim in train (threshold 1.00%). Eval loss and any eval-derived metric measure memorisation, not generalization. Note that model selection via load_best_model_at_end/eval_loss would be fit to leaked data.
+
+  [F2] DATASET SHORTCUT: 'Host (header value)' alone classifies 93.72% of eval (+43.81% over the majority-class baseline) without reading the payload. Thresholds: FAIL at 80% absolute or +20% margin. Any accuracy measured on this dataset is uninterpretable as evidence of attack detection.
+
+  [F3] DETERMINISTIC LABEL REVEAL: 9 envelope value(s) predict the label at >= 99% purity with >= 1.00% coverage. First: Host = 'target.internal.com' -> BLOCK (100.0% pure over 42,979 rows, 43.36% of dataset)
+
+WARNINGS (4) — not blocking, but affect interpretation:
+------------------------------------------------------------------------------
+  [W1] Severe per-category imbalance in BLOCK: 525.6:1 (largest 24,176, smallest 46); threshold 100:1
+
+  [W2] 2 BLOCK categories below 0.10% of the dataset: CSRF attack pattern detected (46), HTTP request smuggling attack detected (52)
+
+  [W3] train.jsonl is 26.24% exact duplicates (threshold 10.00%) — inflates apparent dataset size
+
+  [W4] eval.jsonl is 25.37% exact duplicates (threshold 10.00%) — inflates apparent dataset size
+
+GATE RULE: no training run starts while this reports FAIL.
+See DECISIONS.md (D1, D6, D7) and CONTEXT.md §12 for the agreed remediation.
+
+==============================================================================
+END OF REPORT — exit code 2
+==============================================================================

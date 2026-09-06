@@ -1,0 +1,321 @@
+==============================================================================
+firewall-IA — RENDERED-ROW CAP SENSITIVITY ANALYSIS
+==============================================================================
+Date (UTC)          : 2026-08-17
+Generator           : parse_dataset_v4.py (seed 42, deterministic)
+Base policy         : policy B (source-agnostic), logical-group cap 2,500
+Row caps swept      : 2000 · 2500 · 3000 · 3500 · 4000 · none
+Gate                : check_dataset.py, UNMODIFIED, no threshold weakened
+
+SCOPE: analysis only. datasets/v4_clean/ was NOT replaced (verified
+bit-identical, sha256 12ab1883...). D17 NOT amended. finetune.py NOT run.
+No rows were fabricated, no category upsampled, no example duplicated, the
+grouped split was not weakened, and attack semantics were not modified.
+
+==============================================================================
+1. METHOD — SOURCE-STRATIFIED, GROUP-PRESERVING ROUND ROBIN
+==============================================================================
+The rendered-row cap is applied to malicious (BLOCK) categories only, AFTER
+valid rendering and deduplication and BEFORE final method-stratified balancing.
+Benign traffic is never row-capped.
+
+Exact selection method, per capped category:
+
+  1. SPLIT QUOTA. The category's row budget is divided between train and eval
+     in proportion to their current row counts, so the grouped split's
+     train/eval ratio is preserved and no group is moved between splits.
+
+  2. SOURCE QUOTA. Within a split, the budget is divided between the two
+     sources — PayloadsAllTheThings/hardcoded and CSIC — in proportion to
+     their current row counts, by largest remainder. This is what prevents
+     "trivially deleting one entire source first": at every cap tested, both
+     sources survive in proportion to their natural presence.
+
+  3. GROUP ROUND ROBIN. Within a source stratum, rows are taken one per
+     logical group across all groups, then a second per group, and so on until
+     the quota is met. This deliberately spends the budget on BREADTH before
+     DEPTH, so a row cap removes row REDUNDANCY before it removes logical
+     DIVERSITY.
+
+  4. DETERMINISM. Groups are ordered by group id; rows within a group are
+     ordered by sha256 of their content. Selection is therefore deterministic
+     and independent of iteration order.
+
+VERIFIED BEHAVIOUR-PRESERVING: after adding the row cap, re-running the default
+configuration reproduced datasets/v4_clean/{train,eval}.jsonl BIT-IDENTICALLY.
+
+==============================================================================
+2. SCENARIO SUMMARY
+==============================================================================
+  SCENARIO           TOTAL   TRAIN   EVAL   BLOCK  LARGEST  TOP-3  ENTROPY  EFF.CAT  EVEN  CSIC-BLK  0-EVAL
+  ---------------  -------  ------  -----  ------  -------  -----  -------  -------  ----  --------  ------
+  g2500B_row2000    21,872  17,552  4,320  10,936    18.3%  54.9%    3.154     8.90 0.742     2,285       1
+  g2500B_row2500    25,872  20,760  5,112  12,936    19.3%  58.0%    3.038     8.22 0.715     2,707       1
+  g2500B_row3000    28,084  22,534  5,550  14,042    21.4%  61.2%    2.981     7.89 0.702     3,128       1
+  g2500B_row3500    30,084  24,132  5,952  15,042    23.3%  63.8%    2.926     7.60 0.689     3,550       1
+  g2500B_row4000    31,340  25,134  6,206  15,670    25.5%  65.2%    2.891     7.42 0.681     3,906       1
+  g2500B_rownone    34,430  27,594  6,836  17,215    32.2%  68.4%    2.792     6.93 0.657     4,937       1
+
+  REFERENCE — previous sweep
+  cap2000_B         28,978  23,318  5,660  14,489    31.4%  65.9%    2.897     7.45 0.682     4,196       1
+  cap2500_B         34,430  27,594  6,836  17,215    32.2%  68.4%    2.792     6.93 0.657     4,937       1
+  cap1000_A (live)  26,820  21,624  5,196  13,410    47.3%  70.6%    2.668     6.36 0.628     5,900       1
+
+  ALLOW/BLOCK is exactly 1:1 in every scenario (ALLOW = BLOCK column).
+  g2500B_rownone is identical to cap2500_B by construction — a sanity check
+  that the row-cap code path is inert when disabled.
+
+  ENTROPY: Shannon entropy over the 19 BLOCK categories' share of BLOCK rows;
+  maximum log2(19) = 4.248 bits. EFF.CAT = 2^H, the effective number of
+  equally-represented categories. EVEN = H / log2(19). Descriptive only —
+  equalising all 19 categories is explicitly NOT the objective.
+
+==============================================================================
+3. DOES ROW CAPPING HARM LOGICAL DIVERSITY?  — ONLY BELOW A KNOWN THRESHOLD
+==============================================================================
+This was the decisive question. Measured at the row-cap step:
+
+  SCENARIO         CATEGORY                ROWS b/a      GROUPS b/a    KEPT   CSIC b/a
+  --------------  ----------------------  ------------  ------------  ------  -----------
+  row2000         SQL injection           5545->2000    2500->2000    80.0%   3699->1335  ** LOSS
+  row2000         Cross-site scripting    3628->2000    2500->2000    80.0%    641->353   ** LOSS
+  row2000         File inclusion          2595->2000    2500->2000    80.0%      0->0     ** LOSS
+  row2000         Path traversal          2511->2000    2500->2000    80.0%      0->0     ** LOSS
+  row2500         SQL injection           5545->2500    2500->2258    90.3%   3699->1668
+  row2500         Cross-site scripting    3628->2500    2500->2444    97.8%    641->442
+  row2500         File inclusion          2595->2500    2500->2498    99.9%      0->0
+  row2500         Path traversal          2511->2500    2500->2500   100.0%      0->0
+  row3000         SQL injection           5545->3000    2500->2425    97.0%   3699->2001
+  row3000         Cross-site scripting    3628->3000    2500->2500   100.0%    641->530
+  row3500         SQL injection           5545->3500    2500->2500   100.0%   3699->2335
+  row3500         Cross-site scripting    3628->3500    2500->2500   100.0%    641->618
+  row4000         SQL injection           5545->4000    2500->2500   100.0%   3699->2668
+
+  FINDING — the threshold is arithmetic, not empirical.
+    A category cannot represent G logical groups in fewer than G rows. When
+    row_cap < group_cap the round robin runs out of budget on its FIRST pass,
+    so group retention is pinned at exactly row_cap / group_cap. At row2000
+    that is 2000/2500 = 80.0%, observed exactly, in all four capped categories.
+
+    => The safe floor is row_cap >= group_cap. Below it, the row cap destroys
+       logical diversity by construction, which is the failure mode the task
+       asked to be flagged.
+
+  ABOVE the floor the behaviour is exactly the desirable case named in the
+  task: SQL Injection falls 5,545 -> 3,000 rows (-45.9%) while retaining
+  2,425 of 2,500 logical groups (97.0%), and at 3,500+ it retains 100%.
+  Row capping is removing REDUNDANT RENDERINGS of already-represented payloads,
+  not distinct attack material.
+
+  ROWS PER REPRESENTED GROUP, before and after (g2500B_row3000):
+    CRLF Injection      24.33 -> 1.62      SQL Injection   6.35 -> 1.24
+    XSS Injection        2.08 -> 1.20      Path Traversal  1.00 -> 1.00
+  After row capping no category exceeds 1.67 rows per represented logical
+  group. The redundancy that made row counts a misleading proxy for diversity
+  is gone.
+
+  NOTE ON DENOMINATORS: the previous report's "24.33 rows/group" for CRLF used
+  ATTACK logical groups only (21). The 1.62 figure here uses REPRESENTED groups
+  (315 = 21 PayloadsAllTheThings + 294 CSIC). Both are correct measures of
+  different quantities; CRLF itself was never row-capped (511 rows < any cap
+  tested). This is a denominator change, not an effect of the row cap.
+
+==============================================================================
+4. PER-CATEGORY DETAIL — LEADING HYBRID CANDIDATES
+==============================================================================
+"GROUPS" = attack logical groups surviving the group cap (PayloadsAllTheThings
++ hardcoded only). "REPR" = distinct logical groups actually represented in the
+final rows, including CSIC groups. REPR > GROUPS wherever CSIC contributes.
+
+  --- g2500B_row3000 · 28,084 rows · largest 21.4% · top-3 61.2% · eff.cat 7.89
+  CATEGORY                     GROUPS  REPR   ROWS  TRAIN  EVAL   %BLK  PATT  CSIC   R/G
+  --------------------------  ------  ----  -----  -----  ----  -----  ----  ----  -----
+  SQL Injection                 1074  2425   3000   2388   612  21.4%   999  2001   1.24
+  XSS Injection                 2114  2500   3000   2415   585  21.4%  2470   530   1.20
+  File Inclusion                2500  2500   2595   2101   494  18.5%  2595     0   1.04
+  Directory Traversal           2500  2500   2511   2005   506  17.9%  2511     0   1.00
+  Command Injection              453   562    741    607   134   5.3%   632   109   1.32
+  CRLF Injection                  21   315    511    399   112   3.6%    23   488   1.62
+  SSTI                           368   368    481    393    88   3.4%   481     0   1.31
+  Open Redirect                  242   242    259    208    51   1.8%   259     0   1.07
+  SSRF                           201   201    249    186    63   1.8%   249     0   1.24
+  XXE Injection                   98    98    143    116    27   1.0%   143     0   1.46
+  NoSQL Injection                 83    83    114     97    17   0.8%   114     0   1.37
+  JSON Web Token                  80    80    111     95    16   0.8%   111     0   1.39
+  LDAP Injection                  75    75    101     80    21   0.7%   101     0   1.35
+  GraphQL Injection               74    74     97     75    22   0.7%    97     0   1.31
+  CSRF                            31    31     46     38     8   0.3%    46     0   1.48
+  XPath Injection                 24    24     40     29    11   0.3%    40     0   1.67
+  HTTP Parameter Pollution        20    20     20     17     3   0.1%    20     0   1.00
+  Insecure Deserialization        12    12     16     11     5   0.1%    16     0   1.33
+  Request Smuggling                7     7      7      7     0   0.1%     7     0   1.00
+
+  --- g2500B_row4000 · 31,340 rows · largest 25.5% · top-3 65.2% · eff.cat 7.42
+  SQL Injection                 1074  2500   4000   3183   817  25.5%  1332  2668   1.60
+  XSS Injection                 2114  2500   3628   2920   708  23.2%  2987   641   1.45
+  File Inclusion                2500  2500   2595   2101   494  16.6%  2595     0   1.04
+  Directory Traversal           2500  2500   2511   2005   506  16.0%  2511     0   1.00
+  Command Injection              453   562    741    607   134   4.7%   632   109   1.32
+  CRLF Injection                  21   315    511    399   112   3.3%    23   488   1.62
+  SSTI                           368   368    481    393    88   3.1%   481     0   1.31
+  (remaining 12 categories identical to g2500B_row3000 — none exceeded the cap)
+
+  SOURCE COMPOSITION. Only four categories draw from more than one source:
+  SQL Injection, XSS Injection, Command Injection and CRLF Injection. In every
+  scenario both sources survive in each of them; no category was reduced to a
+  single source by the row cap.
+
+==============================================================================
+5. E0 ON EVERY ROW-CAP SCENARIO — ALL INVARIANTS HOLD
+==============================================================================
+Row capping materially changes the envelope population — CSIC BLOCK rows fall
+from 4,937 to 2,285 at the tightest cap while CSIC benign rows remain — so E0
+was re-run on all six. check_dataset.py is unmodified; no threshold weakened.
+
+  SCENARIO         E0 EXIT   LEAKAGE   DUPLICATES   REVEALS   STRONGEST NON-PAYLOAD
+  --------------  -------  --------  -----------  --------  -----------------------
+  g2500B_row2000        1     0.00%        0.00%         0   51.76%  content-type
+  g2500B_row2500        1     0.00%        0.00%         0   51.43%  content-type
+  g2500B_row3000        1     0.00%        0.00%         0   51.35%  content-type
+  g2500B_row3500        1     0.00%        0.00%         0   51.23%  content-type
+  g2500B_row4000        1     0.00%        0.00%         0   51.16%  content-type
+  g2500B_rownone        1     0.00%        0.00%         0   51.04%  content-type
+
+  Required invariants, all satisfied in all six:
+    exact leakage = 0                          YES (0.00% everywhere)
+    duplicates = 0                             YES (0.00% everywhere)
+    deterministic incidental label reveals = 0 YES (0 everywhere)
+    trivial baselines near majority            YES (max +1.76 over 50.00%)
+
+  Exit 1 = WARNING in every case, from category imbalance only; zero blocking
+  failures. For reference the historical dataset measured Host at 93.72%.
+
+  Content-Type creeps up monotonically as the cap tightens (+1.04 -> +1.76),
+  because tightening removes CSIC form-encoded BLOCK rows while CSIC benign
+  rows stay. The trend is real and worth watching, but +1.76 over a coin flip
+  is not a shortcut and does not approach any E0 threshold.
+
+==============================================================================
+6. SCARCITY — UNCHANGED BY EVERY SCENARIO
+==============================================================================
+  ZERO EVAL SAMPLES: HTTP Request Smuggling (7 train, 0 eval) in all six
+  scenarios. NOT EVALUABLE under D18 regardless of row cap.
+
+  INSUFFICIENT DATA: the same 11 categories with identical counts in every
+  scenario — Request Smuggling 7 · Insecure Deserialization 12 · HPP 20 ·
+  CRLF 21 · XPath 24 · CSRF 31 · GraphQL 74 · LDAP 75 · JWT 80 · NoSQL 83 ·
+  XXE 98. All sit far below every cap tested.
+
+  Neither the group cap nor the row cap has any bearing on scarcity. It is a
+  source-material problem.
+
+==============================================================================
+7. HYBRID vs cap2000_B vs cap2500_B
+==============================================================================
+  CANDIDATE          ROWS   LARGEST  TOP-3  EFF.CAT  CSIC-BLK  GROUP RETENTION
+  ---------------  -------  -------  -----  -------  --------  ----------------
+  g2500B_row3000    28,084    21.4%  61.2%     7.89     3,128  97-100%
+  g2500B_row4000    31,340    25.5%  65.2%     7.42     3,906  100%
+  cap2000_B         28,978    31.4%  65.9%     7.45     4,196  100% (no row cap)
+  cap2500_B         34,430    32.2%  68.4%     6.93     4,937  100% (no row cap)
+  cap1000_A (live)  26,820    47.3%  70.6%     6.36     5,900  100% (no row cap)
+
+  vs cap2000_B — g2500B_row3000 DOMINATES ON BALANCE AT EQUAL SIZE
+    3% smaller (28,084 vs 28,978), but largest share 21.4% vs 31.4% — TEN
+    points better — top-3 61.2% vs 65.9%, eff.cat 7.89 vs 7.45. It gives up
+    1,068 CSIC BLOCK rows (3,128 vs 4,196). For a 3% size reduction it buys a
+    32% relative reduction in single-category dominance.
+
+  vs cap2500_B — g2500B_row4000 IS THE BETTER-BALANCED, SMALLER OPTION
+    9% smaller (31,340 vs 34,430) with largest share 25.5% vs 32.2% and
+    eff.cat 7.42 vs 6.93, retaining 3,906 of 4,937 CSIC BLOCK rows (79%).
+
+  WHY THE HYBRID BEATS GROUP-CAP-ONLY
+    A group cap cannot reach the redundancy that CSIC groups emit — capping
+    groups at 2,500 still left SQL Injection at 5,545 rows because its CSIC
+    groups render many records each. The row cap acts directly on the quantity
+    that determines training contribution, and because it spends its budget
+    breadth-first it does so at almost no cost in logical diversity above the
+    row_cap >= group_cap floor.
+
+==============================================================================
+8. RECOMMENDED CANDIDATES (at most two — neither selected here)
+==============================================================================
+------------------------------------------------------------------------------
+CANDIDATE H1 — group cap 2500, policy B, row cap 3000        "balance-leaning"
+------------------------------------------------------------------------------
+  28,084 rows (train 22,534 / eval 5,550) · ALLOW 14,042 / BLOCK 14,042
+  largest 21.4% · top-3 61.2% · eff.cat 7.89 · evenness 0.702
+  CSIC BLOCK retained 3,128 of 5,900 (53%)
+  group retention 97.0% (SQL) / 100% (all others)
+  E0: leakage 0.00% · duplicates 0.00% · reveals 0 · strongest 51.35%
+
+  TRADEOFF
+    size            28,084 — within 3% of cap2000_B, +5% on the live candidate
+    dominance       best of any candidate with >=28k rows; no category above 22%
+    logical diversity  essentially intact (97-100% group retention)
+    real CSIC       53% retained — the weakest point of this option
+
+------------------------------------------------------------------------------
+CANDIDATE H2 — group cap 2500, policy B, row cap 4000        "traffic-leaning"
+------------------------------------------------------------------------------
+  31,340 rows (train 25,134 / eval 6,206) · ALLOW 15,670 / BLOCK 15,670
+  largest 25.5% · top-3 65.2% · eff.cat 7.42 · evenness 0.681
+  CSIC BLOCK retained 3,906 of 5,900 (66%)
+  group retention 100% in every category
+  E0: leakage 0.00% · duplicates 0.00% · reveals 0 · strongest 51.16%
+
+  TRADEOFF
+    size            31,340 — 17% larger than the live candidate, 8% above 28k
+    dominance       largest 25.5%, still far below cap2000_B's 31.4%
+    logical diversity  100% retention everywhere — no diversity cost at all
+    real CSIC       66% retained, 778 more CSIC BLOCK rows than H1
+                    and 6,206 eval rows vs 5,550
+
+  H2 is the conservative choice: it is the loosest row cap that still costs
+  zero logical diversity, keeps the most real traffic among the hybrids, and
+  yields the largest dataset of the two.
+
+------------------------------------------------------------------------------
+  NOT RECOMMENDED
+    row2000 — 80.0% group retention in four categories. It destroys logical
+      diversity by arithmetic (row_cap < group_cap) and must not be used.
+    row2500 — sits exactly at the floor; 90.3% SQL group retention. Works, but
+      has no margin if the group cap or source mix changes.
+    Staying at cap1000_A — worse than every hybrid on size and dominance
+      simultaneously (47.3% largest share).
+
+==============================================================================
+9. LIMITATIONS
+==============================================================================
+  1. No model was trained. Every figure is a DATASET property. Whether lower
+     dominance improves per-category recall is untested.
+  2. The group cap was held at 2,500 throughout, as instructed. Joint
+     (group, row) optimisation was not explored; a lower group cap with a
+     similar row cap might retain more CSIC traffic at equal balance.
+  3. Only uniform per-category row caps were tested — no per-category budgets.
+  4. The row cap operates on whole rendered rows. Sub-sampling records WITHIN a
+     CSIC group before rendering was not tested and would be a different
+     tradeoff between CSIC row count and CSIC shape diversity.
+  5. Content-Type drifts upward as the cap tightens (§5). Small, but it is a
+     mechanism that would matter if far tighter caps were ever considered.
+  6. Scarcity and the Request Smuggling zero-eval problem are untouched.
+
+==============================================================================
+10. STATE AFTER THIS ANALYSIS
+==============================================================================
+  D17                   : UNCHANGED (cap 1000, policy A)
+  datasets/v4_clean/    : UNCHANGED (sha256 12ab1883..., bit-identical)
+  Historical dataset    : UNCHANGED
+  check_dataset.py      : UNCHANGED, no threshold weakened
+  finetune.py           : NOT RUN
+  test_model.py         : NOT MODIFIED
+  ###END###             : RETAINED
+
+  Every scenario is exactly reproducible:
+    python3.12 parse_dataset_v4.py --cap-per-category 2500 --cap-policy B \
+        --row-cap-per-category N
+
+==============================================================================
+END OF REPORT
+==============================================================================

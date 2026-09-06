@@ -1,0 +1,1796 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {
+    "hyperedges": [
+      {
+        "id": "training_pipeline",
+        "label": "Training Pipeline: parse_dataset \u2192 finetune \u2192 test_model",
+        "nodes": [
+          "firewall_ia_context_parse_dataset",
+          "firewall_ia_context_finetune",
+          "firewall_ia_context_test_model",
+          "firewall_ia_context_model_v3_rebuild"
+        ],
+        "relation": "implement",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "CONTEXT.md"
+      },
+      {
+        "id": "data_sources_pipeline",
+        "label": "Dataset Sources: PayloadsAllTheThings + CSIC 2010 + Hardcoded Payloads + Synthetic ALLOW",
+        "nodes": [
+          "firewall_ia_context_payloads_all_the_things",
+          "firewall_ia_context_csic2010",
+          "firewall_ia_context_dataset_v3_rebuild",
+          "firewall_ia_context_parse_dataset"
+        ],
+        "relation": "participate_in",
+        "confidence": "EXTRACTED",
+        "confidence_score": 1.0,
+        "source_file": "CONTEXT.md"
+      },
+      {
+        "id": "deployment_stack",
+        "label": "Inference Deployment: GGUF export \u2192 llama.cpp \u2192 Inline Proxy",
+        "nodes": [
+          "firewall_ia_context_gguf_export",
+          "firewall_ia_readme_llama_cpp",
+          "firewall_ia_context_inline_proxy",
+          "firewall_ia_context_classifier_api"
+        ],
+        "relation": "form",
+        "confidence": "INFERRED",
+        "confidence_score": 0.85,
+        "source_file": "CONTEXT.md"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "label": "classifier_api.py",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L1",
+      "id": "classifier_api_py",
+      "community": 0,
+      "norm_label": "classifier_api.py"
+    },
+    {
+      "label": "lifespan()",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L74",
+      "id": "firewall_ia_classifier_api_lifespan",
+      "community": 0,
+      "norm_label": "lifespan()"
+    },
+    {
+      "label": "FastAPI",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L74",
+      "id": "fastapi",
+      "community": 0,
+      "norm_label": "fastapi"
+    },
+    {
+      "label": "ClassifyRequest",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L104",
+      "id": "firewall_ia_classifier_api_classifyrequest",
+      "community": 0,
+      "norm_label": "classifyrequest"
+    },
+    {
+      "label": "BaseModel",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "basemodel",
+      "community": 0,
+      "norm_label": "basemodel"
+    },
+    {
+      "label": "ClassifyResponse",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L108",
+      "id": "firewall_ia_classifier_api_classifyresponse",
+      "community": 0,
+      "norm_label": "classifyresponse"
+    },
+    {
+      "label": "_classify_raw()",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L115",
+      "id": "firewall_ia_classifier_api_classify_raw",
+      "community": 0,
+      "norm_label": "_classify_raw()"
+    },
+    {
+      "label": "str",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L115",
+      "id": "str",
+      "community": 0,
+      "norm_label": "str"
+    },
+    {
+      "label": "classify()",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L147",
+      "id": "firewall_ia_classifier_api_classify",
+      "community": 0,
+      "norm_label": "classify()"
+    },
+    {
+      "label": "health()",
+      "file_type": "code",
+      "source_file": "classifier_api.py",
+      "source_location": "L164",
+      "id": "firewall_ia_classifier_api_health",
+      "community": 0,
+      "norm_label": "health()"
+    },
+    {
+      "label": "firewall-IA \u2014 classification engine (control plane).  Wraps the v3 QLoRA-fine-tu",
+      "file_type": "rationale",
+      "source_file": "classifier_api.py",
+      "source_location": "L1",
+      "id": "firewall_ia_classifier_api_rationale_1",
+      "community": 0,
+      "norm_label": "firewall-ia \u2014 classification engine (control plane).  wraps the v3 qlora-fine-tu"
+    },
+    {
+      "label": "Replicates test_model.py classify() 1:1, returning structured parts.",
+      "file_type": "rationale",
+      "source_file": "classifier_api.py",
+      "source_location": "L116",
+      "id": "firewall_ia_classifier_api_rationale_116",
+      "community": 0,
+      "norm_label": "replicates test_model.py classify() 1:1, returning structured parts."
+    },
+    {
+      "label": "parse_dataset.py",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L1",
+      "id": "parse_dataset_py",
+      "community": 5,
+      "norm_label": "parse_dataset.py"
+    },
+    {
+      "label": "obf_url_encode()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L422",
+      "id": "firewall_ia_parse_dataset_obf_url_encode",
+      "community": 6,
+      "norm_label": "obf_url_encode()"
+    },
+    {
+      "label": "obf_double_url_encode()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L427",
+      "id": "firewall_ia_parse_dataset_obf_double_url_encode",
+      "community": 6,
+      "norm_label": "obf_double_url_encode()"
+    },
+    {
+      "label": "obf_unicode_escape()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L431",
+      "id": "firewall_ia_parse_dataset_obf_unicode_escape",
+      "community": 14,
+      "norm_label": "obf_unicode_escape()"
+    },
+    {
+      "label": "obf_case_variation()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L441",
+      "id": "firewall_ia_parse_dataset_obf_case_variation",
+      "community": 10,
+      "norm_label": "obf_case_variation()"
+    },
+    {
+      "label": "obf_sql_comment_inject()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L459",
+      "id": "firewall_ia_parse_dataset_obf_sql_comment_inject",
+      "community": 9,
+      "norm_label": "obf_sql_comment_inject()"
+    },
+    {
+      "label": "obf_whitespace_tab()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L466",
+      "id": "firewall_ia_parse_dataset_obf_whitespace_tab",
+      "community": 11,
+      "norm_label": "obf_whitespace_tab()"
+    },
+    {
+      "label": "obf_bash_ifs()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L470",
+      "id": "firewall_ia_parse_dataset_obf_bash_ifs",
+      "community": 13,
+      "norm_label": "obf_bash_ifs()"
+    },
+    {
+      "label": "obf_html_entity()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L476",
+      "id": "firewall_ia_parse_dataset_obf_html_entity",
+      "community": 12,
+      "norm_label": "obf_html_entity()"
+    },
+    {
+      "label": "_transforms_for()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L495",
+      "id": "firewall_ia_parse_dataset_transforms_for",
+      "community": 7,
+      "norm_label": "_transforms_for()"
+    },
+    {
+      "label": "extract_payloads_from_md()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L501",
+      "id": "firewall_ia_parse_dataset_extract_payloads_from_md",
+      "community": 4,
+      "norm_label": "extract_payloads_from_md()"
+    },
+    {
+      "label": "wrap_in_http()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L522",
+      "id": "firewall_ia_parse_dataset_wrap_in_http",
+      "community": 4,
+      "norm_label": "wrap_in_http()"
+    },
+    {
+      "label": "build_hardcoded_categories()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L536",
+      "id": "firewall_ia_parse_dataset_build_hardcoded_categories",
+      "community": 4,
+      "norm_label": "build_hardcoded_categories()"
+    },
+    {
+      "label": "build_dataset()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L614",
+      "id": "firewall_ia_parse_dataset_build_dataset",
+      "community": 4,
+      "norm_label": "build_dataset()"
+    },
+    {
+      "label": "build_obfuscated_examples()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L671",
+      "id": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "community": 7,
+      "norm_label": "build_obfuscated_examples()"
+    },
+    {
+      "label": "categorize_csic_anomalous()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L701",
+      "id": "firewall_ia_parse_dataset_categorize_csic_anomalous",
+      "community": 5,
+      "norm_label": "categorize_csic_anomalous()"
+    },
+    {
+      "label": "integrate_csic2010()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L767",
+      "id": "firewall_ia_parse_dataset_integrate_csic2010",
+      "community": 5,
+      "norm_label": "integrate_csic2010()"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "parse_dataset.py",
+      "source_location": "L868",
+      "id": "firewall_ia_parse_dataset_main",
+      "community": 5,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Encode key attack chars with %XX: ' < > space ; =",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L423",
+      "id": "firewall_ia_parse_dataset_rationale_423",
+      "community": 6,
+      "norm_label": "encode key attack chars with %xx: ' < > space ; ="
+    },
+    {
+      "label": "URL-encode first, then encode each % as %25 (double encoding)",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L428",
+      "id": "firewall_ia_parse_dataset_rationale_428",
+      "community": 6,
+      "norm_label": "url-encode first, then encode each % as %25 (double encoding)"
+    },
+    {
+      "label": "r\"\"\"Escape < > ' \\\" as \\uXXXX",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L432",
+      "id": "firewall_ia_parse_dataset_rationale_432",
+      "community": 14,
+      "norm_label": "r\"\"\"escape < > ' \\\" as \\uxxxx"
+    },
+    {
+      "label": "Randomly mix upper/lower case on each character of SQL keywords",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L442",
+      "id": "firewall_ia_parse_dataset_rationale_442",
+      "community": 10,
+      "norm_label": "randomly mix upper/lower case on each character of sql keywords"
+    },
+    {
+      "label": "Insert inline SQL comments mid-keyword (SEL/**/ECT, UN/**/ION, \u2026)",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L460",
+      "id": "firewall_ia_parse_dataset_rationale_460",
+      "community": 9,
+      "norm_label": "insert inline sql comments mid-keyword (sel/**/ect, un/**/ion, ...)"
+    },
+    {
+      "label": "Replace spaces with tab characters in SQL payloads",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L467",
+      "id": "firewall_ia_parse_dataset_rationale_467",
+      "community": 11,
+      "norm_label": "replace spaces with tab characters in sql payloads"
+    },
+    {
+      "label": "Replace spaces with ${IFS}; convert backtick exec to $() syntax",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L471",
+      "id": "firewall_ia_parse_dataset_rationale_471",
+      "community": 13,
+      "norm_label": "replace spaces with ${ifs}; convert backtick exec to $() syntax"
+    },
+    {
+      "label": "HTML entity encoding for XSS (alternates named vs numeric entities)",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L477",
+      "id": "firewall_ia_parse_dataset_rationale_477",
+      "community": 12,
+      "norm_label": "html entity encoding for xss (alternates named vs numeric entities)"
+    },
+    {
+      "label": "Genera ejemplos BLOCK para categor\u00edas no cubiertas por PayloadsAllTheThings:",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L537",
+      "id": "firewall_ia_parse_dataset_rationale_537",
+      "community": 4,
+      "norm_label": "genera ejemplos block para categorias no cubiertas por payloadsallthethings:"
+    },
+    {
+      "label": "Sample target_count (payload, label) pairs from the raw BLOCK pool,     apply a",
+      "file_type": "rationale",
+      "source_file": "parse_dataset.py",
+      "source_location": "L672",
+      "id": "firewall_ia_parse_dataset_rationale_672",
+      "community": 7,
+      "norm_label": "sample target_count (payload, label) pairs from the raw block pool,     apply a"
+    },
+    {
+      "label": "test_model.py",
+      "file_type": "code",
+      "source_file": "test_model.py",
+      "source_location": "L1",
+      "id": "test_model_py",
+      "community": 15,
+      "norm_label": "test_model.py"
+    },
+    {
+      "label": "classify()",
+      "file_type": "code",
+      "source_file": "test_model.py",
+      "source_location": "L655",
+      "id": "firewall_ia_test_model_classify",
+      "community": 15,
+      "norm_label": "classify()"
+    },
+    {
+      "label": "finetune.py",
+      "file_type": "code",
+      "source_file": "finetune.py",
+      "source_location": "L1",
+      "id": "finetune_py",
+      "community": 8,
+      "norm_label": "finetune.py"
+    },
+    {
+      "label": "format_example()",
+      "file_type": "code",
+      "source_file": "finetune.py",
+      "source_location": "L61",
+      "id": "firewall_ia_finetune_format_example",
+      "community": 8,
+      "norm_label": "format_example()"
+    },
+    {
+      "label": "firewall-IA Project",
+      "file_type": "document",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a71",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_project_overview",
+      "community": 3,
+      "norm_label": "firewall-ia project"
+    },
+    {
+      "label": "TinyLlama-1.1B-Chat",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a71",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_tinyllama",
+      "community": 3,
+      "norm_label": "tinyllama-1.1b-chat"
+    },
+    {
+      "label": "LoRA / QLoRA 4-bit Fine-tuning",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a71",
+      "source_url": null,
+      "captured_at": null,
+      "author": "null",
+      "contributor": null,
+      "rationale": "4-bit NF4 quantization (rank=16, alpha=32) used to enable fine-tuning on a single consumer GPU (RTX 4090 Laptop) while keeping memory usage within 16 GB VRAM.",
+      "id": "firewall_ia_context_lora_qlora",
+      "community": 3,
+      "norm_label": "lora / qlora 4-bit fine-tuning"
+    },
+    {
+      "label": "parse_dataset.py",
+      "file_type": "code",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_parse_dataset",
+      "community": 2,
+      "norm_label": "parse_dataset.py"
+    },
+    {
+      "label": "finetune.py",
+      "file_type": "code",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_finetune",
+      "community": 3,
+      "norm_label": "finetune.py"
+    },
+    {
+      "label": "test_model.py",
+      "file_type": "code",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_test_model",
+      "community": 2,
+      "norm_label": "test_model.py"
+    },
+    {
+      "label": "classifier_api.py (FastAPI Service)",
+      "file_type": "code",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a75",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_classifier_api",
+      "community": 1,
+      "norm_label": "classifier_api.py (fastapi service)"
+    },
+    {
+      "label": "CSIC 2010 HTTP Dataset",
+      "file_type": "document",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Data Sources",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_csic2010",
+      "community": 2,
+      "norm_label": "csic 2010 http dataset"
+    },
+    {
+      "label": "PayloadsAllTheThings",
+      "file_type": "document",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Data Sources",
+      "source_url": "https://github.com/swisskyrepo/PayloadsAllTheThings",
+      "captured_at": null,
+      "author": "swisskyrepo",
+      "contributor": null,
+      "id": "firewall_ia_context_payloads_all_the_things",
+      "community": 2,
+      "norm_label": "payloadsallthethings"
+    },
+    {
+      "label": "csic_database.csv",
+      "file_type": "document",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_csic_database_csv",
+      "community": 2,
+      "norm_label": "csic_database.csv"
+    },
+    {
+      "label": "Dataset v3-rebuild (99K)",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Dataset",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Previous v3 dataset (52K) was missing Path Traversal and CSRF due to renamed PayloadsAllTheThings folder names; fixing folder mappings added ~46K examples. Doubled size improves category coverage, especially CSRF which had 0 training examples before.",
+      "id": "firewall_ia_context_dataset_v3_rebuild",
+      "community": 2,
+      "norm_label": "dataset v3-rebuild (99k)"
+    },
+    {
+      "label": "Model v3-rebuild (Adapter)",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Model Versions",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_model_v3_rebuild",
+      "community": 1,
+      "norm_label": "model v3-rebuild (adapter)"
+    },
+    {
+      "label": "GGUF Export for llama.cpp",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a77",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "GGUF format enables CPU/embedded inference via llama.cpp, targeting low-resource embedded Linux systems. HuggingFace Transformers inference is ~800ms which is the pre-optimization baseline.",
+      "id": "firewall_ia_context_gguf_export",
+      "community": 1,
+      "norm_label": "gguf export for llama.cpp"
+    },
+    {
+      "label": "Inline HTTP Proxy (Data Plane)",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a75",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_inline_proxy",
+      "community": 1,
+      "norm_label": "inline http proxy (data plane)"
+    },
+    {
+      "label": "19 Attack Categories",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Attack Categories",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_attack_categories",
+      "community": 2,
+      "norm_label": "19 attack categories"
+    },
+    {
+      "label": "HuggingFace PEFT",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_huggingface_peft",
+      "community": 3,
+      "norm_label": "huggingface peft"
+    },
+    {
+      "label": "TRL SFTTrainer",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_context_trl_sfttrainer",
+      "community": 3,
+      "norm_label": "trl sfttrainer"
+    },
+    {
+      "label": "Python 3.12 ML Environment",
+      "file_type": "concept",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a72",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Post-reinstall, python3 maps to Python 3.14 which lacks the ML stack; all scripts must explicitly use python3.12 where torch, transformers, peft, trl, etc. are installed.",
+      "id": "firewall_ia_context_python312_env",
+      "community": 2,
+      "norm_label": "python 3.12 ml environment"
+    },
+    {
+      "label": "Proxy as Data Factory (Future Strategy)",
+      "file_type": "rationale",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a78",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Rather than generic benign-traffic datasets (which carry app/era bias like CSIC), capturing real traffic via a local proxy (e.g. DVWA/bWAPP + Burp Logger) ensures the same HTTP envelope for both ALLOW and BLOCK, breaking User-Agent/cookie shortcut bias.",
+      "id": "firewall_ia_context_proxy_data_factory",
+      "community": 1,
+      "norm_label": "proxy as data factory (future strategy)"
+    },
+    {
+      "label": "v4 Improvement Plan",
+      "file_type": "rationale",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a77",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "Incremental plan: Group 1 removes ###END### token (design cleanliness), Group 2 strengthens JWT/GraphQL weak categories, Group 3 fixes CSIC SQL bias via subsampling.",
+      "id": "firewall_ia_context_v4_plan",
+      "community": 1,
+      "norm_label": "v4 improvement plan"
+    },
+    {
+      "label": "CSIC Envelope Bias (Konqueror UA / JSESSIONID)",
+      "file_type": "rationale",
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a710",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "rationale": "All CSIC examples share the same Konqueror User-Agent and JSESSIONID cookie pattern, risking the model learning to detect attacks by envelope rather than payload content.",
+      "id": "firewall_ia_context_csic_envelope_bias",
+      "community": 1,
+      "norm_label": "csic envelope bias (konqueror ua / jsessionid)"
+    },
+    {
+      "label": "firewall-IA README",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": null,
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_readme_project",
+      "community": 3,
+      "norm_label": "firewall-ia readme"
+    },
+    {
+      "label": "ALLOW/BLOCK Verdict Format",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": "How It Works",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_readme_verdict_format",
+      "community": 1,
+      "norm_label": "allow/block verdict format"
+    },
+    {
+      "label": "v3 Training Results (91% accuracy)",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "Training Results",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_readme_training_results_v3",
+      "community": 1,
+      "norm_label": "v3 training results (91% accuracy)"
+    },
+    {
+      "label": "llama.cpp Embedded Inference",
+      "file_type": "concept",
+      "source_file": "README.md",
+      "source_location": "Tech Stack",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_readme_llama_cpp",
+      "community": 1,
+      "norm_label": "llama.cpp embedded inference"
+    },
+    {
+      "label": "Project Roadmap",
+      "file_type": "document",
+      "source_file": "README.md",
+      "source_location": "Roadmap",
+      "source_url": null,
+      "captured_at": null,
+      "author": null,
+      "contributor": null,
+      "id": "firewall_ia_readme_roadmap",
+      "community": 1,
+      "norm_label": "project roadmap"
+    }
+  ],
+  "links": [
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "fastapi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "firewall_ia_classifier_api_classify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "firewall_ia_classifier_api_classify_raw",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "firewall_ia_classifier_api_classifyrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "firewall_ia_classifier_api_classifyresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L164",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "firewall_ia_classifier_api_health",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "classifier_api_py",
+      "target": "firewall_ia_classifier_api_lifespan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_rationale_1",
+      "target": "classifier_api_py",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_lifespan",
+      "target": "fastapi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L147",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_classify",
+      "target": "firewall_ia_classifier_api_classifyrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_classifyrequest",
+      "target": "basemodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_classifyresponse",
+      "target": "basemodel",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L155",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_classify",
+      "target": "firewall_ia_classifier_api_classifyresponse",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "context": "parameter_type",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L115",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_classify_raw",
+      "target": "str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "classifier_api.py",
+      "source_location": "L116",
+      "weight": 1.0,
+      "source": "firewall_ia_classifier_api_rationale_116",
+      "target": "firewall_ia_classifier_api_classify_raw",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L614",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_build_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L536",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_build_hardcoded_categories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L671",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L701",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_categorize_csic_anomalous",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L501",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_extract_payloads_from_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L767",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_integrate_csic2010",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L868",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L470",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_bash_ifs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L441",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_case_variation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L427",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_double_url_encode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L476",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_html_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L459",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_sql_comment_inject",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L431",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_unicode_escape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L422",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_url_encode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L466",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_obf_whitespace_tab",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L495",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_transforms_for",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L522",
+      "weight": 1.0,
+      "source": "parse_dataset_py",
+      "target": "firewall_ia_parse_dataset_wrap_in_http",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L689",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "target": "firewall_ia_parse_dataset_obf_url_encode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L429",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_obf_double_url_encode",
+      "target": "firewall_ia_parse_dataset_obf_url_encode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L423",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_423",
+      "target": "firewall_ia_parse_dataset_obf_url_encode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L428",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_428",
+      "target": "firewall_ia_parse_dataset_obf_double_url_encode",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L432",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_432",
+      "target": "firewall_ia_parse_dataset_obf_unicode_escape",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L442",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_442",
+      "target": "firewall_ia_parse_dataset_obf_case_variation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L460",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_460",
+      "target": "firewall_ia_parse_dataset_obf_sql_comment_inject",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L467",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_467",
+      "target": "firewall_ia_parse_dataset_obf_whitespace_tab",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L471",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_471",
+      "target": "firewall_ia_parse_dataset_obf_bash_ifs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L477",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_477",
+      "target": "firewall_ia_parse_dataset_obf_html_entity",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L684",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "target": "firewall_ia_parse_dataset_transforms_for",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L627",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_build_dataset",
+      "target": "firewall_ia_parse_dataset_extract_payloads_from_md",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L629",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_build_dataset",
+      "target": "firewall_ia_parse_dataset_wrap_in_http",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L691",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "target": "firewall_ia_parse_dataset_wrap_in_http",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L648",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_build_dataset",
+      "target": "firewall_ia_parse_dataset_build_hardcoded_categories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L537",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_537",
+      "target": "firewall_ia_parse_dataset_build_hardcoded_categories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L873",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_main",
+      "target": "firewall_ia_parse_dataset_build_dataset",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L876",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_main",
+      "target": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L672",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_rationale_672",
+      "target": "firewall_ia_parse_dataset_build_obfuscated_examples",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L826",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_integrate_csic2010",
+      "target": "firewall_ia_parse_dataset_categorize_csic_anomalous",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "parse_dataset.py",
+      "source_location": "L880",
+      "weight": 1.0,
+      "source": "firewall_ia_parse_dataset_main",
+      "target": "firewall_ia_parse_dataset_integrate_csic2010",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "test_model.py",
+      "source_location": "L655",
+      "weight": 1.0,
+      "source": "test_model_py",
+      "target": "firewall_ia_test_model_classify",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "finetune.py",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "finetune_py",
+      "target": "firewall_ia_finetune_format_example",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a71",
+      "weight": 1.0,
+      "source": "firewall_ia_context_project_overview",
+      "target": "firewall_ia_context_inline_proxy"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a71",
+      "weight": 1.0,
+      "source": "firewall_ia_context_project_overview",
+      "target": "firewall_ia_context_lora_qlora"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a71",
+      "weight": 1.0,
+      "source": "firewall_ia_context_project_overview",
+      "target": "firewall_ia_context_tinyllama"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": null,
+      "weight": 1.0,
+      "source": "firewall_ia_readme_project",
+      "target": "firewall_ia_context_project_overview"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_finetune",
+      "target": "firewall_ia_context_tinyllama"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Tech Stack",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_project",
+      "target": "firewall_ia_context_tinyllama"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_finetune",
+      "target": "firewall_ia_context_lora_qlora"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Tech Stack",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_project",
+      "target": "firewall_ia_context_lora_qlora"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_parse_dataset",
+      "target": "firewall_ia_context_csic_database_csv"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73",
+      "weight": 1.0,
+      "source": "firewall_ia_context_parse_dataset",
+      "target": "firewall_ia_context_dataset_v3_rebuild"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_parse_dataset",
+      "target": "firewall_ia_context_payloads_all_the_things"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a72",
+      "weight": 1.0,
+      "source": "firewall_ia_context_python312_env",
+      "target": "firewall_ia_context_parse_dataset"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_finetune",
+      "target": "firewall_ia_context_dataset_v3_rebuild"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_finetune",
+      "target": "firewall_ia_context_huggingface_peft"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_finetune",
+      "target": "firewall_ia_context_model_v3_rebuild"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_finetune",
+      "target": "firewall_ia_context_trl_sfttrainer"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a72",
+      "weight": 1.0,
+      "source": "firewall_ia_context_python312_env",
+      "target": "firewall_ia_context_finetune"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a75",
+      "weight": 1.0,
+      "source": "firewall_ia_context_classifier_api",
+      "target": "firewall_ia_context_test_model"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a72",
+      "weight": 1.0,
+      "source": "firewall_ia_context_python312_env",
+      "target": "firewall_ia_context_test_model"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_test_model",
+      "target": "firewall_ia_context_attack_categories"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_test_model",
+      "target": "firewall_ia_context_model_v3_rebuild"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a75",
+      "weight": 1.0,
+      "source": "firewall_ia_context_classifier_api",
+      "target": "firewall_ia_context_inline_proxy"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a75",
+      "weight": 1.0,
+      "source": "firewall_ia_context_classifier_api",
+      "target": "firewall_ia_context_model_v3_rebuild"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "README.md",
+      "source_location": "How It Works",
+      "weight": 0.85,
+      "source": "firewall_ia_readme_verdict_format",
+      "target": "firewall_ia_context_classifier_api"
+    },
+    {
+      "relation": "implements",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a79",
+      "weight": 1.0,
+      "source": "firewall_ia_context_csic_database_csv",
+      "target": "firewall_ia_context_csic2010"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a710",
+      "weight": 1.0,
+      "source": "firewall_ia_context_csic_envelope_bias",
+      "target": "firewall_ia_context_csic2010"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Data Sources",
+      "weight": 1.0,
+      "source": "firewall_ia_context_dataset_v3_rebuild",
+      "target": "firewall_ia_context_csic2010"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Data Sources",
+      "weight": 1.0,
+      "source": "firewall_ia_context_dataset_v3_rebuild",
+      "target": "firewall_ia_context_payloads_all_the_things"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a73 Attack Categories",
+      "weight": 1.0,
+      "source": "firewall_ia_context_dataset_v3_rebuild",
+      "target": "firewall_ia_context_attack_categories"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a77",
+      "weight": 1.0,
+      "source": "firewall_ia_context_model_v3_rebuild",
+      "target": "firewall_ia_context_gguf_export"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Training Results",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_training_results_v3",
+      "target": "firewall_ia_context_model_v3_rebuild"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Tech Stack",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_llama_cpp",
+      "target": "firewall_ia_context_gguf_export"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a77",
+      "weight": 1.0,
+      "source": "firewall_ia_context_v4_plan",
+      "target": "firewall_ia_context_gguf_export"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a78",
+      "weight": 1.0,
+      "source": "firewall_ia_context_proxy_data_factory",
+      "target": "firewall_ia_context_inline_proxy"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Detected Attack Categories",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_project",
+      "target": "firewall_ia_context_attack_categories"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a78",
+      "weight": 1.0,
+      "source": "firewall_ia_context_proxy_data_factory",
+      "target": "firewall_ia_context_csic_envelope_bias"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md",
+      "source_location": "\u00a78",
+      "weight": 1.0,
+      "source": "firewall_ia_context_proxy_data_factory",
+      "target": "firewall_ia_context_v4_plan"
+    },
+    {
+      "relation": "conceptually_related_to",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Roadmap",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_roadmap",
+      "target": "firewall_ia_context_v4_plan"
+    },
+    {
+      "relation": "references",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "README.md",
+      "source_location": "Tech Stack",
+      "weight": 1.0,
+      "source": "firewall_ia_readme_project",
+      "target": "firewall_ia_readme_llama_cpp"
+    }
+  ],
+  "hyperedges": [
+    {
+      "id": "training_pipeline",
+      "label": "Training Pipeline: parse_dataset \u2192 finetune \u2192 test_model",
+      "nodes": [
+        "firewall_ia_context_parse_dataset",
+        "firewall_ia_context_finetune",
+        "firewall_ia_context_test_model",
+        "firewall_ia_context_model_v3_rebuild"
+      ],
+      "relation": "implement",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md"
+    },
+    {
+      "id": "data_sources_pipeline",
+      "label": "Dataset Sources: PayloadsAllTheThings + CSIC 2010 + Hardcoded Payloads + Synthetic ALLOW",
+      "nodes": [
+        "firewall_ia_context_payloads_all_the_things",
+        "firewall_ia_context_csic2010",
+        "firewall_ia_context_dataset_v3_rebuild",
+        "firewall_ia_context_parse_dataset"
+      ],
+      "relation": "participate_in",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "CONTEXT.md"
+    },
+    {
+      "id": "deployment_stack",
+      "label": "Inference Deployment: GGUF export \u2192 llama.cpp \u2192 Inline Proxy",
+      "nodes": [
+        "firewall_ia_context_gguf_export",
+        "firewall_ia_readme_llama_cpp",
+        "firewall_ia_context_inline_proxy",
+        "firewall_ia_context_classifier_api"
+      ],
+      "relation": "form",
+      "confidence": "INFERRED",
+      "confidence_score": 0.85,
+      "source_file": "CONTEXT.md"
+    }
+  ],
+  "built_at_commit": "ef8da2b8c021dca4e1e2e3eb013a6f534fa12fba"
+}

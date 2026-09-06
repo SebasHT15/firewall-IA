@@ -1,0 +1,240 @@
+{
+  "dataset_name": "firewall-IA v4 clean (candidate)",
+  "version": "v4-clean-candidate",
+  "status": "CANDIDATE — not a validated baseline until E0 passes and it is reviewed",
+  "generated_utc": "2026-08-17T06:49:20+00:00",
+  "generator": "parse_dataset_v4.py",
+  "generator_git_commit": "1bf412fb843992399665e96ec034016462feda7f",
+  "payloadsallthethings_commit": "e961fef231d8327bae83b563fab50aec2e6b77c0",
+  "seed": 42,
+  "eval_fraction_requested": 0.2,
+  "cap_per_category": 2500,
+  "cap_policy_variant": "B",
+  "cap_policy": "D17: max logical groups per malicious attack category, applied before HTTP rendering and augmentation. Selection is by sorted group id (sha256 of the canonical payload) — deterministic and order-independent. Benign categories are not capped. Scarce categories are never upsampled.",
+  "row_cap_per_category": 4000,
+  "row_cap_policy": "D17 FINAL: max rendered BLOCK rows per malicious category, applied after rendering/dedup and before final balancing. Selection is deterministic, source-stratified (proportional by largest remainder), and breadth-first (one row per logical group before any second row), so it removes redundant renderings before logical diversity. Hard floor: row cap >= group cap.",
+  "row_cap_effect": {
+    "BLOCK | SQL injection payload detected.": {
+      "rows_before": 5545,
+      "rows_after": 4000,
+      "rows_removed": 1545,
+      "groups_before": 2500,
+      "groups_after": 2500,
+      "csic_rows_before": 3699,
+      "csic_rows_after": 2668
+    }
+  },
+  "capped_categories": {
+    "Directory Traversal": {
+      "before": 10218,
+      "after": 2500,
+      "removed": 7718,
+      "removed_attack": 7718,
+      "removed_csic": 0
+    },
+    "File Inclusion": {
+      "before": 2937,
+      "after": 2500,
+      "removed": 437,
+      "removed_attack": 437,
+      "removed_csic": 0
+    },
+    "SQL Injection": {
+      "before": 2953,
+      "after": 2500,
+      "removed": 453,
+      "removed_attack": 203,
+      "removed_csic": 250
+    },
+    "XSS Injection": {
+      "before": 2628,
+      "after": 2500,
+      "removed": 128,
+      "removed_attack": 110,
+      "removed_csic": 18
+    }
+  },
+  "logical_groups_per_category_before_cap": {
+    "Command Injection": 453,
+    "Cross-Site Request Forgery": 31,
+    "Directory Traversal": 10218,
+    "File Inclusion": 2937,
+    "GraphQL Injection": 74,
+    "Insecure Deserialization": 12,
+    "JSON Web Token": 80,
+    "LDAP Injection": 75,
+    "NoSQL Injection": 83,
+    "Open Redirect": 242,
+    "Request Smuggling": 7,
+    "SQL Injection": 1277,
+    "Server Side Request Forgery": 201,
+    "Server Side Template Injection": 368,
+    "XSS Injection": 2224,
+    "XXE Injection": 98,
+    "CRLF Injection": 21,
+    "XPath Injection": 24,
+    "HTTP Parameter Pollution": 20
+  },
+  "augment_per_group": 1,
+  "source_counts": {
+    "patt_candidates_scanned": 39396,
+    "patt_accepted_after_filter": 33517,
+    "hardcoded_logical": 81,
+    "attack_groups_unique": 9977,
+    "csic_normal_records": 36000,
+    "csic_anomalous_categorized": 5900,
+    "CSIC_ANOMALOUS_RESERVED": 19165,
+    "csic_malformed_skipped": 0,
+    "csic_groups": 8251,
+    "synthetic_benign_groups": 19785
+  },
+  "rejection_reasons": {
+    "accepted": 33517,
+    "too_short": 305,
+    "empty": 556,
+    "markdown_artifact": 644,
+    "fuzzer_placeholder": 3614,
+    "no_payload_indicator": 315,
+    "too_long": 373,
+    "control_chars": 63,
+    "prose": 9
+  },
+  "candidates_per_category": {
+    "Command Injection": 680,
+    "Cross-Site Request Forgery": 59,
+    "Directory Traversal": 23155,
+    "File Inclusion": 8182,
+    "GraphQL Injection": 231,
+    "Insecure Deserialization": 52,
+    "JSON Web Token": 158,
+    "LDAP Injection": 171,
+    "NoSQL Injection": 151,
+    "Open Redirect": 380,
+    "Request Smuggling": 9,
+    "SQL Injection": 1775,
+    "Server Side Request Forgery": 252,
+    "Server Side Template Injection": 566,
+    "XSS Injection": 3416,
+    "XXE Injection": 159
+  },
+  "logical_groups_per_category": {
+    "CRLF Injection": 21,
+    "Command Injection": 453,
+    "Cross-Site Request Forgery": 31,
+    "Directory Traversal": 2500,
+    "File Inclusion": 2500,
+    "GraphQL Injection": 74,
+    "HTTP Parameter Pollution": 20,
+    "Insecure Deserialization": 12,
+    "JSON Web Token": 80,
+    "LDAP Injection": 75,
+    "NoSQL Injection": 83,
+    "Open Redirect": 242,
+    "Request Smuggling": 7,
+    "SQL Injection": 1074,
+    "Server Side Request Forgery": 201,
+    "Server Side Template Injection": 368,
+    "XPath Injection": 24,
+    "XSS Injection": 2114,
+    "XXE Injection": 98
+  },
+  "group_split_counts": {
+    "attack:train": 8037,
+    "attack:eval": 1940,
+    "benign_synthetic:train": 15802,
+    "benign_synthetic:eval": 3983,
+    "csic:train": 6577,
+    "csic:eval": 1674
+  },
+  "final_rows": {
+    "train": 25134,
+    "eval": 6206,
+    "total": 31340
+  },
+  "achieved_eval_ratio": 0.198,
+  "label_counts": {
+    "ALLOW": 15670,
+    "BLOCK": 15670
+  },
+  "final_category_counts": {
+    "ALLOW | Normal HTTP request with no attack patterns detected.": 15670,
+    "BLOCK | SQL injection payload detected.": 4000,
+    "BLOCK | Server-side request forgery attack detected.": 249,
+    "BLOCK | Cross-site scripting payload detected.": 3628,
+    "BLOCK | Path traversal attack detected.": 2511,
+    "BLOCK | Command injection payload detected.": 741,
+    "BLOCK | File inclusion attack detected.": 2595,
+    "BLOCK | Server-side template injection payload detected.": 481,
+    "BLOCK | GraphQL injection payload detected.": 97,
+    "BLOCK | CRLF injection payload detected.": 511,
+    "BLOCK | XML external entity injection detected.": 143,
+    "BLOCK | Open redirect payload detected.": 259,
+    "BLOCK | Insecure deserialization payload detected.": 16,
+    "BLOCK | HTTP parameter pollution detected.": 20,
+    "BLOCK | NoSQL injection payload detected.": 114,
+    "BLOCK | LDAP injection payload detected.": 101,
+    "BLOCK | JWT token manipulation attack detected.": 111,
+    "BLOCK | CSRF attack pattern detected.": 46,
+    "BLOCK | XPath injection payload detected.": 40,
+    "BLOCK | HTTP request smuggling attack detected.": 7
+  },
+  "insufficient_data_categories": {
+    "Request Smuggling": 7,
+    "Insecure Deserialization": 12,
+    "HTTP Parameter Pollution": 20,
+    "CRLF Injection": 21,
+    "XPath Injection": 24,
+    "Cross-Site Request Forgery": 31,
+    "GraphQL Injection": 74,
+    "LDAP Injection": 75,
+    "JSON Web Token": 80,
+    "NoSQL Injection": 83,
+    "XXE Injection": 98
+  },
+  "not_evaluable_categories": {
+    "BLOCK | HTTP request smuggling attack detected.": {
+      "train_rows": 7,
+      "eval_rows": 0,
+      "policy": "D18: INSUFFICIENT DATA / NOT EVALUABLE — no category-level accuracy, recall, or other performance claim may be made."
+    }
+  },
+  "transform_pools": {
+    "train_pool_used": [
+      "case_variation",
+      "sql_comment_inject",
+      "url_encode",
+      "whitespace_tab"
+    ],
+    "held_out_never_used_in_this_dataset": {
+      "double_url_encode": "percent-encode, then encode each % as %25",
+      "unicode_escape": "escape < > ' \\\" as \\uXXXX",
+      "html_entity": "named/numeric HTML entity encoding",
+      "bash_ifs": "replace spaces with ${IFS}; backtick exec -> $()",
+      "mixed_case_percent": "randomise hex case in percent-escapes (%2F vs %2f)",
+      "param_fragmentation": "split a payload across repeated parameters"
+    }
+  },
+  "causal_envelope_exceptions": {
+    "Cross-Site Request Forgery": "Origin/Referer must be cross-origin for the attack to exist. Benign counterparts in the same shape carry same-origin Origin/Referer, so PRESENCE of the headers is non-predictive; only the cross-origin RELATIONSHIP correlates with BLOCK.",
+    "Request Smuggling": "Conflicting/duplicated Content-Length and Transfer-Encoding framing headers ARE the attack. Benign counterparts carry a single correct Content-Length, so header presence is non-predictive; the conflict is.",
+    "HTTP Parameter Pollution": "Duplicate parameter names ARE the attack. Benign counterparts in the same shape use the same parameter names and paths without duplication.",
+    "CRLF Injection": "Encoded CR/LF sequences interacting with the request-target and response headers ARE the attack. The payload itself carries the signal; the envelope is shared."
+  },
+  "artifact_sha256": {
+    "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+    "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
+  },
+  "artifact_bytes": {
+    "train": 13130392,
+    "eval": 3240906
+  },
+  "known_limitations": [
+    "CANDIDATE dataset. Not a validated baseline until check_dataset.py passes and the dataset is reviewed.",
+    "CSIC BLOCK labels are assigned by an 11-rule keyword heuristic (audit F6). Any future rule-vs-AI comparison on this subset would be circular.",
+    "Categories listed under not_evaluable_categories have ZERO held-out eval rows and are NOT EVALUABLE (D18). No performance claim may be made for them.",
+    "Categories listed under insufficient_data_categories have too few unique logical samples to support a per-category performance claim.",
+    "Held-out transforms were used to generate NOTHING here; obfuscation robustness against them is therefore unmeasured by design (D15).",
+    "Labels terminate via native EOS (D5/E4); no custom stop token is used.",
+    "Synthetic benign traffic is generated, not captured. Its realism is bounded by the parameter pools in this file."
+  ]
+}

@@ -1,23 +1,22 @@
-import torch
-import re
-import time
+import argparse
 import json
-import random
-import statistics
-from collections import defaultdict
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
-from peft import PeftModel
 import os
+import statistics
+import sys
+from collections import Counter, defaultdict
+from datetime import datetime, timezone
 
-# ── Configuración ──────────────────────────────────────────────
-BASE_MODEL  = "TinyLlama/TinyLlama-1.1B-Chat-v1.0"
-ADAPTER_DIR = os.path.expanduser("~/Desktop/firewall-IA/model-output-v3")
-EVAL_FILE   = os.path.expanduser("~/ai-firewall/eval.jsonl")
-
-INSTRUCTION = (
-    "You are a network security firewall classifier. "
-    "Analyze the following HTTP request and respond with exactly: "
-    "ALLOW or BLOCK | <one sentence reason>. Then output ###END###"
+# ── Inference core ─────────────────────────────────────────────
+# The V4 runtime pipeline — decision contract, prompt, model loading,
+# generation and parsing — lives in inference_core.py and is shared with the
+# FastAPI control plane, so evaluation and runtime cannot drift apart (#15).
+from inference_core import (
+    DEFAULT_ADAPTER_DIR as ADAPTER_DIR,
+    classify_raw,
+    load_model,
+    normalize_reason,
+    parse_prediction,
+    resolve_device,
 )
 
 # ── Test cases: (request, expected_label, category, description) ──
@@ -624,141 +623,632 @@ FALSE_POSITIVE_CASES = [
 # ── Combined suite ────────────────────────────────────────────────
 ALL_CASES = SYSTEMATIC_CASES + ADVERSARIAL_CASES + FALSE_POSITIVE_CASES
 
-# ── Cargar modelo ─────────────────────────────────────────────────
-print("[1/3] Cargando modelo fine-tuneado...")
+# ══════════════════════════════════════════════════════════════════════════
+# E5 — FROZEN EVALUATION METHODOLOGY
+#
+# Everything below implements the methodology frozen in
+# reports/e5_evaluation_methodology.txt BEFORE the first V4 training run.
+#
+# THREE SEPARATE LEVELS. They are never combined into one headline number.
+#   LEVEL 1  binary security decision   (ALLOW vs BLOCK)
+#   LEVEL 2  attack category / reason   (only over correctly-blocked attacks)
+#   LEVEL 3  latency distribution       (model-side inference only)
+#
+# PRIMARY SOURCE  datasets/v4_clean/eval.jsonl — the held-out, leakage-free
+#                 split from E2/E3.
+# LEGACY SUITE    the 135 hand-authored cases above are a MANUAL DIAGNOSTIC /
+#                 REGRESSION suite. They are NOT the primary metric.
+# ══════════════════════════════════════════════════════════════════════════
 
-bnb_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.float16,
-)
+CLEAN_EVAL = os.path.expanduser("~/Desktop/firewall-IA/datasets/v4_clean/eval.jsonl")
+MANIFEST = os.path.expanduser("~/Desktop/firewall-IA/datasets/manifest_v4_clean.json")
 
-tokenizer = AutoTokenizer.from_pretrained(ADAPTER_DIR)
-tokenizer.pad_token = tokenizer.eos_token
+# Positive class for all binary metrics. BLOCK is positive because the
+# security question is "did we catch the attack?". Never switch this silently.
+POSITIVE_CLASS = "BLOCK"
 
-base_model = AutoModelForCausalLM.from_pretrained(
-    BASE_MODEL,
-    quantization_config=bnb_config,
-    device_map="auto",
-)
-base_model.resize_token_embeddings(len(tokenizer))
-
-model = PeftModel.from_pretrained(base_model, ADAPTER_DIR)
-model.eval()
-print("      Modelo cargado OK\n")
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
-end_token_id = tokenizer.convert_tokens_to_ids("###END###")
+# A category needs at least this much held-out support before its per-category
+# numbers are presented as anything but exploratory. Not a quality threshold —
+# a reporting-honesty threshold.
+MIN_EVAL_SUPPORT = 30
 
 
-# ── Inferencia ────────────────────────────────────────────────────
-def classify(request):
-    prompt = (
-        f"<|system|>\n{INSTRUCTION}</s>\n"
-        f"<|user|>\n{request}</s>\n"
-        f"<|assistant|>\n"
+# ── Dataset label parsing ──────────────────────────────────────────────────
+# parse_prediction() and normalize_reason() are the shared contract and live
+# in inference_core.py. split_output() parses DATASET labels, which is an
+# evaluation concern only, so it stays here.
+def split_output(output):
+    """Split a dataset label 'DECISION | reason' into its two parts."""
+    decision, _, reason = output.partition("|")
+    return decision.strip().upper(), reason.strip()
+
+
+# ── Level 1: binary security decision ──────────────────────────────────────
+def score_binary(records):
+    """records: iterable of dicts with keys expected, predicted, status.
+
+    BLOCK is the positive class.
+      TP  expected BLOCK, predicted BLOCK   (attack caught)
+      FN  expected BLOCK, predicted ALLOW   (attack missed - most serious)
+      FP  expected ALLOW, predicted BLOCK   (benign traffic broken)
+      TN  expected ALLOW, predicted ALLOW
+
+    INVALID-OUTPUT POLICY (frozen): an unparseable output is counted as an
+    incorrect security decision and is mapped to the OPPOSITE of the expected
+    decision, so it can never earn credit. It is additionally reported as a
+    separate invalid-output rate, and a parseable-only view is emitted
+    alongside so the effect of the mapping is always visible.
+
+    NOTE: D4 specifies FAIL-CLOSED runtime behaviour (an unusable classifier
+    response blocks traffic). That is an operational control, NOT evaluation
+    credit; a model that emits garbage is not detecting anything. The two
+    concerns are deliberately kept separate.
+    """
+    cm = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
+    cm_valid = {"TP": 0, "FP": 0, "FN": 0, "TN": 0}
+    invalid = 0
+    for r in records:
+        exp = r["expected"]
+        if r["status"] == "invalid":
+            invalid += 1
+            pred = "ALLOW" if exp == "BLOCK" else "BLOCK"
+            target = cm
+        else:
+            pred = r["predicted"]
+            target = None
+        for d in ((cm,) if target is cm else (cm, cm_valid)):
+            if exp == "BLOCK" and pred == "BLOCK":
+                d["TP"] += 1
+            elif exp == "BLOCK" and pred == "ALLOW":
+                d["FN"] += 1
+            elif exp == "ALLOW" and pred == "BLOCK":
+                d["FP"] += 1
+            else:
+                d["TN"] += 1
+
+    def derive(c, n_total):
+        tp, fp, fn, tn = c["TP"], c["FP"], c["FN"], c["TN"]
+        n = tp + fp + fn + tn
+        prec = tp / (tp + fp) if (tp + fp) else None
+        rec = tp / (tp + fn) if (tp + fn) else None
+        f1 = (2 * prec * rec / (prec + rec)) if (prec and rec) else None
+        return {
+            "support": n,
+            "correct": tp + tn,
+            "accuracy": (tp + tn) / n if n else None,
+            "precision_block": prec,
+            "recall_block": rec,
+            "f1_block": f1,
+            "attack_detection_rate": rec,      # == recall on the positive class
+            "false_positives": fp,
+            "false_positive_rate": fp / (fp + tn) if (fp + tn) else None,
+            "false_negatives": fn,
+            "false_negative_rate": fn / (tp + fn) if (tp + fn) else None,
+            "confusion_matrix": dict(c),
+            "allow_support": fp + tn,
+            "block_support": tp + fn,
+        }
+
+    total = cm["TP"] + cm["FP"] + cm["FN"] + cm["TN"]
+    out = derive(cm, total)
+    out["invalid_outputs"] = invalid
+    out["invalid_output_rate"] = invalid / total if total else None
+    out["parseable_only"] = derive(cm_valid, total - invalid)
+    return out
+
+
+# ── Level 2: attack category / reason ──────────────────────────────────────
+def score_categories(records, insufficient_reasons, all_expected_reasons):
+    """Per-category metrics over expected-BLOCK examples.
+
+    CRITICAL SEPARATION: a category mismatch NEVER reduces binary recall.
+    'BLOCK | SQL injection' predicted for an expected 'BLOCK | XSS' is:
+        binary decision  = CORRECT
+        category/reason  = INCORRECT
+    Reason accuracy is measured ONLY over correctly-blocked attacks, so the two
+    dimensions cannot contaminate each other.
+    """
+    per = {}
+    for reason in all_expected_reasons:
+        per[reason] = {"support": 0, "blocked_correct": 0,
+                       "reason_correct": 0, "invalid": 0}
+    for r in records:
+        if r["expected"] != "BLOCK":
+            continue
+        reason = r["expected_reason"]
+        e = per.setdefault(reason, {"support": 0, "blocked_correct": 0,
+                                    "reason_correct": 0, "invalid": 0})
+        e["support"] += 1
+        if r["status"] == "invalid":
+            e["invalid"] += 1
+            continue
+        if r["predicted"] == "BLOCK":
+            e["blocked_correct"] += 1
+            if normalize_reason(r["predicted_reason"]) == normalize_reason(reason):
+                e["reason_correct"] += 1
+
+    out = {}
+    for reason, e in per.items():
+        sup, bc = e["support"], e["blocked_correct"]
+        if sup == 0:
+            status = "NOT EVALUABLE"
+        elif reason in insufficient_reasons or sup < MIN_EVAL_SUPPORT:
+            status = "INSUFFICIENT DATA"
+        else:
+            status = "OK"
+        out[reason] = {
+            "support": sup,
+            "binary_recall_num": bc,
+            "binary_recall_den": sup,
+            "binary_recall": (bc / sup) if sup else None,
+            "reason_accuracy_num": e["reason_correct"],
+            "reason_accuracy_den": bc,
+            "reason_accuracy": (e["reason_correct"] / bc) if bc else None,
+            "invalid_outputs": e["invalid"],
+            "evidence_status": status,
+        }
+    return out
+
+
+# ── Level 3: latency ───────────────────────────────────────────────────────
+def percentile(sorted_vals, q):
+    """Nearest-rank percentile. q in [0,1]."""
+    if not sorted_vals:
+        return None
+    import math
+    k = max(1, math.ceil(q * len(sorted_vals)))
+    return sorted_vals[min(k, len(sorted_vals)) - 1]
+
+
+def latency_stats(samples_ms):
+    """Model-side inference latency ONLY.
+
+    This is NOT end-to-end gateway latency. The D3 target of P95 <= 200 ms is
+    an END-TO-END budget covering proxy + API + model; a model-only number
+    cannot be compared against it directly.
+    """
+    if not samples_ms:
+        return {"count": 0}
+    s = sorted(samples_ms)
+    return {
+        "count": len(s),
+        "scope": "model-side inference only (NOT end-to-end gateway latency)",
+        "mean_ms": statistics.mean(s),
+        "p50_ms": percentile(s, 0.50),
+        "p95_ms": percentile(s, 0.95),
+        "p99_ms": percentile(s, 0.99),
+        "min_ms": s[0],
+        "max_ms": s[-1],
+        "stdev_ms": statistics.stdev(s) if len(s) > 1 else 0.0,
+    }
+
+
+# ── Dataset / manifest helpers ─────────────────────────────────────────────
+def load_manifest_flags():
+    """Derive insufficient-data and not-evaluable reason strings from the
+    dataset manifest, mapped through the generator's own category tables so the
+    two never drift apart."""
+    insufficient, not_evaluable, manifest_meta = set(), set(), {}
+    try:
+        with open(MANIFEST) as f:
+            man = json.load(f)
+        manifest_meta = {
+            "version": man.get("version"),
+            "generated_utc": man.get("generated_utc"),
+            "cap_per_category": man.get("cap_per_category"),
+            "row_cap_per_category": man.get("row_cap_per_category"),
+            "artifact_sha256": man.get("artifact_sha256"),
+        }
+        not_evaluable = {k.partition("|")[2].strip()
+                         for k in man.get("not_evaluable_categories", {})}
+        try:
+            import parse_dataset_v4 as gen
+            name_to_reason = {c: v[0] for c, v in gen.CATEGORY_SHAPES.items()}
+            name_to_reason.update({c: v[0] for c, v in gen.HARDCODED_SHAPES.items()})
+        except Exception:
+            name_to_reason = {}
+        for cat in man.get("insufficient_data_categories", {}):
+            if cat in name_to_reason:
+                insufficient.add(name_to_reason[cat])
+    except FileNotFoundError:
+        pass
+    return insufficient, not_evaluable, manifest_meta
+
+
+def git_commit():
+    try:
+        import subprocess
+        r = subprocess.run(["git", "-C", os.path.dirname(os.path.abspath(__file__)),
+                            "rev-parse", "HEAD"], capture_output=True, text=True, timeout=10)
+        return r.stdout.strip() if r.returncode == 0 else "<unavailable>"
+    except Exception:
+        return "<unavailable>"
+
+
+def sha256_file(path):
+    import hashlib
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for c in iter(lambda: f.read(1 << 20), b""):
+            h.update(c)
+    return h.hexdigest()
+
+
+# ── Reporting ──────────────────────────────────────────────────────────────
+def pct(x):
+    return "n/a" if x is None else f"{100 * x:.2f}%"
+
+
+def print_report(result):
+    m = result["run_metadata"]
+    print("\n" + "=" * 78)
+    print("firewall-IA — V4 EVALUATION (frozen methodology, E5)")
+    print("=" * 78)
+    for k in ("date_utc", "git_commit", "mode", "adapter_dir", "dataset",
+              "dataset_sha256", "manifest_version"):
+        if m.get(k) is not None:
+            print(f"  {k:<18}: {m[k]}")
+
+    b = result["binary"]
+    print("\n" + "=" * 78)
+    print("LEVEL 1 — BINARY SECURITY DECISION   (positive class = BLOCK)")
+    print("=" * 78)
+    print(f"  support                  : {b['support']:,}"
+          f"   (BLOCK {b['block_support']:,} / ALLOW {b['allow_support']:,})")
+    print(f"  correct                  : {b['correct']:,}")
+    print(f"  accuracy                 : {pct(b['accuracy'])}")
+    print(f"  precision (BLOCK)        : {pct(b['precision_block'])}")
+    print(f"  recall (BLOCK)           : {pct(b['recall_block'])}")
+    print(f"  F1 (BLOCK)               : {pct(b['f1_block'])}")
+    print(f"  attack detection rate    : {pct(b['attack_detection_rate'])}  (= recall)")
+    print(f"  false positives          : {b['false_positives']:,}")
+    print(f"  false positive rate      : {pct(b['false_positive_rate'])}"
+          f"   [FP / (FP+TN), benign traffic wrongly blocked]")
+    print(f"  false negatives          : {b['false_negatives']:,}")
+    print(f"  false negative rate      : {pct(b['false_negative_rate'])}"
+          f"   [FN / (TP+FN), attacks missed]")
+    print(f"  invalid outputs          : {b['invalid_outputs']:,}"
+          f"   ({pct(b['invalid_output_rate'])})")
+    c = b["confusion_matrix"]
+    print("\n  confusion matrix (rows = expected, cols = predicted)")
+    print(f"                 pred BLOCK   pred ALLOW")
+    print(f"    exp BLOCK    {c['TP']:>10,}   {c['FN']:>10,}")
+    print(f"    exp ALLOW    {c['FP']:>10,}   {c['TN']:>10,}")
+    pv = b["parseable_only"]
+    print(f"\n  parseable-only view (excludes {b['invalid_outputs']:,} invalid): "
+          f"support {pv['support']:,}, accuracy {pct(pv['accuracy'])}, "
+          f"recall {pct(pv['recall_block'])}, FPR {pct(pv['false_positive_rate'])}")
+
+    print("\n" + "=" * 78)
+    print("LEVEL 2 — ATTACK CATEGORY / REASON")
+    print("=" * 78)
+    print("  Measured ONLY over correctly-blocked attacks. A category mismatch")
+    print("  is NOT a binary security failure and never reduces recall above.")
+    print()
+    print(f"  {'CATEGORY':<44}{'SUP':>6}{'BINARY RECALL':>18}{'REASON ACC':>18}  STATUS")
+    print("  " + "-" * 104)
+    cats = result["categories"]
+    for reason in sorted(cats, key=lambda r: (-cats[r]["support"], r)):
+        e = cats[reason]
+        br = f"{e['binary_recall_num']}/{e['binary_recall_den']}"
+        ra = f"{e['reason_accuracy_num']}/{e['reason_accuracy_den']}"
+        brp = f"({pct(e['binary_recall'])})" if e["binary_recall"] is not None else "(n/a)"
+        rap = f"({pct(e['reason_accuracy'])})" if e["reason_accuracy"] is not None else "(n/a)"
+        print(f"  {reason[:43]:<44}{e['support']:>6}{br:>9}{brp:>9}"
+              f"{ra:>9}{rap:>9}  {e['evidence_status']}")
+    print("  " + "-" * 104)
+    ne = [r for r in cats if cats[r]["evidence_status"] == "NOT EVALUABLE"]
+    ins = [r for r in cats if cats[r]["evidence_status"] == "INSUFFICIENT DATA"]
+    if ne:
+        print(f"\n  NOT EVALUABLE ({len(ne)}) — zero held-out support, no claim may be made:")
+        for r in sorted(ne):
+            print(f"    - {r}")
+    if ins:
+        print(f"\n  INSUFFICIENT DATA ({len(ins)}) — exploratory only, not a robust")
+        print("  category-level conclusion (D18):")
+        for r in sorted(ins, key=lambda r: cats[r]["support"]):
+            print(f"    - {r}  (support {cats[r]['support']})")
+
+    lat = result.get("latency") or {}
+    if lat.get("count"):
+        print("\n" + "=" * 78)
+        print("LEVEL 3 — LATENCY")
+        print("=" * 78)
+        print(f"  scope   : {lat['scope']}")
+        print(f"  count   : {lat['count']:,}")
+        for k in ("mean_ms", "p50_ms", "p95_ms", "p99_ms", "min_ms", "max_ms", "stdev_ms"):
+            print(f"  {k:<8}: {lat[k]:>9.1f} ms")
+        print("\n  NOTE: D3's P95 <= 200 ms target is an END-TO-END budget")
+        print("  (proxy + API + model). These model-only numbers are not")
+        print("  comparable to it.")
+
+    print("\n" + "=" * 78)
+    print("No conclusions are generated automatically. Interpret with the")
+    print("evidence-status column and reports/e5_evaluation_methodology.txt.")
+    print("=" * 78)
+
+
+# ── Evaluation drivers ─────────────────────────────────────────────────────
+def evaluate_dataset(args):
+    insufficient, not_evaluable, man_meta = load_manifest_flags()
+    rows = [json.loads(l) for l in open(args.dataset) if l.strip()]
+    if args.limit:
+        rows = rows[: args.limit]
+    all_reasons = {split_output(r["output"])[1] for r in rows
+                   if split_output(r["output"])[0] == "BLOCK"} | not_evaluable
+
+    tok, mdl = load_model(args.adapter)
+    device = resolve_device()
+
+    records, lat = [], []
+    for i, r in enumerate(rows, 1):
+        exp_dec, exp_reason = split_output(r["output"])
+        raw, dt = classify_raw(tok, mdl, r["input"], device)
+        lat.append(dt)
+        dec, reason, status = parse_prediction(raw)
+        records.append({"expected": exp_dec, "expected_reason": exp_reason,
+                        "predicted": dec, "predicted_reason": reason,
+                        "status": status, "raw": raw})
+        if i % 250 == 0:
+            print(f"  {i}/{len(rows)} ...", flush=True)
+
+    return {
+        "run_metadata": {
+            "date_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "git_commit": git_commit(),
+            "mode": "dataset",
+            "adapter_dir": args.adapter,
+            "dataset": args.dataset,
+            "dataset_sha256": sha256_file(args.dataset),
+            "manifest_version": man_meta.get("version"),
+            "manifest": man_meta,
+            "positive_class": POSITIVE_CLASS,
+            "methodology": "reports/e5_evaluation_methodology.txt",
+        },
+        "binary": score_binary(records),
+        "categories": score_categories(records, insufficient, all_reasons),
+        "latency": latency_stats(lat),
+    }
+
+
+def evaluate_manual(args):
+    """LEGACY MANUAL DIAGNOSTIC / REGRESSION SUITE.
+
+    NOT the primary V4 metric. 135 hand-authored cases, 109 BLOCK / 26 ALLOW,
+    5 per category, with an adversarial block whose transform families overlap
+    training augmentation. Useful for edge cases and regression checks only.
+    """
+    print("=" * 78)
+    print("LEGACY MANUAL DIAGNOSTIC / REGRESSION SUITE — NOT the primary metric")
+    print("  135 cases, 109 BLOCK / 26 ALLOW. An always-BLOCK classifier scores")
+    print("  80.7%. The 26 ALLOW cases cannot support an FPR claim. The")
+    print("  adversarial cases reuse transform families seen in training and")
+    print("  are NOT evidence of evasion resistance.")
+    print("=" * 78)
+    tok, mdl = load_model(args.adapter)
+    device = resolve_device()
+    records, lat, per_cat = [], [], defaultdict(lambda: {"n": 0, "ok": 0})
+    for request, expected, category, desc in ALL_CASES:
+        raw, dt = classify_raw(tok, mdl, request, device)
+        lat.append(dt)
+        dec, reason, status = parse_prediction(raw)
+        records.append({"expected": expected, "expected_reason": category,
+                        "predicted": dec, "predicted_reason": reason,
+                        "status": status, "raw": raw})
+        per_cat[category]["n"] += 1
+        if status == "ok" and dec == expected:
+            per_cat[category]["ok"] += 1
+    res = {
+        "run_metadata": {
+            "date_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "git_commit": git_commit(), "mode": "manual-suite",
+            "adapter_dir": args.adapter,
+            "dataset": "legacy 135-case manual diagnostic suite",
+            "positive_class": POSITIVE_CLASS,
+            "warning": "diagnostic only — not the primary V4 metric",
+        },
+        "binary": score_binary(records),
+        "categories": {},
+        "latency": latency_stats(lat),
+        "manual_per_case_category": {k: dict(v) for k, v in per_cat.items()},
+    }
+    return res
+
+
+# ── Self-test (no model required) ──────────────────────────────────────────
+def self_test(args):
+    """Structural verification of the metric code on controlled fixtures.
+
+    Mock predictions ONLY. Nothing here is a model result.
+    """
+    ok = True
+
+    def check(name, got, want):
+        nonlocal ok
+        good = got == want
+        ok &= good
+        print(f"  [{'PASS' if good else 'FAIL'}] {name:<52} got={got!r}"
+              + ("" if good else f" want={want!r}"))
+
+    print("=" * 78)
+    print("E5 SELF-TEST — mock predictions, NOT model results")
+    print("=" * 78)
+
+    print("\n-- parser --")
+    for text, want in [
+        ("ALLOW | Normal HTTP request with no attack patterns detected.",
+         ("ALLOW", "Normal HTTP request with no attack patterns detected", "ok")),
+        ("BLOCK | SQL injection payload detected.", ("BLOCK", "SQL injection payload detected", "ok")),
+        ("  BLOCK |   Path traversal attack detected.  ", ("BLOCK", "Path traversal attack detected", "ok")),
+        ("BLOCK | XSS detected. trailing rambling", ("BLOCK", "XSS detected", "ok")),
+        ("BLOCK | no period here", ("BLOCK", "no period here", "ok")),
+        ("total garbage, no contract", (None, None, "invalid")),
+        ("", (None, None, "invalid")),
+        (None, (None, None, "invalid")),
+    ]:
+        check(f"parse {text!r}"[:60], parse_prediction(text), want)
+
+    print("\n-- reason normalisation --")
+    check("case/space/period invariance",
+          normalize_reason("  SQL Injection   Payload Detected. ") == normalize_reason("sql injection payload detected"),
+          True)
+    check("distinct reasons stay distinct",
+          normalize_reason("SQL injection payload detected.") == normalize_reason("Cross-site scripting payload detected."),
+          False)
+
+    print("\n-- confusion matrix (2 TP, 1 FN, 1 FP, 3 TN) --")
+    recs = (
+        [{"expected": "BLOCK", "predicted": "BLOCK", "status": "ok",
+          "expected_reason": "SQL injection payload detected.",
+          "predicted_reason": "SQL injection payload detected."} for _ in range(2)]
+        + [{"expected": "BLOCK", "predicted": "ALLOW", "status": "ok",
+            "expected_reason": "SQL injection payload detected.", "predicted_reason": "x"}]
+        + [{"expected": "ALLOW", "predicted": "BLOCK", "status": "ok",
+            "expected_reason": "", "predicted_reason": "y"}]
+        + [{"expected": "ALLOW", "predicted": "ALLOW", "status": "ok",
+            "expected_reason": "", "predicted_reason": "z"} for _ in range(3)]
     )
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    with torch.no_grad():
-        outputs = model.generate(
-            **inputs,
-            max_new_tokens=40,
-            do_sample=False,
-            pad_token_id=tokenizer.eos_token_id,
-            eos_token_id=end_token_id,
-        )
-    input_len = inputs["input_ids"].shape[1]
-    new_tokens = outputs[0][input_len:]
-    response = tokenizer.decode(new_tokens, skip_special_tokens=True)
-    match = re.search(r"(ALLOW|BLOCK)\s*\|\s*(.+?)(?:\s*###END###|\.|$)", response)
-    if match:
-        return f"{match.group(1)} | {match.group(2).strip()}"
-    return response.split("\n")[0].strip()
+    b = score_binary(recs)
+    check("confusion matrix", b["confusion_matrix"], {"TP": 2, "FP": 1, "FN": 1, "TN": 3})
+    check("support", b["support"], 7)
+    check("accuracy 5/7", round(b["accuracy"], 6), round(5 / 7, 6))
+    check("precision 2/3", round(b["precision_block"], 6), round(2 / 3, 6))
+    check("recall 2/3", round(b["recall_block"], 6), round(2 / 3, 6))
+    check("F1 2/3", round(b["f1_block"], 6), round(2 / 3, 6))
+    check("FPR 1/4", b["false_positive_rate"], 0.25)
+    check("FNR 1/3", round(b["false_negative_rate"], 6), round(1 / 3, 6))
+    check("attack detection rate == recall", b["attack_detection_rate"], b["recall_block"])
+
+    print("\n-- invalid-output policy --")
+    inv = [{"expected": "BLOCK", "predicted": None, "status": "invalid",
+            "expected_reason": "SQL injection payload detected.", "predicted_reason": None},
+           {"expected": "ALLOW", "predicted": None, "status": "invalid",
+            "expected_reason": "", "predicted_reason": None}]
+    b2 = score_binary(recs + inv)
+    check("invalid counted", b2["invalid_outputs"], 2)
+    check("invalid rate 2/9", round(b2["invalid_output_rate"], 6), round(2 / 9, 6))
+    check("invalid BLOCK -> FN", b2["confusion_matrix"]["FN"], 2)
+    check("invalid ALLOW -> FP", b2["confusion_matrix"]["FP"], 2)
+    check("invalid never earns credit", b2["correct"], 5)
+    check("parseable-only unaffected", b2["parseable_only"]["confusion_matrix"],
+          {"TP": 2, "FP": 1, "FN": 1, "TN": 3})
+
+    print("\n-- category scoring: mismatch must NOT hurt binary recall --")
+    crecs = [
+        {"expected": "BLOCK", "predicted": "BLOCK", "status": "ok",
+         "expected_reason": "SQL injection payload detected.",
+         "predicted_reason": "SQL injection payload detected."},
+        {"expected": "BLOCK", "predicted": "BLOCK", "status": "ok",
+         "expected_reason": "SQL injection payload detected.",
+         "predicted_reason": "Cross-site scripting payload detected."},
+        {"expected": "BLOCK", "predicted": "ALLOW", "status": "ok",
+         "expected_reason": "SQL injection payload detected.", "predicted_reason": "n"},
+    ]
+    cats = score_categories(crecs, set(), {"SQL injection payload detected."})
+    e = cats["SQL injection payload detected."]
+    check("support 3", e["support"], 3)
+    check("binary recall 2/3 (mismatch still blocked)",
+          (e["binary_recall_num"], e["binary_recall_den"]), (2, 3))
+    check("reason accuracy 1/2 (over blocked only)",
+          (e["reason_accuracy_num"], e["reason_accuracy_den"]), (1, 2))
+
+    print("\n-- evidence status --")
+    cats2 = score_categories(crecs, {"SQL injection payload detected."},
+                             {"SQL injection payload detected.",
+                              "HTTP request smuggling attack detected."})
+    check("zero support -> NOT EVALUABLE",
+          cats2["HTTP request smuggling attack detected."]["evidence_status"], "NOT EVALUABLE")
+    check("flagged category -> INSUFFICIENT DATA",
+          cats2["SQL injection payload detected."]["evidence_status"], "INSUFFICIENT DATA")
+
+    print("\n-- percentiles (1..100) --")
+    vals = list(range(1, 101))
+    check("p50", percentile(vals, 0.50), 50)
+    check("p95", percentile(vals, 0.95), 95)
+    check("p99", percentile(vals, 0.99), 99)
+    ls = latency_stats([float(v) for v in vals])
+    check("count", ls["count"], 100)
+    check("min", ls["min_ms"], 1.0)
+    check("max", ls["max_ms"], 100.0)
+    check("mean", ls["mean_ms"], 50.5)
+    check("single sample stdev 0", latency_stats([5.0])["stdev_ms"], 0.0)
+    check("empty latency", latency_stats([]), {"count": 0})
+
+    print("\n-- live dataset structural checks --")
+    try:
+        rows = [json.loads(l) for l in open(CLEAN_EVAL) if l.strip()]
+        check("eval.jsonl loads", len(rows) > 0, True)
+        exp = [split_output(r["output"]) for r in rows]
+        check("every label parses as DECISION | reason",
+              all(d in ("ALLOW", "BLOCK") and rr for d, rr in exp), True)
+        sup = Counter(rr for d, rr in exp if d == "BLOCK")
+        insufficient, not_evaluable, _ = load_manifest_flags()
+        print(f"       eval rows={len(rows)}  BLOCK categories={len(sup)}  "
+              f"ALLOW={sum(1 for d, _ in exp if d == 'ALLOW')}")
+        check("Request Smuggling absent from eval",
+              "HTTP request smuggling attack detected." in sup, False)
+        check("manifest flags Request Smuggling NOT EVALUABLE",
+              "HTTP request smuggling attack detected." in not_evaluable, True)
+        mock = [{"expected": d, "expected_reason": rr, "predicted": d,
+                 "predicted_reason": rr, "status": "ok"} for d, rr in exp]
+        cats3 = score_categories(mock, insufficient, set(sup) | not_evaluable)
+        check("category supports match dataset",
+              {k: v["support"] for k, v in cats3.items() if v["support"]}, dict(sup))
+        check("Request Smuggling -> NOT EVALUABLE",
+              cats3["HTTP request smuggling attack detected."]["evidence_status"],
+              "NOT EVALUABLE")
+        flagged = sorted(k for k, v in cats3.items()
+                         if v["evidence_status"] == "INSUFFICIENT DATA")
+        print(f"       INSUFFICIENT DATA categories flagged: {len(flagged)}")
+        for k in flagged:
+            print(f"         - {k} (support {cats3[k]['support']})")
+        b3 = score_binary(mock)
+        check("perfect mock -> accuracy 1.0", b3["accuracy"], 1.0)
+        check("perfect mock -> 0 FP", b3["false_positives"], 0)
+        check("perfect mock -> 0 FN", b3["false_negatives"], 0)
+    except FileNotFoundError:
+        print("  [SKIP] datasets/v4_clean/eval.jsonl not found")
+
+    print("\n" + "=" * 78)
+    print(f"SELF-TEST: {'PASS' if ok else 'FAIL'}   (mock data only — not model results)")
+    print("=" * 78)
+    return 0 if ok else 1
 
 
-# ── Correr suite completa ─────────────────────────────────────────
-print("[2/3] Clasificando requests de prueba...\n")
+# ── CLI ────────────────────────────────────────────────────────────────────
+def main():
+    ap = argparse.ArgumentParser(
+        description="firewall-IA V4 evaluation (frozen methodology, E5)")
+    ap.add_argument("--mode", choices=["dataset", "manual", "self-test"],
+                    default="dataset",
+                    help="dataset = primary held-out eval (default); "
+                         "manual = legacy 135-case diagnostic suite; "
+                         "self-test = verify metric code, no model needed")
+    ap.add_argument("--dataset", default=CLEAN_EVAL)
+    ap.add_argument("--adapter", default=ADAPTER_DIR)
+    ap.add_argument("--limit", type=int, default=0,
+                    help="evaluate only the first N rows (smoke runs)")
+    ap.add_argument("--json", default=None, help="write machine-readable results here")
+    args = ap.parse_args()
 
-category_stats = defaultdict(lambda: {"correct": 0, "total": 0, "failures": []})
-total_correct = 0
-false_positives = 0   # ALLOW expected but BLOCK returned
-false_negatives = 0   # BLOCK expected but ALLOW returned
+    if args.mode == "self-test":
+        return self_test(args)
 
-for request, expected, category, description in ALL_CASES:
-    result = classify(request)
-    got = "BLOCK" if "BLOCK" in result.upper() else "ALLOW"
-    ok = got == expected
-    category_stats[category]["total"] += 1
-    if ok:
-        category_stats[category]["correct"] += 1
-        total_correct += 1
-    else:
-        category_stats[category]["failures"].append((description, expected, got, result))
-        if expected == "ALLOW" and got == "BLOCK":
-            false_positives += 1
-        elif expected == "BLOCK" and got == "ALLOW":
-            false_negatives += 1
+    if not os.path.isdir(args.adapter):
+        print(f"FATAL: adapter not found: {args.adapter}\n"
+              f"V4 has not been trained yet. Use --mode self-test to verify the\n"
+              f"evaluation code without a model.")
+        return 3
 
-total_cases = len(ALL_CASES)
+    result = evaluate_dataset(args) if args.mode == "dataset" else evaluate_manual(args)
+    print_report(result)
+    if args.json:
+        os.makedirs(os.path.dirname(os.path.abspath(args.json)), exist_ok=True)
+        with open(args.json, "w") as f:
+            json.dump(result, f, indent=2)
+        print(f"\nmachine-readable results -> {args.json}")
+    return 0
 
-# ── Per-category summary ──────────────────────────────────────────
-print("=" * 72)
-print(f"{'CATEGORY':<30} {'CORRECT':>8} {'TOTAL':>6} {'ACCURACY':>9}")
-print("=" * 72)
-for cat in sorted(category_stats.keys()):
-    s = category_stats[cat]
-    pct = 100 * s["correct"] // s["total"] if s["total"] else 0
-    print(f"{cat:<30} {s['correct']:>8} {s['total']:>6} {pct:>8}%")
-print("=" * 72)
-print(f"{'OVERALL':<30} {total_correct:>8} {total_cases:>6} {100*total_correct//total_cases:>8}%")
-print(f"\nFalse positives (ALLOW→BLOCK): {false_positives}")
-print(f"False negatives (BLOCK→ALLOW): {false_negatives}")
 
-# ── Failures detail ───────────────────────────────────────────────
-all_failures = [
-    (cat, desc, exp, got, resp)
-    for cat, s in category_stats.items()
-    for (desc, exp, got, resp) in s["failures"]
-]
-if all_failures:
-    print(f"\n{'=' * 72}")
-    print(f"FAILED CASES ({len(all_failures)} total)")
-    print("=" * 72)
-    for cat, desc, exp, got, resp in all_failures:
-        print(f"  [{exp}→{got}] [{cat}] {desc}")
-        print(f"  Model output: {resp}")
-        print()
-else:
-    print("\nAll cases passed!")
-
-# ── Inference benchmark ───────────────────────────────────────────
-print("\n[3/3] Inference benchmark (100 samples from eval.jsonl)...\n")
-
-with open(EVAL_FILE) as f:
-    all_samples = [json.loads(line) for line in f]
-
-block_samples = [s for s in all_samples if s["output"].startswith("BLOCK")]
-allow_samples = [s for s in all_samples if s["output"].startswith("ALLOW")]
-
-random.seed(42)
-bench_samples = random.sample(block_samples, 50) + random.sample(allow_samples, 50)
-random.shuffle(bench_samples)
-
-latencies_ms = []
-for i, sample in enumerate(bench_samples, 1):
-    t0 = time.perf_counter()
-    classify(sample["input"])
-    latencies_ms.append((time.perf_counter() - t0) * 1000)
-    if i % 10 == 0:
-        print(f"  {i}/100 done...")
-
-print()
-print("=" * 72)
-print("INFERENCE BENCHMARK — 100 samples (50 BLOCK + 50 ALLOW from eval.jsonl)")
-print("=" * 72)
-print(f"  Average latency : {statistics.mean(latencies_ms):>8.1f} ms")
-print(f"  Minimum latency : {min(latencies_ms):>8.1f} ms")
-print(f"  Maximum latency : {max(latencies_ms):>8.1f} ms")
-print(f"  Std deviation   : {statistics.stdev(latencies_ms):>8.1f} ms")
-print(f"  Median latency  : {statistics.median(latencies_ms):>8.1f} ms")
-print("=" * 72)
+if __name__ == "__main__":
+    sys.exit(main())

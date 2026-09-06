@@ -1,0 +1,468 @@
+==============================================================================
+firewall-IA — E1: TRAINING PIPELINE COMPATIBILITY REPAIR
+==============================================================================
+Date (UTC)          : 2026-08-17T04:45:29Z
+Git commit (HEAD)   : 434e8346f25364dfef47295b6f4400cb3b5058e2
+Working tree        : finetune.py modified (the E1 port itself)
+Experiment          : E1 — software compatibility test
+Result              : PASS
+
+SCOPE STATEMENT
+  This is a SOFTWARE COMPATIBILITY TEST. It is NOT a model-quality experiment,
+  NOT a valid v4 training run, NOT a dataset experiment, NOT a performance
+  benchmark, and NOT a new baseline.
+
+  The loss values recorded below are evidence that gradients flow and that the
+  optimizer step executes. They are NOT research results. The dataset they were
+  computed on failed the E0 integrity gate
+  (reports/e0_dataset_integrity_current.txt) and is scientifically invalid.
+
+==============================================================================
+1. ENVIRONMENT
+==============================================================================
+Python              : 3.12.13 (/usr/bin/python3.12)
+Platform            : Linux-7.0.0-22-generic-x86_64-with-glibc2.43
+GPU detected        : NVIDIA GeForce RTX 4090 Laptop GPU
+VRAM                : 15.55 GiB
+torch.cuda          : available = True
+bf16 support        : torch.cuda.is_bf16_supported() = True
+
+Package versions (measured at run time):
+  torch             2.6.0+cu124
+  transformers      5.8.0
+  trl               1.4.0
+  peft              0.19.1
+  bitsandbytes      0.49.2
+  accelerate        1.13.0
+  datasets          4.8.5
+
+==============================================================================
+2. API INSPECTION PERFORMED BEFORE EDITING
+==============================================================================
+The installed APIs were introspected directly rather than assumed.
+
+  trl.SFTTrainer.__init__ accepted params:
+    [self, model, args, data_collator, train_dataset, eval_dataset,
+     processing_class, compute_loss_func, compute_metrics, callbacks,
+     optimizers, optimizer_cls_and_kwargs, preprocess_logits_for_metrics,
+     peft_config, formatting_func]
+
+    dataset_text_field  accepted: False   <- was passed by the old code
+    max_seq_length      accepted: False   <- was passed by the old code
+    tokenizer           accepted: False   <- was passed by the old code
+
+  trl.SFTConfig:
+    MRO = [SFTConfig, _BaseConfig, TrainingArguments, object]
+    -> SFTConfig SUBCLASSES TrainingArguments, so every argument the old
+       TrainingArguments call used remains valid on SFTConfig.
+    dataset_text_field  accepted: True    (default 'text')
+    max_seq_length      accepted: False
+    max_length          accepted: True    (default 1024)  <- the rename
+
+  transformers.Trainer:
+    tokenizer=          accepted: False
+    processing_class=   accepted: True
+
+  transformers.TrainingArguments: all fields used by the old recipe still
+    exist (output_dir, num_train_epochs, per_device_*_batch_size,
+    gradient_accumulation_steps, gradient_checkpointing, eval_strategy,
+    eval_steps, save_steps, logging_steps, learning_rate, fp16, optim,
+    lr_scheduler_type, warmup_ratio, report_to, load_best_model_at_end,
+    save_total_limit, save_strategy, max_steps).
+    NOTE: `evaluation_strategy` is gone; `eval_strategy` is correct and was
+    already in use.
+
+  transformers.BitsAndBytesConfig: load_in_4bit, bnb_4bit_quant_type,
+    bnb_4bit_compute_dtype, bnb_4bit_use_double_quant — all still accepted.
+
+  peft.LoraConfig: r, lora_alpha, target_modules, lora_dropout, bias,
+    task_type, modules_to_save — all still accepted.
+
+TRL 1.4 DEFAULTS CHECKED FOR SILENT RECIPE DRIFT (none found):
+  packing                = False   (matches previous behaviour)
+  padding_free           = False
+  completion_only_loss   = None    (not applicable to a plain text field)
+  neftune_noise_alpha    = None
+  use_liger_kernel       = False
+  activation_offloading  = False
+  chat_template_path     = None
+
+TRL EOS AUTO-APPEND — INSPECTED, NOT A BEHAVIOUR CHANGE:
+  trl/trainer/sft_trainer.py:1427 appends EOS to the text field, but is
+  guarded by `not example["text"].endswith(eos_token)`. format_example()
+  already ends with `</s>`, so nothing is double-appended. Confirmed in the
+  run log by the "Adding EOS to train dataset" map step completing without
+  altering sequence semantics.
+
+TRL HANDLES PEFT + GRADIENT CHECKPOINTING ITSELF:
+  sft_trainer.py:1081-1082 calls model.enable_input_require_grads() when the
+  model is a PEFT model and gradient_checkpointing is on. No manual
+  prepare_model_for_kbit_training() call is needed.
+
+==============================================================================
+3. API CHANGES MADE TO finetune.py
+==============================================================================
+  OLD                                     NEW
+  --------------------------------------  -------------------------------------
+  TrainingArguments(...)                  SFTConfig(...)
+  SFTTrainer(dataset_text_field="text")   SFTConfig(dataset_text_field="text")
+  SFTTrainer(max_seq_length=512)          SFTConfig(max_length=512)
+  SFTTrainer(tokenizer=tokenizer)         SFTTrainer(processing_class=tokenizer)
+  (implicit save_strategy)                save_strategy="steps" (made explicit,
+                                            required by load_best_model_at_end)
+
+UNCHANGED — verified identical to the pre-port recipe:
+  LoRA r=16 · lora_alpha=32 · lora_dropout=0.05
+  target_modules = [q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj]
+  bias="none" · task_type=CAUSAL_LM
+  bnb_4bit_quant_type="nf4" · bnb_4bit_use_double_quant=True
+  bnb_4bit_compute_dtype=torch.float16
+  optim="paged_adamw_8bit" · learning_rate=2e-4
+  num_train_epochs=4 · lr_scheduler_type="cosine" · warmup_ratio=0.05
+  per_device_train_batch_size=4 · gradient_accumulation_steps=8
+  per_device_eval_batch_size=2 · gradient_checkpointing=True
+  max_length (was max_seq_length) = 512  [rename only, same semantics]
+
+------------------------------------------------------------------------------
+3a. THE ONE RECIPE-AFFECTING CHANGE:  fp16=True  ->  bf16=True
+------------------------------------------------------------------------------
+This was FORCED by the stack, not chosen. The first smoke attempt with the
+recipe's original fp16=True crashed:
+
+  File ".../accelerate/accelerator.py", line 2932, in unscale_gradients
+    self.scaler.unscale_(opt)
+  File ".../torch/amp/grad_scaler.py", line 279, in _unscale_grads_
+    torch._amp_foreach_non_finite_check_and_unscale_(
+  RuntimeError: "_amp_foreach_non_finite_check_and_unscale_cuda"
+                not implemented for 'BFloat16'
+
+  Crash occurred at step 0/12, in _clip_grad_norm during the first optimizer
+  step. Model load, dataset tokenization, LoRA attachment and the forward pass
+  all succeeded before it.
+
+CAUSAL CHAIN (verified by reading the installed TRL source):
+  1. trl/trainer/sft_trainer.py:1088-1092 — when the base model is 4-bit
+     loaded, TRL casts EVERY trainable parameter to torch.bfloat16, following
+     the QLoRA paper. There is no flag to disable this.
+       "if getattr(model, 'is_loaded_in_4bit', False) ...:
+            for param in model.parameters():
+                if param.requires_grad:
+                    param.data = param.data.to(torch.bfloat16)"
+     Confirmed empirically — the run prints:
+       dtype de parámetros entrenables: ['torch.bfloat16']
+  2. fp16=True makes transformers/accelerate wrap the step in
+     torch.amp.GradScaler.
+  3. GradScaler.unscale_ dispatches to a CUDA kernel with no BFloat16
+     implementation.
+
+  => fp16 + 4-bit QLoRA cannot run on TRL 1.4.0 at all. This is structural.
+
+RESOLUTION: bf16=True. bf16 requires no loss scaling, so the GradScaler path
+  is not taken. The RTX 4090 Laptop (Ada, sm_89) supports bf16 natively
+  (torch.cuda.is_bf16_supported() = True).
+
+  `fp16` is not in the E1 protected-parameter list, so this did not trigger
+  the STOP condition. It is nonetheless a numerics change and is recorded here
+  rather than applied silently. It is reversible and reproducible:
+      python3.12 finetune.py --smoke --force-fp16
+  reproduces the crash above.
+
+  bnb_4bit_compute_dtype was deliberately LEFT at torch.float16. It is
+  quantization configuration (explicitly protected for E1) and changing it is
+  not required to fix this. Aligning it to bfloat16 for consistency with the
+  QLoRA reference configuration is a separate decision for the user.
+
+==============================================================================
+4. SMOKE TEST
+==============================================================================
+Command:
+  python3.12 finetune.py --smoke
+
+Configuration (smoke overrides only; production recipe untouched):
+  output_dir            model-output-e1-smoke/   (never touches model-output-v3)
+  train subset          500 examples  (train.jsonl .select(range(500)))
+  eval subset           100 examples  (eval.jsonl  .select(range(100)))
+  max_steps             12
+  eval_steps            6
+  save_steps            6
+  save_total_limit      1        <- checkpoint-count safety (audit F12)
+  logging_steps         2
+  warmup_ratio          0.0      <- 12 steps is too few for a warmup phase
+
+  The on-disk dataset was NOT modified, NOT regenerated, and NOT resampled.
+  Subsetting is done in memory via Dataset.select().
+
+RESULTS
+  [1] base model load .................... OK  (201 weight shards)
+  [2] 4-bit quantization ................. OK  is_loaded_in_4bit = True
+                                               quant_method = BITS_AND_BYTES
+  [3] tokenizer + ###END### resize ....... OK  vocab 32000 -> 32001
+  [4] dataset load + tokenize ............ OK  500 train / 100 eval
+  [5] LoRA attach ........................ OK  12,615,680 / 628,226,048
+                                               trainable = 2.0081%
+                                               308 LoRA tensors
+  [6] training executed .................. OK  12/12 steps
+  [7] gradients flowed ................... OK  grad_norm 2.484 -> 1.164
+                                               loss 2.023 -> 1.099
+  [8] evaluation executed ................ OK  2 in-loop evals + 1 explicit
+                                               eval_loss 1.372 -> 1.049
+  [9] checkpoint saved ................... OK  checkpoint-12/ (1 only)
+  [10] adapter saved ..................... OK  adapter_model.safetensors
+  [11] adapter reloaded .................. OK  (see section 6)
+
+  Wall-clock duration      : 30.5 s total (train_runtime 23.31 s)
+  Peak GPU memory allocated: 1.64 GiB
+  Peak GPU memory reserved : 3.12 GiB
+  Throughput (smoke only)  : 16.48 train samples/s, 0.515 steps/s
+
+  Loss trace (COMPATIBILITY EVIDENCE ONLY — NOT A RESULT):
+    step  2  loss 2.023  grad_norm 2.484
+    step  4  loss 1.563  grad_norm 2.250
+    step  6  eval_loss 1.372
+    step  8  loss 1.268  grad_norm 2.625
+    step 10  loss 1.163  grad_norm 1.383
+    step 12  loss 1.099  grad_norm 1.164 / eval_loss 1.049
+
+==============================================================================
+5. NF4 / QLoRA COMPATIBILITY VERIFICATION
+==============================================================================
+Each item the audit marked UNVERIFIED, now resolved:
+
+  BitsAndBytesConfig loads ............... CONFIRMED
+  NF4 quantization initializes ........... CONFIRMED (quant_method =
+                                             QuantizationMethod.BITS_AND_BYTES,
+                                             is_loaded_in_4bit = True)
+  bnb_4bit_use_double_quant works ........ CONFIRMED (no error; model loaded
+                                             and trained with it enabled)
+  PEFT LoRA attaches correctly ........... CONFIRMED (308 LoRA tensors,
+                                             12,615,680 trainable params
+                                             across the 7 target modules)
+  Gradients flow to LoRA parameters ...... CONFIRMED (non-zero, decreasing
+                                             grad_norm across all 12 steps;
+                                             loss decreased monotonically)
+  Adapter can be saved ................... CONFIRMED
+  Adapter can be reloaded ................ CONFIRMED
+
+  bitsandbytes 0.49.2 + peft 0.19.1 + transformers 5.8.0 NF4 double-quant path
+  is therefore VERIFIED WORKING on this machine.
+
+==============================================================================
+6. ADAPTER RELOAD TEST
+==============================================================================
+  AutoTokenizer.from_pretrained(adapter) ... OK   len(tokenizer) = 32001
+                                                  '###END###' -> id 32000
+  base model reload (4-bit NF4) ............ OK
+  resize_token_embeddings(32001) ........... OK
+  PeftModel.from_pretrained(base, adapter) . OK   active_adapter = 'default'
+  LoRA params present after reload ......... 12,615,680
+  model.generate() ......................... OK   produced output without error
+
+  (The generated text is meaningless — 12 steps on 500 examples of an invalid
+   dataset. Only the mechanical success of the call is being reported.)
+
+==============================================================================
+7. SAVED ADAPTER CONTENTS — SIGNIFICANT FINDING
+==============================================================================
+adapter_config.json:
+  r=16 · lora_alpha=32 · lora_dropout=0.05 · bias=none · task_type=CAUSAL_LM
+  target_modules = [down_proj, o_proj, q_proj, up_proj, v_proj, gate_proj, k_proj]
+  modules_to_save          = None
+  trainable_token_indices  = None
+
+adapter_model.safetensors — 298.2 MB, containing:
+  308 LoRA tensors ........................  12,615,680 params  (~24 MiB bf16)
+  base_model.model.model.embed_tokens.weight  [32001, 2048]
+  base_model.model.lm_head.weight             [32001, 2048]
+    -> 131,076,096 params (~250 MiB bf16) of FULL embedding matrices
+
+CAUSE: peft/utils/save_and_load.py:386 emits
+  "Setting `save_embedding_layers` to `True` as the embedding layer has been
+   resized during finetuning."
+PEFT auto-detects the ###END### resize and force-saves BOTH full embedding
+matrices into every checkpoint and into the final adapter.
+
+CONSEQUENCE: the ###END### token inflates the adapter from ~24 MiB to 298 MB
+— a ~12x size increase — for two matrices that carry no trained information
+beyond the base model's own weights (modules_to_save=None and
+trainable_token_indices=None, so neither matrix received any gradient).
+
+This is direct, measured evidence for DECISIONS.md D5 (remove ###END###),
+independent of any latency argument. It also bears on D8 item 3 (GGUF /
+quantized deployment path) and D10 (embedded deployment storage budget).
+
+------------------------------------------------------------------------------
+7a. CORRECTION TO AUDIT FINDING F5
+------------------------------------------------------------------------------
+The audit stated that the ###END### embedding row is "randomly initialised",
+"never saved", and "re-randomised on every load". On THIS stack that is
+partly wrong, and the record is corrected here:
+
+  WRONG  — "randomly initialised": transformers 5.8 mean-resizes new rows from
+           a multivariate normal fitted to the existing embeddings' mean and
+           covariance, not pure random init. (Log message confirms this.)
+  WRONG  — "never saved" / "re-randomised on every load": PEFT force-saves both
+           embedding matrices when a resize is detected, so the row IS
+           persisted and IS deterministic across loads.
+  CORRECT — the row receives NO gradient. modules_to_save=None and
+           trainable_token_indices=None in the saved adapter_config.json
+           confirm it. The token is saved at its initialisation value and
+           never learns to be emitted.
+
+  The conclusion (remove the token, per D5) is unchanged, but the mechanism is
+  different from what the audit described, and the strongest argument for D5 is
+  now the measured 12x adapter-size inflation rather than load non-determinism.
+
+  TRL 1.4 does contain machinery that would fix this class of bug
+  (trainable_token_indices={"embed_tokens": ...} plus an automatic
+  modules_to_save=["lm_head"]), but sft_trainer.py:1037-1056 only fires it for
+  tokens TRL itself adds via chat-template cloning — not for tokens added
+  externally as finetune.py does.
+
+==============================================================================
+8. WARNINGS OBSERVED
+==============================================================================
+  [transformers] warmup_ratio is deprecated and will be removed in v5.2.
+                 Use `warmup_steps` instead.
+      -> NOT ACTED ON. warmup_ratio=0.05 is a protected recipe parameter for
+         E1. Migrating to warmup_steps is a later, isolated change; note that
+         warmup_steps is an absolute count and would need recomputing from the
+         real dataset size, which changes with E2/E3.
+
+  [transformers] The new embeddings will be initialized from a multivariate
+                 normal distribution ... (x2, for embed_tokens and lm_head)
+      -> Expected consequence of the ###END### resize. See section 7a.
+
+  [transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the
+                 model config and generation config ... Updated tokens:
+                 {'pad_token_id': 2}
+      -> Expected. tokenizer.pad_token = eos_token is set deliberately.
+
+  [peft] Setting `save_embedding_layers` to `True` as the embedding layer has
+         been resized during finetuning.  (x3 — each save)
+      -> The 298 MB adapter cause. See section 7.
+
+  [transformers] Both `max_new_tokens` and `max_length` seem to have been set
+      -> Reload test only, benign.
+
+  [HF Hub] unauthenticated requests warning
+      -> Benign; base model downloaded/cached without issue.
+
+  No CUDA OOM. No NaN/Inf loss. No gradient-overflow events.
+
+==============================================================================
+9. OUTPUT DIRECTORY AND DISK USAGE
+==============================================================================
+  Path                      : ~/Desktop/firewall-IA/model-output-e1-smoke/
+  Total size                : 605 MB
+    adapter_model.safetensors  298.2 MB
+    tokenizer.json               3.5 MB
+    adapter_config.json          1.1 KB
+    README.md                    1.5 KB
+    chat_template.jinja          410 B
+    checkpoint-12/             ~302 MB  (1 checkpoint only)
+
+  Checkpoint count: 1 (save_total_limit=1 held).
+  For scale: the production recipe (4 epochs, save_steps=200, no
+  save_total_limit) would produce ~49 checkpoints. At ~302 MB each that is
+  ~14.8 GB, and that is BEFORE optimizer state. Audit finding F12 is confirmed
+  quantitatively and setting save_total_limit for the real run is strongly
+  recommended.
+
+  NOT DELETED, per instruction. Retained for inspection.
+  NOT COMMITTED: `.gitignore:2` (`model-output*/`) covers model-output-e1-smoke/
+  — verified with `git check-ignore -v`. No weights or adapter files are staged.
+  No smoke dataset artifacts were written to disk.
+
+==============================================================================
+10. VERDICT
+==============================================================================
+
+    E1 RESULT: PASS
+
+  All five PASS criteria met:
+    [x] model loads
+    [x] QLoRA initializes
+    [x] training executes
+    [x] evaluation executes
+    [x] adapter/checkpoint saves successfully
+  Plus the optional criterion:
+    [x] saved adapter successfully reloads
+
+  The training pipeline is no longer blocked. E1's blocker status in
+  CONTEXT.md §13 can be cleared.
+
+  REMINDER: this unblocks the TOOLING only. The dataset still fails E0
+  (reports/e0_dataset_integrity_current.txt). The gate rule stands — no real
+  training run starts while E0 reports FAIL.
+
+==============================================================================
+11. POST-E1 DECISION NOTE — appended 2026-08-17
+==============================================================================
+Everything above records what was OBSERVED during the E1 run and is unchanged.
+This section records what was DECIDED afterwards, and the small verification
+performed when those decisions were applied.
+
+DECISIONS RATIFIED
+  D11 — Training numerical precision. Adopt BF16:
+          bf16 = True
+          fp16 = False
+          bnb_4bit_compute_dtype = torch.bfloat16
+        Explicitly an environment compatibility / numerical consistency
+        decision. It must NOT be presented as a measured model-quality
+        improvement — no fp16-vs-bf16 quality comparison exists or can be
+        made, because the fp16 path does not run on this stack at all.
+
+        Note: §3a and §4 above were produced with
+        bnb_4bit_compute_dtype=torch.float16, which is what E1 ran with.
+        D11 subsequently aligned it to bfloat16. The observed results above
+        are NOT restated under the new value.
+
+  D12 — Checkpoint retention. save_total_limit=2 for the production recipe.
+        save_steps and all other hyperparameters unchanged.
+
+APPLIED TO finetune.py (2026-08-17)
+  bnb_4bit_compute_dtype : torch.float16  -> torch.bfloat16
+  fp16                   : True           -> False
+  bf16                   : (absent)       -> True
+  save_total_limit       : (unset)        -> 2
+
+  The --force-fp16 diagnostic flag is retained. It contradicts D11 by design
+  and exists only so the original incompatibility stays reproducible.
+
+VERIFICATION PERFORMED (the full 500-example smoke test was NOT rerun)
+  1. Config check — finetune.py AST-parsed; its exact SFTConfig, LoraConfig
+     and BitsAndBytesConfig objects rebuilt and asserted:
+       bnb_4bit_compute_dtype    torch.bfloat16
+       bnb_4bit_quant_type       nf4
+       bnb_4bit_use_double_quant True
+       fp16                      False
+       bf16                      True
+       save_total_limit          2
+       save_steps / eval_steps   200 / 200        (unchanged)
+       epochs / lr / sched / warmup  4 / 2e-4 / cosine / 0.05   (unchanged)
+       batch / accum             4 / 8            (unchanged)
+       optim                     paged_adamw_8bit (unchanged)
+       lora r / alpha / dropout  16 / 32 / 0.05   (unchanged)
+       dataset_text_field / max_length   text / 512
+     Result: PASS.
+
+  2. NF4 kernel check — the compute-dtype change touches the quantization
+     kernel path, which a config check cannot exercise. A minimal validation
+     was run: model load + one forward + one backward, no Trainer, no save,
+     no output directory.
+       4-bit loaded            True
+       forward loss            3.4263 (fp32 reduction)
+       backward                308 LoRA tensors received gradients
+       gradient dtype          torch.bfloat16
+       gradient norm           7.4594, finite
+     Result: PASS. The NF4 + double-quant path works with bfloat16 compute
+     dtype on bitsandbytes 0.49.2.
+
+E1 STATUS: CLOSED. Verdict in §10 (PASS) stands unchanged.
+
+The dataset still fails the E0 integrity gate. The gate rule is unaffected by
+anything in this section: no real training run starts while E0 reports FAIL.
+
+==============================================================================
+END OF REPORT
+==============================================================================

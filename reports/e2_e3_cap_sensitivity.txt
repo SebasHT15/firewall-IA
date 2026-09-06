@@ -1,0 +1,304 @@
+==============================================================================
+firewall-IA — DATASET CAP SENSITIVITY ANALYSIS
+==============================================================================
+Date (UTC)          : 2026-08-17
+Generator           : parse_dataset_v4.py (seed 42, deterministic)
+PayloadsAllTheThings: e961fef231d8327bae83b563fab50aec2e6b77c0
+Scenarios           : 11 (5 caps x 2 policies, plus uncapped)
+Gate                : check_dataset.py, UNMODIFIED, no threshold weakened
+
+SCOPE: analysis only. The live candidate at datasets/v4_clean/ was NOT replaced
+and is bit-identical to the D17 cap-1000 policy-A scenario below. All scenarios
+were written to a temporary tree. D17 was NOT changed. finetune.py was NOT run.
+
+==============================================================================
+0. WHAT WAS ADDED TO THE GENERATOR (behaviour-preserving)
+==============================================================================
+Three additions, none of which alter default output:
+
+  --cap-policy {A,B}   A = D17 as approved (default). B = source-agnostic.
+  --stats-json PATH    side-car statistics with per-category source attribution
+  --csic-cache PATH    parsed-CSIC cache, keyed on the CSV SHA-256
+
+The cap application was moved to AFTER CSIC loading so policy B can see CSIC
+groups. VERIFIED: re-running the default configuration after the restructure
+reproduced datasets/v4_clean/{train,eval}.jsonl BIT-IDENTICALLY.
+
+Policy B counts CSIC-derived BLOCK groups toward the SAME per-category budget.
+Selection remains "first N by sorted group id" over the merged pool, so it is
+deterministic and does not prefer either source.
+
+==============================================================================
+1. THE MECHANISM — WHY GROUP CAPS DO NOT CONTROL ROW DOMINANCE
+==============================================================================
+The question that motivated this analysis: 1,000 logical groups produce 6,347
+rows for SQL Injection but 1,004 for Path Traversal. Measured cause:
+
+  RENDERED ROWS PER LOGICAL GROUP, cap 1000 policy A:
+
+    CATEGORY                  GROUPS   ROWS  from PATT  from CSIC   ROWS/GROUP
+    ----------------------   -------  -----  ---------  ---------  -----------
+    CRLF Injection                21    511         23        488        24.33
+    SQL Injection              1,000  6,347      1,720      4,627         6.35
+    XSS Injection              1,000  2,084      1,408        676         2.08
+    XPath Injection               24     40         40          0         1.67
+    Command Injection            453    741        632        109         1.64
+    XXE Injection                 98    143        143          0         1.46
+    Cross-Site Request Forgery    31     46         46          0         1.48
+    File Inclusion             1,000  1,039      1,039          0         1.04
+    Directory Traversal        1,000  1,004      1,004          0         1.00
+    HTTP Parameter Pollution      20     20         20          0         1.00
+    Request Smuggling              7      7          7          0         1.00
+
+  Every category whose ratio exceeds ~2.0 is a category where CSIC contributes.
+  Categories with no CSIC contribution sit at 1.0-1.7 rows per group.
+
+  ROOT CAUSE: a CSIC group is a request SHAPE that collapsed many original
+  records (41,900 records -> 8,519 groups). Every record in the group still
+  renders. So one CSIC group can emit hundreds of rows, while one
+  PayloadsAllTheThings group emits 1 row plus at most 1 augmented variant.
+
+  CONSEQUENCE: capping LOGICAL GROUPS cannot control RENDERED-ROW dominance
+  wherever CSIC contributes. This is why policy A fails (section 3).
+
+  SECOND-ORDER FINDING — CRLF is a diversity illusion.
+    CRLF holds 3.0-5.9% of BLOCK rows across scenarios, which looks adequate.
+    But it has only 21 unique logical payloads; 488 of its 511 rows come from
+    CSIC groups. Row count OVERSTATES its diversity by more than an order of
+    magnitude. CRLF is on the INSUFFICIENT DATA list and must stay there
+    regardless of how healthy its row share looks.
+
+==============================================================================
+2. SCENARIO SUMMARY
+==============================================================================
+  SCENARIO       TOTAL   TRAIN   EVAL    ALLOW    BLOCK  LARGEST  TOP-3  ENTROPY  EFF.CAT  EVEN  0-EVAL
+  -----------  -------  ------  -----  -------  -------  -------  -----  -------  -------  ----  ------
+  cap1000_A     26,820  21,624  5,196   13,410   13,410    47.3%  70.6%    2.668     6.36 0.628       1
+  cap1000_B     17,366  14,006  3,360    8,683    8,683    26.0%  54.6%    3.264     9.60 0.768       1
+  cap1250_A     29,398  23,718  5,680   14,699   14,699    46.1%  71.5%    2.655     6.30 0.625       1
+  cap1250_B     20,200  16,232  3,968   10,100   10,100    27.7%  58.5%    3.152     8.89 0.742       1
+  cap1500_A     31,224  25,156  6,068   15,612   15,612    43.7%  71.5%    2.673     6.38 0.629       1
+  cap1500_B     22,836  18,358  4,478   11,418   11,418    28.4%  61.1%    3.068     8.39 0.722       1
+  cap2000_A     34,674  27,976  6,698   17,337   17,337    39.3%  71.5%    2.693     6.47 0.634       1
+  cap2000_B     28,978  23,318  5,660   14,489   14,489    31.4%  65.9%    2.897     7.45 0.682       1
+  cap2500_A     37,360  30,098  7,262   18,680   18,680    36.5%  70.8%    2.702     6.51 0.636       1
+  cap2500_B     34,430  27,594  6,836   17,215   17,215    32.2%  68.4%    2.792     6.93 0.657       1
+  uncapped      53,756  43,158 10,598   26,878   26,878    38.1%  77.7%    2.484     5.59 0.585       1
+
+  cap1000_A is the CURRENT LIVE CANDIDATE (verified bit-identical).
+  ALLOW/BLOCK is exactly 1:1 in every scenario (method-stratified balancing).
+
+  ENTROPY — what it means here.
+    Shannon entropy H = -SUM p_i * log2(p_i) over the 19 BLOCK categories'
+    share of BLOCK rows. Maximum is log2(19) = 4.248 bits, reached only if all
+    19 categories were equally represented.
+    EFF.CAT = 2^H, the "effective number of equally-represented categories" —
+    the most interpretable figure. cap1000_A scores 6.36, meaning its 19
+    categories carry as much diversity as ~6 equally-sized ones.
+    EVEN = H / log2(19), normalised to [0,1].
+    These are DESCRIPTIVE. Higher is not automatically better: perfectly equal
+    representation is explicitly NOT the objective.
+
+==============================================================================
+3. POLICY A CANNOT CONTROL DOMINANCE — AND TIGHTENING IT MAKES IT WORSE
+==============================================================================
+  Largest attack-category share of BLOCK, policy A:
+      cap 1000  47.3%      cap 2000  39.3%
+      cap 1250  46.1%      cap 2500  36.5%
+      cap 1500  43.7%      uncapped  38.1%
+
+  Under policy A the largest category is SQL Injection in every scenario, and
+  it never falls below 36.5%.
+
+  The relationship is INVERTED relative to intuition: a TIGHTER cap produces
+  MORE dominance. Cause — policy A only shrinks the PayloadsAllTheThings side.
+  CSIC's ~4,600 SQL rows are untouched, so tightening the cap removes the
+  traffic that was diluting them. At cap 1000 the SQL row count is 6,347, of
+  which only 1,720 came from PayloadsAllTheThings.
+
+  This is the central negative result of the analysis: the D17 lever, as
+  currently defined, does not act on the quantity it was intended to control.
+
+==============================================================================
+4. POLICY B — DIRECT CONTROL, PAID FOR IN SIZE AND SOURCE DIVERSITY
+==============================================================================
+  Largest share, policy B:
+      cap 1000  26.0%      cap 2000  31.4%
+      cap 1250  27.7%      cap 2500  32.2%
+      cap 1500  28.4%
+
+  Policy B behaves monotonically and as intended. The cost is twofold:
+
+  (a) SIZE. At the same cap, B is 25-35% smaller than A, because CSIC BLOCK
+      groups are dropped and the 1:1 method-stratified balance then trims the
+      ALLOW side to match.
+
+  (b) SOURCE DIVERSITY. B discards REAL captured traffic. At cap 2000 the SQL
+      CSIC contribution falls from 4,627 rows to 3,051. That is a genuine loss:
+      CSIC is the only non-synthetic attack traffic in the dataset. The
+      analysis does not treat this as free.
+
+  What B does NOT do: it does not fix rows-per-group. CRLF stays at 24.33
+  rows/group in every B scenario, because 21 + its CSIC groups never reaches
+  any tested cap.
+
+==============================================================================
+5. THE CURRENT POLICY IS PARETO-DOMINATED
+==============================================================================
+  The decisive comparison. Against the live candidate (cap1000_A):
+
+    SCENARIO      TOTAL ROWS   vs current   LARGEST SHARE   TOP-3   EFF.CAT
+    -----------  -----------  -----------  --------------  ------  --------
+    cap1000_A         26,820            —           47.3%   70.6%      6.36
+    cap2000_B         28,978        +8.0%           31.4%   65.9%      7.45
+    cap2500_B         34,430       +28.4%           32.2%   68.4%      6.93
+
+  Both policy-B scenarios are LARGER than the current candidate AND less
+  dominated on every measure. There is no size-vs-balance trade to negotiate
+  between these three points — cap1000_A is worse on both axes simultaneously.
+
+  This holds regardless of how the size/balance tradeoff is weighted, which is
+  why it is stated as a finding rather than a preference.
+
+==============================================================================
+6. INSUFFICIENT DATA AND ZERO-EVAL — UNCHANGED BY EVERY SCENARIO
+==============================================================================
+  ZERO EVAL SAMPLES: exactly one category in all 11 scenarios —
+      HTTP Request Smuggling (7 train rows, 0 eval rows)
+  No cap or policy changes this. It is NOT EVALUABLE under D18 in every
+  scenario tested.
+
+  INSUFFICIENT DATA (<100 unique logical groups): the SAME 11 categories in
+  every scenario, with identical counts, because all sit far below the lowest
+  cap tested:
+      Request Smuggling 7 · Insecure Deserialization 12 · HPP 20 ·
+      CRLF 21 · XPath 24 · CSRF 31 · GraphQL 74 · LDAP 75 · JWT 80 ·
+      NoSQL 83 · XXE 98
+
+  The cap decision therefore has NO bearing on category scarcity. Scarcity is a
+  source-material problem and can only be fixed with new sources.
+
+==============================================================================
+7. E0 RE-RUN — NO SCENARIO REINTRODUCES AN ENVELOPE CONFOUND
+==============================================================================
+Policy B materially changes the HTTP envelope population: it removes CSIC BLOCK
+rows while CSIC benign rows remain, which could have made "CSIC-shaped request"
+predict ALLOW. E0 was therefore re-run on every policy-B scenario and on
+policy-A references. No threshold was weakened; check_dataset.py is unmodified.
+
+  SCENARIO     E0 EXIT   LEAKAGE   DUPLICATES   REVEALS   STRONGEST NON-PAYLOAD
+  -----------  -------  --------  -----------  --------  ----------------------
+  cap1000_A          1     0.00%        0.00%         0   51.81%  (accept)
+  cap1000_B          1     0.00%        0.00%         0   52.11%  (content-type)
+  cap1250_B          1     0.00%        0.00%         0   52.39%  (accept)
+  cap1500_B          1     0.00%        0.00%         0   51.63%  (accept)
+  cap2000_A          1     0.00%        0.00%         0   50.93%  (content-type)
+  cap2000_B          1     0.00%        0.00%         0   51.27%  (content-type)
+  cap2500_A          1     0.00%        0.00%         0   51.38%  (accept)
+  cap2500_B          1     0.00%        0.00%         0   51.04%  (content-type)
+  uncapped           1     0.00%        0.00%         0   50.77%  (accept)
+
+  Exit 1 = WARNING in every case, from category imbalance only. Zero blocking
+  failures anywhere. Every strongest incidental feature is within +2.39 points
+  of the 50.00% majority baseline; for reference the historical dataset
+  measured 93.72%.
+
+  CORRECTION TO THE 2026-08-17 E2/E3 REPORT: that report cited the live
+  candidate's strongest non-payload baseline as 51.31% (Content-Type). That was
+  the maximum of the NAMED-feature table only. The gate's own maximum, which
+  also covers the generic per-header scan, is 51.81% (accept). The conclusion
+  is unchanged; the figure was understated by 0.5 points.
+
+==============================================================================
+8. CANDIDATE POLICIES (at most two, as requested)
+==============================================================================
+Neither is selected here. Both strictly dominate the current cap1000_A.
+
+------------------------------------------------------------------------------
+CANDIDATE 1 — cap 2000, policy B          "balance-leaning"
+------------------------------------------------------------------------------
+  rows 28,978 (train 23,318 / eval 5,660) · ALLOW 14,489 / BLOCK 14,489
+  largest share 31.4% · top-3 65.9% · effective categories 7.45 · evenness 0.682
+  E0: leakage 0.00%, duplicates 0.00%, reveals 0, strongest incidental 51.27%
+
+  FOR
+    * Largest single-category share falls from 47.3% to 31.4% — the biggest
+      dominance reduction available without going below the current size.
+    * Still 8% LARGER than the current candidate.
+    * SQL Injection stops being nearly half the BLOCK pool.
+  AGAINST
+    * Discards ~1,600 real CSIC SQL rows. Real traffic is the scarcest and
+      least replaceable ingredient in this dataset.
+    * 28,978 rows is still small for a 1.1B model.
+    * Requires amending D17 (policy A -> B), which is a scope change.
+
+------------------------------------------------------------------------------
+CANDIDATE 2 — cap 2500, policy B          "size-leaning"
+------------------------------------------------------------------------------
+  rows 34,430 (train 27,594 / eval 6,836) · ALLOW 17,215 / BLOCK 17,215
+  largest share 32.2% · top-3 68.4% · effective categories 6.93 · evenness 0.657
+  E0: leakage 0.00%, duplicates 0.00%, reveals 0, strongest incidental 51.04%
+
+  FOR
+    * 28% larger than the current candidate — the largest dataset among
+      scenarios that also control dominance.
+    * Largest share 32.2%, essentially matching Candidate 1 (+0.8 points).
+    * Retains more real CSIC traffic than Candidate 1.
+    * More eval rows (6,836 vs 5,660) for every category above the floor.
+  AGAINST
+    * Top-3 share 68.4% vs 65.9% — Directory Traversal and File Inclusion grow
+      to 2,500 groups each and re-enter the top three.
+    * Effective categories 6.93 vs 7.45.
+    * Same D17 amendment required.
+
+------------------------------------------------------------------------------
+  HOW TO CHOOSE
+    The two differ by 0.8 points of largest-category share and 5,452 rows.
+    If the binding constraint is that SQL Injection must not dominate a small
+    dataset, take Candidate 1. If the binding constraint is that 26,820 rows is
+    already thin for a 1.1B model, take Candidate 2 — it buys 28% more data for
+    almost no extra dominance.
+
+    NOT RECOMMENDED: cap1000_B. It has the best balance figures of any scenario
+    (26.0% largest, 9.60 effective categories) but only 17,366 rows — a 35% cut
+    against a candidate already flagged as small. Optimising evenness to that
+    point is exactly the "perfectly equal distribution" objective this analysis
+    was told not to pursue.
+
+    ALSO NOT RECOMMENDED: staying at cap1000_A. Section 5 shows it is worse
+    than both candidates on size and on every dominance measure at once.
+
+==============================================================================
+9. LIMITATIONS OF THIS ANALYSIS
+==============================================================================
+  1. No model was trained. Every figure is a DATASET property. Whether lower
+     category dominance improves per-category recall is a hypothesis this
+     analysis cannot test.
+  2. Entropy/evenness are descriptive summaries, not objectives.
+  3. Only uniform per-category caps were tested. Per-category budgets, or a cap
+     on RENDERED ROWS rather than logical groups, were not explored and might
+     dominate both candidates. A row-level cap follows directly from section 1
+     and is the obvious next lever if neither candidate satisfies.
+  4. Policy B drops whole CSIC groups. Sub-sampling records WITHIN a CSIC group
+     would reduce rows while retaining shape diversity, and was not tested.
+  5. The augmentation multiplier (1 per group) was held constant throughout.
+  6. Scarcity is untouched by any scenario (section 6).
+
+==============================================================================
+10. STATE AFTER THIS ANALYSIS
+==============================================================================
+  D17                        : UNCHANGED (cap 1000, policy A)
+  datasets/v4_clean/         : UNCHANGED, bit-identical to cap1000_A
+  Historical dataset         : UNCHANGED
+  check_dataset.py           : UNCHANGED, no threshold weakened
+  finetune.py                : NOT RUN
+  test_model.py              : NOT MODIFIED
+  ###END###                  : RETAINED
+
+  Scenario artifacts are in the session scratchpad and are not committed. Every
+  scenario is exactly reproducible:
+      python3.12 parse_dataset_v4.py --cap-per-category N --cap-policy {A,B}
+
+==============================================================================
+END OF REPORT
+==============================================================================
