@@ -103,8 +103,10 @@ SSTI are at 100% binary recall.
 
 **Do not conclude from this that SQLi and command injection need more training data.** That
 is one hypothesis among several — label noise in the CSIC-derived subset (audit F6) and
-payload-family gaps are equally plausible. Issue #8 must analyse the actual failures first
-(**D21**).
+payload-family gaps are equally plausible. The actual failures must be analysed first
+(**D21**). NOTE: this analysis was previously attributed to issue #8; issue #8 is the V4
+metrics evaluation and is now closed. The failure analysis has no dedicated issue yet — see
+the roadmap below.
 
 ### Evidence status (D18)
 
@@ -149,24 +151,40 @@ batch size 1.
 validated (see §5). This partially advances M3 ahead of M2 by deliberate decision
 (**D26**); it does not make HF/PEFT the deployment backend, and **D23** still holds.
 
-**Issue numbering (reconciled against the tracker):** GitHub **#8** is *Evaluate V4 clean
-security metrics* — the evaluation was executed and archived in `reports/v4_clean_eval.json`,
-though the issue is still open. GitHub **#15** is the FastAPI Control Plane. Earlier text in
-this file described #8 as "analyse the 92 false negatives"; that failure analysis is real
-outstanding work (**D21**) but is not what issue #8 says, and it has no dedicated issue yet.
+**Issue numbering (reconciled against the tracker, 2026-09-06):** GitHub **#8** is
+*Evaluate V4 clean security metrics* — **closed**, all ten acceptance criteria verified
+against `reports/v4_clean_eval.json`. GitHub **#15** is the FastAPI Control Plane —
+**closed**, merged via PR #34. Earlier text in this file described #8 as "analyse the 92
+false negatives"; that failure analysis is real outstanding work (**D21**) but is not what
+issue #8 says, and it still has no dedicated issue.
 
-1. **Issue #8** — V4 clean security evaluation (metrics produced; issue open)
-2. **Issue #9** — controlled inference benchmark, honouring the cold-start /
+1. **Issue #9** — controlled inference benchmark, honouring the cold-start /
    steady-state separation recorded in §5
-3. **Failure analysis of the 92 false negatives** (**D21**) — untracked
-4. **Real HTTP laboratory validation** (**D22**)
-5. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
-6. GGUF / Q4_K_M / llama.cpp (**Issues #10–#12**)
-7. Quantized security regression
-8. Inline gateway — **Issue #16** mitmproxy data plane, **Issue #17** fail-closed
-   enforcement (neither started)
-9. End-to-end latency (**Issue #18**)
+2. **Issue #16** — mitmproxy inline data plane
+3. **Issue #17** — fail-closed enforcement (**D4**) and the classifier timeout, which
+   **D3** still leaves underived
+4. **Issue #18** — end-to-end gateway latency, the no-fast-path baseline
+5. **Failure analysis of the 92 false negatives** (**D21**) — untracked
+6. **Real HTTP laboratory validation** (**D22**)
+7. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
+8. GGUF / Q4_K_M / llama.cpp (**Issues #10–#12**)
+9. Quantized security regression
 10. Embedded deployment
+
+### Latency-reduction layer — designed, NOT built (D29, D30)
+
+Four issues, all M3, none started. Do **not** describe any of them as implemented.
+
+| Issue | Scope |
+|---|---|
+| **#35** | Heuristic suspicious scoring — standalone module, deterministic, explainable signals. No ML, no online learning. Parallelizable: it does not depend on the data plane. |
+| **#36** | Benign fast-path ALLOW — one explicit threshold; clearly benign traffic skips synchronous inference. **No heuristic fast BLOCK.** Depends on #35, #16, #17. |
+| **#37** | Asynchronous model validation of fast-path traffic — re-classifies off the critical path, records agreement/disagreement. Never blocks retroactively, never updates the model. Depends on #36. |
+| **#38** | Fast-path calibration and benchmark — fast path off vs on, path split, disagreement rate, threshold recommendation. Depends on #18, #36, #37. |
+
+The fast path exists for **latency**, not security: it decides only whether the model's
+classification happens before the response or after it (**D30**), never whether a request
+is malicious.
 
 **Dataset expansion is NOT approved simply because the dataset has ~31k rows** (**D21**). More
 data will be considered only on evidence from failure analysis, demonstrated independent
@@ -739,10 +757,14 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **E4** | `###END###` removal (D5) | **DONE 2026-08-17** (`reports/e4_remove_end_token.txt`). Dataset regenerated; E0 metrics byte-identical. |
 | **E5** | Freeze evaluation methodology (D19) | **DONE 2026-08-17** (`reports/e5_evaluation_methodology.txt`). Self-test PASS. |
 | **#7** | **V4 clean baseline training run** | **DONE 2026-08-18 — merged (PR #32).** See §3 and `reports/v4_clean_baseline_results.txt`. |
-| **#8** | Security / error analysis of the 92 false negatives | **NEXT** |
+| **#8** | V4 clean security metrics evaluation | **DONE 2026-08-18 — closed 2026-09-06.** `reports/v4_clean_eval.json`; all ten AC verified. |
+| **#15** | FastAPI Control Plane | **DONE 2026-09-05 — merged (PR #34), closed.** See §5. |
 | **#9** | Controlled inference benchmark | **NEXT** |
+| — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
+| **#16/#17/#18** | Data plane, fail-closed, end-to-end latency | NOT STARTED |
+| **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED |
 | — | Real HTTP laboratory validation (D22) | Planned — external validation gate |
-| — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending #8/#9 |
+| — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis and #9 |
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |
