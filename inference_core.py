@@ -18,6 +18,12 @@ Dependency direction (must stay acyclic):
 
 `inference_core` imports nothing from this project: no dataset generation, no
 metric scoring, no manifest handling, no CLI.
+
+Issue #9 added `classify_timed()` — the same generation path with a per-stage
+timing breakdown and explicit device synchronization. `classify_raw()` delegates
+to it, so the benchmark harness measures exactly the pipeline the control plane
+serves. Nothing about the model, prompt, generation parameters or parsing
+changed.
 """
 
 import os
@@ -135,6 +141,75 @@ def load_model(adapter_dir=DEFAULT_ADAPTER_DIR):
     return tok, mdl
 
 
+def device_sync(device):
+    """Block until every operation queued on `device` has actually finished.
+
+    CUDA kernel launches are asynchronous: control returns to Python as soon as
+    the work is *submitted*, not when it is done. A stopwatch stopped without
+    this would time submission, not inference. No-op on CPU, where execution is
+    already synchronous, and no-op if CUDA is not available.
+    """
+    if torch.cuda.is_available() and str(device).startswith("cuda"):
+        torch.cuda.synchronize(device)
+
+
+def classify_timed(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
+    """Generate one decision with a per-stage timing breakdown (Issue #9).
+
+    Returns `(raw_decoded_text, measure)`. `measure` is a flat dict; every key
+    ending in `_ms` is a duration in milliseconds, the rest are counters:
+
+        prompt_build_ms   render the V4 prompt template
+        tokenize_ms       tokenizer call, CPU tensors
+        transfer_ms       host -> device copy
+        generate_ms       generate(), synchronized     <- Issue #9 PRIMARY SCOPE
+        decode_ms         detokenize the new tokens
+        prompt_tokens     input_ids length fed to generate()
+        generated_tokens  new tokens produced
+        stopped_on_eos    True if generation ended on native EOS rather than
+                          hitting the max_new_tokens safety bound
+
+    `generate_ms` is bracketed by `device_sync()` on both sides, so it contains
+    the whole generation and nothing queued before it. It is model-side
+    inference only — NOT end-to-end gateway latency (D3, Issue #18).
+
+    This is the single implementation of the V4 generation path;
+    `classify_raw()` delegates to it, so instrumentation cannot drift from what
+    the control plane actually runs.
+    """
+    t0 = time.perf_counter()
+    prompt = build_prompt(request)
+    t1 = time.perf_counter()
+    cpu_inputs = tok(prompt, return_tensors="pt")
+    t2 = time.perf_counter()
+    inputs = cpu_inputs.to(device)
+    device_sync(device)
+    t3 = time.perf_counter()
+
+    with torch.no_grad():
+        out = mdl.generate(**inputs, max_new_tokens=max_new_tokens,
+                           do_sample=False, pad_token_id=tok.eos_token_id)
+    device_sync(device)
+    t4 = time.perf_counter()
+
+    prompt_len = inputs["input_ids"].shape[1]
+    new = out[0][prompt_len:]
+    text = tok.decode(new, skip_special_tokens=True)
+    t5 = time.perf_counter()
+
+    n_new = int(new.shape[0])
+    return text, {
+        "prompt_build_ms": (t1 - t0) * 1000,
+        "tokenize_ms": (t2 - t1) * 1000,
+        "transfer_ms": (t3 - t2) * 1000,
+        "generate_ms": (t4 - t3) * 1000,
+        "decode_ms": (t5 - t4) * 1000,
+        "prompt_tokens": int(prompt_len),
+        "generated_tokens": n_new,
+        "stopped_on_eos": bool(n_new < max_new_tokens),
+    }
+
+
 def classify_raw(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
     """Generate one decision. Returns (raw_decoded_text, model_latency_ms).
 
@@ -144,13 +219,15 @@ def classify_raw(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
 
     The returned latency covers `generate()` alone — model-side inference, NOT
     end-to-end gateway latency (D3).
+
+    METHODOLOGY CHANGE (Issue #9, D31): generation is now bracketed by
+    `device_sync()`, so this timer measures completed GPU work instead of
+    submitted work. It is a stopwatch correction, not a change to the model,
+    the prompt, the parameters or the output — the decision returned for a
+    given request is bit-identical to before. Latency figures measured under
+    the older unsynchronized timer (the 270.8 ms P95 in
+    `reports/v4_clean_eval.json`) are therefore historical antecedents, not
+    `baseline-local-v1` results.
     """
-    prompt = build_prompt(request)
-    inputs = tok(prompt, return_tensors="pt").to(device)
-    t0 = time.perf_counter()
-    with torch.no_grad():
-        out = mdl.generate(**inputs, max_new_tokens=max_new_tokens,
-                           do_sample=False, pad_token_id=tok.eos_token_id)
-    dt = (time.perf_counter() - t0) * 1000
-    new = out[0][inputs["input_ids"].shape[1]:]
-    return tok.decode(new, skip_special_tokens=True), dt
+    text, m = classify_timed(tok, mdl, request, device, max_new_tokens)
+    return text, m["generate_ms"]
