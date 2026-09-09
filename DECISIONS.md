@@ -1104,6 +1104,123 @@ been delivered. Pretending otherwise would misrepresent the security property.
 
 ---
 
+## D31 — Model-side latency is measured with a device-synchronized stopwatch
+
+- **Date:** 2026-09-09
+- **Status:** APPROVED
+- **Implementation:** DONE — `inference_core.classify_timed()` / `device_sync()` (Issue #9)
+
+**Decision.** The canonical model-side latency measurement is the time spent inside
+`generate()`, bracketed by an explicit device synchronization on both sides.
+
+```
+IN  scope   generate()
+OUT scope   prompt construction · tokenization · host->device transfer ·
+            decoding · contract parsing
+```
+
+The out-of-scope stages are still timed, but they are reported as separate pipeline
+stages and are never pooled into the primary metric. The scope carries an identifier —
+`generate-only/device-synchronized/v1` — and two results with different scope
+identifiers are **not comparable**, whatever units they are printed in.
+
+**This is a stopwatch correction, not a model improvement.** CUDA kernel launches are
+asynchronous: a timer stopped immediately after `generate()` returns can measure the
+*submission* of work rather than its completion. `torch.cuda.synchronize()` removes that
+class of error by construction. Nothing about the model, adapter, prompt, generation
+parameters, parsing or quantization changed, and the decision returned for a given
+request is unchanged (verified: identical output through both code paths).
+
+**Measured effect of the correction on this machine.** Interleaved A/B measurement,
+n=40 per arm, same requests, same process, run twice:
+
+| measurement | unsynchronized mean | synchronized mean | delta |
+|---|---:|---:|---:|
+| before the baseline runs | 223.75 ms | 223.77 ms | **+0.020 ms (+0.009%)** |
+| after the baseline runs (`verify-timing`) | 235.08 ms | 234.17 ms | **−0.909 ms (−0.387%)** |
+
+The delta is **below 0.4% and inconsistent in sign**, i.e. indistinguishable from the
+machine's own run-to-run noise. The explanation is that HuggingFace `generate()` already
+forces a synchronization on every decoding step when it evaluates stopping criteria, so
+the older timer was, in practice, already measuring completed work. The decoded output is
+identical through both code paths.
+
+Reproduce: `python3.12 benchmark_inference.py verify-timing --experiment <id> --limit 40`.
+Record: `reports/benchmarks/baseline-local-v1/timing_method_ab.json`.
+
+The correction is therefore kept for **guaranteed** correctness rather than for a
+different number, and it must hold under future backends that may not synchronize
+internally. It also means the historical figures were not inflated or deflated by
+missing synchronization — but they remain **historical antecedents** rather than
+comparands, because they were produced under a different protocol (single run, no
+separation of load / cold start / warm-up from steady state). See **D32**.
+
+**Rationale.** A latency programme whose first act is to optimize the engine (M2, D23)
+must be able to prove that a later reduction is real. That requires knowing that the
+stopwatch measures finished GPU work under every future backend, including ones that do
+not happen to synchronize internally. Establishing the guarantee now — and quantifying
+that it changes nothing today — is cheaper than discovering later that a "reduction" was
+an artifact of asynchronous submission.
+
+---
+
+## D32 — Benchmark experiment identity, immutability and comparison rules
+
+- **Date:** 2026-09-09
+- **Status:** APPROVED
+- **Implementation:** DONE — `benchmark_inference.py`, `benchmark_compare.py` (Issue #9)
+
+**Decision.** Every inference benchmark is an **experiment with an identity**, stored
+under `reports/benchmarks/<experiment-id>/`, and comparisons between experiments follow
+fixed rules.
+
+**Identity.** An experiment records its timing scope, dataset SHA-256, request selection
+and order, protocol version, batch size, concurrency, run count, model and adapter
+hashes, effective quantization, and the full machine environment. The reference
+experiment is **`baseline-local-v1`**.
+
+**Immutability.** `baseline-local-v1` is a fixed reference. A new measurement takes a new
+experiment id; the harness refuses to overwrite an experiment that already has results.
+A candidate may be compared against the original baseline **and** against its own
+immediately preceding version.
+
+**Comparison.**
+
+```
+percentage reduction  =  100 * (baseline - candidate) / baseline
+speedup factor        =  baseline / candidate
+```
+
+These are distinct quantities — a 50% reduction is a 2.0x speedup — and are reported
+separately, per statistic. A negative reduction is a regression and is reported as such.
+Missing values, zero references and negative references are reported as undefined, never
+silently rendered as 0%.
+
+**Two results are not comparable merely because both are in milliseconds.** Timing scope,
+dataset hash, request count, selection policy, request order, protocol version, batch
+size and concurrency must match. A mismatch is **blocking**: the comparison is stamped
+NOT COMPARABLE and the tool exits non-zero.
+
+**Attribution.**
+
+- A **hardware** change (GPU, CPU, device) does not block a comparison but invalidates
+  any claim of a software improvement. The base version of the software must be re-run on
+  the new hardware, and the candidate compared against *that*.
+- When hardware and software both changed, the difference is reported as a **joint
+  effect**. Causality is not attributed to either alone.
+- A speed improvement is **never** presented without naming any accompanying quality
+  degradation. The comparison tool raises this pairing automatically.
+
+**Rationale.** The point of a baseline is to make a future claim falsifiable. Without a
+recorded identity, "P95 dropped 40%" is unverifiable: the two runs could differ in
+dataset, in what the stopwatch covered, in the machine, or in how many requests were
+measured. Encoding the compatibility rules in the tool rather than in prose means an
+invalid comparison fails loudly instead of being asserted confidently — and it is the
+reason the historical 270.8 ms is blocked automatically when someone tries to use it as
+a comparand (**D31**).
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -1138,6 +1255,8 @@ been delivered. Pretending otherwise would misrepresent the security property.
 | D28 | Control Plane readiness behaviour — 200/`model_loaded`, 503 | APPROVED | **DONE (#15)** |
 | D29 | Heuristic suspicious scoring and benign fast path (allow-only) | APPROVED | NOT YET (#35, #36, #38) |
 | D30 | Deferred model validation for fast-path traffic — no online learning | APPROVED | NOT YET (#37) |
+| D31 | Model-side latency measured with a device-synchronized stopwatch | APPROVED | **DONE (#9)** |
+| D32 | Benchmark experiment identity, immutability and comparison rules | APPROVED | **DONE (#9)** |
 
 ---
 

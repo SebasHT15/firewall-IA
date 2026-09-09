@@ -657,6 +657,24 @@ def summarize_experiment(experiment_id, out_dir, environment=None):
         "prompt_tokens_mean": summarize(pooled_prompt_tok, unit="tokens").get("mean_tokens"),
     }
 
+    metric_aggregation = {
+        "latency_family": ("pooled — every steady sample from every run in one "
+                           "distribution, then the statistic"),
+        "steady_pipeline_p95_ms": "pooled, same as the latency family",
+        "first_inference_ms": "median of the per-run cold-start samples",
+        "model_load_ms": "median of the per-run model-load times",
+        "peak_vram_allocated_mib": "maximum over runs (worst observed peak)",
+        "peak_vram_reserved_mib": "maximum over runs (worst observed peak)",
+        "quality_family": ("computed once over the pooled records of all runs; "
+                           "greedy decoding makes the per-run values identical, "
+                           "which is checked and reported as "
+                           "`quality_consistent_across_runs`"),
+        "workload_family": "mean over the pooled steady samples",
+        "per_run_alternative": ("`across_runs` carries each run's own statistic plus "
+                                "min/median/max/mean/stdev and peak-to-peak range, "
+                                "which is the run-to-run variation"),
+    }
+
     env = environment or {}
     summary = {
         "summary_schema": "firewall-IA/benchmark-summary/1",
@@ -678,6 +696,7 @@ def summarize_experiment(experiment_id, out_dir, environment=None):
         },
         "metrics": metrics,
         "metric_directions": METRIC_DIRECTIONS,
+        "metric_aggregation": metric_aggregation,
         "steady_state_pooled": {
             "generate_ms": pooled,
             "pipeline_ms": summarize(pooled_pipe,
@@ -871,6 +890,88 @@ def print_summary(s):
     print(line)
 
 
+# ── Stopwatch verification ─────────────────────────────────────────────────
+def verify_timing(args):
+    """Quantify what the D31 synchronization changed, instead of asserting it.
+
+    Runs the SAME requests under the pre-Issue-#9 unsynchronized timer and the
+    current synchronized one, interleaved A/B/B/A so a drift in machine state
+    cannot be mistaken for a methodology effect, and checks that the decoded
+    output is identical through both code paths.
+
+    A stopwatch correction is not a model improvement: this exists to show, with
+    numbers, how much of any future difference it could account for.
+    """
+    import torch
+    import inference_core as core
+
+    rows, dataset_meta = load_dataset(args.dataset, args.manifest)
+    n = args.limit or 40
+    tok, mdl = core.load_model(args.adapter)
+    device = core.resolve_device()
+
+    def old_timer(req):
+        """Exactly the pre-Issue-#9 instrumentation: no explicit synchronization."""
+        inputs = tok(core.build_prompt(req), return_tensors="pt").to(device)
+        t0 = time.perf_counter()
+        with torch.no_grad():
+            mdl.generate(**inputs, max_new_tokens=core.MAX_NEW_TOKENS,
+                         do_sample=False, pad_token_id=tok.eos_token_id)
+        return (time.perf_counter() - t0) * 1000
+
+    for r in rows[:5]:                      # warm up; discarded
+        core.classify_timed(tok, mdl, r["input"], device)
+
+    old, new = [], []
+    for i, r in enumerate(rows[5:5 + n]):
+        req = r["input"]
+        if i % 2 == 0:
+            old.append(old_timer(req))
+            new.append(core.classify_timed(tok, mdl, req, device)[1]["generate_ms"])
+        else:
+            new.append(core.classify_timed(tok, mdl, req, device)[1]["generate_ms"])
+            old.append(old_timer(req))
+
+    same = all(core.classify_raw(tok, mdl, rows[i]["input"], device)[0]
+               == core.classify_timed(tok, mdl, rows[i]["input"], device)[0]
+               for i in range(5))
+    o, w = summarize(old), summarize(new)
+    delta = w["mean_ms"] - o["mean_ms"]
+    doc = {
+        "verification_schema": "firewall-IA/timing-method-ab/1",
+        "run_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "question": ("Does bracketing generate() with device synchronization "
+                     "change the measured latency on this machine?"),
+        "method": ("Same requests, same process, interleaved A/B/B/A, "
+                   f"n={n} per arm, {args.limit and 'limited' or 'default'} "
+                   "selection from the head of the verified eval split. "
+                   "Warm-up discarded."),
+        "device": device,
+        "dataset_sha256": dataset_meta["sha256"],
+        "arm_unsynchronized": {"scope_id": HISTORICAL_TIMING_SCOPE, **o},
+        "arm_synchronized": {"scope_id": TIMING_SCOPE_ID, **w},
+        "mean_delta_ms": delta,
+        "mean_delta_pct": 100.0 * delta / o["mean_ms"] if o["mean_ms"] else None,
+        "decoded_output_identical_through_both_paths": same,
+        "interpretation": (
+            "HuggingFace generate() already synchronizes on every decoding step "
+            "when it evaluates stopping criteria, so the older timer was in "
+            "practice already measuring completed work. The synchronization is "
+            "kept as a guarantee that holds under any future backend, not "
+            "because it moves the number. It is a stopwatch correction, never a "
+            "model improvement."),
+    }
+    out = args.out_dir or os.path.join(BENCH_ROOT, args.experiment or "adhoc")
+    path = os.path.join(out, "timing_method_ab.json")
+    _write_json(path, doc)
+    print(f"\nunsynchronized  mean {o['mean_ms']:8.2f} ms   P50 {o['p50_ms']:8.2f} ms")
+    print(f"synchronized    mean {w['mean_ms']:8.2f} ms   P50 {w['p50_ms']:8.2f} ms")
+    print(f"delta           {delta:+8.3f} ms   ({doc['mean_delta_pct']:+.3f}%)")
+    print(f"identical decoded output through both paths: {same}")
+    print(f"-> {path}")
+    return 0
+
+
 # ── Smoke / estimate / self-test ───────────────────────────────────────────
 def smoke(args):
     """Small functional check of the instrumentation. NOT a measurement.
@@ -932,12 +1033,14 @@ def main():
         description="firewall-IA controlled V4 model-side inference benchmark (Issue #9)")
     ap.add_argument("command",
                     choices=["protocol", "run", "summarize", "smoke", "estimate",
-                             "self-test"],
+                             "verify-timing", "self-test"],
                     help="protocol = full measurement (spawns one process per run); "
                          "run = a single run in this process; "
                          "summarize = re-aggregate existing runs; "
                          "smoke = small functional check; "
-                         "estimate = duration only; self-test = no model needed")
+                         "estimate = duration only; "
+                         "verify-timing = quantify the D31 synchronization; "
+                         "self-test = no model needed")
     ap.add_argument("--experiment", default=None,
                     help="experiment id, e.g. baseline-local-v1")
     ap.add_argument("--out-dir", default=None)
@@ -967,11 +1070,15 @@ def main():
     if args.adapter is None:
         import inference_core as core
         args.adapter = core.DEFAULT_ADAPTER_DIR
-    if args.command != "smoke":
+    if args.command not in ("smoke", "verify-timing"):
         if not args.experiment:
             raise SystemExit("FATAL: --experiment is required")
         args.out_dir = args.out_dir or os.path.join(BENCH_ROOT, args.experiment)
+    elif args.experiment and not args.out_dir:
+        args.out_dir = os.path.join(BENCH_ROOT, args.experiment)
 
+    if args.command == "verify-timing":
+        return verify_timing(args)
     if args.command == "summarize":
         print_summary(summarize_experiment(args.experiment, args.out_dir))
         return 0

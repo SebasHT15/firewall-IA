@@ -1,0 +1,146 @@
+{
+  "manifest_schema": "firewall-IA/benchmark-env/1",
+  "experiment_id": "baseline-local-v1",
+  "captured_utc": "2026-09-09T19:47:45+00:00",
+  "captured_on": "the machine that executed the benchmark",
+  "code": {
+    "repo_root": "/home/sebas/Desktop/firewall-IA",
+    "git_commit": "d64de10a6ee399f1aa19afb1a5abecd0fbc7bf39",
+    "git_branch": "perf/9-v4-inference-benchmark",
+    "working_tree_clean": true,
+    "working_tree_changed_paths": [],
+    "working_tree_diff_sha256": null,
+    "working_tree_diff_bytes": null,
+    "measured_source_sha256": {
+      "inference_core.py": "870deb97880605da0f41d8e1ed1fe0fa24c3f0d85866860d45b24666c874a917",
+      "benchmark_inference.py": "f951d325306db965516653a64c4b315e9b704426bf5d61f4b4517e2e1162b010",
+      "benchmark_env.py": "2c95356714ed5ccee9fec7191bbad78f0f0d3998223841e51aefea5f293e8c24",
+      "benchmark_compare.py": "5b3ad81ea97aacc701ebd347b6ff921cd370d8ac615b230223340e20bbe1b695",
+      "test_model.py": "0850900a083995d8057cb48a21c642399889bb33350076891aeeb65f6d214858"
+    },
+    "note": "A clean tree is identified by git_commit alone. When dirty, git_commit + working_tree_diff_sha256 identify the executed code; the diff content is not stored."
+  },
+  "os": {
+    "distribution": "Ubuntu 26.04.1 LTS",
+    "distribution_id": "ubuntu",
+    "distribution_version": "26.04",
+    "distribution_codename": "resolute",
+    "kernel_release": "7.0.0-31-generic",
+    "kernel_version": "#31-Ubuntu SMP PREEMPT_DYNAMIC Sat Aug  1 04:26:38 UTC 2026",
+    "machine": "x86_64",
+    "hostname_recorded": false,
+    "hostname_note": "Deliberately not recorded \u2014 identifies the operator's machine."
+  },
+  "cpu": {
+    "model": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "physical_cores": 24,
+    "logical_cpus": 32,
+    "scaling_governors": [
+      "powersave"
+    ],
+    "scaling_governor_note": null
+  },
+  "memory": {
+    "ram_total_kb": 32129868,
+    "ram_available_kb": 24783960,
+    "swap_total_kb": 8388604,
+    "ram_total_gib": 30.64
+  },
+  "gpu": {
+    "driver_version": "595.84",
+    "driver_max_cuda_version": "13.2",
+    "driver_max_cuda_note": "Highest CUDA the driver can support \u2014 a compatibility ceiling, NOT the runtime in use. See python.torch_cuda_runtime.",
+    "devices": [
+      {
+        "name": "NVIDIA GeForce RTX 4090 Laptop GPU",
+        "vram_total_mib": 16376,
+        "pci_bus_id": "00000000:01:00.0",
+        "persistence_mode": "Disabled",
+        "power_limit_w": null,
+        "enforced_power_limit_w": 150,
+        "power_limit_note": "power.limit reads [N/A] on some laptop GPUs where the cap is dynamic; enforced.power.limit is the value actually in force at capture.",
+        "compute_mode": "Default"
+      }
+    ],
+    "available": true,
+    "unavailable_reason": null,
+    "torch_device_0": {
+      "name": "NVIDIA GeForce RTX 4090 Laptop GPU",
+      "total_memory_mib": 15920.7,
+      "capability": "8.9",
+      "multi_processor_count": 76
+    }
+  },
+  "python": {
+    "executable": "/usr/bin/python3.12",
+    "version": "3.12.13",
+    "implementation": "CPython",
+    "torch_cuda_runtime": "12.4",
+    "torch_cuda_runtime_note": "CUDA runtime PyTorch is built against and actually uses \u2014 distinct from the driver's maximum supported CUDA version.",
+    "cudnn_version": 90100,
+    "packages_installed": {
+      "torch": "2.6.0+cu124",
+      "transformers": "5.8.0",
+      "peft": "0.19.1",
+      "accelerate": "1.13.0",
+      "bitsandbytes": "0.49.2",
+      "tokenizers": "0.22.2",
+      "safetensors": "0.7.0",
+      "numpy": "2.4.3",
+      "trl": "1.4.0",
+      "datasets": "4.8.5",
+      "fastapi": "0.136.3",
+      "pydantic": "2.13.4",
+      "uvicorn": "0.48.0"
+    },
+    "packages_note": "Read from the live interpreter via importlib.metadata. null means the package is not installed here."
+  },
+  "model": {
+    "base_model_repo": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "base_model_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "base_model_weight_sha256": {
+      "model.safetensors": "6e6001da2106d4757498752a021df6c2bdc332c650aae4bae6b0c004dcf14933"
+    },
+    "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v4-clean",
+    "adapter_config": {
+      "base_model_name_or_path": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "peft_type": "LORA",
+      "task_type": "CAUSAL_LM",
+      "r": 16,
+      "lora_alpha": 32,
+      "lora_dropout": 0.05,
+      "target_modules": [
+        "k_proj",
+        "gate_proj",
+        "up_proj",
+        "q_proj",
+        "o_proj",
+        "v_proj",
+        "down_proj"
+      ],
+      "bias": "none",
+      "fan_in_fan_out": false,
+      "inference_mode": true,
+      "revision": null
+    },
+    "adapter_file_sha256": {
+      "adapter_config.json": "7b722e884d68628cef9611048eaeb11e2d192b78f809103eea6ab5010c3bc781",
+      "adapter_model.safetensors": "7bf168758a428fa7775dff0328de3d07d3063ddf99b961dc8b8406a0dce93de1"
+    },
+    "tokenizer_file_sha256": {
+      "chat_template.jinja": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362",
+      "tokenizer.json": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5",
+      "tokenizer_config.json": "9529c716c37195c285e8ae06abf6a53f5206263b710878b853ef71aa438e78e6"
+    },
+    "notes": []
+  },
+  "environment_variables": {
+    "FIREWALL_ADAPTER_DIR": null,
+    "CUDA_VISIBLE_DEVICES": null,
+    "CUDA_DEVICE_ORDER": null,
+    "PYTHONHASHSEED": null,
+    "OMP_NUM_THREADS": null,
+    "TOKENIZERS_PARALLELISM": null
+  },
+  "environment_variables_note": "Allowlist only. The process environment is never dumped, so no credentials or tokens can reach this file."
+}

@@ -117,6 +117,8 @@ the roadmap below.
 
 ### Latency — model-side only
 
+Historical, Issue #8, single evaluation run, unsynchronized timer — **kept as measured**:
+
 | | mean | P50 | P95 | P99 | min | max | stdev |
 |---|---|---|---|---|---|---|---|
 | ms | 229.1 | 241.8 | 270.8 | 286.6 | 163.1 | 467.5 | 31.8 |
@@ -128,6 +130,41 @@ EOS terminated 100% of generations, none hit the 40-token cap.
 (P95 end-to-end added latency ≤ 200 ms) has **not** been measured and is neither passed nor
 failed. But model-side P95 alone already exceeds the entire future budget, so the current HF
 path is not a viable final backend without optimization — see **D23**.
+
+### Controlled benchmark — `baseline-local-v1` (Issue #9, 2026-09-09)
+
+The reference measurement. 3 fresh processes × the full 6,206-row split = 18,618 real
+classifications. Scope `generate-only/device-synchronized/v1` — `generate()` only, device
+synchronized (**D31**). Batch 1, concurrency 1, model loaded once per process. Frozen;
+future runs take their own experiment id (**D32**).
+
+| steady state, pooled (n=18,618) | mean | P50 | **P95** | P99 | min | max | stdev |
+|---|---|---|---|---|---|---|---|
+| ms | 227.86 | 238.82 | **269.01** | 275.90 | 155.80 | 337.16 | 32.43 |
+
+Reported separately, never pooled in, never discarded:
+
+- **model load** 2275.5 / 2251.6 / 2416.6 ms — once per process
+- **first inference (cold start)** 418.2 / 410.4 / 446.2 ms — **1.75× the steady P50**
+- **warm-up** 4 per run, 159.5–271.2 ms
+
+Peak memory, PyTorch allocator, this process only: 935.5 MiB allocated / 1170.0 MiB
+reserved. Non-generate pipeline stages total ~0.58 ms at P95. Generated tokens mean 11.63
+(r = 0.934 with latency); 0 of 18,618 hit the 40-token cap.
+
+Quality at that latency, same E5 metrics: attack detection 97.04%, 2 FP and 92 FN per run,
+0 invalid, accuracy 98.49% — **bit-identical across the 3 runs and identical to
+`reports/v4_clean_eval.json`**, which is the evidence that the instrumentation did not
+perturb inference.
+
+**⚠ Run-to-run variation is 11.17% on P95** (244.03 / 266.55 / 273.21 ms). Paired per-row
+analysis: run 3 was slower than run 1 in 99.5% of 6,206 requests, GPU starting at 48 °C for
+run 1 and 72 °C for run 3. **Any future claim of an improvement below ~11% on this machine
+is not distinguishable from run-order/thermal variation** unless it is controlled for.
+
+Report: `reports/v4_inference_benchmark.md`. Artifacts:
+`reports/benchmarks/baseline-local-v1/`. The historical 270.8 ms above is an antecedent,
+not a comparand — `benchmark_compare.py` blocks that comparison (6 blocking differences).
 
 ### Legacy manual suite (diagnostic only)
 
@@ -158,8 +195,10 @@ against `reports/v4_clean_eval.json`. GitHub **#15** is the FastAPI Control Plan
 false negatives"; that failure analysis is real outstanding work (**D21**) but is not what
 issue #8 says, and it still has no dedicated issue.
 
-1. **Issue #9** — controlled inference benchmark, honouring the cold-start /
-   steady-state separation recorded in §5
+1. ~~**Issue #9** — controlled inference benchmark~~ — **DONE 2026-09-09.**
+   `baseline-local-v1` measured and frozen; cold-start, warm-up and steady state kept as
+   separate populations (§3). Next in this area: reduce the 11% run-to-run variation by
+   controlling thermal state, and measure a second hardware baseline.
 2. **Issue #16** — mitmproxy inline data plane
 3. **Issue #17** — fail-closed enforcement (**D4**) and the classifier timeout, which
    **D3** still leaves underived
@@ -385,6 +424,13 @@ over the full 6,206-row split. **Do not claim the P95 improved.**
 sets. The warm-up sample must not be silently discarded, and must not be pooled into
 steady-state statistics without saying so explicitly.
 
+**Honoured 2026-09-09.** `baseline-local-v1` separates four populations, not two — model
+load, first inference, warm-up and steady state — and every sample of every population is
+on disk in the per-run JSONL. The controlled cold start measured 410–446 ms across three
+fresh processes, against the 512.8 ms single observation above; both are cold starts taken
+under different conditions and are not two measurements of the same quantity. See §3
+"Controlled benchmark".
+
 ---
 
 ## 6. PayloadsAllTheThings folder renames (root cause of missing categories)
@@ -470,6 +516,32 @@ Reports three levels that are **never combined into one accuracy number**: (1) b
 Invalid outputs are never coerced — counted as incorrect, mapped opposite to expected, reported as a separate rate alongside a parseable-only view. D18 is enforced by an `evidence_status` column (`OK` / `INSUFFICIENT DATA` / `NOT EVALUABLE`); every percentage carries its numerator and denominator. `--json` emits the machine-readable record.
 
 Full specification: `reports/e5_evaluation_methodology.txt`.
+
+### `benchmark_inference.py` · `benchmark_env.py` · `benchmark_compare.py`  *(added 2026-09-09 — Issue #9)*
+**Controlled model-side inference benchmark.** Reuses `inference_core`; does not duplicate
+inference logic and does not touch the `/classify` contract.
+
+- `benchmark_inference.py` — `protocol` (spawns one fresh process per run), `run` (a single
+  run), `summarize` (re-aggregate existing runs), `smoke`, `estimate`, `verify-timing`,
+  `self-test`. Four populations kept separate — model load, first inference, warm-up,
+  steady state — with cold-start/warm-up requests fixed in advance by seed 42 and excluded
+  from the steady statistics without being discarded. Verifies the dataset against its
+  manifest before measuring and refuses to overwrite an experiment that already has results.
+  Percentiles are nearest-rank, identical to `test_model.percentile` (enforced by a test).
+  No outlier removal. Quality comes from `test_model.score_binary`.
+- `benchmark_env.py` — environment manifest read live from the machine: code identity
+  (commit, dirty-diff hash, source hashes), OS/kernel, CPU/RAM, GPU/VRAM, NVIDIA driver and
+  its *maximum supported* CUDA kept distinct from PyTorch's *actual* CUDA runtime, installed
+  package versions, base-model revision, tokenizer/adapter hashes, effective CPU/GPU
+  placement, effective quantization, and sampled power/thermal/load conditions. Unavailable
+  values are recorded as null with a reason; environment variables are allowlisted.
+- `benchmark_compare.py` — `reduction = 100 × (baseline − candidate) / baseline` and the
+  distinct `speedup = baseline / candidate`, per statistic, handling missing values, zero
+  references and regressions. Blocks incomparable reports (timing scope, dataset hash,
+  request count, selection, order, protocol, batch, concurrency) with a non-zero exit.
+  Flags hardware changes, joint hardware+software effects, and any quality degradation
+  accompanying a speed gain. Accepts a legacy `test_model.py` result and correctly refuses
+  to treat it as a peer.
 
 ### `check_dataset.py`  *(added 2026-08-16 — experiment E0)*
 **Dataset integrity gate. Analysis-only — never mutates the dataset.** Run `python3.12 check_dataset.py`.
@@ -759,12 +831,12 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **#7** | **V4 clean baseline training run** | **DONE 2026-08-18 — merged (PR #32).** See §3 and `reports/v4_clean_baseline_results.txt`. |
 | **#8** | V4 clean security metrics evaluation | **DONE 2026-08-18 — closed 2026-09-06.** `reports/v4_clean_eval.json`; all ten AC verified. |
 | **#15** | FastAPI Control Plane | **DONE 2026-09-05 — merged (PR #34), closed.** See §5. |
-| **#9** | Controlled inference benchmark | **NEXT** |
+| **#9** | Controlled inference benchmark | **DONE 2026-09-09 — `baseline-local-v1` measured and frozen. Not closed: closure is the maintainer's call.** See §3. |
 | — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
 | **#16/#17/#18** | Data plane, fail-closed, end-to-end latency | NOT STARTED |
 | **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED |
 | — | Real HTTP laboratory validation (D22) | Planned — external validation gate |
-| — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis and #9 |
+| — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis (#9 is done) |
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |

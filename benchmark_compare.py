@@ -414,26 +414,27 @@ def render_text(cmp_doc):
               "The figures below are printed for diagnosis only and must not be "
               "reported as an improvement. ***", ""]
 
-    L.append(f"{'metric':<34}{'baseline':>12}{'candidate':>12}"
-             f"{'reduction':>12}{'verdict':>12}")
-    L.append("-" * 82)
+    L.append(f"{'metric':<34}{'baseline':>14}{'candidate':>14}"
+             f"{'reduction':>20}{'verdict':>15}")
+    L.append("-" * 97)
     family = None
     for m in cmp_doc["metrics"]:
         if m["family"] != family:
             family = m["family"]
             L.append(f"[{family}]")
         red = m["percent_reduction"]
-        rs = (f"{red['value']:+.2f}%" if red["status"] == "ok" else red["status"])
-        L.append(f"  {m['metric']:<32}{_fmt(m['baseline'], 4):>12}"
-                 f"{_fmt(m['candidate'], 4):>12}{rs:>12}{m['verdict']:>12}")
+        rs = (f"{red['value']:+.4f}%" if red["status"] == "ok" else red["status"])
+        nd = 6 if m["unit"] == "ratio" else 3   # rates need more digits than ms
+        L.append(f"  {m['metric']:<32}{_fmt(m['baseline'], nd):>14}"
+                 f"{_fmt(m['candidate'], nd):>14}{rs:>20}{m['verdict']:>15}")
         sp = m.get("speedup_factor")
         if sp and sp["status"] == "ok":
-            L.append(f"  {'':<32}{'':>12}{'':>12}"
-                     f"{sp['value']:>11.3f}x{'speedup':>12}")
+            L.append(f"  {'':<32}{'':>14}{'':>14}"
+                     f"{sp['value']:>19.4f}x{'speedup':>14}")
 
     L += ["", "COMPATIBILITY"]
     if not cmp_doc["compatibility"]["findings"]:
-        L.append("  no differences recorded")
+        L.append("  no differences on any checked identity field")
     for f in cmp_doc["compatibility"]["findings"]:
         L.append(f"  [{f['severity']:<8}] {f['field']}")
         L.append(f"             baseline : {f['baseline']}")
@@ -477,11 +478,12 @@ def render_markdown(cmp_doc):
           "|---|---|---:|---:|---:|---:|---|"]
     for m in c["metrics"]:
         red = m["percent_reduction"]
-        rs = f"{red['value']:+.2f}%" if red["status"] == "ok" else f"_{red['status']}_"
+        rs = f"{red['value']:+.4f}%" if red["status"] == "ok" else f"_{red['status']}_"
         sp = m.get("speedup_factor")
-        ss = f"{sp['value']:.3f}x" if sp and sp["status"] == "ok" else "—"
-        L.append(f"| `{m['metric']}` | {m['unit'] or ''} | {_fmt(m['baseline'], 4)} "
-                 f"| {_fmt(m['candidate'], 4)} | {rs} | {ss} | {m['verdict']} |")
+        ss = f"{sp['value']:.4f}x" if sp and sp["status"] == "ok" else "—"
+        nd = 6 if m["unit"] == "ratio" else 3
+        L.append(f"| `{m['metric']}` | {m['unit'] or ''} | {_fmt(m['baseline'], nd)} "
+                 f"| {_fmt(m['candidate'], nd)} | {rs} | {ss} | {m['verdict']} |")
     L += ["", "## Compatibility", ""]
     if c["compatibility"]["findings"]:
         L += ["| severity | field | baseline | candidate |", "|---|---|---|---|"]
@@ -489,7 +491,7 @@ def render_markdown(cmp_doc):
             L.append(f"| {f['severity']} | `{f['field']}` | `{f['baseline']}` "
                      f"| `{f['candidate']}` |")
     else:
-        L.append("No differences recorded between the two experiments.")
+        L.append("No difference on any checked identity field.")
     L.append("")
     for n in c["compatibility"]["attribution_notes"]:
         L += [f"> {n}", ""]

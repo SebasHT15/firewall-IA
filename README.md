@@ -59,6 +59,9 @@ status=invalid -> no decision                          NOT enforced on any traff
 - **FastAPI control plane (`classifier_api.py`)** — implemented and executed against the
   real V4 model. `GET /health` and `POST /classify` verified end to end. It classifies
   and reports; it does not enforce anything. See [Control Plane](#control-plane-issue-15).
+- **Controlled model-side inference benchmark (`benchmark_inference.py`)** — executed on
+  the real GPU against the real adapter. The reproducible reference `baseline-local-v1`
+  is frozen in `reports/benchmarks/`. See [Inference Benchmark](#inference-benchmark-issue-9).
 
 **Planned, not built**
 
@@ -68,7 +71,7 @@ status=invalid -> no decision                          NOT enforced on any traff
 - GGUF export, Q4_K_M quantization, llama.cpp inference
 - End-to-end gateway latency measurement
 - Fast path, suspicious score, asynchronous classification (Issues #35–#38 — designed, not built)
-- Concurrency / load validation
+- Concurrency / load validation (the inference benchmark is deliberately concurrency 1)
 - Embedded Linux deployment
 - Real HTTP laboratory validation
 
@@ -155,6 +158,83 @@ neither to be silently discarded nor pooled into steady-state statistics without
 
 ---
 
+## Inference Benchmark (Issue #9)
+
+`benchmark_inference.py` measures how long the V4 classifier takes to generate one
+decision, under a fixed protocol, together with the full environment it ran in. The
+reference experiment is **`baseline-local-v1`** — measured, frozen, and never overwritten.
+
+**Scope: `generate()` only.** Prompt construction, tokenization, host→device transfer,
+decoding and parsing are timed and reported separately and are never pooled into the
+primary metric — together they contribute about 0.58 ms at P95. This is **not** API
+latency and **not** gateway latency; end-to-end is Issue #18, and the D3 budget of
+end-to-end P95 ≤ 200 ms is neither passed nor failed here.
+
+### `baseline-local-v1` — measured on 2026-09-09
+
+3 independent runs × the full 6,206-row held-out split = **18,618 real classifications**,
+on an RTX 4090 Laptop GPU, batch size 1, concurrency 1, model loaded once per process.
+
+| | mean | P50 | **P95** | P99 | min | max | stdev |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| steady state, pooled (ms) | 227.86 | 238.82 | **269.01** | 275.90 | 155.80 | 337.16 | 32.43 |
+
+Reported **separately**, never pooled into the above and never discarded:
+
+| population | values |
+|---|---|
+| model load, per process | 2275.5 · 2251.6 · 2416.6 ms |
+| first inference, per process (cold start) | 418.2 · 410.4 · 446.2 ms |
+| warm-up, 4 per run | 159.5 – 271.2 ms |
+
+Peak memory, PyTorch allocator, this process only: **935.5 MiB allocated / 1170.0 MiB
+reserved**. 11.63 generated tokens on average; **0 of 18,618** generations hit the
+40-token safety bound.
+
+**Quality at that latency** — same E5 metrics, over the same requests: attack detection
+**97.04%**, **2 false positives** and **92 false negatives** per run of 3,103 each,
+**0 invalid outputs**, accuracy 98.49%. The three runs were bit-identical: 0 of 6,206 rows
+differed in decision or in reason text.
+
+> **Run-to-run variation is the finding that matters most.** P95 across the three runs was
+> 244.03, 266.55 and 273.21 ms — a spread of **11.17%**. Pairing each row with itself
+> across runs shows run 3 slower than run 1 in **99.5%** of 6,206 requests, with the GPU
+> starting run 1 at 48 °C and run 3 at 72 °C. **A future candidate claiming a reduction
+> smaller than ~11% on this machine has not demonstrated anything** unless run order and
+> thermal state are controlled.
+
+Full report: [`reports/v4_inference_benchmark.md`](reports/v4_inference_benchmark.md).
+Artifacts: [`reports/benchmarks/baseline-local-v1/`](reports/benchmarks/baseline-local-v1/).
+
+### Reproduce it, and compare a future run
+
+```bash
+python3.12 benchmark_inference.py self-test          # statistics only, no model
+python3.12 benchmark_inference.py estimate --runs 3  # duration before committing to it
+python3.12 benchmark_inference.py protocol --experiment <new-id> --runs 3
+python3.12 benchmark_compare.py --baseline baseline-local-v1 --candidate <new-id>
+```
+
+`benchmark_compare.py` reports, per statistic,
+`reduction = 100 × (baseline − candidate) / baseline` and the distinct speedup factor
+`baseline / candidate`. It **refuses** to call two results comparable merely because both
+are in milliseconds: timing scope, dataset hash, request count, selection, order,
+protocol, batch size and concurrency must match, and a mismatch exits non-zero. A hardware
+change demands re-running the base version on that hardware; simultaneous hardware and
+software changes are reported as a joint effect; and a speed gain is never printed without
+naming any quality degradation beside it. See D31 and D32.
+
+### Historical antecedents — preserved, not comparable
+
+The Issue #8 model-side P95 of **270.8 ms** and the Issue #15 preliminary observation
+(first inference 512.8 ms, steady n=30 P50 232.5 ms) remain as measured, under their own
+protocols. They are **not** `baseline-local-v1` results. Pointing the comparison tool at
+the former produces `NOT COMPARABLE` with 6 blocking differences — the demonstration is
+committed at
+[`vs-historical-e5.md`](reports/benchmarks/baseline-local-v1/vs-historical-e5.md).
+
+---
+
 ## Current Research Status
 
 | Stage | Status |
@@ -167,7 +247,7 @@ neither to be silently discarded nor pooled into steady-state statistics without
 | V4 clean training (Issue #7) | Complete |
 | V4 security evaluation (Issue #8) | Complete |
 | FastAPI control plane (Issue #15) | Complete |
-| Controlled inference benchmark (Issue #9) | Next |
+| Controlled inference benchmark (Issue #9) | Complete |
 | Inline data plane (Issue #16) | Planned |
 | Fail-closed enforcement (Issue #17) | Planned |
 | Heuristic suspicious scoring (Issue #35) | Planned |
@@ -253,8 +333,9 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - **Real HTTP laboratory traffic has not been validated yet.**
 - **No adversarial held-out evaluation has been performed.** Evasion resistance is
   unmeasured by design.
-- **Model-side P95 (270.8 ms) already exceeds the whole 200 ms end-to-end budget**, so
-  the current HuggingFace path is not a viable deployment backend without optimization.
+- **Model-side P95 (269.0 ms under the Issue #9 protocol; 270.8 ms historically) already
+  exceeds the whole 200 ms end-to-end budget**, so the current HuggingFace path is not a
+  viable deployment backend without optimization.
 - **No quantized comparison exists yet** — GGUF/Q4_K_M is unbuilt.
 - **No physical embedded validation exists yet.**
 - **CSIC BLOCK labels come from a keyword heuristic**, so the CSIC-derived portion of
@@ -267,7 +348,15 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - **Concurrency is serialized but unvalidated.** One GPU, one inference at a time;
   behaviour under simultaneous load has not been measured.
 - **Cold-start latency is materially higher than steady state**, and the two must never
-  be pooled — see [Control Plane](#control-plane-issue-15).
+  be pooled — measured at 1.75× the steady P50, see [Inference Benchmark](#inference-benchmark-issue-9).
+- **Latency varies by ~11% between back-to-back runs on this machine**, driven by run
+  order and GPU thermal state. Any future improvement claim smaller than that is not
+  distinguishable from run-order variation without controlling for it.
+- **The benchmark is single-request**: batch size 1, concurrency 1, one process. It says
+  nothing about behaviour under concurrent load.
+- **The baseline exists for one machine only.** No embedded or alternative-hardware
+  baseline has been measured, and cross-hardware comparison requires re-running the base
+  version on the new hardware (D32).
 
 ---
 
@@ -294,7 +383,8 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 
 - Issue #8 — V4 clean security evaluation: **complete**, metrics archived in
   `reports/v4_clean_eval.json`
-- Issue #9 — controlled inference benchmark
+- Issue #9 — controlled inference benchmark: **complete**, `baseline-local-v1` frozen in
+  `reports/benchmarks/`
 - Failure analysis of the 92 false negatives (D21) — outstanding work, not currently
   tracked by a dedicated issue
 - Real HTTP laboratory validation
@@ -353,6 +443,8 @@ Commit format is `type(scope): description` — types `feat` `fix` `perf` `refac
 | Path | Contents |
 |---|---|
 | [`reports/`](reports/) | Every experiment record — E0 through the V4 baseline |
+| [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark experiments; `baseline-local-v1` is the frozen reference |
+| [`reports/v4_inference_benchmark.md`](reports/v4_inference_benchmark.md) | Issue #9 benchmark report — protocol, environment, results |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | Dataset identity: hashes, seed, source commit, generation policy |
 | [`CONTEXT.md`](CONTEXT.md) | Current technical state and immediate roadmap |
 | [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D30) |
