@@ -1,0 +1,42 @@
+{
+  "verification_schema": "firewall-IA/timing-method-ab/1",
+  "run_utc": "2026-09-09T21:01:48+00:00",
+  "question": "Does bracketing generate() with device synchronization change the measured latency on this machine?",
+  "method": "Same requests, same process, interleaved A/B/B/A, n=40 per arm, limited selection from the head of the verified eval split. Warm-up discarded.",
+  "device": "cuda",
+  "dataset_sha256": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859",
+  "arm_unsynchronized": {
+    "scope_id": "generate-only/unsynchronized/v0",
+    "count": 40,
+    "unit": "ms",
+    "mean_ms": 235.08206589999645,
+    "p50_ms": 240.63387699970917,
+    "p95_ms": 248.1890970002496,
+    "p99_ms": 258.0282459994123,
+    "min_ms": 168.7026119998336,
+    "max_ms": 258.0282459994123,
+    "stdev_ms": 19.753625035355682,
+    "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+    "samples_above_p99": 0,
+    "outlier_policy": "none removed; all samples retained and reported"
+  },
+  "arm_synchronized": {
+    "scope_id": "generate-only/device-synchronized/v1",
+    "count": 40,
+    "unit": "ms",
+    "mean_ms": 234.17296132502088,
+    "p50_ms": 240.766345999873,
+    "p95_ms": 245.95645899989904,
+    "p99_ms": 248.14044800041302,
+    "min_ms": 169.06481299974985,
+    "max_ms": 248.14044800041302,
+    "stdev_ms": 19.11615302948746,
+    "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+    "samples_above_p99": 0,
+    "outlier_policy": "none removed; all samples retained and reported"
+  },
+  "mean_delta_ms": -0.9091045749755722,
+  "mean_delta_pct": -0.386717962297602,
+  "decoded_output_identical_through_both_paths": true,
+  "interpretation": "HuggingFace generate() already synchronizes on every decoding step when it evaluates stopping criteria, so the older timer was in practice already measuring completed work. The synchronization is kept as a guarantee that holds under any future backend, not because it moves the number. It is a stopwatch correction, never a model improvement."
+}

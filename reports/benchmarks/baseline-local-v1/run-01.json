@@ -1,0 +1,359 @@
+{
+  "run_schema": "firewall-IA/benchmark-run/1",
+  "experiment_id": "baseline-local-v1",
+  "run_index": 1,
+  "started_utc": "2026-09-09T19:47:48+00:00",
+  "finished_utc": "2026-09-09T20:10:14+00:00",
+  "pid": 28384,
+  "protocol_version": "1.0.0",
+  "timing_scope_id": "generate-only/device-synchronized/v1",
+  "samples_file": "run-01.samples.jsonl",
+  "device": "cuda",
+  "model_placement": {
+    "hf_device_map": null,
+    "parameter_devices": {
+      "cuda:0": {
+        "parameters": 628221952,
+        "share": 1.0
+      }
+    },
+    "buffers_on_cpu": 0,
+    "quantization_effective": {
+      "quant_method": "bitsandbytes",
+      "_load_in_8bit": false,
+      "_load_in_4bit": true,
+      "llm_int8_threshold": 6.0,
+      "llm_int8_skip_modules": null,
+      "llm_int8_enable_fp32_cpu_offload": false,
+      "llm_int8_has_fp16_weight": false,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": false,
+      "bnb_4bit_compute_dtype": "bfloat16",
+      "bnb_4bit_quant_storage": "uint8",
+      "load_in_4bit": true,
+      "load_in_8bit": false
+    }
+  },
+  "model_load_ms": 2275.4804319997675,
+  "first_inference": {
+    "policy": "EXCLUDED from steady-state statistics; reported separately",
+    "samples_ms": [
+      418.21659100014585
+    ],
+    "rows": [
+      5238
+    ],
+    "generated_tokens": [
+      9
+    ]
+  },
+  "warmup": {
+    "policy": "EXCLUDED from steady-state statistics; reported separately",
+    "samples_ms": [
+      243.7768119998509,
+      228.5592230000475,
+      180.96185299964418,
+      159.4809329999407
+    ],
+    "rows": [
+      912,
+      204,
+      6074,
+      2253
+    ]
+  },
+  "steady_state": {
+    "wall_clock_s": 1342.2094621739998,
+    "generate_ms": {
+      "count": 6206,
+      "unit": "ms",
+      "mean_ms": 215.80842776699643,
+      "p50_ms": 232.01308200032145,
+      "p95_ms": 244.03269000049477,
+      "p99_ms": 248.07199199949537,
+      "min_ms": 155.80048199990415,
+      "max_ms": 259.78154499989614,
+      "stdev_ms": 29.289133970443032,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "generate-only/device-synchronized/v1",
+      "samples_above_p99": 62,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    "pipeline_ms": {
+      "count": 6206,
+      "unit": "ms",
+      "mean_ms": 216.219929636332,
+      "p50_ms": 232.41710299998886,
+      "p95_ms": 244.4244099997377,
+      "p99_ms": 248.47470700115082,
+      "min_ms": 156.18728200024634,
+      "max_ms": 260.43649800067215,
+      "stdev_ms": 29.28001380690733,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "prompt+tokenize+transfer+generate+decode+parse",
+      "samples_above_p99": 62,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    "stages_ms": {
+      "prompt_build_ms": {
+        "count": 6206,
+        "unit": "ms",
+        "mean_ms": 0.0010336308453940588,
+        "p50_ms": 0.000985000042419415,
+        "p95_ms": 0.0013019998732488602,
+        "p99_ms": 0.0015579998944303952,
+        "min_ms": 0.000642000486550387,
+        "max_ms": 0.014151999948808225,
+        "stdev_ms": 0.0003469610478382699,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "tokenize_ms": {
+        "count": 6206,
+        "unit": "ms",
+        "mean_ms": 0.2746600446366344,
+        "p50_ms": 0.2663790000951849,
+        "p95_ms": 0.3732859995579929,
+        "p99_ms": 0.4331200002525293,
+        "min_ms": 0.16396099999838043,
+        "max_ms": 0.7583940005133627,
+        "stdev_ms": 0.05333745950779693,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "transfer_ms": {
+        "count": 6206,
+        "unit": "ms",
+        "mean_ms": 0.0650699110503778,
+        "p50_ms": 0.05239300026005367,
+        "p95_ms": 0.12496999988798052,
+        "p99_ms": 0.1970309995158459,
+        "min_ms": 0.04025899988846504,
+        "max_ms": 0.3940960004911176,
+        "stdev_ms": 0.03223136230593676,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "decode_ms": {
+        "count": 6206,
+        "unit": "ms",
+        "mean_ms": 0.06383617161524326,
+        "p50_ms": 0.062046000493864994,
+        "p95_ms": 0.07727899992460152,
+        "p99_ms": 0.08694999996805564,
+        "min_ms": 0.046500999815179966,
+        "max_ms": 0.14281099993240787,
+        "stdev_ms": 0.006840922972223683,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "parse_ms": {
+        "count": 6206,
+        "unit": "ms",
+        "mean_ms": 0.006902111187929781,
+        "p50_ms": 0.0067009996200795285,
+        "p95_ms": 0.008588000127929263,
+        "p99_ms": 0.011420000191719737,
+        "min_ms": 0.004610000360116828,
+        "max_ms": 0.030014000003575347,
+        "stdev_ms": 0.0010641972955944268,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      }
+    },
+    "workload": {
+      "prompt_tokens": {
+        "count": 6206,
+        "unit": "tokens",
+        "mean_tokens": 191.89429584273284,
+        "p50_tokens": 175.0,
+        "p95_tokens": 322.0,
+        "p99_tokens": 422.0,
+        "min_tokens": 74.0,
+        "max_tokens": 815.0,
+        "stdev_tokens": 71.74622733971118,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "generated_tokens": {
+        "count": 6206,
+        "unit": "tokens",
+        "mean_tokens": 11.62584595552691,
+        "p50_tokens": 13.0,
+        "p95_tokens": 13.0,
+        "p99_tokens": 13.0,
+        "min_tokens": 9.0,
+        "max_tokens": 13.0,
+        "stdev_tokens": 1.6880493970613466,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 0,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "request_chars": {
+        "count": 6206,
+        "unit": "chars",
+        "mean_chars": 270.353206574283,
+        "p50_chars": 252.0,
+        "p95_chars": 484.0,
+        "p99_chars": 602.0,
+        "min_chars": 46.0,
+        "max_chars": 940.0,
+        "stdev_chars": 108.98488889124978,
+        "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+        "samples_above_p99": 62,
+        "outlier_policy": "none removed; all samples retained and reported"
+      },
+      "stopped_on_eos_count": 6206,
+      "hit_token_cap_count": 0
+    }
+  },
+  "memory": {
+    "what_this_measures": "PyTorch caching-allocator accounting for THIS process only. `allocated` is live tensor memory, `reserved` is what the allocator holds from the driver. Neither includes the CUDA context (~250-500 MiB) nor memory used by other processes, so neither equals nvidia-smi's figure for the GPU.",
+    "after_model_load": {
+      "available": true,
+      "allocated_mib": 837.1,
+      "max_allocated_mib": 1039.0,
+      "reserved_mib": 1170.0,
+      "max_reserved_mib": 1170.0
+    },
+    "peak_during_steady_state": {
+      "available": true,
+      "allocated_mib": 846.1,
+      "max_allocated_mib": 935.5,
+      "reserved_mib": 1170.0,
+      "max_reserved_mib": 1170.0
+    },
+    "gpu_total_used_mib_before": 541,
+    "gpu_total_used_mib_after": 2010
+  },
+  "quality": {
+    "source": "test_model.score_binary (E5 frozen methodology, BLOCK positive)",
+    "attack_detection_rate": 0.97035127296165,
+    "false_positives": 2,
+    "false_positive_rate": 0.0006445375443119562,
+    "false_negatives": 92,
+    "false_negative_rate": 0.029648727038349983,
+    "invalid_outputs": 0,
+    "invalid_output_rate": 0.0,
+    "accuracy": 0.984853367708669,
+    "support": 6206,
+    "confusion_matrix": {
+      "TP": 3011,
+      "FP": 2,
+      "FN": 92,
+      "TN": 3101
+    },
+    "full": {
+      "support": 6206,
+      "correct": 6112,
+      "accuracy": 0.984853367708669,
+      "precision_block": 0.9993362097577165,
+      "recall_block": 0.97035127296165,
+      "f1_block": 0.9846304774362328,
+      "attack_detection_rate": 0.97035127296165,
+      "false_positives": 2,
+      "false_positive_rate": 0.0006445375443119562,
+      "false_negatives": 92,
+      "false_negative_rate": 0.029648727038349983,
+      "confusion_matrix": {
+        "TP": 3011,
+        "FP": 2,
+        "FN": 92,
+        "TN": 3101
+      },
+      "allow_support": 3103,
+      "block_support": 3103,
+      "invalid_outputs": 0,
+      "invalid_output_rate": 0.0,
+      "parseable_only": {
+        "support": 6206,
+        "correct": 6112,
+        "accuracy": 0.984853367708669,
+        "precision_block": 0.9993362097577165,
+        "recall_block": 0.97035127296165,
+        "f1_block": 0.9846304774362328,
+        "attack_detection_rate": 0.97035127296165,
+        "false_positives": 2,
+        "false_positive_rate": 0.0006445375443119562,
+        "false_negatives": 92,
+        "false_negative_rate": 0.029648727038349983,
+        "confusion_matrix": {
+          "TP": 3011,
+          "FP": 2,
+          "FN": 92,
+          "TN": 3101
+        },
+        "allow_support": 3103,
+        "block_support": 3103
+      }
+    }
+  },
+  "conditions_before": {
+    "sampled_utc": "2026-09-09T19:47:48+00:00",
+    "note": "immediately before this run",
+    "load_average_1_5_15": [
+      1.13,
+      1.04,
+      1.01
+    ],
+    "ac_power": true,
+    "battery_capacity_pct": 80,
+    "gpu": [
+      {
+        "power_draw_w": 9.14,
+        "temperature_c": 48,
+        "clock_sm_mhz": 210,
+        "clock_mem_mhz": 405,
+        "utilization_gpu_pct": 32,
+        "utilization_memory_pct": 6,
+        "memory_used_mib": 541,
+        "memory_total_mib": 16376,
+        "throttle_reasons_active": "0x0000000000000001"
+      }
+    ],
+    "other_gpu_processes": [
+      {
+        "pid": 9967,
+        "process_name": "/usr/bin/ptyxis",
+        "used_memory_mib": 24
+      }
+    ]
+  },
+  "conditions_after": {
+    "sampled_utc": "2026-09-09T20:10:14+00:00",
+    "note": "immediately after this run",
+    "load_average_1_5_15": [
+      1.56,
+      1.52,
+      1.38
+    ],
+    "ac_power": true,
+    "battery_capacity_pct": 80,
+    "gpu": [
+      {
+        "power_draw_w": 78.43,
+        "temperature_c": 73,
+        "clock_sm_mhz": 2310,
+        "clock_mem_mhz": 9001,
+        "utilization_gpu_pct": 42,
+        "utilization_memory_pct": 10,
+        "memory_used_mib": 2010,
+        "memory_total_mib": 16376,
+        "throttle_reasons_active": "0x0000000000000000"
+      }
+    ],
+    "other_gpu_processes": [
+      {
+        "pid": 9967,
+        "process_name": "/usr/bin/ptyxis",
+        "used_memory_mib": 24
+      }
+    ]
+  }
+}
