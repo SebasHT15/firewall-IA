@@ -453,7 +453,8 @@ $(dep N10)
 - [ ] Classifier crash/error blocks
 - [ ] Invalid response blocks
 - [ ] Each failure mode tested explicitly, not assumed
-- [ ] Timeout value chosen and justified against the D3 latency budget
+- [ ] Classifier timeout configurable, initial value 3 s: an operational threshold to detect classifier unavailability and apply fail-closed
+- [ ] Timeout not derived from D3: P95 end-to-end <= 200 ms is a future performance objective, not a timeout basis (D35)
 - [ ] Behaviour documented as a security property
 
 ## Note

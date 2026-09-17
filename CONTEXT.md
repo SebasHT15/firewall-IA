@@ -11,7 +11,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D24). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D35). Read it before proposing architectural changes.
 > - `reports/` — experiment and audit outputs. Never overwrite a report; add a new one.
 
 ---
@@ -25,7 +25,8 @@ The device is an **authorized inline supervisor (a legitimate security gateway),
 - **ALWAYS invoke `python3.12` explicitly** to run scripts: `python3.12 finetune.py`. Never `python3`.
 - **ALWAYS install with `python3.12 -m pip install <pkg> --break-system-packages`.** Plain `pip` currently maps to 3.12 but `python3.12 -m pip` is unambiguous.
 - Verify pip target anytime with `pip --version` (look for `(python 3.12)`).
-- No virtual environments are used (project preference).
+- No virtual environments are used for the ML stack (project preference). Exception: the data plane runs in
+  `.venv-dataplane`, because mitmproxy's pins conflict with the ML stack (**D33**).
 
 Stack confirmed working in 3.12 (2026-05-24): torch 2.6.0+cu124 (CUDA True on RTX 4090 Laptop), transformers, peft, trl, bitsandbytes, accelerate, datasets, pandas. Driver NVIDIA 595.71.05, supports up to CUDA 13.2; torch cu124 wheels run fine via forward-compat.
 
@@ -127,9 +128,10 @@ Peak evaluation VRAM 2,476 MiB. Generated tokens (n=300 sample): mean 11.58, P95
 EOS terminated 100% of generations, none hit the 40-token cap.
 
 **These are HuggingFace model-side inference times, NOT end-to-end gateway latency.** D3
-(P95 end-to-end added latency ≤ 200 ms) has **not** been measured and is neither passed nor
-failed. But model-side P95 alone already exceeds the entire future budget, so the current HF
-path is not a viable final backend without optimization — see **D23**.
+(P95 end-to-end added latency ≤ 200 ms) is a project **performance objective**, not an
+acceptance criterion (**D35**). No formal end-to-end benchmark of the complete system exists
+yet (Issue #18). Model-side P95 alone is already above 200 ms, which is why inference
+optimization is prioritized; see **D23**.
 
 ### Controlled benchmark — `baseline-local-v1` (Issue #9, 2026-09-09)
 
@@ -199,9 +201,10 @@ issue #8 says, and it still has no dedicated issue.
    `baseline-local-v1` measured and frozen; cold-start, warm-up and steady state kept as
    separate populations (§3). Next in this area: reduce the 11% run-to-run variation by
    controlling thermal state, and measure a second hardware baseline.
-2. **Issue #16** — mitmproxy inline data plane
-3. **Issue #17** — fail-closed enforcement (**D4**) and the classifier timeout, which
-   **D3** still leaves underived
+2. **Issue #16** — mitmproxy inline data plane — **first version implemented 2026-09-16** (§5b)
+3. **Issue #17** — fail-closed enforcement (**D4**) — **first version implemented 2026-09-16** (§5b, **D34**).
+   The 3 s classifier timeout is an operational limit for detecting classifier failure, not the
+   latency objective; tune it with end-to-end evidence (**D35**)
 4. **Issue #18** — end-to-end gateway latency, the no-fast-path baseline
 5. **Failure analysis of the 92 false negatives** (**D21**) — untracked
 6. **Real HTTP laboratory validation** (**D22**)
@@ -389,10 +392,10 @@ It re-implements nothing.
 
 - The Control Plane **reports**; it does not enforce. It surfaces `invalid`, `503` and
   `500`, and nothing acts on them.
-- The future Data Plane is responsible for applying **fail-closed** (**D4**) when it
+- The Data Plane is responsible for applying **fail-closed** (**D4**) when it
   receives an invalid result, an error, or a timeout.
-- **mitmproxy is not implemented.** There is no inline interception, no enforcement, and
-  no classifier timeout.
+- Enforcement lives in the data plane (§5b), which applies fail-closed to `invalid`,
+  non-200 answers, timeouts and connection errors.
 
 ### Validation evidence
 
@@ -430,6 +433,62 @@ on disk in the per-run JSONL. The controlled cold start measured 410–446 ms ac
 fresh processes, against the 512.8 ms single observation above; both are cold starts taken
 under different conditions and are not two measurements of the same quantity. See §3
 "Controlled benchmark".
+
+---
+
+## 5b. Data Plane — FIRST VERSION (Issues #16/#17, 2026-09-16)
+
+`data_plane.py` is a mitmproxy addon, run with
+`.venv-dataplane/bin/mitmdump -s data_plane.py --listen-host 127.0.0.1 -p 8080`.
+
+- For every request it renders the raw D1 text and calls `POST /classify` (unchanged
+  contract). It never loads the model.
+- It forwards only an explicit `status: "ok"` + `decision: "ALLOW"`.
+- A model BLOCK gets 403. A classifier failure or an invalid decision gets 503
+  (fail-closed).
+
+Decisions: **D33** (separate environment), **D34** (enforcement), **D35** (D3 objective vs.
+timeout). Full description and reproduction steps: README, "Data Plane".
+
+- **Separate environment (D33).** mitmproxy 12.2.3 pins `typing-extensions<=4.14` on
+  Python 3.12, while pydantic 2.13.4 needs `>=4.14.1`. The data plane uses
+  `.venv-dataplane` and `requirements-data-plane.txt`; `requirements.txt` is unchanged.
+- **Config.** `config.yaml` holds `data_plane.classifier_url` and
+  `data_plane.classifier_timeout_seconds` = 3.0. The timeout is an operational limit for
+  detecting classifier failure, not the latency objective (D35).
+- **mitmproxy fail-open behaviours verified on 12.2.3, and handled.**
+  1. An exception in a hook is logged and the request is forwarded, so the hook catches
+     everything and blocks.
+  2. A failed hot reload leaves the proxy running without the addon, so on unload the
+     addon enables the built-in `block_list` for all traffic (503) until restart.
+  3. A load or config error at startup makes mitmdump exit with code 1, observed about
+     1 ms after its port opens.
+- **Tests.** `tests/test_data_plane.py` (21 tests), run with `.venv-dataplane/bin/python`.
+  Under python3.12 the module is skipped.
+- **Manual verification, 2026-09-16, real V4 model.**
+  - ALLOW: `GET localhost:9000/index.html` → 200, and the destination logged the GET.
+  - BLOCK: a SQL injection request → 403, and the destination logged nothing.
+  - Classifier stopped: → 503, and the destination logged nothing.
+  - Also exercised once each, with no request reaching the destination: XSS, path
+    traversal, command injection and SQL injection in a POST body (all 403); a hung
+    classifier (503 after 3.0 s); a model that was not loaded (503); an addon broken by a
+    hot reload (503).
+- **Finding: model false positives on real client traffic.** A model/dataset limitation
+  (D22), not a data plane defect.
+  - `GET /index.html` with `Host: 127.0.0.1:9000` → BLOCK "Server-side request forgery",
+    on every repetition. Sent directly to `/classify` with the same Host, `GET /` and
+    `GET /products?id=42` were also BLOCK. With `localhost:9000` or a domain, the same
+    request is ALLOW. The role of `Host` is an open finding still to be isolated
+    experimentally, not a demonstrated cause.
+  - `GET /` with `localhost:9000` → BLOCK "HTTP request smuggling"; cause not isolated.
+  - `Proxy-Connection` (0 V4 training rows) did not change the decision for the request
+    tested, so it is **not** a confirmed cause.
+  - In the V4 splits, `127.0.0.1` is never a Host value and elsewhere appears only in
+    BLOCK rows (58 train / 12 eval). The `10.20.30.40:8000` and `localhost:8080` Hosts
+    are balanced across labels. This is consistent with the observation above but does
+    not demonstrate a cause.
+  - Headers are not rewritten, and `render_request()` is not changed, to hide it. It is
+    to be studied separately.
 
 ---
 
@@ -511,7 +570,7 @@ Three modes, cleanly separated:
 - `--mode manual` — the legacy 135 hand-authored cases, reclassified as a **MANUAL DIAGNOSTIC / REGRESSION SUITE**. Preserved verbatim, prints a banner explaining why it is not the headline metric.
 - `--mode self-test` — verifies the metric code on fixtures with **no model required**.
 
-Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** and explicitly not comparable to D3's end-to-end budget.
+Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** and explicitly not comparable to D3's end-to-end objective.
 
 Invalid outputs are never coerced — counted as incorrect, mapped opposite to expected, reported as a separate rate alongside a parseable-only view. D18 is enforced by an `evidence_status` column (`OK` / `INSUFFICIENT DATA` / `NOT EVALUABLE`); every percentage carries its numerator and denominator. `--json` emits the machine-readable record.
 
@@ -833,7 +892,8 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **#15** | FastAPI Control Plane | **DONE 2026-09-05 — merged (PR #34), closed.** See §5. |
 | **#9** | Controlled inference benchmark | **DONE 2026-09-09 — `baseline-local-v1` measured and frozen. Not closed: closure is the maintainer's call.** See §3. |
 | — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
-| **#16/#17/#18** | Data plane, fail-closed, end-to-end latency | NOT STARTED |
+| **#16/#17** | Data plane, fail-closed | **FIRST VERSION 2026-09-16** — verified locally, see §5b |
+| **#18** | End-to-end latency | NOT STARTED |
 | **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED |
 | — | Real HTTP laboratory validation (D22) | Planned — external validation gate |
 | — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis (#9 is done) |

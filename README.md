@@ -35,8 +35,8 @@ embedded Linux hardware and validated against real traffic in an authorized labo
 HTTP Client
     |
     v
-Data Plane — inline gateway ..........  NOT BUILT     (mitmproxy; would enforce fail-closed)
-    |
+Data Plane — inline gateway ..........  FIRST VERSION (mitmproxy addon, data_plane.py)
+    |                                                   enforces ALLOW/BLOCK, fail-closed
     v
 Control Plane — POST /classify .......  IMPLEMENTED   (FastAPI, classifier_api.py)
     |
@@ -44,8 +44,8 @@ Control Plane — POST /classify .......  IMPLEMENTED   (FastAPI, classifier_api
 inference_core — V4 pipeline .........  IMPLEMENTED   (TinyLlama + model-output-v4-clean)
     |
     v
-status=ok -> ALLOW | BLOCK           .  IMPLEMENTED   (reported to the caller,
-status=invalid -> no decision                          NOT enforced on any traffic)
+status=ok -> ALLOW | BLOCK           .  IMPLEMENTED   (enforced by the data plane;
+status=invalid -> no decision                          invalid/error/timeout -> BLOCK)
 ```
 
 **Implemented today**
@@ -62,12 +62,14 @@ status=invalid -> no decision                          NOT enforced on any traff
 - **Controlled model-side inference benchmark (`benchmark_inference.py`)** — executed on
   the real GPU against the real adapter. The reproducible reference `baseline-local-v1`
   is frozen in `reports/benchmarks/`. See [Inference Benchmark](#inference-benchmark-issue-9).
+- **Data plane, first version (`data_plane.py`)** — mitmproxy addon that sends every HTTP
+  request to `POST /classify` and enforces the answer, fail-closed. Executed locally
+  against the real V4 model. See [Data Plane](#data-plane-issues-16-17--first-version).
 
 **Planned, not built**
 
-- Inline interception data plane (mitmproxy)
-- Fail-closed enforcement in a live path
-- Classifier timeout
+- Classifier timeout tuned with end-to-end evidence (today: a conservative operational 3 s)
+- HTTPS / HTTP/2 / WebSocket interception validation (the first data plane targets plain HTTP/1.1)
 - GGUF export, Q4_K_M quantization, llama.cpp inference
 - End-to-end gateway latency measurement
 - Fast path, suspicious score, asynchronous classification (Issues #35–#38 — designed, not built)
@@ -82,8 +84,8 @@ Nothing in the "planned" list should be read as working today.
 ## Control Plane (Issue #15)
 
 `classifier_api.py` exposes the V4 classifier over HTTP. It **classifies and reports —
-it does not enforce**. Nothing intercepts or blocks traffic yet: the data plane
-(mitmproxy) and inline fail-closed enforcement are not built.
+it does not enforce**. Enforcement, including fail-closed, lives in the
+[data plane](#data-plane-issues-16-17--first-version).
 
 ```
 test_model.py  -->  inference_core.py  <--  classifier_api.py
@@ -121,7 +123,7 @@ Other responses: `422` malformed body, `503` model not loaded (D28), `500` infer
 failure — no traceback is ever returned to the client.
 
 `model_latency_ms` is **model-side inference only**, the same scope the V4 evaluation
-uses. It is not end-to-end latency; there is no data plane to measure end to end.
+uses. It is not end-to-end latency, which has not been measured yet.
 
 ### Running it
 
@@ -158,6 +160,201 @@ neither to be silently discarded nor pooled into steady-state statistics without
 
 ---
 
+## Data Plane (Issues #16, #17) — first version
+
+`data_plane.py` is a mitmproxy addon: an **authorized inline interception** point, not a
+man-in-the-middle attack. Every HTTP request that reaches the proxy is classified by the
+control plane before anything is forwarded.
+
+```
+HTTP client --(HTTP proxy 127.0.0.1:8080)--> mitmdump -s data_plane.py
+                                                 |  render_request(): raw HTTP text (D1)
+                                                 v
+                                   POST http://127.0.0.1:8000/classify   (control plane: the model)
+                                                 |
+               ALLOW <---------------------------+---------------------------> BLOCK / no valid decision
+                 |                                                               |
+   forwarded to the destination                            answered by the proxy, never forwarded:
+                                                           403 model BLOCK, 503 fail-closed
+```
+
+The data plane **never loads the model**; it only speaks HTTP to the control plane. The two
+run as separate processes in separate Python environments (D33).
+
+**What is sent to `/classify`.** The unchanged contract `{"request": "<raw HTTP text>"}`, in
+the exact layout of the V4 dataset: `METHOD /path?query HTTP/1.1`, one `Name: value` line
+per header, LF line endings, and a blank line plus the body only when there is a body.
+Headers are passed exactly as received, never filtered or normalized. A unit test rebuilds
+all 6,206 held-out rows as mitmproxy requests and checks that the rendering reproduces
+each one byte for byte.
+
+### Fail-closed (D4, D34)
+
+| Classifier outcome | Client gets | Forwarded |
+|---|---|---|
+| HTTP 200, `status: "ok"`, `decision: "ALLOW"` | the destination's response | **yes** |
+| HTTP 200, `status: "ok"`, `decision: "BLOCK"` | `403` | no |
+| HTTP 200, `status: "invalid"` | `503` | no |
+| Any non-200 (`503` model not loaded, `500` inference failure, ...) | `503` | no |
+| Timeout, connection refused, network error | `503` | no |
+| Invalid JSON, missing or unknown `status`/`decision` | `503` | no |
+| Unexpected error inside the addon | `503` | no |
+
+The client never receives the model's reason; it is written to the proxy log. The internal
+classifier client ignores `HTTP_PROXY`/`HTTPS_PROXY` (`trust_env=False`), so a shell configured
+to use the gateway cannot route the classifier call back through it.
+
+Two mitmproxy 12.2.3 behaviours were verified to **fail open** by default, and are handled:
+
+- An exception raised inside an addon hook is logged and the request is **forwarded
+  anyway**. The addon's `request` hook catches every exception and blocks.
+- mitmdump **hot-reloads** a script when its file changes; if the new version fails to
+  load, the proxy keeps running **without the addon**. When the addon is unloaded while
+  the proxy is running, it switches mitmproxy's built-in `block_list` to block all
+  traffic (`503`) until mitmdump is restarted. **Restart mitmdump after editing
+  `data_plane.py`.**
+
+If the addon or `config.yaml` fails to load at startup, mitmdump exits with code 1 (observed
+about 1 ms after its port opens).
+
+### Configuration
+
+`config.yaml`, read when the addon loads:
+
+```yaml
+data_plane:
+  classifier_url: http://127.0.0.1:8000/classify
+  classifier_timeout_seconds: 3.0
+```
+
+The timeout is an **operational limit for detecting a failed or hung classifier** and
+applying fail-closed. It is **not** the project's latency objective (D3) and is not derived
+from latency measurements. 3 s is a conservative initial value, to be tuned with end-to-end
+evidence (Issue #18). See D35.
+
+### Setup (once)
+
+mitmproxy 12.2.3 pins `typing-extensions<=4.14` on Python 3.12, while the control plane's
+pydantic 2.13.4 needs `>=4.14.1`. The data plane therefore gets its own environment, and
+nothing is installed into the ML/control-plane interpreter (D33):
+
+```bash
+uv venv --python 3.12 --seed .venv-dataplane
+.venv-dataplane/bin/python -m pip install -r requirements-data-plane.txt
+```
+
+### Running it locally (three terminals, from the repository root)
+
+```bash
+# 1 — control plane (ML environment)
+python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
+
+# 2 — a destination app to protect
+mkdir -p /tmp/fw-demo && echo '<h1>destination reached</h1>' > /tmp/fw-demo/index.html
+python3.12 -m http.server 9000 --bind 127.0.0.1 --directory /tmp/fw-demo
+
+# 3 — gateway (data plane environment); wait for "data plane ready"
+.venv-dataplane/bin/mitmdump -s data_plane.py --listen-host 127.0.0.1 -p 8080
+```
+
+Clients use the gateway as an explicit HTTP proxy at `127.0.0.1:8080` (`curl -x`,
+`http_proxy`, or a browser's manual HTTP proxy for plain `http://` sites). The proxy
+terminal logs one line per request received and one per decision: method, host, path, and
+the model's reason or the failure cause. The addon does not log query strings or bodies;
+mitmdump's own per-flow line shows the shortened URL, and `--set flow_detail=0` hides it.
+
+### Manual verification
+
+Verified on 2026-09-16 with the real V4 model loaded. Terminal 2's log shows what actually
+reached the destination.
+
+**1 — ALLOW.** With the classifier running:
+
+```bash
+curl -i -x http://127.0.0.1:8080 http://localhost:9000/index.html
+```
+
+The model answers `ALLOW`, the proxy lets the request through, the client receives `200`,
+and terminal 2 logs `GET /index.html`:
+`client -> proxy -> classifier -> ALLOW -> destination`.
+
+**2 — BLOCK.** A SQL injection request through the proxy:
+
+```bash
+curl -i -x http://127.0.0.1:8080 "http://localhost:9000/products?id=1%27%20OR%20%271%27%3D%271"
+```
+
+The classifier answers `BLOCK`, the proxy returns `403 Forbidden`, and terminal 2 logs
+nothing: the block happens before the destination is contacted.
+
+**3 — Fail-closed.** Stop the classifier completely (Ctrl+C in terminal 1) and repeat
+request 1. The client receives `HTTP/1.1 503 Service Unavailable` with the body
+`Request blocked by firewall-IA: classifier unavailable (fail-closed).`, and terminal 2
+logs no new GET:
+
+```
+client -> proxy -> classifier unavailable
+                -> 503
+                X  destination
+```
+
+Two other failure paths were each exercised once during development: a classifier that
+accepts connections but never answers (`503` after ~3 s), and a classifier running without
+a loaded model (`FIREWALL_ADAPTER_DIR=/nonexistent`, `503`). Every failure path in the
+table above is covered by the unit tests.
+
+### Real client traffic: observed model false positives
+
+This is a **known limitation of the model/dataset** with traffic from real clients, **not**
+a data plane defect. It is not worked around by rewriting headers or changing
+`render_request()`, and it will be studied separately (D22). Observed with curl, 2026-09-16:
+
+- `GET /index.html` with `Host: 127.0.0.1:9000` was BLOCK ("Server-side request forgery")
+  on every repetition. The same request with `Host: localhost:9000` or a domain name was
+  ALLOW. Sent directly to `/classify` with `Host: 127.0.0.1:9000`, `GET /` and
+  `GET /products?id=42` were also BLOCK. Only a few `Host` variants were tried, so the
+  role of `Host` is an **open finding still to be isolated experimentally**, not a
+  demonstrated cause.
+- `GET /` with `Host: localhost:9000` was BLOCK ("HTTP request smuggling"). The cause was
+  not isolated.
+- curl adds `Proxy-Connection: Keep-Alive` in proxy mode, a header that appears in 0 V4
+  training rows. Removing it did not change the decision for the request tested, so it
+  is **not** a confirmed cause, and its wider effect has not been evaluated.
+- In the V4 splits, `127.0.0.1` never appears as a `Host` value, and elsewhere it appears
+  only in BLOCK rows (58 train, 12 eval). IP-literal and port-bearing hosts
+  (`10.20.30.40:8000`, `localhost:8080`) do appear, balanced across labels. This is
+  consistent with the observation above but does not demonstrate a cause.
+
+For the demo, use `localhost` in destination URLs.
+
+### Tests
+
+```bash
+# data plane (21 tests; no model, no running services)
+.venv-dataplane/bin/python -m unittest discover -s tests -p 'test_data_plane.py' -v
+
+# everything else (ML environment); the data plane module is reported as skipped
+python3.12 -m unittest discover -s tests -v
+```
+
+### Scope of this first version
+
+The following are outside this version's scope or not yet evaluated. They are not
+implementation defects.
+
+- Validated: plain HTTP/1.1 through an explicit proxy, locally
+- HTTPS/TLS: not validated
+- HTTP/2: not validated
+- WebSockets: not validated
+- Large request bodies: not evaluated
+- Concurrency: not characterized (the control plane serializes inference on one GPU, so
+  simultaneous requests queue)
+- End-to-end benchmark: pending (Issue #18)
+- Model behaviour on real HTTP traffic: needs deeper evaluation (see above, D22)
+- Heuristics, suspicious score, fast path: not implemented (Issues #35–#38)
+
+---
+
 ## Inference Benchmark (Issue #9)
 
 `benchmark_inference.py` measures how long the V4 classifier takes to generate one
@@ -167,8 +364,8 @@ reference experiment is **`baseline-local-v1`** — measured, frozen, and never 
 **Scope: `generate()` only.** Prompt construction, tokenization, host→device transfer,
 decoding and parsing are timed and reported separately and are never pooled into the
 primary metric — together they contribute about 0.58 ms at P95. This is **not** API
-latency and **not** gateway latency; end-to-end is Issue #18, and the D3 budget of
-end-to-end P95 ≤ 200 ms is neither passed nor failed here.
+latency and **not** gateway latency; end-to-end is Issue #18, and the D3 objective of
+end-to-end P95 ≤ 200 ms is not evaluated here.
 
 ### `baseline-local-v1` — measured on 2026-09-09
 
@@ -248,8 +445,8 @@ committed at
 | V4 security evaluation (Issue #8) | Complete |
 | FastAPI control plane (Issue #15) | Complete |
 | Controlled inference benchmark (Issue #9) | Complete |
-| Inline data plane (Issue #16) | Planned |
-| Fail-closed enforcement (Issue #17) | Planned |
+| Inline data plane (Issue #16) | First version implemented, verified locally |
+| Fail-closed enforcement (Issue #17) | First version implemented, verified locally; timeout to be tuned |
 | Heuristic suspicious scoring (Issue #35) | Planned |
 | Benign fast path (Issue #36) | Planned |
 | Async fast-path validation (Issue #37) | Planned |
@@ -257,7 +454,7 @@ committed at
 | Real HTTP laboratory validation | Planned |
 | GGUF / Q4_K_M | Planned |
 | llama.cpp inference | Planned |
-| Inline gateway | Planned |
+| Inline HTTP gateway (plain HTTP/1.1, validated locally) | First version implemented |
 | Embedded deployment | Planned |
 
 ---
@@ -333,18 +530,24 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - **Real HTTP laboratory traffic has not been validated yet.**
 - **No adversarial held-out evaluation has been performed.** Evasion resistance is
   unmeasured by design.
-- **Model-side P95 (269.0 ms under the Issue #9 protocol; 270.8 ms historically) already
-  exceeds the whole 200 ms end-to-end budget**, so the current HuggingFace path is not a
-  viable deployment backend without optimization.
+- **Model-side P95 is already above 200 ms** — 269.0 ms under the Issue #9 protocol,
+  270.8 ms historically. D3 (end-to-end P95 ≤ 200 ms) is a project **performance
+  objective**, not an acceptance criterion for the current gateway, and no formal
+  end-to-end benchmark exists yet (Issue #18). The model-side figure is why inference
+  optimization is prioritized (M2, D23, D35).
 - **No quantized comparison exists yet** — GGUF/Q4_K_M is unbuilt.
 - **No physical embedded validation exists yet.**
 - **CSIC BLOCK labels come from a keyword heuristic**, so the CSIC-derived portion of
   per-category results inherits that circularity.
-- **The control plane reports; it does not enforce.** `POST /classify` returns
-  `status: "invalid"` for unparseable model output, and 5xx on failure. Nothing acts on
-  that yet — fail-closed (D4) belongs to the data plane, which is not built.
-- **No classifier timeout has been derived.** D3 makes the latency budget a prerequisite
-  for choosing one, and the value is still undecided.
+- **The data plane is a first version, validated locally with plain HTTP/1.1 only.**
+  HTTPS, HTTP/2, WebSockets, large bodies and concurrency are not yet validated. See
+  [Scope of this first version](#scope-of-this-first-version).
+- **The classifier timeout is operational.** 3 s is an initial limit for detecting a
+  failed classifier and applying fail-closed. It is not the latency objective, and it
+  will be tuned with end-to-end evidence (D35).
+- **The model produced false positives on real client traffic** during local
+  verification, e.g. `GET /index.html` with `Host: 127.0.0.1:9000`. See
+  [Real client traffic](#real-client-traffic-observed-model-false-positives).
 - **Concurrency is serialized but unvalidated.** One GPU, one inference at a time;
   behaviour under simultaneous load has not been measured.
 - **Cold-start latency is materially higher than steady state**, and the two must never
@@ -393,8 +596,8 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 **M3 — partially started ahead of M2 (D26)**
 
 - Issue #15 — FastAPI control plane: **complete**
-- Issue #16 — mitmproxy inline data plane: not started
-- Issue #17 — fail-closed enforcement: not started
+- Issue #16 — mitmproxy inline data plane: **first version implemented**, verified locally
+- Issue #17 — fail-closed enforcement: **first version implemented**, verified locally; timeout to be tuned
 - Issue #18 — end-to-end gateway latency (no-fast-path baseline): not started
 
 Latency-reduction layer — **designed, not built** (D29, D30):
@@ -447,8 +650,10 @@ Commit format is `type(scope): description` — types `feat` `fix` `perf` `refac
 | [`reports/v4_inference_benchmark.md`](reports/v4_inference_benchmark.md) | Issue #9 benchmark report — protocol, environment, results |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | Dataset identity: hashes, seed, source commit, generation policy |
 | [`CONTEXT.md`](CONTEXT.md) | Current technical state and immediate roadmap |
-| [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D30) |
+| [`DECISIONS.md`](DECISIONS.md) | Project decision log (D1–D35) |
 | [`requirements.txt`](requirements.txt) | Direct dependencies, pinned to the verified environment |
+| [`requirements-data-plane.txt`](requirements-data-plane.txt) | Data plane dependencies (mitmproxy), for the separate `.venv-dataplane` environment |
+| [`config.yaml`](config.yaml) | Runtime configuration — today only the data plane section |
 
 Dataset generation is deterministic and verified bit-identical across `PYTHONHASHSEED`
 values. Environment: Python 3.12, torch 2.6.0+cu124, transformers 5.8.0, TRL 1.4.0,
