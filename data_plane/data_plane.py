@@ -20,7 +20,7 @@ A model BLOCK is answered with 403 and a classifier failure with 503, so the
 two stay distinguishable. The client is never told the model's reason.
 
 RUN (from the repository root, in the data plane environment):
-    .venv-dataplane/bin/mitmdump -s data_plane.py --listen-host 127.0.0.1 -p 8080
+    .venv-dataplane/bin/mitmdump -s data_plane/data_plane.py --listen-host 127.0.0.1 -p 8080
 
 The classifier URL and timeout are read from config.yaml when the script loads.
 """
@@ -38,7 +38,9 @@ log = logging.getLogger("firewall.data_plane")
 # httpx logs every classifier call at INFO; the ALLOW/BLOCK line already covers it.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
-CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
+# config.yaml stays at the repository root; this file lives in data_plane/.
+CONFIG_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                           "config.yaml")
 
 BLOCKED_BODY = "Request blocked by firewall-IA.\n"
 UNAVAILABLE_BODY = "Request blocked by firewall-IA: classifier unavailable (fail-closed).\n"

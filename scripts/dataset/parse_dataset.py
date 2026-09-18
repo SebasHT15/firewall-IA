@@ -7,7 +7,7 @@ import random
 PAYLOADS_REPO   = os.path.expanduser("~/PayloadsAllTheThings")
 OUTPUT_TRAIN    = os.path.expanduser("~/Desktop/firewall-IA/train.jsonl")
 OUTPUT_EVAL     = os.path.expanduser("~/Desktop/firewall-IA/eval.jsonl")
-CSIC_PATH       = os.path.join(os.path.dirname(os.path.abspath(__file__)), "csic_database.csv")
+CSIC_PATH       = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "csic_database.csv")  # repo root
 EVAL_SPLIT          = 0.2
 RANDOM_SEED         = 42
 OBFUSCATION_TARGET  = 2000   # nº de BLOCK obfuscados a generar (ALLOW se balancea igual)

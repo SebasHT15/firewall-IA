@@ -36,12 +36,12 @@ RUNS AND PROCESSES
     every request in that run; batch size 1, concurrency 1.
 
 USAGE
-    python3.12 benchmark_inference.py self-test              # no model needed
-    python3.12 benchmark_inference.py smoke                  # small functional check
-    python3.12 benchmark_inference.py estimate               # duration estimate only
-    python3.12 benchmark_inference.py protocol \\
+    python3.12 scripts/benchmarks/benchmark_inference.py self-test              # no model needed
+    python3.12 scripts/benchmarks/benchmark_inference.py smoke                  # small functional check
+    python3.12 scripts/benchmarks/benchmark_inference.py estimate               # duration estimate only
+    python3.12 scripts/benchmarks/benchmark_inference.py protocol \\
         --experiment baseline-local-v1 --runs 3              # the real measurement
-    python3.12 benchmark_inference.py summarize \\
+    python3.12 scripts/benchmarks/benchmark_inference.py summarize \\
         --experiment baseline-local-v1                       # re-aggregate existing runs
 """
 
@@ -59,7 +59,12 @@ from datetime import datetime, timezone
 
 import benchmark_env as envmod
 
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+# This file lives in scripts/benchmarks/. inference_core is imported from
+# control_plane/ and test_model from scripts/evaluation/.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+for _d in ("control_plane", os.path.join("scripts", "evaluation")):
+    if os.path.join(REPO_ROOT, _d) not in sys.path:
+        sys.path.insert(0, os.path.join(REPO_ROOT, _d))
 BENCH_ROOT = os.path.join(REPO_ROOT, "reports", "benchmarks")
 
 DEFAULT_DATASET = os.path.join(REPO_ROOT, "datasets", "v4_clean", "eval.jsonl")

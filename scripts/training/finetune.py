@@ -2,10 +2,10 @@
 firewall-IA — QLoRA fine-tuning of TinyLlama-1.1B-Chat.
 
 Run (production recipe, unchanged from the original):
-    python3.12 finetune.py
+    python3.12 scripts/training/finetune.py
 
 Run (E1 compatibility smoke test — small subset, few steps, separate output dir):
-    python3.12 finetune.py --smoke
+    python3.12 scripts/training/finetune.py --smoke
 
 The ML stack is installed for python3.12 on this machine, NOT the default python3.
 
@@ -53,7 +53,7 @@ PRECISION — DECISIONS.md D11 (APPROVED 2026-08-17):
   scaling, so the GradScaler path disappears entirely. The RTX 4090 Laptop
   (Ada, sm_89) supports bf16 natively.
 
-  Run `python3.12 finetune.py --smoke --force-fp16` to reproduce the crash.
+  Run `python3.12 scripts/training/finetune.py --smoke --force-fp16` to reproduce the crash.
   That flag is opt-in only and contradicts D11 by design; it exists so the
   incompatibility stays reproducible.
 

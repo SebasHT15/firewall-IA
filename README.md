@@ -130,7 +130,7 @@ It is not end-to-end latency, which has not been measured yet.
 ### Running it
 
 ```bash
-python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
+python3.12 -m uvicorn --app-dir control_plane classifier_api:app --host 127.0.0.1 --port 8000
 curl -s http://127.0.0.1:8000/health
 ```
 
@@ -169,7 +169,7 @@ man-in-the-middle attack. Every HTTP request that reaches the proxy is classifie
 control plane before anything is forwarded.
 
 ```
-HTTP client --(HTTP proxy 127.0.0.1:8080)--> mitmdump -s data_plane.py
+HTTP client --(HTTP proxy 127.0.0.1:8080)--> mitmdump -s data_plane/data_plane.py
                                                  |  render_request(): raw HTTP text (D1)
                                                  v
                                    POST http://127.0.0.1:8000/classify   (control plane: the model)
@@ -249,14 +249,14 @@ uv venv --python 3.12 --seed .venv-dataplane
 
 ```bash
 # 1 — control plane (ML environment)
-python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
+python3.12 -m uvicorn --app-dir control_plane classifier_api:app --host 127.0.0.1 --port 8000
 
 # 2 — a destination app to protect
 mkdir -p /tmp/fw-demo && echo '<h1>destination reached</h1>' > /tmp/fw-demo/index.html
 python3.12 -m http.server 9000 --bind 127.0.0.1 --directory /tmp/fw-demo
 
 # 3 — gateway (data plane environment); wait for "data plane ready"
-.venv-dataplane/bin/mitmdump -s data_plane.py --listen-host 127.0.0.1 -p 8080
+.venv-dataplane/bin/mitmdump -s data_plane/data_plane.py --listen-host 127.0.0.1 -p 8080
 ```
 
 Clients use the gateway as an explicit HTTP proxy at `127.0.0.1:8080` (`curl -x`,
@@ -423,10 +423,10 @@ Artifacts: [`reports/benchmarks/baseline-local-v1/`](reports/benchmarks/baseline
 ### Reproduce it, and compare a future run
 
 ```bash
-python3.12 benchmark_inference.py self-test          # statistics only, no model
-python3.12 benchmark_inference.py estimate --runs 3  # duration before committing to it
-python3.12 benchmark_inference.py protocol --experiment <new-id> --runs 3
-python3.12 benchmark_compare.py --baseline baseline-local-v1 --candidate <new-id>
+python3.12 scripts/benchmarks/benchmark_inference.py self-test          # statistics only, no model
+python3.12 scripts/benchmarks/benchmark_inference.py estimate --runs 3  # duration before committing to it
+python3.12 scripts/benchmarks/benchmark_inference.py protocol --experiment <new-id> --runs 3
+python3.12 scripts/benchmarks/benchmark_compare.py --baseline baseline-local-v1 --candidate <new-id>
 ```
 
 `benchmark_compare.py` reports, per statistic,

@@ -15,9 +15,9 @@ GATE RULE
     No training run starts while this reports FAIL.
 
 USAGE
-    python3.12 check_dataset.py
-    python3.12 check_dataset.py --train train.jsonl --eval eval.jsonl
-    python3.12 check_dataset.py --out reports/e0_dataset_integrity_current.txt
+    python3.12 scripts/dataset/check_dataset.py
+    python3.12 scripts/dataset/check_dataset.py --train train.jsonl --eval eval.jsonl
+    python3.12 scripts/dataset/check_dataset.py --out reports/e0_dataset_integrity_current.txt
 
 EXIT CODES
     0 = PASS      1 = WARNING      2 = FAIL      3 = could not run
@@ -266,11 +266,12 @@ def pct(x: float) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="firewall-IA E0 dataset integrity gate (read-only)")
-    here = os.path.dirname(os.path.abspath(__file__))
-    ap.add_argument("--train", default=os.path.join(here, "train.jsonl"))
-    ap.add_argument("--eval", dest="eval_path", default=os.path.join(here, "eval.jsonl"))
+    # Defaults resolve from the repository root; this file lives in scripts/dataset/.
+    repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    ap.add_argument("--train", default=os.path.join(repo_root, "train.jsonl"))
+    ap.add_argument("--eval", dest="eval_path", default=os.path.join(repo_root, "eval.jsonl"))
     ap.add_argument("--payloads-repo", default="~/PayloadsAllTheThings")
-    ap.add_argument("--repo", default=here)
+    ap.add_argument("--repo", default=repo_root)
     ap.add_argument("--out", default=None, help="also write the report to this path")
     ap.add_argument("--top", type=int, default=25, help="rows to show in long tables")
     args = ap.parse_args()
@@ -571,7 +572,7 @@ def main() -> int:
         section(out, "6. REPRODUCIBILITY INFORMATION")
         out("Artifact hashes (SHA-256):")
         for p in (args.train, args.eval_path,
-                  os.path.join(args.repo, "parse_dataset.py"),
+                  os.path.join(args.repo, "scripts", "dataset", "parse_dataset.py"),
                   os.path.join(args.repo, "csic_database.csv")):
             if os.path.isfile(p):
                 out(f"  {os.path.basename(p):<24} {sha256(p)}")

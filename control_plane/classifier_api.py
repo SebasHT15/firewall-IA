@@ -15,11 +15,11 @@ future Data Plane (Issues #16/#17), which will decide what to do with an
 An unparseable model output is NEVER coerced into a decision — not to ALLOW,
 not to BLOCK. See `inference_core.parse_prediction`.
 
-RUN (single worker: one GPU, model loaded once at startup):
-    python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000
+RUN (from the repository root; single worker: one GPU, model loaded once at startup):
+    python3.12 -m uvicorn --app-dir control_plane classifier_api:app --host 127.0.0.1 --port 8000
 
 Point at a different adapter without editing this file:
-    FIREWALL_ADAPTER_DIR=/path/to/adapter python3.12 -m uvicorn classifier_api:app
+    FIREWALL_ADAPTER_DIR=/path/to/adapter python3.12 -m uvicorn --app-dir control_plane classifier_api:app
 """
 
 import logging

@@ -17,7 +17,10 @@ import sys
 import tempfile
 import unittest
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+for _d in ("control_plane", os.path.join("scripts", "evaluation"),
+           os.path.join("scripts", "benchmarks")):
+    sys.path.insert(0, os.path.join(_REPO_ROOT, _d))
 
 import benchmark_compare as cmpmod
 import benchmark_inference as bench
