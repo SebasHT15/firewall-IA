@@ -86,11 +86,18 @@ not pass `--allow-incompatible` to make the message go away.
   never pooled. Nothing is discarded — every sample is in the JSONL.
 - **No outlier removal.** Extremes are characterized, not dropped.
 
-## What these numbers are not
+## What these numbers are, and are not
 
-Model-side `generate()` only. Not API latency, not gateway latency. End-to-end
-measurement is Issue #18, and the D3 budget of end-to-end P95 ≤ 200 ms is not
-evaluated here.
+The primary metric is model-side `generate()` only. Not API latency, not gateway
+latency. End-to-end measurement is Issue #18.
+
+**Latency objective (D36).** The objective is the P95 of the inference pipeline
+(prompt construction, tokenization, transfer, `generate()`, decoding, parsing),
+at most 200 ms in steady state. The harness records it as `steady_pipeline_p95_ms`.
+In `baseline-local-v1` it is **269.58 ms**: not met. D36 supersedes D3, which
+described 200 ms as an end-to-end budget. The `protocol.json` and `summary.json`
+of `baseline-local-v1` were written before D36 and keep the D3 wording; they are
+not rewritten.
 
 ## Historical antecedents — not benchmarks under this protocol
 

@@ -801,11 +801,13 @@ def percentile(sorted_vals, q):
 
 
 def latency_stats(samples_ms):
-    """Model-side inference latency ONLY.
+    """Model-side inference latency ONLY: generate() per row, with the cold
+    first inference pooled in.
 
-    This is NOT end-to-end gateway latency. The D3 target of P95 <= 200 ms is
-    an END-TO-END budget covering proxy + API + model; a model-only number
-    cannot be compared against it directly.
+    This is NOT end-to-end gateway latency, and it is not the instrument of the
+    D36 objective (P95 of the inference pipeline <= 200 ms, steady state). That
+    objective is measured by benchmark_inference.py, which covers the whole
+    pipeline and separates cold start and warm-up from steady state.
     """
     if not samples_ms:
         return {"count": 0}
@@ -958,9 +960,9 @@ def print_report(result):
         print(f"  count   : {lat['count']:,}")
         for k in ("mean_ms", "p50_ms", "p95_ms", "p99_ms", "min_ms", "max_ms", "stdev_ms"):
             print(f"  {k:<8}: {lat[k]:>9.1f} ms")
-        print("\n  NOTE: D3's P95 <= 200 ms target is an END-TO-END budget")
-        print("  (proxy + API + model). These model-only numbers are not")
-        print("  comparable to it.")
+        print("\n  NOTE: these numbers cover generate() only and include the cold")
+        print("  first inference. The D36 objective (P95 of the inference pipeline")
+        print("  <= 200 ms, steady state) is measured by benchmark_inference.py.")
 
     print("\n" + "=" * 78)
     print("No conclusions are generated automatically. Interpret with the")

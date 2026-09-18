@@ -6,12 +6,13 @@
 
 The system is conceptually comparable to an application firewall / WAF-like security mechanism. It is **NOT** a replacement for a conventional stateful network firewall, and must not be described as one. The classifier is **stateless at the application-request level** — each HTTP request is classified independently, with no session context carried across requests. Being inline does not make it stateful.
 
-firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP request string, it outputs `ALLOW | <reason>` or `BLOCK | <reason>`, terminating on the model's native EOS (the `###END###` suffix was removed in E4 — see D5 in `DECISIONS.md`). The model is trained via LoRA (4-bit quantized) using supervised fine-tuning on a labeled dataset of real and synthetic HTTP traffic. The end goal is a GGUF-exported model embedded behind an inline HTTP proxy for real-time application-layer classification.
+firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP request string, it outputs `ALLOW | <reason>` or `BLOCK | <reason>`, terminating on the model's native EOS (the `###END###` suffix was removed in E4 — see D5 in `DECISIONS.md`). The model is trained via LoRA (4-bit quantized) using supervised fine-tuning on a labeled dataset of generator-rendered HTTP requests: synthetic requests plus requests derived from CSIC 2010 (see §3, "Dataset used"). The end goal is a GGUF-exported model embedded behind an inline HTTP proxy for real-time application-layer classification.
 
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D35). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D37). Read it before proposing architectural changes.
+> - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
 > - `reports/` — experiment and audit outputs. Never overwrite a report; add a new one.
 
 ---
@@ -53,9 +54,13 @@ has its first scientifically interpretable baseline.
 | Adapter structure | 12,615,680 LoRA params, 308 tensors, ~48.2 MiB |
 | `embed_tokens` / `lm_head` | **absent** — E4 custom-token resize fix holds under full training |
 
-`eval_loss` bottomed at step 2200 and rose to 0.4669 by 3144 — mild overfitting in the final
-~30%. The best checkpoint was selected automatically; a shorter schedule was **not** explored
-and must not be assumed better without an experiment.
+`eval_loss` bottomed at step 2200 and rose to 0.4669 by 3144 (+0.8%, one seed, loss only) —
+**compatible with** mild overfitting in the final ~30%, not established by it. It says nothing
+about the real-traffic false positives. For those, out-of-distribution inputs are a more
+plausible hypothesis than overfitting, and neither is established (see
+`docs/ml_evaluation_methodology.md` §3). The best checkpoint was selected
+automatically; a shorter schedule was **not** explored and must not be assumed better without
+an experiment.
 
 ### Dataset used
 
@@ -70,6 +75,29 @@ eval.jsonl   61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859
 E0 immediately before training: 0.00% leakage, 0.00% duplicates in both splits, 0
 deterministic label reveals, **0 blocking failures**. WARNING persists for category scarcity
 only.
+
+**Sources** (generator `parse_dataset_v4.py`, seed 42; counts from the manifest unless marked):
+
+| Source | Role | Counts |
+|---|---|---|
+| PayloadsAllTheThings `e961fef` | attack payloads, 16 category directories (`.md` fenced blocks, `.txt` lines), quality-filtered | 39,396 candidates → 33,517 accepted |
+| Hardcoded payloads in the generator | CRLF, XPath, HPP, request smuggling | 81 (XPath 31, CRLF 24, HPP 20, smuggling 6 — split read from the generator source) |
+| CSIC 2010 | Normal → ALLOW; Anomalous → BLOCK only if the keyword heuristic categorizes it (F6), else reserved (D2) | 36,000 normal · 5,900 categorized · 19,165 reserved, unused |
+| Synthetic benign generator | parametrized benign requests in the attack shapes (D13) | 19,785 logical groups |
+
+Logical groups after grouping and the D17 caps: attack 9,977 (8,037 train / 1,940 eval),
+CSIC 8,251 (6,577 / 1,674), synthetic benign 19,785 (15,802 / 3,983). Non-structural attack
+groups get at most one obfuscated variant from the training transform pool. BLOCK rows:
+3,906 from CSIC (`reports/e2_e3_row_cap_sensitivity.txt`, a bit-identical reproduction),
+hence 11,764 from PayloadsAllTheThings plus hardcoded. The ALLOW split between CSIC and the
+synthetic generator is not recorded anywhere.
+
+**CSIC in V4 is derived, not raw.** Method, path (minus `/tienda1`), query and body are kept.
+The original headers are discarded and the envelope is redrawn from the pools shared by every
+source. These rows are *derived from CSIC 2010 and re-rendered into the V4 HTTP
+representation*; do not describe them as real traffic. Historical-pipeline figures in §3-historical
+and §10–§12 (6,587 / 18,478 CSIC anomalous, 240 benign templates) and the uncapped-candidate
+figure in D13 (36,721 benign samples) are not V4 figures.
 
 ### Formal evaluation (frozen E5 methodology, D19)
 
@@ -127,11 +155,15 @@ Historical, Issue #8, single evaluation run, unsynchronized timer — **kept as 
 Peak evaluation VRAM 2,476 MiB. Generated tokens (n=300 sample): mean 11.58, P95 13; native
 EOS terminated 100% of generations, none hit the 40-token cap.
 
-**These are HuggingFace model-side inference times, NOT end-to-end gateway latency.** D3
-(P95 end-to-end added latency ≤ 200 ms) is a project **performance objective**, not an
-acceptance criterion (**D35**). No formal end-to-end benchmark of the complete system exists
-yet (Issue #18). Model-side P95 alone is already above 200 ms, which is why inference
-optimization is prioritized; see **D23**.
+**These are HuggingFace model-side inference times, NOT end-to-end gateway latency.**
+
+**Latency objective — D36 (supersedes D3):** P95 of the latency added by the inference
+pipeline (tokenization and preparation, `generate()`, decoding and parsing) ≤ 200 ms in
+steady state. It excludes model load, cold start and warm-up (reported separately), HTTP
+transport, network, proxy and destination. It is an **optimization objective**, not an
+acceptance criterion (**D35**), and it is **not met**: `baseline-local-v1` pipeline P95 is
+269.58 ms (below). This is why inference optimization is prioritized (**D23**). End-to-end
+latency is a different quantity, still to be measured (Issue #18), with no threshold defined.
 
 ### Controlled benchmark — `baseline-local-v1` (Issue #9, 2026-09-09)
 
@@ -154,6 +186,12 @@ Peak memory, PyTorch allocator, this process only: 935.5 MiB allocated / 1170.0 
 reserved. Non-generate pipeline stages total ~0.58 ms at P95. Generated tokens mean 11.63
 (r = 0.934 with latency); 0 of 18,618 hit the 40-token cap.
 
+**Against D36:** steady-state inference-pipeline P95 (`steady_pipeline_p95_ms`, scope
+`prompt+tokenize+transfer+generate+decode+parse`) is **269.58 ms**. The objective of
+≤ 200 ms is not met. The artifacts in `reports/benchmarks/baseline-local-v1/` were written
+before D36 and still describe the objective as D3's end-to-end budget; they are not
+rewritten.
+
 Quality at that latency, same E5 metrics: attack detection 97.04%, 2 FP and 92 FN per run,
 0 invalid, accuracy 98.49% — **bit-identical across the 3 runs and identical to
 `reports/v4_clean_eval.json`**, which is the evidence that the instrumentation did not
@@ -170,19 +208,26 @@ not a comparand — `benchmark_compare.py` blocks that comparison (6 blocking di
 
 ### Legacy manual suite (diagnostic only)
 
-135 cases: accuracy 91.85%, recall 95.41%, FPR 23.08% — but that FPR is 6 errors out of only
-26 benign cases, against 0.06% on 3,103 benign rows in the formal split. Not equivalent to the
-formal evaluation and never the headline. It remains useful as a possible distribution-shift
-warning.
+135 cases (109 known-BLOCK / 26 known-ALLOW): accuracy 91.85%, recall 95.41%. **6 false
+positives among 26 known-ALLOW samples in the manual diagnostic set.** This is a diagnostic
+count, not an estimate of the model's FPR; the model's FPR is measured on the formal split
+(2 of 3,103 benign rows). Not equivalent to the formal evaluation and never the headline. It
+remains useful as a possible distribution-shift warning; the cause of those false positives
+is not established.
 
 ### Current limitations
 
 Single run, single seed, no confidence intervals · evasion resistance unmeasured by design
-(D15) · benign population is synthetic + CSIC 2010, so the 0.06% FPR does not transfer to
-production traffic · CSIC label circularity (F6) · reason matching is deliberately strict ·
-the eval split also drove checkpoint selection, so it is a held-out evaluation/validation
-split and **not** an untouched final test set (**D24**) · latency is model-side, laptop-class,
-batch size 1.
+(D15) · benign population is synthetic + CSIC-2010-derived (re-rendered), so the 0.06% FPR
+does not transfer to production traffic · CSIC label circularity (F6) · reason matching is
+deliberately strict · `eval.jsonl` was used both for checkpoint selection (validation) and
+for the internal evaluation, so it is held out from training but **not** an independent test
+set (**D24**) · latency is model-side, laptop-class, batch size 1.
+
+**Rule from V5 on** (**D37**, `docs/ml_evaluation_methodology.md` §1): TRAIN → training ·
+VALIDATION → checkpoint/configuration selection · INTERNAL TEST → independent internal
+evaluation · EXTERNAL TEST → independent evaluation outside the internal distribution. These
+splits do not exist yet.
 
 ### Immediate roadmap
 
@@ -448,7 +493,7 @@ under different conditions and are not two measurements of the same quantity. Se
   (fail-closed).
 
 Decisions: **D33** (separate environment), **D34** (enforcement), **D35** (D3 objective vs.
-timeout). Full description and reproduction steps: README, "Data Plane".
+timeout; the objective itself is now **D36**). Full description and reproduction steps: README, "Data Plane".
 
 - **Separate environment (D33).** mitmproxy 12.2.3 pins `typing-extensions<=4.14` on
   Python 3.12, while pydantic 2.13.4 needs `>=4.14.1`. The data plane uses
@@ -489,6 +534,12 @@ timeout). Full description and reproduction steps: README, "Data Plane".
     not demonstrate a cause.
   - Headers are not rewritten, and `render_request()` is not changed, to hide it. It is
     to be studied separately.
+  - **Follow-up experiment, 2026-09-17: raw data lost.** A controlled one-variable A/B
+    experiment (`/classify` direct and through the proxy) was run. Its raw records were
+    written under `/tmp` and lost at the next reboot. An audit summary survives outside the
+    repository; it is not a substitute for the raw data, and its figures cannot be
+    re-verified. The experiment must be repeated, with results persisted in the repository
+    (`reports/<kind>/<experiment-id>/`), before its findings count as evidence.
 
 ---
 
@@ -570,7 +621,7 @@ Three modes, cleanly separated:
 - `--mode manual` — the legacy 135 hand-authored cases, reclassified as a **MANUAL DIAGNOSTIC / REGRESSION SUITE**. Preserved verbatim, prints a banner explaining why it is not the headline metric.
 - `--mode self-test` — verifies the metric code on fixtures with **no model required**.
 
-Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** and explicitly not comparable to D3's end-to-end objective.
+Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** — `generate()` per row, with the cold first inference pooled in. It is not the D36 objective's instrument; that is `benchmark_inference.py`'s steady-state pipeline P95.
 
 Invalid outputs are never coerced — counted as incorrect, mapped opposite to expected, reported as a separate rate alongside a parseable-only view. D18 is enforced by an `evidence_status` column (`OK` / `INSUFFICIENT DATA` / `NOT EVALUABLE`); every percentage carries its numerator and denominator. `--json` emits the machine-readable record.
 
@@ -618,7 +669,7 @@ CSIC 2010. 61,065 rows × 17 cols. Label col `Unnamed: 0` (`"Normal"`/`"Anomalou
 - **18,478 CSIC Anomalous excluded:** structural anomalies (buffer overflow, integer tampering, cookie poisoning) with no keyword-detectable payload; generic label can't be validated from content. ~73.7% of CSIC Anomalous. **Per D2, these stay excluded from the clean baseline** and are preserved conceptually as a separate future experimental dataset.
 - **CSIC attack diversity is narrow:** ~70% SQL, low payload variety (see §4).
 - **`--` SQL keyword rule is broad** in `categorize_csic_anomalous()`; acceptable for e-commerce context, revisit if extended.
-- **Latency: the ~800ms/request figure is UNVERIFIED and confounded.** No model exists to measure. It was also inflated by forced 40-token generation (§12 F5), so it was never a measure of decision latency. **Per D3 the design target is now defined: end-to-end added latency P95 ≤ 200 ms** — a target, not a demonstrated capability. Future measurement must decompose into model-only / model+API / proxy overhead / end-to-end, each with P50, P95, P99 and throughput.
+- **Latency: the ~800ms/request figure is UNVERIFIED and confounded.** No model exists to measure. It was also inflated by forced 40-token generation (§12 F5), so it was never a measure of decision latency. **Per D3 the design target is now defined: end-to-end added latency P95 ≤ 200 ms** — a target, not a demonstrated capability. Future measurement must decompose into model-only / model+API / proxy overhead / end-to-end, each with P50, P95, P99 and throughput. *(2026-09-18: the target is superseded by **D36** — P95 of the inference pipeline ≤ 200 ms in steady state, not end-to-end; see §3. The decomposition requirement still applies.)*
 - **Failure behaviour: FAIL-CLOSED** per **D4**. If the classifier times out, crashes, is unavailable, or returns an invalid decision, traffic is blocked by default. A fallback mechanism is explicitly out of current scope.
 
 ---
@@ -890,7 +941,7 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **#7** | **V4 clean baseline training run** | **DONE 2026-08-18 — merged (PR #32).** See §3 and `reports/v4_clean_baseline_results.txt`. |
 | **#8** | V4 clean security metrics evaluation | **DONE 2026-08-18 — closed 2026-09-06.** `reports/v4_clean_eval.json`; all ten AC verified. |
 | **#15** | FastAPI Control Plane | **DONE 2026-09-05 — merged (PR #34), closed.** See §5. |
-| **#9** | Controlled inference benchmark | **DONE 2026-09-09 — `baseline-local-v1` measured and frozen. Not closed: closure is the maintainer's call.** See §3. |
+| **#9** | Controlled inference benchmark | **DONE 2026-09-09 — `baseline-local-v1` measured and frozen. Closed 2026-09-14.** See §3. |
 | — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
 | **#16/#17** | Data plane, fail-closed | **FIRST VERSION 2026-09-16** — verified locally, see §5b |
 | **#18** | End-to-end latency | NOT STARTED |
@@ -900,7 +951,7 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |
-| **E9** | Inline overhead decomposition (D3 metrics) | NOT STARTED |
+| **E9** | Inline overhead decomposition (per layer: inference pipeline / API / proxy / end-to-end; D3 decomposition, D36 objective) | NOT STARTED |
 | **E7** | Conventional rule-based baseline | **FUTURE / OPTIONAL per D9** — do not implement now |
 
 **Gate rule:** no training run starts while `check_dataset.py` reports FAIL.

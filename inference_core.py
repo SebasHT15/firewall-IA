@@ -171,7 +171,9 @@ def classify_timed(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
 
     `generate_ms` is bracketed by `device_sync()` on both sides, so it contains
     the whole generation and nothing queued before it. It is model-side
-    inference only — NOT end-to-end gateway latency (D3, Issue #18).
+    inference only — NOT end-to-end gateway latency (Issue #18). The D36
+    objective covers the whole pipeline timed here (prompt_build_ms through
+    decode_ms, plus parsing), not generate_ms alone.
 
     This is the single implementation of the V4 generation path;
     `classify_raw()` delegates to it, so instrumentation cannot drift from what
@@ -218,7 +220,8 @@ def classify_raw(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
     safety bound.
 
     The returned latency covers `generate()` alone — model-side inference, NOT
-    end-to-end gateway latency (D3).
+    end-to-end gateway latency, and not the full inference pipeline that the
+    D36 objective covers.
 
     METHODOLOGY CHANGE (Issue #9, D31): generation is now bracketed by
     `device_sync()`, so this timer measures completed GPU work instead of
