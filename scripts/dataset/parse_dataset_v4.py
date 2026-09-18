@@ -3,8 +3,8 @@
 firewall-IA — v4 CLEAN dataset generator  (experiments E2 + E3)
 
 Run:
-    python3.12 parse_dataset_v4.py
-    python3.12 parse_dataset_v4.py --out-dir datasets/v4_clean --seed 42
+    python3.12 scripts/dataset/parse_dataset_v4.py
+    python3.12 scripts/dataset/parse_dataset_v4.py --out-dir datasets/v4_clean --seed 42
 
 WHY THIS IS A SEPARATE FILE FROM parse_dataset.py
     parse_dataset.py is the generator that produced the HISTORICAL dataset.
@@ -114,12 +114,13 @@ from urllib.parse import quote, unquote_plus
 # ══════════════════════════════════════════════════════════════════════════
 # CONFIGURATION
 # ══════════════════════════════════════════════════════════════════════════
-HERE = os.path.dirname(os.path.abspath(__file__))
+# This file lives in scripts/dataset/; inputs and outputs resolve from the repository root.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PAYLOADS_REPO = os.path.expanduser("~/PayloadsAllTheThings")
-CSIC_PATH = os.path.join(HERE, "csic_database.csv")
+CSIC_PATH = os.path.join(REPO_ROOT, "csic_database.csv")
 
-DEFAULT_OUT_DIR = os.path.join(HERE, "datasets", "v4_clean")
-DEFAULT_MANIFEST = os.path.join(HERE, "datasets", "manifest_v4_clean.json")
+DEFAULT_OUT_DIR = os.path.join(REPO_ROOT, "datasets", "v4_clean")
+DEFAULT_MANIFEST = os.path.join(REPO_ROOT, "datasets", "manifest_v4_clean.json")
 
 EVAL_FRACTION = 0.20
 RANDOM_SEED = 42
@@ -1600,7 +1601,7 @@ def main():
         "status": "CANDIDATE — not a validated baseline until E0 passes and it is reviewed",
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "generator": os.path.basename(__file__),
-        "generator_git_commit": git_rev(HERE),
+        "generator_git_commit": git_rev(REPO_ROOT),
         "payloadsallthethings_commit": git_rev(PAYLOADS_REPO),
         "seed": args.seed,
         "eval_fraction_requested": args.eval_fraction,
@@ -1740,7 +1741,7 @@ def main():
         print("\n  NOT EVALUABLE (D18 — zero held-out eval rows):")
         for lbl in not_evaluable:
             print(f"    train={train_rows_per_reason[lbl]:>4} eval=0   {lbl}")
-    print("\n  Next: python3.12 check_dataset.py --train "
+    print("\n  Next: python3.12 scripts/dataset/check_dataset.py --train "
           f"{paths['train']} --eval {paths['eval']}")
 
 

@@ -29,11 +29,11 @@ WHAT THIS TOOL REFUSES TO DO
     compared in the same pass and any degradation is raised next to the speedup.
 
 USAGE
-    python3.12 benchmark_compare.py --baseline baseline-local-v1 \\
+    python3.12 scripts/benchmarks/benchmark_compare.py --baseline baseline-local-v1 \\
                                     --candidate <experiment-id-or-path>
-    python3.12 benchmark_compare.py --baseline baseline-local-v1 \\
+    python3.12 scripts/benchmarks/benchmark_compare.py --baseline baseline-local-v1 \\
                                     --candidate <id> --previous <id>
-    python3.12 benchmark_compare.py --legacy-baseline reports/v4_clean_eval.json \\
+    python3.12 scripts/benchmarks/benchmark_compare.py --legacy-baseline reports/v4_clean_eval.json \\
                                     --candidate baseline-local-v1
 """
 
@@ -43,7 +43,8 @@ import os
 import sys
 from datetime import datetime, timezone
 
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+# This file lives in scripts/benchmarks/, two levels below the repository root.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BENCH_ROOT = os.path.join(REPO_ROOT, "reports", "benchmarks")
 
 # Fallback only. A summary carries its own `metric_directions`, which wins.

@@ -27,19 +27,19 @@ report stays readable without the tool that produced it.
 ## Reproduce the baseline
 
 ```bash
-python3.12 benchmark_inference.py self-test
+python3.12 scripts/benchmarks/benchmark_inference.py self-test
 ```
 
 ```bash
-python3.12 benchmark_inference.py smoke --out-dir /tmp/bench-smoke --limit 20
+python3.12 scripts/benchmarks/benchmark_inference.py smoke --out-dir /tmp/bench-smoke --limit 20
 ```
 
 ```bash
-python3.12 benchmark_inference.py estimate --runs 3
+python3.12 scripts/benchmarks/benchmark_inference.py estimate --runs 3
 ```
 
 ```bash
-python3.12 benchmark_inference.py protocol --experiment baseline-local-v1 --runs 3
+python3.12 scripts/benchmarks/benchmark_inference.py protocol --experiment baseline-local-v1 --runs 3
 ```
 
 The harness refuses to write over an experiment that already has a
@@ -48,24 +48,24 @@ choosing a **new** id — the numbers will differ, and that difference is the
 point:
 
 ```bash
-python3.12 benchmark_inference.py protocol --experiment baseline-<machine>-v1 --runs 3
+python3.12 scripts/benchmarks/benchmark_inference.py protocol --experiment baseline-<machine>-v1 --runs 3
 ```
 
 ## Measure a candidate and compare it
 
 ```bash
-python3.12 benchmark_inference.py protocol --experiment <candidate-id> --runs 3
+python3.12 scripts/benchmarks/benchmark_inference.py protocol --experiment <candidate-id> --runs 3
 ```
 
 ```bash
-python3.12 benchmark_compare.py --baseline baseline-local-v1 --candidate <candidate-id> --markdown reports/benchmarks/<candidate-id>/vs-baseline.md --json reports/benchmarks/<candidate-id>/vs-baseline.json
+python3.12 scripts/benchmarks/benchmark_compare.py --baseline baseline-local-v1 --candidate <candidate-id> --markdown reports/benchmarks/<candidate-id>/vs-baseline.md --json reports/benchmarks/<candidate-id>/vs-baseline.json
 ```
 
 Compare against the original baseline **and** the candidate's own previous
 version in one report:
 
 ```bash
-python3.12 benchmark_compare.py --baseline baseline-local-v1 --candidate <candidate-id> --previous <previous-candidate-id>
+python3.12 scripts/benchmarks/benchmark_compare.py --baseline baseline-local-v1 --candidate <candidate-id> --previous <previous-candidate-id>
 ```
 
 `benchmark_compare.py` exits non-zero when the two experiments are not

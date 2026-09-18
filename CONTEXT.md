@@ -23,7 +23,7 @@ The device is an **authorized inline supervisor (a legitimate security gateway),
 
 - `python3` resolves to **Python 3.14** (`/usr/bin/python3`) — the ML stack is NOT installed here.
 - The ML stack lives in **Python 3.12** (`/usr/bin/python3.12`, packages in `~/.local/lib/python3.12/site-packages`).
-- **ALWAYS invoke `python3.12` explicitly** to run scripts: `python3.12 finetune.py`. Never `python3`.
+- **ALWAYS invoke `python3.12` explicitly** to run scripts: `python3.12 scripts/training/finetune.py`. Never `python3`.
 - **ALWAYS install with `python3.12 -m pip install <pkg> --break-system-packages`.** Plain `pip` currently maps to 3.12 but `python3.12 -m pip` is unambiguous.
 - Verify pip target anytime with `pip --version` (look for `(python 3.12)`).
 - No virtual environments are used for the ML stack (project preference). Exception: the data plane runs in
@@ -345,7 +345,7 @@ The previous 52,670 dataset was silently **missing Path Traversal and CSRF** bec
 >
 > The same applies to every other low-volume category — see the full per-category table in §11.
 
-Run `python3.12 check_dataset.py` to re-measure this at any time. Do not restate category coverage from memory.
+Run `python3.12 scripts/dataset/check_dataset.py` to re-measure this at any time. Do not restate category coverage from memory.
 
 ### Data Sources
 
@@ -484,7 +484,7 @@ under different conditions and are not two measurements of the same quantity. Se
 ## 5b. Data Plane — FIRST VERSION (Issues #16/#17, 2026-09-16)
 
 `data_plane.py` is a mitmproxy addon, run with
-`.venv-dataplane/bin/mitmdump -s data_plane.py --listen-host 127.0.0.1 -p 8080`.
+`.venv-dataplane/bin/mitmdump -s data_plane/data_plane.py --listen-host 127.0.0.1 -p 8080`.
 
 - For every request it renders the raw D1 text and calls `POST /classify` (unchanged
   contract). It never loads the model.
@@ -596,8 +596,15 @@ The weakest part of the current dataset is **legitimate-traffic diversity** (syn
 
 ## 9. Files and What They Do
 
+**Locations** (run everything from the repository root): `control_plane/` — `classifier_api.py`,
+`inference_core.py` · `data_plane/` — `data_plane.py` · `scripts/dataset/` — `parse_dataset.py`,
+`parse_dataset_v4.py`, `check_dataset.py` · `scripts/training/` — `finetune.py` ·
+`scripts/evaluation/` — `test_model.py` · `scripts/benchmarks/` — `benchmark_inference.py`,
+`benchmark_env.py`, `benchmark_compare.py`. `config.yaml`, `csic_database.csv` and the historical
+`train.jsonl`/`eval.jsonl` stay at the root.
+
 ### `parse_dataset.py`
-Generates train/eval JSONL. Run `python3.12 parse_dataset.py`.
+Generates train/eval JSONL. Run `python3.12 scripts/dataset/parse_dataset.py`.
 - `build_dataset()` — payloads from PayloadsAllTheThings + hardcoded categories + synthetic ALLOW pool.
 - `build_obfuscated_examples(raw_block_payloads, 2000)` — 8 obfuscation transforms → 2,000 obfuscated BLOCK variants.
 - `categorize_csic_anomalous(request_str)` — 11-rule heuristic on raw + `unquote_plus()`-decoded string.
@@ -605,7 +612,7 @@ Generates train/eval JSONL. Run `python3.12 parse_dataset.py`.
 - `main()` — build → obfuscate → integrate CSIC → merge → rebalance 1:1 (min-trim, seed=42) → shuffle → split 80/20 → write.
 
 ### `finetune.py`
-LoRA fine-tune (4-bit NF4, rank=16, alpha=32). Run `python3.12 finetune.py`.
+LoRA fine-tune (4-bit NF4, rank=16, alpha=32). Run `python3.12 scripts/training/finetune.py`.
 - `TRAIN_FILE`/`EVAL_FILE` → `~/Desktop/firewall-IA/`; `OUTPUT_DIR = model-output-v3` (already set).
 - `resume_from_checkpoint=False` (set this session — fresh machine has no checkpoint to resume; `True` would crash).
 - 4 epochs, batch 4, grad accum 8, lr 2e-4 cosine, **BF16 (D11)**, paged_adamw_8bit. Eval and save every 200 steps, `save_total_limit=2` (**D12**). `SFTConfig` + `SFTTrainer`.
@@ -614,7 +621,7 @@ LoRA fine-tune (4-bit NF4, rank=16, alpha=32). Run `python3.12 finetune.py`.
 - **`###END###` removed 2026-08-17 (E4/D5).** No `add_special_tokens`, no `resize_token_embeddings`; termination is native EOS. See §12 F5 and `reports/e4_remove_end_token.txt`.
 
 ### `test_model.py`
-**Evaluation harness — methodology FROZEN in E5 (D19).** Run `python3.12 test_model.py --mode <mode>`.
+**Evaluation harness — methodology FROZEN in E5 (D19).** Run `python3.12 scripts/evaluation/test_model.py --mode <mode>`.
 
 Three modes, cleanly separated:
 - `--mode dataset` *(default)* — **the primary scientific evaluation.** Runs `datasets/v4_clean/eval.jsonl` (6,206 rows, 3,103 ALLOW / 3,103 BLOCK, 18 categories).
@@ -654,7 +661,7 @@ inference logic and does not touch the `/classify` contract.
   to treat it as a peer.
 
 ### `check_dataset.py`  *(added 2026-08-16 — experiment E0)*
-**Dataset integrity gate. Analysis-only — never mutates the dataset.** Run `python3.12 check_dataset.py`.
+**Dataset integrity gate. Analysis-only — never mutates the dataset.** Run `python3.12 scripts/dataset/check_dataset.py`.
 Measures, from the JSONL files each run (nothing hardcoded): per-category counts, duplication, exact train→eval leakage, envelope-confound distributions, trivial single-feature baselines, and SHA-256 hashes of all inputs. Exits `PASS` / `WARNING` / `FAIL`.
 **Gate rule: no training run starts while this reports FAIL.**
 
@@ -763,7 +770,7 @@ The fix must dedup *and* split on a payload-identity key, so that obfuscated/wra
 
 > **Resolved.** Ported to `SFTConfig` / `processing_class` / `max_length`; smoke test PASS. See `reports/e1_training_pipeline_smoke.txt`.
 >
-> **One recipe-affecting change was forced, now ratified as D11:** `fp16=True` → `bf16=True`. TRL 1.4 casts all trainable params to bfloat16 when the base model is 4-bit loaded (`sft_trainer.py:1088-1092`), and `fp16` routes through `GradScaler`, whose `_amp_foreach_non_finite_check_and_unscale_cuda` kernel has no BFloat16 implementation. fp16 + 4-bit QLoRA cannot run on TRL 1.4 at all. `python3.12 finetune.py --smoke --force-fp16` reproduces the crash. **D11 is a compatibility decision and must never be presented as a model-quality improvement** — no fp16-vs-bf16 quality comparison exists or can be made.
+> **One recipe-affecting change was forced, now ratified as D11:** `fp16=True` → `bf16=True`. TRL 1.4 casts all trainable params to bfloat16 when the base model is 4-bit loaded (`sft_trainer.py:1088-1092`), and `fp16` routes through `GradScaler`, whose `_amp_foreach_non_finite_check_and_unscale_cuda` kernel has no BFloat16 implementation. fp16 + 4-bit QLoRA cannot run on TRL 1.4 at all. `python3.12 scripts/training/finetune.py --smoke --force-fp16` reproduces the crash. **D11 is a compatibility decision and must never be presented as a model-quality improvement** — no fp16-vs-bf16 quality comparison exists or can be made.
 >
 > **Also confirmed quantitatively, now ratified as D12:** the production recipe (4 epochs, `save_steps=200`, no `save_total_limit`) would produce ~49 checkpoints at ~302 MB each ≈ **14.8 GB before optimizer state**. `save_total_limit=2` is now set; `save_steps` and all other hyperparameters are unchanged.
 >
@@ -967,7 +974,7 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 3. Read `parse_dataset.py`, `finetune.py`, `test_model.py` for current config — and read §12 first, so you know which of their behaviours are already-identified defects rather than things to rediscover.
 4. Check training status: `ls ~/Desktop/firewall-IA/model-output-v4-clean/`. **As of 2026-08-18 the V4-clean baseline EXISTS** (best checkpoint 2200). `model-output-v3/` never existed and is not the current model.
 5. Confirm dataset: `wc -l datasets/v4_clean/train.jsonl` (expect 25,134) and `datasets/v4_clean/eval.jsonl` (expect 6,206). The root `train.jsonl`/`eval.jsonl` are the HISTORICAL leaky corpus — do not train on them.
-6. **Run the integrity gate:** `python3.12 check_dataset.py --train datasets/v4_clean/train.jsonl --eval datasets/v4_clean/eval.jsonl`. No training starts while it reports FAIL. WARNING (category scarcity) is expected and acceptable.
+6. **Run the integrity gate:** `python3.12 scripts/dataset/check_dataset.py --train datasets/v4_clean/train.jsonl --eval datasets/v4_clean/eval.jsonl`. No training starts while it reports FAIL. WARNING (category scarcity) is expected and acceptable.
 7. Confirm no missing categories: run `parse_dataset.py` only if regenerating, and check for `[SKIP]` lines. `[SKIP]` is an ERROR, not a warning.
 8. Verify PayloadsAllTheThings is at the recorded commit `e961fef231d8327bae83b563fab50aec2e6b77c0` (§6) if categories look off.
 

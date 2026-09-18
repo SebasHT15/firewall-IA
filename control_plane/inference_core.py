@@ -36,7 +36,8 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 # Resolved relative to this file so the repo is not tied to one user's $HOME.
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+# This file lives in control_plane/, one level below the repository root.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # The V4-clean adapter (Issue #7). The historical `model-output-v3` does not
 # exist on disk — see CONTEXT.md §3-historical.

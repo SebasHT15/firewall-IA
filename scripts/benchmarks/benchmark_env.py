@@ -21,7 +21,7 @@ variables that change benchmark behaviour is recorded.
 
 Used by `benchmark_inference.py`; safe to run standalone:
 
-    python3.12 benchmark_env.py
+    python3.12 scripts/benchmarks/benchmark_env.py
 """
 
 import hashlib
@@ -34,7 +34,10 @@ import subprocess
 import sys
 from datetime import datetime, timezone
 
-REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
+# This file lives in scripts/benchmarks/; inference_core is in control_plane/.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if os.path.join(REPO_ROOT, "control_plane") not in sys.path:
+    sys.path.insert(0, os.path.join(REPO_ROOT, "control_plane"))
 
 # Only these environment variables are recorded. Anything else — tokens, keys,
 # proxies, credentials — is never read or written to a manifest.
@@ -128,11 +131,13 @@ def code_state():
         changed = sorted(f"{l[:2]} {l[2:].strip()}" for l in lines)
 
     measured_sources = {}
-    for name in ("inference_core.py", "benchmark_inference.py", "benchmark_env.py",
-                 "benchmark_compare.py", "test_model.py"):
-        p = os.path.join(REPO_ROOT, name)
+    for rel in ("control_plane/inference_core.py", "scripts/benchmarks/benchmark_inference.py",
+                "scripts/benchmarks/benchmark_env.py", "scripts/benchmarks/benchmark_compare.py",
+                "scripts/evaluation/test_model.py"):
+        p = os.path.join(REPO_ROOT, rel)
         if os.path.exists(p):
-            measured_sources[name] = sha256_file(p)
+            # keyed by file name, as in earlier manifests
+            measured_sources[os.path.basename(rel)] = sha256_file(p)
 
     return {
         "repo_root": REPO_ROOT,

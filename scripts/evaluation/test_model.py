@@ -6,6 +6,14 @@ import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 
+# ── Repository layout ──────────────────────────────────────────
+# This file lives in scripts/evaluation/. inference_core is in control_plane/ and
+# parse_dataset_v4 (imported lazily below) in scripts/dataset/.
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+for _d in ("control_plane", os.path.join("scripts", "dataset")):
+    if os.path.join(_REPO_ROOT, _d) not in sys.path:
+        sys.path.insert(0, os.path.join(_REPO_ROOT, _d))
+
 # ── Inference core ─────────────────────────────────────────────
 # The V4 runtime pipeline — decision contract, prompt, model loading,
 # generation and parsing — lives in inference_core.py and is shared with the
