@@ -101,7 +101,7 @@ choosing a classifier timeout, which is in turn a prerequisite for D4.
 
 - **Date:** 2026-08-16
 - **Status:** APPROVED
-- **Implementation:** OUT OF CURRENT SCOPE — applies when the inline gateway is built
+- **Implementation:** **DONE (first version) — `data_plane.py`, 2026-09-16; see D34**
 
 **Decision.** Default architecture decision: **FAIL-CLOSED.**
 
@@ -1221,6 +1221,103 @@ a comparand (**D31**).
 
 ---
 
+## D33 — Separate Python environments for the data plane and the ML/control plane
+
+- **Date:** 2026-09-16
+- **Status:** APPROVED
+- **Implementation:** DONE — `.venv-dataplane`, `requirements-data-plane.txt` (Issue #16)
+
+**Decision.** The data plane (mitmproxy) runs in its own Python environment,
+`.venv-dataplane`, with its own dependency file, `requirements-data-plane.txt`.
+`requirements.txt` remains the ML/control-plane stack and does not list mitmproxy. No data
+plane dependency is installed into the ML interpreter, and no ML dependency is changed to
+make mitmproxy fit.
+
+**Rationale.** mitmproxy 12.2.3 pins `typing-extensions<=4.14` on Python < 3.13, while
+pydantic 2.13.4, used by the control plane, requires `typing-extensions>=4.14.1`. A shared
+interpreter would downgrade a dependency of the verified control plane. The planes only
+talk over HTTP (D34), so separate environments cost nothing functionally. This is a scoped
+exception to the "no virtual environments" preference in `CONTEXT.md` §2, which still
+applies to the ML stack.
+
+---
+
+## D34 — Data plane enforcement: decisions over HTTP, 403 / 503, fail-closed
+
+- **Date:** 2026-09-16
+- **Status:** APPROVED
+- **Implementation:** DONE (first version) — `data_plane.py` (Issues #16, #17)
+
+**Decision.**
+
+- The proxy obtains every decision from the control plane over HTTP (`POST /classify`,
+  unchanged D25 contract). It **never loads the model**.
+- `ALLOW` — HTTP 200 with `status: "ok"` and `decision: "ALLOW"` — lets the request
+  continue to the destination. Nothing else does.
+- `BLOCK` from the model: the proxy answers **`403`**, and the request is not forwarded.
+- Classifier failure or no valid decision (timeout, connection error, non-200 answer,
+  invalid JSON, `status: "invalid"`, missing or unknown decision, or an unexpected error
+  inside the addon): the proxy answers **`503`**, and the request is not forwarded.
+- **Fail-closed (D4) is confirmed** as the live behaviour.
+- The internal HTTP client uses `trust_env=False`, so `HTTP_PROXY`/`HTTPS_PROXY` cannot
+  route the classifier call back into the same proxy.
+
+**Evidence.** `tests/test_data_plane.py` (21 tests). Manual run on 2026-09-16 with the real
+V4 model:
+
+- ALLOW reached the destination (`200`).
+- A SQL injection request got `403` and never reached the destination.
+- With the classifier stopped, a benign request got `503` and never reached the
+  destination.
+
+mitmproxy 12.2.3 forwards a request whose hook raised, and keeps proxying when a hot
+reload of the script fails. Both behaviours were verified, and both are closed in
+`data_plane.py`.
+
+**Rationale.** Separate 403 and 503 answers keep "the model judged this request malicious"
+distinct from "no decision could be obtained" for both client and operator. This carries
+the D28 distinction through to traffic. `trust_env=False` removes the request loop that a
+shell configured to use the gateway would otherwise create.
+
+---
+
+## D35 — D3 is a performance objective; the classifier timeout is operational
+
+- **Date:** 2026-09-16
+- **Status:** APPROVED
+- **Implementation:** DONE — `config.yaml`, `data_plane.classifier_timeout_seconds: 3.0`
+
+**Decision.**
+
+- **P95 end-to-end ≤ 200 ms (D3) is a project performance objective.** It is **not** a
+  blocking or acceptance criterion for the first data plane implementation.
+- Existing latency figures are **model-side / control-plane** measurements: the Issue #8
+  evaluation, the preliminary Issue #15 observation and `baseline-local-v1`. **No formal
+  end-to-end benchmark of the complete system exists yet** (Issue #18).
+- The data plane's classifier timeout is configurable, with an **initial value of 3 s**.
+  It is an **operational limit** for detecting a failed or hung classifier and applying
+  fail-closed (D34). It **does not represent the latency objective**, and it **will be
+  tuned with end-to-end evidence**.
+
+**Relationship to earlier entries.** Their text is preserved; none is superseded.
+
+- D3's decision is unchanged. Its rationale described a stated latency budget as a
+  prerequisite for choosing a classifier timeout, but the timeout is no longer chosen
+  that way.
+- D23, D26 and D29 describe model-side P95 as already exceeding "the entire 200 ms
+  end-to-end budget". Those statements compare a model-side figure with the objective's
+  value, and they motivate prioritizing inference optimization (M2) and the fast path.
+  They are not end-to-end measurements and not a failed requirement; D23 already states
+  that its comparison is not a formal D3 failure.
+
+**Rationale.** A 200 ms timeout would sit below the measured steady-state model-side P50
+(238.82 ms, `baseline-local-v1`), so it would have failed closed on at least half of the
+requests in that measurement. The timeout answers "is the classifier broken?". The
+objective answers "is the gateway fast enough?", a question only an end-to-end benchmark
+can settle.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -1228,7 +1325,7 @@ a comparand (**D31**).
 | D1 | HTTP request representation — neutralize envelope shortcuts | APPROVED | NOT YET |
 | D2 | CSIC excluded anomalies — keep out of baseline | APPROVED FOR FUTURE WORK | N/A |
 | D3 | Latency target — P95 ≤ 200 ms end-to-end added | APPROVED | N/A |
-| D4 | Failure behavior — FAIL-CLOSED | APPROVED | OUT OF CURRENT SCOPE |
+| D4 | Failure behavior — FAIL-CLOSED | APPROVED | **DONE (first version, D34)** |
 | D5 | Remove `###END###`, use native termination | APPROVED | **DONE (E4)** |
 | D6 | Dataset versioning — manifest-based, no `git rm` yet | APPROVED | NOT YET |
 | D7 | Scientific integrity over the historical 91% | APPROVED | N/A |
@@ -1257,6 +1354,9 @@ a comparand (**D31**).
 | D30 | Deferred model validation for fast-path traffic — no online learning | APPROVED | NOT YET (#37) |
 | D31 | Model-side latency measured with a device-synchronized stopwatch | APPROVED | **DONE (#9)** |
 | D32 | Benchmark experiment identity, immutability and comparison rules | APPROVED | **DONE (#9)** |
+| D33 | Separate Python environments for the data plane and the ML/control plane | APPROVED | **DONE (#16)** |
+| D34 | Data plane enforcement — HTTP decisions, 403 / 503, fail-closed | APPROVED | **DONE (first version, #16/#17)** |
+| D35 | D3 is a performance objective; classifier timeout (3 s) is operational | APPROVED | **DONE** |
 
 ---
 

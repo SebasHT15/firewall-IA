@@ -1,0 +1,16 @@
+# firewall-IA — runtime configuration.
+#
+# Only the data plane (data_plane.py) reads this file today. The control plane
+# (classifier_api.py) is still configured through FIREWALL_ADAPTER_DIR.
+# Changes take effect when mitmdump is restarted.
+
+data_plane:
+  # Control plane classification endpoint (classifier_api.py, POST /classify).
+  classifier_url: http://127.0.0.1:8000/classify
+
+  # Operational limit for detecting a failed or hung classifier. It is NOT the
+  # project's latency objective (D3, D35). httpx applies it to each phase of the
+  # call (connect, send, wait for the response). When it expires the request is
+  # blocked (fail-closed). 3 s is a conservative starting value, to be tuned with
+  # end-to-end evidence.
+  classifier_timeout_seconds: 3.0
