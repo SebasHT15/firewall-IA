@@ -80,6 +80,7 @@ label quality in the baseline and the future research question intact.
 - **Date:** 2026-08-16
 - **Status:** APPROVED
 - **Implementation:** N/A (a target, not a build task)
+- **SUPERSEDED BY D36** (2026-09-18). The original entry below is preserved unchanged.
 
 **Decision.** Initial engineering target: **end-to-end added latency P95 ≤ 200 ms.**
 
@@ -1318,13 +1319,136 @@ can settle.
 
 ---
 
+## D36 — Latency objective: P95 of the inference pipeline ≤ 200 ms (supersedes D3)
+
+- **Date:** 2026-09-18
+- **Status:** APPROVED — **supersedes D3**
+- **Implementation:** N/A (an objective, not a build task). **Not met** by the current
+  baseline.
+
+**Decision.** The project latency objective is:
+
+> **P95 of the latency added by the model inference pipeline ≤ 200 ms, in steady state.**
+
+The inference pipeline is everything needed to turn one raw HTTP request into a valid
+ALLOW/BLOCK decision:
+
+- preparation for inference: prompt construction, tokenization, host→device transfer;
+- model execution: `generate()`;
+- post-processing: decoding and contract parsing into a valid `ALLOW` / `BLOCK` decision.
+
+Excluded: initial model load · cold start (the first inference in a fresh process) and
+warm-up · HTTP transport to and from the control plane · network latency · the data
+plane / proxy · the destination server · complete end-to-end system latency.
+
+**Measurement.**
+
+- Steady state only. Model load, cold start and warm-up are measured and reported
+  separately. They are never pooled into the objective's statistic and never discarded.
+- Instrument: `benchmark_inference.py` under the `baseline-local-v1` protocol (batch size
+  1, concurrency 1, recorded hardware). The statistic is `steady_pipeline_p95_ms`, scope
+  `prompt+tokenize+transfer+generate+decode+parse`, which the harness already records.
+  `generate()` stays the benchmark's primary comparison metric (D31, D32), and it accounts
+  for almost all of the pipeline.
+- `model_latency_ms` from `/classify` covers `generate()` only, and `test_model.py` pools
+  the cold first inference into its latency figures. Neither is the objective's
+  instrument.
+
+**Current status: not met.** `baseline-local-v1` (2026-09-09, RTX 4090 Laptop GPU,
+n = 18,618): steady-state pipeline P95 **269.58 ms**; `generate()` alone 269.01 ms. The
+≤ 200 ms figure is an **optimization objective** and must not be presented as met. On this
+machine P95 moves by about 11% between back-to-back runs, so progress claims must control
+run order and thermal state (D32).
+
+**Rationale.** The objective measures the cost of adding the ML component to the gateway,
+not the total latency of every component in the system. The proxy, HTTP transport,
+network and destination server exist with or without a classifier, and they depend on
+deployment choices unrelated to the model. Stated at the inference pipeline, the objective
+can be measured today with the existing harness, and the comparison with
+`baseline-local-v1` is direct rather than a lower bound.
+
+**Relationship to earlier entries.** Their text is preserved; none is rewritten.
+
+- **D3 is superseded.** Its objective (end-to-end added latency P95 ≤ 200 ms) no longer
+  applies. Its instruction to measure model-only, model + API, proxy overhead and
+  end-to-end latency separately, with P50, P95, P99 and throughput, still stands.
+- **D19, D23, D26, D29 and D35** describe the 200 ms objective as an end-to-end budget.
+  That description is superseded. Their conclusions stand, and D23's becomes stronger: the
+  inference latency is now compared with the objective directly, not as a one-sided lower
+  bound, and the current HuggingFace path does not meet it. GGUF / Q4_K_M / llama.cpp
+  (M2) stays on the critical path.
+- **D35 otherwise stands.** The objective is not an acceptance criterion for the first
+  data plane, and the 3 s classifier timeout is an operational limit not derived from it.
+- **The fast path (D29, D30) is not the mechanism for meeting D36.** D36 measures the
+  performance of the inference pipeline. The fast path is a future optimization of overall
+  latency and load that avoids some inferences; it does not reduce the time of an
+  inference.
+- **End-to-end latency** is still measured and reported per layer (Issue #18). No
+  end-to-end threshold is defined at present.
+- Artifacts produced before this entry (`reports/e5_evaluation_methodology.txt`,
+  `reports/v4_clean_baseline_results.txt`, `reports/v4_inference_benchmark.md`,
+  `reports/benchmarks/baseline-local-v1/`) use the D3 wording and are not rewritten.
+
+---
+
+## D37 — Evaluation data roles from V5 on: train, validation, internal test, external test
+
+- **Date:** 2026-09-18
+- **Status:** APPROVED
+- **Implementation:** NOT YET — applies from V5. V4 is not changed retrospectively.
+
+**Decision.** From V5 on, every model version is developed and evaluated with four
+separate data roles:
+
+| Role | Used for | Never used for |
+|---|---|---|
+| **TRAIN** | fitting the weights | — |
+| **VALIDATION** | checkpoint selection, hyperparameters and development decisions | reporting final results |
+| **INTERNAL TEST** | independent evaluation inside the internal pipeline's distribution | selecting a checkpoint or tuning the model |
+| **EXTERNAL TEST** | independent evaluation with respect to the internal pipeline: measuring generalization and comparing versions | correcting the model: its individual examples do not guide dataset or model changes |
+
+- Sets are separated by logical identity before rendering (D16), external sets included.
+- **A test set that guides a change is no longer a test set.** Reporting aggregate and
+  per-slice metrics does not affect a test set. If the individual errors of a test set are
+  inspected and those errors guide a dataset or model change, that set stops being an
+  independent test and becomes **development / error-analysis data**. The change is
+  recorded with the set, and claims about the next version need a test set that has not
+  been used that way.
+- Individual failures are studied, hypotheses formed and A/B tests seeded on
+  development / error-analysis data (`docs/ml_evaluation_methodology.md` §1, §4).
+- Comparing two versions requires a test set that neither version was trained or tuned on.
+
+**V4 did not fully meet this separation.** `datasets/v4_clean/eval.jsonl` served as
+VALIDATION, because `load_best_model_at_end` selected `checkpoint-2200` on its `eval_loss`,
+and afterwards as the internal evaluation behind every reported V4 metric. It is held out
+from training (0.00% exact leakage, grouped split per D16) but it is **not** an independent
+internal test (D24). V4 has no external test. **V4 is not changed retrospectively:** its
+results stand as reported, with this limitation stated.
+
+**Consequences for V5.** VALIDATION is a grouped split carved from training groups, so the
+internal test is only ever reported. If individual V4 eval errors, such as the 92 false
+negatives under analysis (D21), guide V5 changes, `eval.jsonl` becomes development data for
+those changes and cannot serve as an independent test of V5.
+
+**Rationale.** A set used to select or correct a model is optimized against, so its metrics
+become optimistic. Fixing the roles in advance keeps the internal and external tests
+unbiased, and makes any contamination a recorded event rather than something discovered
+after results are reported.
+
+**Relationship to earlier entries.** Nothing is superseded. D37 extends **D24**, which
+fixed the terminology for V4's eval split, and generalizes the contamination rule of
+**D22** from real-traffic validation to every test set. The metric definitions of **D19**
+are unchanged.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
 |----|-------|--------|----------------|
 | D1 | HTTP request representation — neutralize envelope shortcuts | APPROVED | NOT YET |
 | D2 | CSIC excluded anomalies — keep out of baseline | APPROVED FOR FUTURE WORK | N/A |
-| D3 | Latency target — P95 ≤ 200 ms end-to-end added | APPROVED | N/A |
+| D3 | Latency target — P95 ≤ 200 ms end-to-end added | **SUPERSEDED BY D36** | N/A |
 | D4 | Failure behavior — FAIL-CLOSED | APPROVED | **DONE (first version, D34)** |
 | D5 | Remove `###END###`, use native termination | APPROVED | **DONE (E4)** |
 | D6 | Dataset versioning — manifest-based, no `git rm` yet | APPROVED | NOT YET |
@@ -1357,6 +1481,8 @@ can settle.
 | D33 | Separate Python environments for the data plane and the ML/control plane | APPROVED | **DONE (#16)** |
 | D34 | Data plane enforcement — HTTP decisions, 403 / 503, fail-closed | APPROVED | **DONE (first version, #16/#17)** |
 | D35 | D3 is a performance objective; classifier timeout (3 s) is operational | APPROVED | **DONE** |
+| D36 | Latency objective — P95 of the inference pipeline ≤ 200 ms, steady state (supersedes D3) | APPROVED | N/A — **not met** (269.58 ms) |
+| D37 | Evaluation data roles from V5 — train / validation / internal test / external test; a test set whose errors guide changes becomes development data | APPROVED | NOT YET — from V5; V4 not changed |
 
 ---
 

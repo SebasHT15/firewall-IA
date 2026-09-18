@@ -12,8 +12,10 @@ WHAT THIS MEASURES
     transfer · decoding · contract parsing
 
     This is NOT API latency and NOT gateway latency. End-to-end measurement is
-    Issue #18. The D3 budget of P95 <= 200 ms is an END-TO-END budget for the
-    whole gateway and is neither passed nor failed here.
+    Issue #18. The D36 latency objective (P95 of the inference pipeline
+    <= 200 ms, steady state) is read from the pipeline statistic this harness
+    also records (`steady_pipeline_p95_ms`), not from the generate()-only
+    primary metric.
 
 FOUR POPULATIONS, KEPT SEPARATE
     1. model_load        loading base + adapter in a fresh process
@@ -278,8 +280,10 @@ def build_protocol(experiment_id, dataset_meta, rows, limit=0, note=None):
                                 "generate() timer, so completed GPU work is "
                                 "measured rather than submitted work"),
             "not_measured": ("API latency, proxy overhead and end-to-end gateway "
-                             "latency. Those belong to Issue #18. The D3 budget "
-                             "of end-to-end P95 <= 200 ms is not evaluated here."),
+                             "latency. Those belong to Issue #18. The D36 "
+                             "objective (P95 of the inference pipeline <= 200 ms, "
+                             "steady state) is read from steady_pipeline_p95_ms, "
+                             "not from the primary metric."),
         },
         "dataset": dataset_meta,
         "selection": {
@@ -691,8 +695,8 @@ def summarize_experiment(experiment_id, out_dir, environment=None):
             "companions": ["steady_generate_p50_ms", "quality_attack_detection_rate",
                            "quality_false_positive_rate"],
             "not_a_gateway_number": ("model-side only. End-to-end gateway latency "
-                                     "is Issue #18; the D3 200 ms budget is not "
-                                     "evaluated here."),
+                                     "is Issue #18; the D36 objective is read from "
+                                     "steady_pipeline_p95_ms."),
         },
         "metrics": metrics,
         "metric_directions": METRIC_DIRECTIONS,

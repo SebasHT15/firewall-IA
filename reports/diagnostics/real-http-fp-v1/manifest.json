@@ -1,0 +1,150 @@
+{
+  "experiment_id": "real-http-fp-v1",
+  "experiment_type": "diagnostic",
+  "interpretation_rule": "Composition is chosen by the experimenter to find and explain failures. Proportions of BLOCK among these benign texts are NOT a representative false-positive rate and must not be reported as the model's FPR or extrapolated to real traffic.",
+  "not": [
+    "external test",
+    "representative benchmark",
+    "FPR estimate",
+    "training data",
+    "latency benchmark"
+  ],
+  "reproduces": "design of the 2026-09-17 diagnostic, whose raw data were lost; only its audit summary survived",
+  "created_utc": "2026-09-18T21:26:34.835+00:00",
+  "code": {
+    "git_branch": "feature/ml-evaluation",
+    "git_commit": "52f4fbc05d410672c26d33597eac5c01fcb302b5",
+    "working_tree_dirty_files": [
+      "M CONTEXT.md",
+      " M DECISIONS.md",
+      " M README.md",
+      " M benchmark_inference.py",
+      " M inference_core.py",
+      " M reports/benchmarks/README.md",
+      " M scripts/github_bootstrap.sh",
+      " M test_model.py",
+      "?? docs/",
+      "?? reports/diagnostics/"
+    ]
+  },
+  "model": {
+    "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "adapter_dir": "model-output-v4-clean",
+    "adapter_model_sha256": "7bf168758a428fa7775dff0328de3d07d3063ddf99b961dc8b8406a0dce93de1",
+    "adapter_config_sha256": "7b722e884d68628cef9611048eaeb11e2d192b78f809103eea6ab5010c3bc781",
+    "classifier_health": {
+      "status": "ok",
+      "model_loaded": true,
+      "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v4-clean"
+    }
+  },
+  "dataset": {
+    "name": "V4 clean",
+    "manifest": "datasets/manifest_v4_clean.json",
+    "manifest_artifact_sha256": {
+      "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+      "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
+    },
+    "eval_sha256_live": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859",
+    "used_for": "10 ALLOW rows as in-distribution contexts (family EVALSWAP)"
+  },
+  "hardware": {
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "gpu": "NVIDIA GeForce RTX 4090 Laptop GPU, 595.84, 16376 MiB",
+    "os": "Linux-7.0.0-31-generic-x86_64-with-glibc2.43"
+  },
+  "runtime": {
+    "python_ml": "Python 3.12.13",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0",
+    "peft": "0.19.1",
+    "bitsandbytes": "0.49.2",
+    "fastapi": "0.136.3",
+    "uvicorn": "0.48.0",
+    "mitmproxy": [
+      "Mitmproxy: 12.2.3"
+    ],
+    "curl": [
+      "curl 8.18.0 (x86_64-pc-linux-gnu) libcurl/8.18.0 OpenSSL/3.5.5 zlib/1.3.1 brotli/1.2.0 zstd/1.5.7 libidn2/2.3.8 libpsl/0.21.2 libssh2/1.11.1 nghttp2/1.68.0 librtmp/2.3 mit-krb5/1.22.1 OpenLDAP/2.6.10"
+    ],
+    "strace": [
+      "strace -- version 6.19"
+    ]
+  },
+  "design": {
+    "cases": 175,
+    "unique_texts": 149,
+    "families": {
+      "HOST": 32,
+      "PATH": 28,
+      "PORT": 24,
+      "HDR": 29,
+      "UAxPC": 8,
+      "UA": 24,
+      "EVALSWAP": 30
+    },
+    "proxy_cases": 31,
+    "proxy_unique_curl_commands": 26,
+    "repetitions_per_unique_text": 3,
+    "direct_warmup_calls_excluded": 3,
+    "proxy_warmup_requests_excluded": 1,
+    "expected_label_all": "ALLOW (benign by construction; the model's output is never used to label)",
+    "seed": 42,
+    "seed_scope": "selection of the 10 eval rows only",
+    "concurrency": 1,
+    "request_order": "rep-major, case-file order",
+    "cases_file_sha256": "b60bafba44c3d22c123897662546133fd0329b7a9a53f26abdde86f38f122690"
+  },
+  "endpoints": {
+    "classifier_url": "http://127.0.0.1:8000/classify",
+    "proxy_url": "http://127.0.0.1:8080",
+    "destination": "http://127.0.0.1:9000 (python http.server, docroot www/)",
+    "ports": {
+      "classifier": 8000,
+      "proxy": 8080,
+      "destination": 9000
+    }
+  },
+  "capture": "exact proxy->classifier bodies recorded by strace around the unchanged mitmdump command (proxy_strace.log); no code or config was changed",
+  "commands": {
+    "classifier": "PYTHONUNBUFFERED=1 python3.12 -m uvicorn classifier_api:app --host 127.0.0.1 --port 8000 2>&1 | tee -a reports/diagnostics/real-http-fp-v1/classifier.log",
+    "proxy": "PYTHONUNBUFFERED=1 strace -f -tt -xx -s 1048576 -e trace=connect,sendto,sendmsg,write,writev,close -o reports/diagnostics/real-http-fp-v1/proxy_strace.log .venv-dataplane/bin/mitmdump -s data_plane.py --listen-host 127.0.0.1 -p 8080 2>&1 | tee -a reports/diagnostics/real-http-fp-v1/proxy.log",
+    "server": "PYTHONUNBUFFERED=1 python3.12 -m http.server 9000 --bind 127.0.0.1 --directory reports/diagnostics/real-http-fp-v1/www 2>&1 | tee -a reports/diagnostics/real-http-fp-v1/server.log",
+    "client": "PYTHONUNBUFFERED=1 python3.12 reports/diagnostics/real-http-fp-v1/run_experiment.py 2>&1 | tee -a reports/diagnostics/real-http-fp-v1/client.log"
+  },
+  "scope": [
+    "benign GET requests (+ eval rows with their original method and body)",
+    "Host/loopback, path, port, header presence, User-Agent value, UA x Proxy-Connection, in-distribution Host swap",
+    "direct /classify vs proxy path, and proxy enforcement (403 / arrival)"
+  ],
+  "limitations": [
+    "diagnostic composition: BLOCK proportions are not an FPR",
+    "one client (curl 8.18.0) through the proxy; plain HTTP/1.1; GET only via proxy",
+    "benign texts are constructed by hand from real client header sets, not captured from users",
+    "latency figures are observations under strace and are not a benchmark (D36 is not evaluated here)",
+    "single machine, single model version (V4); greedy decoding"
+  ],
+  "logs": {
+    "classifier": "reports/diagnostics/real-http-fp-v1/classifier.log",
+    "proxy": "reports/diagnostics/real-http-fp-v1/proxy.log",
+    "server": "reports/diagnostics/real-http-fp-v1/server.log",
+    "client": "reports/diagnostics/real-http-fp-v1/client.log"
+  },
+  "go_utc": "2026-09-18T21:23:53.826+00:00",
+  "log_offsets_at_go": {
+    "classifier": 2673,
+    "proxy": 306,
+    "server": 65,
+    "client": 409,
+    "strace": 47437
+  },
+  "finished_utc": "2026-09-18T21:26:34.834+00:00",
+  "result_counts": {
+    "warmup-direct": 3,
+    "direct": 447,
+    "warmup-proxy": 1,
+    "proxy": 78,
+    "capture": 79,
+    "resend": 78
+  }
+}
