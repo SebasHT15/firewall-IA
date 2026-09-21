@@ -28,6 +28,7 @@ import threading
 
 from flask import (Flask, jsonify, make_response, redirect, render_template_string,
                    request, url_for)
+from markupsafe import Markup
 
 ACCESS_LOG = os.environ.get("ACCESS_LOG", "/logs/lab-app-access.jsonl")
 PORT = int(os.environ.get("PORT", "9100"))
@@ -47,8 +48,17 @@ PRODUCTS = [
     {"id": 8, "name": "Ceramic Mug",            "category": "food",   "price": 9.90},
 ]
 
+# INERT RENDERING (External v1 requires the lab app to be inert; protocol section 5.1).
+#
+# `body` is rendered with Jinja autoescaping ({{ body }}, NOT {{ body|safe }}). Each route
+# composes `body` as a markupsafe.Markup out of TRUSTED static markup (the forms, lists and
+# links the browser flows drive) plus request-derived values interpolated with Markup.format,
+# which HTML-escapes every substituted value. A reflected `<script>`/`onerror=` payload is
+# therefore stored and echoed as escaped text, never as live HTML — nothing request-derived
+# reaches an HTML sink unescaped. The page structure (form field names, actions, buttons,
+# link hrefs) is unchanged, so the External v1 requests clients make are unchanged.
 PAGE = """<!doctype html><html><head><meta charset="utf-8"><title>{{ title }}</title></head>
-<body><h1>{{ title }}</h1>{{ body|safe }}
+<body><h1>{{ title }}</h1>{{ body }}
 <nav><a href="/">home</a> <a href="/products">products</a> <a href="/search">search</a>
 <a href="/cart">cart</a> <a href="/login">login</a> <a href="/profile">profile</a></nav>
 </body></html>"""
@@ -73,9 +83,28 @@ def receipt() -> None:
     print("RECEIVED " + line, flush=True)
 
 
+# The Docker healthcheck polls /healthz every few seconds from INSIDE this container.
+# Those probes are infrastructure, not traffic under test, and recording them buried the
+# experimental receipts (41 of 49 entries in the Phase B capture gate).
+#
+# The exclusion is deliberately narrow: only /healthz AND only from the container's own
+# loopback. Anything arriving through a proxy has the proxy container's address, so a
+# proxied request is ALWAYS recorded, even to /healthz. Excluding /healthz by path alone
+# would create a blind spot: a request that reached this app would leave no receipt, and
+# L2/L3 would score it as "not delivered".
+HEALTHCHECK_PATH = "/healthz"
+LOOPBACK = {"127.0.0.1", "::1"}
+
+
+def should_record(path: str, remote_addr) -> bool:
+    """True unless this is the container's own healthcheck probe."""
+    return not (path == HEALTHCHECK_PATH and remote_addr in LOOPBACK)
+
+
 @app.before_request
 def _record():
-    receipt()
+    if should_record(request.path, request.remote_addr):
+        receipt()
 
 
 def page(title, body):
@@ -85,51 +114,55 @@ def page(title, body):
 # ── Pages ──────────────────────────────────────────────────────────────────
 @app.get("/")
 def home():
-    return page("fwlab shop", "<p>Lab storefront for External Test v1.</p>")
+    return page("fwlab shop", Markup("<p>Lab storefront for External Test v1.</p>"))
 
 
 @app.get("/products")
 def products():
-    # Query parameters are read and echoed ESCAPED; never interpolated anywhere.
+    # Query parameters are read and echoed as ESCAPED TEXT via Markup.format; never reach an
+    # HTML sink as live markup. Product fields come from the trusted catalogue.
     cat = request.args.get("category", "")
     page_n = request.args.get("page", "1")
     sort = request.args.get("sort", "id")
     limit = request.args.get("limit", "10")
     items = [p for p in PRODUCTS if not cat or p["category"] == cat]
-    rows = "".join(f"<li><a href='/products/{p['id']}'>{p['name']}</a> "
-                   f"{p['price']:.2f}</li>" for p in items)
-    return page("products", f"<p>category={cat!r} page={page_n!r} sort={sort!r} "
-                            f"limit={limit!r}</p><ul>{rows}</ul>")
+    rows = Markup("").join(
+        Markup("<li><a href='/products/{}'>{}</a> {}</li>").format(
+            p["id"], p["name"], f"{p['price']:.2f}") for p in items)
+    return page("products", Markup("<p>category={} page={} sort={} limit={}</p><ul>{}</ul>")
+                .format(cat, page_n, sort, limit, rows))
 
 
 @app.get("/products/<pid>")
 def product(pid):
     found = next((p for p in PRODUCTS if str(p["id"]) == str(pid)), None)
     if not found:
-        return page("not found", f"<p>no product {pid!r}</p>"), 404
+        return page("not found", Markup("<p>no product {}</p>").format(pid)), 404
     return page(found["name"],
-                f"<p>{found['category']} — {found['price']:.2f}</p>"
-                f"<form method='post' action='/cart'>"
-                f"<input type='hidden' name='product_id' value='{found['id']}'>"
-                f"<input name='quantity' value='1'>"
-                f"<button type='submit'>add to cart</button></form>")
+                Markup("<p>{} — {}</p>"
+                       "<form method='post' action='/cart'>"
+                       "<input type='hidden' name='product_id' value='{}'>"
+                       "<input name='quantity' value='1'>"
+                       "<button type='submit'>add to cart</button></form>")
+                .format(found["category"], f"{found['price']:.2f}", found["id"]))
 
 
 @app.get("/search")
 def search():
     q = request.args.get("q", "")
     hits = [p for p in PRODUCTS if q.lower() in p["name"].lower()] if q else []
-    rows = "".join(f"<li>{p['name']}</li>" for p in hits)
-    return page("search", f"<form method='get' action='/search'>"
-                          f"<input name='q' value=''><button>search</button></form>"
-                          f"<p>query={q!r}, {len(hits)} hit(s)</p><ul>{rows}</ul>")
+    rows = Markup("").join(Markup("<li>{}</li>").format(p["name"]) for p in hits)
+    return page("search",
+                Markup("<form method='get' action='/search'>"
+                       "<input name='q' value=''><button>search</button></form>")
+                + Markup("<p>query={}, {} hit(s)</p><ul>{}</ul>").format(q, len(hits), rows))
 
 
 @app.get("/login")
 def login_form():
-    return page("login", "<form method='post' action='/login'>"
-                         "<input name='username'><input name='password' type='password'>"
-                         "<button type='submit'>sign in</button></form>")
+    return page("login", Markup("<form method='post' action='/login'>"
+                                "<input name='username'><input name='password' type='password'>"
+                                "<button type='submit'>sign in</button></form>"))
 
 
 @app.post("/login")
@@ -146,7 +179,7 @@ def profile():
     session = request.cookies.get("fwlab_session")
     if not session:
         return redirect(url_for("login_form"))
-    return page("profile", f"<p>session={session!r}</p>")
+    return page("profile", Markup("<p>session={}</p>").format(session))
 
 
 @app.route("/cart", methods=["GET", "POST"])
@@ -157,15 +190,17 @@ def cart():
         resp = make_response(redirect(url_for("cart")))
         resp.set_cookie("fwlab_cart", f"{pid}x{qty}", samesite="Lax")
         return resp
-    return page("cart", f"<p>cart={request.cookies.get('fwlab_cart')!r}</p>"
-                        f"<form method='post' action='/checkout'>"
-                        f"<input name='address'><input name='card_last4' value='0000'>"
-                        f"<button type='submit'>checkout</button></form>")
+    return page("cart", Markup("<p>cart={}</p>"
+                               "<form method='post' action='/checkout'>"
+                               "<input name='address'><input name='card_last4' value='0000'>"
+                               "<button type='submit'>checkout</button></form>")
+                .format(request.cookies.get("fwlab_cart")))
 
 
 @app.post("/checkout")
 def checkout():
-    return page("checkout", f"<p>order placed, fields={sorted(request.form.keys())}</p>")
+    return page("checkout",
+                Markup("<p>order placed, fields={}</p>").format(sorted(request.form.keys())))
 
 
 @app.get("/static/<path:asset>")
