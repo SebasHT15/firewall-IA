@@ -17,6 +17,62 @@ The device is an **authorized inline supervisor (a legitimate security gateway),
 
 ---
 
+## Current checkpoint (2026-09-21)
+
+**Read this first.** It states where the project is and what comes next. Everything below
+explains how it got here; where an older section disagrees with this one, this one is
+current.
+
+**Completed**
+
+- V4 clean baseline trained and evaluated (§3)
+- Control plane implemented and validated (§5)
+- Data plane / inline HTTP gateway implemented (§5b)
+- ALLOW / BLOCK / fail-closed validated (§5b, §5c)
+- ML evaluation methodology established (`docs/ml_evaluation_methodology.md`)
+- **D36** (latency objective) and **D37** (evaluation data roles) recorded
+- Reproducible diagnostic `reports/diagnostics/real-http-fp-v1/` completed and persisted (§5c)
+- Proxy / direct-API consistency validated (§5c)
+- Gateway enforcement validated (§5c)
+- Repository reorganized by responsibility (§9)
+- **Docker Lab COMPLETE and runtime verified** (§5d) — built and run. GPU
+  passthrough works, the control plane runs on CUDA, V4 loads from the read-only
+  mounted adapter, and the five infrastructure checks A–E all pass
+  (startup/readiness, ALLOW, BLOCK, fail-closed, recovery). Closure report and
+  committed raw logs: `reports/lab/docker-lab-v1/` (`raw/`). **Infrastructure only — not External Test v1, not
+  a benchmark, no model metric.**
+
+**Current baseline**
+
+- TinyLlama **V4** (`model-output-v4-clean`, checkpoint 2200) — **unchanged** by all of the
+  work above
+- **`datasets/v4_clean/` unchanged** — hashes still match `datasets/manifest_v4_clean.json`
+- No V5, no V4.1
+- No external test set
+- No fast path, no suspicious score, no asynchronous classification
+- No GGUF / llama.cpp, no embedded deployment
+
+**Next — in this order**
+
+1. **External Test v1** — an independent, frozen external evaluation set (§13).
+   **Not started.**
+2. **Full external security + gateway-enforcement evaluation** —
+   client → data plane → control plane → V4 → data plane → destination, executed
+   in the Docker Lab (§5d)
+3. **Professor demo** — ALLOW, BLOCK and fail-closed shown live on a small demo subset,
+   with the external-test results presented already computed
+4. **README / results / standards alignment / future work**
+
+Do not reorder these. *(Docker Lab was step 1 of this sequence and is now done,
+§5d; the remaining order is unchanged.)*
+
+**Not to be reopened before that sequence produces evidence that requires it:** the
+diagnostic false positives, another documentation audit, V5, the fast path, the suspicious
+score, llama.cpp/GGUF, embedded hardware and inference optimization. They stay recorded in
+§3, §5c and §13 as later work.
+
+---
+
 ## 2. ENVIRONMENT — CRITICAL (post-Ubuntu-reinstall, 2026-05-24)
 
 **The machine was reinstalled. The Python environment changed and this WILL bite you if ignored.**
@@ -231,9 +287,12 @@ splits do not exist yet.
 
 ### Immediate roadmap
 
-**Done since the V4 baseline:** Issue #15 — FastAPI Control Plane, implemented and
-validated (see §5). This partially advances M3 ahead of M2 by deliberate decision
-(**D26**); it does not make HF/PEFT the deployment backend, and **D23** still holds.
+**Done since the V4 baseline:** Issue #15 — FastAPI Control Plane (§5), Issue #9 —
+controlled inference benchmark (§3), Issues #16/#17 — data plane and fail-closed
+enforcement (§5b), the reproducible real-HTTP diagnostic `real-http-fp-v1` (§5c), and the
+structural repository reorganization (§9). This partially advances M3 ahead of M2 by
+deliberate decision (**D26**); it does not make HF/PEFT the deployment backend, and **D23**
+still holds.
 
 **Issue numbering (reconciled against the tracker, 2026-09-06):** GitHub **#8** is
 *Evaluate V4 clean security metrics* — **closed**, all ten acceptance criteria verified
@@ -250,13 +309,34 @@ issue #8 says, and it still has no dedicated issue.
 3. **Issue #17** — fail-closed enforcement (**D4**) — **first version implemented 2026-09-16** (§5b, **D34**).
    The 3 s classifier timeout is an operational limit for detecting classifier failure, not the
    latency objective; tune it with end-to-end evidence (**D35**)
-4. **Issue #18** — end-to-end gateway latency, the no-fast-path baseline
-5. **Failure analysis of the 92 false negatives** (**D21**) — untracked
-6. **Real HTTP laboratory validation** (**D22**)
-7. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
-8. GGUF / Q4_K_M / llama.cpp (**Issues #10–#12**)
-9. Quantized security regression
-10. Embedded deployment
+4. ~~**Real-HTTP diagnostic**~~ — **DONE 2026-09-18.** `real-http-fp-v1`, persisted with
+   all raw data (§5c). It is diagnostic evidence, not a benchmark and not an FPR.
+5. ~~**Repository reorganization**~~ — **DONE 2026-09-20.** Structural only; the model and
+   the datasets keep identical hashes (§9).
+
+6. ~~**Docker Lab**~~ — **DONE 2026-09-21.** Built and run; GPU passthrough, CUDA
+   model load and the five infrastructure checks A–E all pass (§5d). Closure
+   report `reports/lab/docker-lab-v1/`. Infrastructure only.
+
+**The current ordered work, from here** (the same order as "Current checkpoint" above — do
+not reorder):
+
+7. **External Test v1** — an independent, frozen external evaluation set; does not exist
+   yet (§13, "External Test v1")
+8. **Full external evaluation through the complete gateway** (**D22**) — client → data
+   plane → control plane → V4 → data plane → destination
+9. **Professor demo** — ALLOW, BLOCK and fail-closed live on a small demo subset, with the
+   external-test results already computed
+10. **README / results / standards alignment / future work**
+
+**Later, only after that sequence:**
+
+11. **Issue #18** — end-to-end gateway latency, the no-fast-path baseline
+12. **Failure analysis of the 92 false negatives** (**D21**) — untracked
+13. **Decision gate** — targeted V4.1 only if evidence requires it, otherwise proceed to M2
+14. GGUF / Q4_K_M / llama.cpp (**Issues #10–#12**)
+15. Quantized security regression
+16. Embedded deployment
 
 ### Latency-reduction layer — designed, NOT built (D29, D30)
 
@@ -534,12 +614,215 @@ timeout; the objective itself is now **D36**). Full description and reproduction
     not demonstrate a cause.
   - Headers are not rewritten, and `render_request()` is not changed, to hide it. It is
     to be studied separately.
-  - **Follow-up experiment, 2026-09-17: raw data lost.** A controlled one-variable A/B
-    experiment (`/classify` direct and through the proxy) was run. Its raw records were
-    written under `/tmp` and lost at the next reboot. An audit summary survives outside the
-    repository; it is not a substitute for the raw data, and its figures cannot be
-    re-verified. The experiment must be repeated, with results persisted in the repository
-    (`reports/<kind>/<experiment-id>/`), before its findings count as evidence.
+  - **Follow-up experiment, 2026-09-17: raw data lost — historical antecedent only.** A
+    controlled one-variable A/B experiment (`/classify` direct and through the proxy) was
+    run. Its raw records were written under `/tmp` and lost at the next reboot. An audit
+    summary survives outside the repository; it is not a substitute for the raw data, and
+    its figures cannot be re-verified. It is kept as an antecedent and is not evidence.
+  - **That work was repeated and persisted, 2026-09-18:**
+    `reports/diagnostics/real-http-fp-v1/`, with every raw record in the repository. It is
+    the current evidence on this finding — see **§5c**.
+
+---
+
+## 5c. Real-HTTP diagnostic — `real-http-fp-v1` (2026-09-18, reproducible)
+
+The 2026-09-17 follow-up lost its raw data and survives only as a non-re-verifiable
+antecedent (§5b). **That work was repeated correctly.** The reproducible experiment lives at
+`reports/diagnostics/real-http-fp-v1/` — pre-registered cases, every raw record, the four
+process logs, the code and the manifest. Full write-up: its `summary.md`.
+
+**What it is.** A **diagnostic** (`docs/ml_evaluation_methodology.md`): the case mix was
+built to find and explain failures. It is **not** the external test, **not** a benchmark and
+**not** an FPR estimate.
+
+**What was run.** 175 pre-registered cases over 149 unique HTTP texts, 3 repetitions per
+text — 447 direct calls to `/classify` — plus 26 curl commands × 3 = 78 requests through
+the gateway.
+
+**Validity and determinism**
+
+- 0 invalid outputs in 447 direct calls.
+- 149/149 unique texts gave the same decision **and** the same reason across all 3
+  repetitions.
+
+**Proxy / direct-API consistency**
+
+- 78/78 texts captured from the proxy were byte-identical to the pre-registered text.
+- 78/78 decisions matched between the proxy path and the direct API.
+- 78/78 reasons matched.
+
+**Gateway enforcement**
+
+- 48/48 ALLOW decisions were forwarded and reached the destination.
+- 30/30 BLOCK decisions returned 403 and did not reach it.
+- No fail-closed 503 occurred during this run.
+
+**Diagnostic finding.** 37 of the 149 constructed benign texts were classified BLOCK
+(SSRF 25, file inclusion 4, HPP 3, open redirect 3, request smuggling 2). **37/149 is a
+diagnostic count on a mix built to provoke failures — it is NOT a false-positive rate and
+must never be reported as one.** The model's measured FPR is the formal-split 0.06% (§3).
+
+**What the evidence supports.** Coverage gaps / out-of-distribution inputs, possible
+spurious correlations (for example loopback Host → SSRF) and joint-feature context
+sensitivity are all *compatible* with the observations. The experiment does **not**
+demonstrate overfitting, does **not** establish causality for Host, path, port or headers,
+and its proportions are **not** performance metrics for the model.
+
+---
+
+## 5d. Docker Lab — COMPLETE, RUNTIME VERIFIED (2026-09-21)
+
+A containerized laboratory that runs the existing system end to end, so
+**External Test v1** can later be executed in a reproducible environment. It is
+**infrastructure**: no model, dataset, prompt, parser, generation parameter,
+request representation (D1), enforcement rule (D4/D34) or evaluation methodology
+changed. Full documentation: `docker/README.md`.
+
+### Layout
+
+`compose.yaml` at the repository root (canonical Compose v2 filename, discovered
+from the root where every other command runs); all Docker assets under `docker/`:
+`config.docker.yaml`, `control-plane/`, `data-plane/`, `destination/`, `client/`,
+`smoke_test.sh`, `.env.example`, `README.md`. Plus `.dockerignore` at the root.
+Nothing was moved; the §9 organization is unchanged.
+
+### Four services
+
+| Service | Image base | Role |
+|---|---|---|
+| `control-plane` | `ubuntu:24.04` + Python 3.12 + torch 2.6.0+cu124 + `requirements.txt` | FastAPI → `inference_core` → TinyLlama + V4. The only service that loads the model or needs the GPU. |
+| `data-plane` | `python:3.12-slim` + `requirements-data-plane.txt` | mitmdump running the unchanged `data_plane.py`. Never loads the model. |
+| `destination` | `python:3.12-slim`, stdlib only | The protected origin. Serves two static pages and appends every received request to a JSONL receipt log — this is how a BLOCK is proved *not* to have arrived. |
+| `client` | `python:3.12-slim`, stdlib only | One-shot smoke client under a compose profile, so `docker compose up` does not fire traffic. |
+
+### Design choices, and why
+
+- **No production code was modified.** `data_plane.py` reads `config.yaml` beside
+  the repository root; the lab bind-mounts `docker/config.docker.yaml` over it
+  instead of adding an environment override to a validated component. The root
+  `config.yaml` is untouched, so the local non-Docker workflow still works.
+  Exactly one key differs: `classifier_url` →
+  `http://control-plane:8000/classify`, because `127.0.0.1` inside a container is
+  that container.
+- **Two images, not one (D33).** mitmproxy's `typing-extensions<=4.14` pin against
+  the control plane's pydantic `>=4.14.1` is preserved as an image boundary.
+- **Two processes, not one.** The data plane still reaches the control plane over
+  HTTP. Merging them would have been convenient and would have destroyed the
+  separation the project chose deliberately.
+- **The adapter is mounted, never copied.** `FIREWALL_ADAPTER_DIR` (already in
+  `inference_core.py`) is set to `/opt/firewall-ia/adapter`; the host
+  `model-output-v4-clean/` is bind-mounted there read-only. It is gitignored and
+  must never enter an image layer. `.dockerignore` is an allowlist for the same
+  reason: the repository root also holds `csic_database.csv` (28 MB), the
+  historical `train.jsonl`/`eval.jsonl` (43 MB), `datasets/` and `reports/`.
+- **HuggingFace cache mounted read-only with `HF_HUB_OFFLINE=1`,** so the container
+  reuses the verified TinyLlama base snapshot instead of fetching a possibly
+  different revision.
+- **No fail-open introduced.** Nothing in the lab touches the enforcement path.
+  The control-plane healthcheck asserts `model_loaded` (not just HTTP 200, per
+  D28) and the data plane starts only after it passes — convenience, not safety:
+  if the classifier disappears later the addon still fails closed.
+- **GPU is requested, never silently skipped.** Without the NVIDIA Container
+  Toolkit the control-plane container fails to start rather than falling back to
+  CPU. A CPU run is a *different execution environment* from the
+  `baseline-local-v1` CUDA baseline and must never be reported as comparable.
+
+### Networking
+
+Explicit bridge network `firewall-lab`, service-name DNS. `control-plane:8000`
+and `destination:9000` are **not** published to the host; the data plane is
+published on `127.0.0.1:8080` only. The destination also answers to the alias
+`app.fwlab.test` — chosen and disclosed because `real-http-fp-v1` (§5c) observed
+ordinary hostnames of that shape as ALLOW in every context tested, which keeps the
+ALLOW smoke check about transport rather than re-measuring the model.
+
+### Runtime verification — smoke run `20260921T011153Z`
+
+The lab was built and run. Host prerequisites resolved: Docker and Compose work,
+the **NVIDIA Container Toolkit works** and **GPU passthrough works**. The control
+plane runs on **CUDA** and loads V4 from the read-only mounted adapter —
+`startup: model ready on cuda in 1.7 s`, adapter `/opt/firewall-ia/adapter`.
+
+Final run, `./docker/smoke_test.sh`, ended with `all infrastructure smoke checks
+passed`:
+
+| Check | Result | Evidence in the run log |
+|---|---|---|
+| **A** startup / readiness | **PASS** | `control plane healthy (/health reports model_loaded: true)` |
+| **B** ALLOW | **PASS** | `status=200`, destination received 1 request (`GET /index.html`) |
+| **C** BLOCK | **PASS** | `status=403`, destination received **0** requests; body `Request blocked by firewall-IA.` |
+| **D** fail-closed | **PASS** | control plane `exited` before *and* after the request; `status=503`, destination received **0**; body `...classifier unavailable (fail-closed).` |
+| **E** recovery | **PASS** | control plane healthy again, ALLOW `status=200` and received |
+
+Raw evidence is **committed** with the closure report at `reports/lab/docker-lab-v1/`:
+`raw/smoke-20260921T011153Z-PASS-final.log` (harness output plus all three services'
+logs) and `raw/destination-access.jsonl` (the receipt log, cumulative across runs),
+with `raw/SHA256SUMS`. The logs of the two failed validation attempts are committed
+beside them, named `-FAILED-`. The machine-local originals stay under
+`docker/.lab-logs/`, which remains gitignored working output.
+
+Static checks, all still passing: `docker compose config` schema and
+interpolation; `docker/config.docker.yaml` accepted by the real
+`data_plane.load_config()` with a timeout identical to the root `config.yaml`;
+**112 core tests pass with 1 expected skip**; **24 data plane tests pass**
+(21 existing + 3 Docker-config drift tests). `datasets/v4_clean/` and
+`model-output-v4-clean/` SHA-256 unchanged, dataset hashes still matching
+`datasets/manifest_v4_clean.json`.
+
+### Two defects found during validation, and their fixes
+
+Both were found by running the lab; neither was a gateway fault.
+
+1. **V4 could not load in the container.** `bitsandbytes` imports Triton, whose
+   NVIDIA backend compiles a small CPython extension on first import. The bare
+   `ubuntu:24.04` image had no toolchain, so model load failed with
+   `RuntimeError: Failed to find C compiler. Please specify via CC environment
+   variable.` FastAPI still started and `/health` stayed `model_loaded: false`,
+   so the healthcheck correctly never went healthy — the failure was visible, not
+   silent. **Fix: `docker/control-plane/Dockerfile` only**, adding
+   `build-essential` (the C compiler) and `python3-dev` (the CPython headers the
+   generated extension includes) to the existing apt layer. V4 then loaded on
+   CUDA. No production code, requirement or version changed.
+2. **The first fail-closed attempt was invalid.** `docker compose run client
+   failclosed` resolves the dependency graph
+   `client → data-plane → control-plane (condition: service_healthy)`, so Compose
+   **restarted the classifier that had just been stopped** and waited until it was
+   healthy. The run log shows `Stopping → Stopped → Starting → Started → Waiting →
+   Healthy`, after which the request returned a normal ALLOW/200 and reached the
+   destination. **This was a harness orchestration defect, not a fail-open of the
+   gateway**: the data plane was never presented with an unavailable classifier.
+   **Fix: `docker/smoke_test.sh` only** — `--no-deps` on the fail-closed
+   invocation, plus an assertion that the control plane is stopped immediately
+   before the request and still stopped after it, so a restart can never again be
+   mistaken for a result. The manual sequence in `docker/README.md` carried the
+   same defect and was corrected too. Fail-closed semantics were not touched.
+
+### What the smoke tests are, and are not
+
+`./docker/smoke_test.sh` runs the five checks above and tees every run to
+`docker/.lab-logs/smoke-<timestamp>.log` together with the three services' logs,
+so the raw evidence stays in the repository rather than in a terminal — the lesson
+of the lost 2026-09-17 data (§5b).
+
+**These are infrastructure smoke tests.** Three hand-written requests. They are
+**not** External Test v1, **not** an evaluation, **not** a benchmark and **not** a
+diagnostic. No accuracy, precision, recall, FPR, FNR, latency or throughput figure
+may be derived from them — the `model_latency_ms` values visible in the run log
+are incidental service logging, not a measurement. The smoke fixtures are
+infrastructure fixtures and stay conceptually separate from any future external
+evaluation set (**D37**). The frozen
+`reports/benchmarks/baseline-local-v1/` and
+`reports/diagnostics/real-http-fp-v1/` are never overwritten.
+
+### Still out of scope for the lab
+
+Unchanged from the local gateway's scope, and **not** validated by this run:
+HTTPS/TLS interception, HTTP/2, WebSockets, transparent proxying, large request
+bodies, concurrency and load (the control plane still serializes inference on one
+GPU), end-to-end latency (Issue #18), and any model-quality claim. No fast path,
+no suspicious scoring, no asynchronous classification, no GGUF/llama.cpp. The lab
+reproduces the current no-fast-path baseline and nothing else.
 
 ---
 
@@ -602,6 +885,17 @@ The weakest part of the current dataset is **legitimate-traffic diversity** (syn
 `scripts/evaluation/` — `test_model.py` · `scripts/benchmarks/` — `benchmark_inference.py`,
 `benchmark_env.py`, `benchmark_compare.py`. `config.yaml`, `csic_database.csv` and the historical
 `train.jsonl`/`eval.jsonl` stay at the root.
+
+**Docker Lab files (2026-09-20).** `compose.yaml` at the repository root; all
+Docker assets under `docker/` (`config.docker.yaml`, one directory per service,
+`smoke_test.sh`, `.env.example`, `README.md`); `.dockerignore` at the root. Nothing
+in the layout above was moved. See §5d.
+
+**Reorganization, 2026-09-20 — structural only.** Files were grouped by responsibility; no
+behaviour, dataset or model changed. Verified afterwards: 112 core tests pass with 1
+expected skip, the 21 data plane tests pass, the control plane and the data plane both start
+from their new locations, the main self-tests pass, and the model and datasets keep
+identical hashes.
 
 ### `parse_dataset.py`
 Generates train/eval JSONL. Run `python3.12 scripts/dataset/parse_dataset.py`.
@@ -949,11 +1243,17 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | **#8** | V4 clean security metrics evaluation | **DONE 2026-08-18 — closed 2026-09-06.** `reports/v4_clean_eval.json`; all ten AC verified. |
 | **#15** | FastAPI Control Plane | **DONE 2026-09-05 — merged (PR #34), closed.** See §5. |
 | **#9** | Controlled inference benchmark | **DONE 2026-09-09 — `baseline-local-v1` measured and frozen. Closed 2026-09-14.** See §3. |
-| — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
 | **#16/#17** | Data plane, fail-closed | **FIRST VERSION 2026-09-16** — verified locally, see §5b |
-| **#18** | End-to-end latency | NOT STARTED |
+| — | Real-HTTP diagnostic `real-http-fp-v1` | **DONE 2026-09-18** — reproducible and persisted, see §5c |
+| — | Repository reorganization by responsibility | **DONE 2026-09-20** — structural only, see §9 |
+| — | **Docker Lab** — reproducible environment for the whole system | **DONE 2026-09-21 — runtime verified.** Checks A–E pass, see §5d and `reports/lab/docker-lab-v1/` |
+| — | **External Test v1** — independent, frozen external set | **NEXT — NOT STARTED**, does not exist yet (below) |
+| — | **Full external evaluation through the complete gateway** (D22) | NOT STARTED — depends on the two above |
+| — | **Professor demo** — ALLOW / BLOCK / fail-closed + demo subset | NOT STARTED |
+| — | **README / results / standards alignment / future work** | NOT STARTED |
+| **#18** | End-to-end latency | NOT STARTED — after the sequence above |
+| — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
 | **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED |
-| — | Real HTTP laboratory validation (D22) | Planned — external validation gate |
 | — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis (#9 is done) |
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
@@ -963,20 +1263,45 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 
 **Gate rule:** no training run starts while `check_dataset.py` reports FAIL.
 
+### External Test v1 — does not exist yet
+
+Nothing of it is built. When it is built, per **D37** and
+`docs/ml_evaluation_methodology.md`:
+
+- It is **independent of the V4 dataset**, and **frozen before V4 is evaluated on it**.
+- It ships with ground truth, categories, slices, a manifest and hashes.
+- It measures TP/TN/FP/FN, accuracy, BLOCK precision, recall / attack detection rate, F1,
+  FPR, FNR, invalid outputs, and per-category / per-slice metrics.
+- It also verifies **gateway enforcement**, not only classification.
+- The **main execution runs through the complete system** — client → data plane → control
+  plane → V4 → data plane → destination. Direct `/classify` calls are auxiliary per-layer
+  consistency controls only.
+- It is **not** designed around the already known failures of `real-http-fp-v1` (§5c).
+- If its individual errors are later used to guide V5, it stops being an independent test
+  for V5 (**D37**) and becomes development / error-analysis data.
+
 **Core scope per D8:** clean dataset → validated classifier → GGUF/quantized deployment → inline HTTP gateway → security validation → sufficient performance evaluation → physical embedded deployment. Deep comparative studies and architecture extensions are **not** core.
 
 ---
 
 ## 14. How to Re-Orient at the Start of a New Session
 
-1. Read this file first, then `DECISIONS.md`.
+1. Read **"Current checkpoint"** at the top of this file — it is the fastest reconstruction
+   of where the project is and what comes next. Then this file, then `DECISIONS.md`.
 2. **Use `python3.12`, not `python3`** (see §2). This is the #1 gotcha post-reinstall.
-3. Read `parse_dataset.py`, `finetune.py`, `test_model.py` for current config — and read §12 first, so you know which of their behaviours are already-identified defects rather than things to rediscover.
+3. Read `scripts/dataset/parse_dataset.py`, `scripts/training/finetune.py`,
+   `scripts/evaluation/test_model.py` for current config (locations in §9) — and read §12
+   first, so you know which of their behaviours are already-identified defects rather than
+   things to rediscover.
 4. Check training status: `ls ~/Desktop/firewall-IA/model-output-v4-clean/`. **As of 2026-08-18 the V4-clean baseline EXISTS** (best checkpoint 2200). `model-output-v3/` never existed and is not the current model.
 5. Confirm dataset: `wc -l datasets/v4_clean/train.jsonl` (expect 25,134) and `datasets/v4_clean/eval.jsonl` (expect 6,206). The root `train.jsonl`/`eval.jsonl` are the HISTORICAL leaky corpus — do not train on them.
 6. **Run the integrity gate:** `python3.12 scripts/dataset/check_dataset.py --train datasets/v4_clean/train.jsonl --eval datasets/v4_clean/eval.jsonl`. No training starts while it reports FAIL. WARNING (category scarcity) is expected and acceptable.
 7. Confirm no missing categories: run `parse_dataset.py` only if regenerating, and check for `[SKIP]` lines. `[SKIP]` is an ERROR, not a warning.
 8. Verify PayloadsAllTheThings is at the recorded commit `e961fef231d8327bae83b563fab50aec2e6b77c0` (§6) if categories look off.
+9. **Docker Lab:** built and runtime verified on 2026-09-21 (§5d). Bring it up with
+   `docker compose up -d control-plane data-plane destination` and re-check it with
+   `./docker/smoke_test.sh`. Its checks are infrastructure plumbing only — never
+   quote them as model results.
 
 ### Language discipline
 

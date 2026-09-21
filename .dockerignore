@@ -1,0 +1,25 @@
+# firewall-IA — Docker build context filter.
+#
+# ALLOWLIST on purpose. The repository root holds artifacts that must never enter
+# an image build context: the V4 adapter (model-output*/, 157 MB, gitignored),
+# csic_database.csv (28 MB), the historical train.jsonl/eval.jsonl (43 MB),
+# datasets/, reports/ (frozen experiment records), .git/ and .venv-dataplane/.
+# Denying them one by one is fragile, so everything is excluded and only what the
+# images actually need is added back.
+#
+# If a service needs a new file from the repository root, re-include it here.
+
+*
+
+# Control plane image (docker/control-plane/Dockerfile).
+!control_plane/
+!requirements.txt
+
+# Data plane image (docker/data-plane/Dockerfile).
+!data_plane/
+!requirements-data-plane.txt
+
+# Never ship caches, even from the re-included directories above.
+**/__pycache__/
+**/*.pyc
+**/*.pyo

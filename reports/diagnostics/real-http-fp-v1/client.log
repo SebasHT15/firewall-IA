@@ -1,0 +1,630 @@
+15:22:59.265  real-http-fp-v1 — DIAGNOSTIC — 175 cases, 149 unique texts, expected label ALLOW for all
+15:22:59.265  PREFLIGHT — waiting for classifier (model loaded), proxy :8080, destination :9000
+15:22:59.269    classifier ok (model loaded) · proxy ok · destination ok · strace log present
+15:22:59.816    manifest.json written. READY. Waiting for GO: touch reports/diagnostics/real-http-fp-v1/GO
+15:23:54.438  GO received
+15:23:54.439  WARM-UP — 3 direct calls (excluded from all statistics)
+15:23:55.005    warm-up 1: ALLOW 529.0771449981548 ms
+15:23:55.238    warm-up 2: ALLOW 230.90405900074984 ms
+15:23:55.467    warm-up 3: ALLOW 227.05333499834524 ms
+15:23:55.467  DIRECT /classify — 149 unique texts x 3 = 447 calls
+15:23:55.696        rep1 #001 HOST-001,PATH-002…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.8265409982414 ms]
+15:23:55.930    FP  rep1 #002 HOST-002,PATH-023…     exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.72972099928302 ms]
+15:23:56.165    FP  rep1 #003 HOST-003               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.07669900168548 ms]
+15:23:56.395    FP  rep1 #004 HOST-004               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [228.07192499749362 ms]
+15:23:56.624        rep1 #005 HOST-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.98393199971179 ms]
+15:23:56.858        rep1 #006 HOST-006               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.649807003123 ms]
+15:23:57.090        rep1 #007 HOST-007,PORT-018      exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.44713899778435 ms]
+15:23:57.321        rep1 #008 HOST-008               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.31051800312707 ms]
+15:23:57.566        rep1 #009 HOST-009,PATH-009…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [242.10974699963117 ms]
+15:23:57.797    FP  rep1 #010 HOST-010,HDR-020…      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [228.55808199892635 ms]
+15:23:58.030    FP  rep1 #011 HOST-011               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.39546399741084 ms]
+15:23:58.259    FP  rep1 #012 HOST-012               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [226.79911600062042 ms]
+15:23:58.494        rep1 #013 HOST-013               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.83790300047258 ms]
+15:23:58.725        rep1 #014 HOST-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.8263029984373 ms]
+15:23:58.960        rep1 #015 HOST-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.41125499771442 ms]
+15:23:59.190        rep1 #016 HOST-016               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.8700420029054 ms]
+15:23:59.421        rep1 #017 HOST-017,PATH-016…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.04830199695425 ms]
+15:23:59.653        rep1 #018 HOST-018               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.55208900020807 ms]
+15:23:59.885        rep1 #019 HOST-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.35018299904186 ms]
+15:24:00.115        rep1 #020 HOST-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.20981900056358 ms]
+15:24:00.350        rep1 #021 HOST-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.39157699936186 ms]
+15:24:00.581        rep1 #022 HOST-022               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.16577200157917 ms]
+15:24:00.820        rep1 #023 HOST-023               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [236.4084200016805 ms]
+15:24:01.053        rep1 #024 HOST-024               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.56970600030036 ms]
+15:24:01.286        rep1 #025 HOST-025               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.93605100075365 ms]
+15:24:01.519        rep1 #026 HOST-026               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.7169959967723 ms]
+15:24:01.761        rep1 #027 HOST-027               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [239.58385899823043 ms]
+15:24:01.997        rep1 #028 HOST-028               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.77759100185358 ms]
+15:24:02.235        rep1 #029 HOST-029               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.59050599942566 ms]
+15:24:02.473        rep1 #030 HOST-030               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [236.2608840012399 ms]
+15:24:02.702        rep1 #031 HOST-031               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.45453099923907 ms]
+15:24:02.942        rep1 #032 HOST-032               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [237.65770099998917 ms]
+15:24:03.160    FP  rep1 #033 PATH-001               exp ALLOW  pred BLOCK  HTTP request smuggling attack detected  [216.07856999980868 ms]
+15:24:03.387        rep1 #034 PATH-003               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [224.9683879999793 ms]
+15:24:03.618        rep1 #035 PATH-004               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.05537000042386 ms]
+15:24:03.847        rep1 #036 PATH-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.75943799913512 ms]
+15:24:04.010    FP  rep1 #037 PATH-006               exp ALLOW  pred BLOCK  File inclusion attack detected  [161.2327840011858 ms]
+15:24:04.240        rep1 #038 PATH-007               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.81236700029694 ms]
+15:24:04.453    FP  rep1 #039 PATH-008               exp ALLOW  pred BLOCK  HTTP request smuggling attack detected  [210.753494000528 ms]
+15:24:04.686        rep1 #040 PATH-010               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.81110199927934 ms]
+15:24:04.917        rep1 #041 PATH-011               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.5922590017435 ms]
+15:24:05.145        rep1 #042 PATH-012               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.33177699754015 ms]
+15:24:05.309    FP  rep1 #043 PATH-013               exp ALLOW  pred BLOCK  File inclusion attack detected  [161.71171699897968 ms]
+15:24:05.541        rep1 #044 PATH-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.43183400275302 ms]
+15:24:05.768        rep1 #045 PATH-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [224.93370899974252 ms]
+15:24:05.998        rep1 #046 PATH-017               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.65260400046827 ms]
+15:24:06.227        rep1 #047 PATH-018               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.8675279992749 ms]
+15:24:06.457        rep1 #048 PATH-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.04497499964782 ms]
+15:24:06.687        rep1 #049 PATH-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.83563600003254 ms]
+15:24:06.919        rep1 #050 PATH-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.6708839967323 ms]
+15:24:07.153    FP  rep1 #051 PATH-022               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.41294100080268 ms]
+15:24:07.390        rep1 #052 PATH-024               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.90151799927116 ms]
+15:24:07.570    FP  rep1 #053 PATH-025               exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [177.86009699921124 ms]
+15:24:07.749    FP  rep1 #054 PATH-026               exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [177.50828600037494 ms]
+15:24:07.916    FP  rep1 #055 PATH-027               exp ALLOW  pred BLOCK  File inclusion attack detected  [164.85995599941816 ms]
+15:24:08.147        rep1 #056 PATH-028               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.6996850016294 ms]
+15:24:08.384        rep1 #057 PORT-001               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.21152499961318 ms]
+15:24:08.617        rep1 #058 PORT-002               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.00311099895043 ms]
+15:24:08.847        rep1 #059 PORT-003               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.07987700070953 ms]
+15:24:09.078        rep1 #060 PORT-004               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.0337720005482 ms]
+15:24:09.309        rep1 #061 PORT-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.39520600266405 ms]
+15:24:09.542        rep1 #062 PORT-007               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.13325099964277 ms]
+15:24:09.770        rep1 #063 PORT-008               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.61828800098738 ms]
+15:24:10.001    FP  rep1 #064 PORT-009               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [228.96756699992693 ms]
+15:24:10.227    FP  rep1 #065 PORT-010               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [223.57359400120913 ms]
+15:24:10.457    FP  rep1 #066 PORT-011               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [228.0181360001734 ms]
+15:24:10.688    FP  rep1 #067 PORT-012               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [228.85575399777736 ms]
+15:24:10.923        rep1 #068 PORT-013               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.91631900065113 ms]
+15:24:11.154        rep1 #069 PORT-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.51058800006285 ms]
+15:24:11.381        rep1 #070 PORT-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.65736400065362 ms]
+15:24:11.611        rep1 #071 PORT-016               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.7864689967828 ms]
+15:24:11.842        rep1 #072 PORT-017               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.68340500281192 ms]
+15:24:12.077        rep1 #073 PORT-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.35897600190947 ms]
+15:24:12.307        rep1 #074 PORT-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.69278900159406 ms]
+15:24:12.539        rep1 #075 PORT-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.14538799907314 ms]
+15:24:12.704    FP  rep1 #076 PORT-022               exp ALLOW  pred BLOCK  Open redirect payload detected  [162.94637600003625 ms]
+15:24:12.939    FP  rep1 #077 PORT-023               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.93016900040675 ms]
+15:24:13.101    FP  rep1 #078 PORT-024               exp ALLOW  pred BLOCK  Open redirect payload detected  [159.92385999925318 ms]
+15:24:13.281    FP  rep1 #079 HDR-002,UAxPC-003      exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [178.25400199944852 ms]
+15:24:13.513        rep1 #080 HDR-004                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.27292700114776 ms]
+15:24:13.745    FP  rep1 #081 HDR-005                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.2972929974203 ms]
+15:24:13.979        rep1 #082 HDR-006                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.3218790004612 ms]
+15:24:14.208        rep1 #083 HDR-008,UAxPC-004      exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.70333600055892 ms]
+15:24:14.442        rep1 #084 HDR-009                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.59253900303156 ms]
+15:24:14.676        rep1 #085 HDR-010                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.6713489999529 ms]
+15:24:14.908        rep1 #086 HDR-011                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.8931739969703 ms]
+15:24:15.140        rep1 #087 HDR-014                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.60574900207575 ms]
+15:24:15.371        rep1 #088 HDR-015                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.07682200093404 ms]
+15:24:15.603        rep1 #089 HDR-016                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.28559199883603 ms]
+15:24:15.837        rep1 #090 HDR-017                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.77215200121282 ms]
+15:24:16.080    FP  rep1 #091 HDR-019,UAxPC-007      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.35446999772103 ms]
+15:24:16.315    FP  rep1 #092 HDR-021                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.03210400263197 ms]
+15:24:16.547    FP  rep1 #093 HDR-022                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.60143700038316 ms]
+15:24:16.780        rep1 #094 HDR-023                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.24489600013476 ms]
+15:24:17.014    FP  rep1 #095 HDR-025,UAxPC-008      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.63538800145034 ms]
+15:24:17.178    FP  rep1 #096 HDR-026                exp ALLOW  pred BLOCK  File inclusion attack detected  [162.9741920005472 ms]
+15:24:17.412    FP  rep1 #097 HDR-027                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.22218800219707 ms]
+15:24:17.644        rep1 #098 HDR-028                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.61721799947554 ms]
+15:24:17.880        rep1 #099 UA-002                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.8950230005139 ms]
+15:24:18.117        rep1 #100 UA-003                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.74847600320936 ms]
+15:24:18.351        rep1 #101 UA-004                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.1952339989366 ms]
+15:24:18.516    FP  rep1 #102 UA-005                 exp ALLOW  pred BLOCK  Open redirect payload detected  [162.49614600019413 ms]
+15:24:18.750        rep1 #103 UA-006                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.35948299770826 ms]
+15:24:18.986        rep1 #104 UA-007                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.15112200018484 ms]
+15:24:19.219        rep1 #105 UA-008                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.08118000163813 ms]
+15:24:19.448    FP  rep1 #106 UA-010                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [227.54646699831937 ms]
+15:24:19.680    FP  rep1 #107 UA-011                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.46376999971108 ms]
+15:24:19.913    FP  rep1 #108 UA-012                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.07839799922658 ms]
+15:24:20.149    FP  rep1 #109 UA-013                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [234.34715400071582 ms]
+15:24:20.383    FP  rep1 #110 UA-014                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.26661700027762 ms]
+15:24:20.620    FP  rep1 #111 UA-015                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [235.56529699999373 ms]
+15:24:20.856    FP  rep1 #112 UA-016                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.89332900114823 ms]
+15:24:21.099        rep1 #113 UA-018                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.37095199894975 ms]
+15:24:21.332        rep1 #114 UA-019                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.26802600017982 ms]
+15:24:21.564        rep1 #115 UA-020                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.93635999955586 ms]
+15:24:21.800        rep1 #116 UA-021                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.36583000147948 ms]
+15:24:22.039        rep1 #117 UA-022                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [236.20429999937187 ms]
+15:24:22.278        rep1 #118 UA-023                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [237.6899560003949 ms]
+15:24:22.514        rep1 #119 UA-024                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.71391000182484 ms]
+15:24:22.751        rep1 #120 EVALSWAP-001           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.58520599888288 ms]
+15:24:22.985        rep1 #121 EVALSWAP-002           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.88092300208518 ms]
+15:24:23.222        rep1 #122 EVALSWAP-003           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.30120800205623 ms]
+15:24:23.460        rep1 #123 EVALSWAP-004           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.49920900040888 ms]
+15:24:23.692        rep1 #124 EVALSWAP-005           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.64845800035982 ms]
+15:24:23.930        rep1 #125 EVALSWAP-006           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.58956099805073 ms]
+15:24:24.166        rep1 #126 EVALSWAP-007           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.0502840015688 ms]
+15:24:24.397        rep1 #127 EVALSWAP-008           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.3377829992096 ms]
+15:24:24.629        rep1 #128 EVALSWAP-009           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.53604500071378 ms]
+15:24:24.861        rep1 #129 EVALSWAP-010           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.57071700147935 ms]
+15:24:25.093        rep1 #130 EVALSWAP-011           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.60183199777384 ms]
+15:24:25.325        rep1 #131 EVALSWAP-012           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.79250300340937 ms]
+15:24:25.558        rep1 #132 EVALSWAP-013           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.5899019993376 ms]
+15:24:25.793        rep1 #133 EVALSWAP-014           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.92260200105375 ms]
+15:24:26.027        rep1 #134 EVALSWAP-015           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.01934899771004 ms]
+15:24:26.261        rep1 #135 EVALSWAP-016           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.6470160005556 ms]
+15:24:26.496        rep1 #136 EVALSWAP-017           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.42980600116425 ms]
+15:24:26.728        rep1 #137 EVALSWAP-018           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.32898300152738 ms]
+15:24:26.960        rep1 #138 EVALSWAP-019           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.35036000126274 ms]
+15:24:27.191        rep1 #139 EVALSWAP-020           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.46346499884385 ms]
+15:24:27.425        rep1 #140 EVALSWAP-021           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.92497699690284 ms]
+15:24:27.656        rep1 #141 EVALSWAP-022           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.62243700001272 ms]
+15:24:27.887        rep1 #142 EVALSWAP-023           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.79174600166152 ms]
+15:24:28.120        rep1 #143 EVALSWAP-024           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.05302499991376 ms]
+15:24:28.352        rep1 #144 EVALSWAP-025           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.58733399718767 ms]
+15:24:28.585        rep1 #145 EVALSWAP-026           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.9903250024945 ms]
+15:24:28.818        rep1 #146 EVALSWAP-027           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.63190700122504 ms]
+15:24:29.051        rep1 #147 EVALSWAP-028           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.9596689992759 ms]
+15:24:29.286        rep1 #148 EVALSWAP-029           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.84304999833694 ms]
+15:24:29.521        rep1 #149 EVALSWAP-030           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.13531799794873 ms]
+15:24:29.754        rep2 #150 HOST-001,PATH-002…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.21379499934847 ms]
+15:24:29.988    FP  rep2 #151 HOST-002,PATH-023…     exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.11333500148612 ms]
+15:24:30.222    FP  rep2 #152 HOST-003               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.02646400022786 ms]
+15:24:30.456    FP  rep2 #153 HOST-004               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.5320369998517 ms]
+15:24:30.690        rep2 #154 HOST-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.52641200067592 ms]
+15:24:30.923        rep2 #155 HOST-006               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.68057999989833 ms]
+15:24:31.156        rep2 #156 HOST-007,PORT-018      exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.49989399826154 ms]
+15:24:31.389        rep2 #157 HOST-008               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.1802420008462 ms]
+15:24:31.620        rep2 #158 HOST-009,PATH-009…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.19341399756377 ms]
+15:24:31.853    FP  rep2 #159 HOST-010,HDR-020…      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.77884699887363 ms]
+15:24:32.089    FP  rep2 #160 HOST-011               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [234.40083300010883 ms]
+15:24:32.322    FP  rep2 #161 HOST-012               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.5378569981258 ms]
+15:24:32.553        rep2 #162 HOST-013               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.7848039995879 ms]
+15:24:32.788        rep2 #163 HOST-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.7957499983313 ms]
+15:24:33.023        rep2 #164 HOST-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.14384200036875 ms]
+15:24:33.257        rep2 #165 HOST-016               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.93529399941326 ms]
+15:24:33.488        rep2 #166 HOST-017,PATH-016…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.99405299904174 ms]
+15:24:33.720        rep2 #167 HOST-018               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.34274400176946 ms]
+15:24:33.957        rep2 #168 HOST-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.01673099963227 ms]
+15:24:34.189        rep2 #169 HOST-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.41148300035275 ms]
+15:24:34.420        rep2 #170 HOST-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.06290700100362 ms]
+15:24:34.651        rep2 #171 HOST-022               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.27888699996402 ms]
+15:24:34.882        rep2 #172 HOST-023               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.36785999991116 ms]
+15:24:35.115        rep2 #173 HOST-024               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.61476700240746 ms]
+15:24:35.346        rep2 #174 HOST-025               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.3486599990283 ms]
+15:24:35.575        rep2 #175 HOST-026               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.4284279992571 ms]
+15:24:35.808        rep2 #176 HOST-027               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.86967800190905 ms]
+15:24:36.040        rep2 #177 HOST-028               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.47699699964141 ms]
+15:24:36.272        rep2 #178 HOST-029               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.42360600084066 ms]
+15:24:36.505        rep2 #179 HOST-030               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.80705599932116 ms]
+15:24:36.735        rep2 #180 HOST-031               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.20448499987833 ms]
+15:24:36.971        rep2 #181 HOST-032               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.12286300299456 ms]
+15:24:37.187    FP  rep2 #182 PATH-001               exp ALLOW  pred BLOCK  HTTP request smuggling attack detected  [213.62905599744408 ms]
+15:24:37.430        rep2 #183 PATH-003               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.4330580017413 ms]
+15:24:37.665        rep2 #184 PATH-004               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.30849600076908 ms]
+15:24:37.898        rep2 #185 PATH-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.73571100030676 ms]
+15:24:38.065    FP  rep2 #186 PATH-006               exp ALLOW  pred BLOCK  File inclusion attack detected  [164.95055199993658 ms]
+15:24:38.296        rep2 #187 PATH-007               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.13588099982007 ms]
+15:24:38.514    FP  rep2 #188 PATH-008               exp ALLOW  pred BLOCK  HTTP request smuggling attack detected  [215.0525210017804 ms]
+15:24:38.749        rep2 #189 PATH-010               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.58657599944854 ms]
+15:24:38.986        rep2 #190 PATH-011               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.2307959990867 ms]
+15:24:39.218        rep2 #191 PATH-012               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.49807999975746 ms]
+15:24:39.384    FP  rep2 #192 PATH-013               exp ALLOW  pred BLOCK  File inclusion attack detected  [164.01625700018485 ms]
+15:24:39.615        rep2 #193 PATH-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.93704300076934 ms]
+15:24:39.842        rep2 #194 PATH-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [224.9729839968495 ms]
+15:24:40.082        rep2 #195 PATH-017               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [238.07512700295774 ms]
+15:24:40.318        rep2 #196 PATH-018               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.88654800126096 ms]
+15:24:40.554        rep2 #197 PATH-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.57686699839542 ms]
+15:24:40.791        rep2 #198 PATH-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.9011180010857 ms]
+15:24:41.026        rep2 #199 PATH-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.27959600283066 ms]
+15:24:41.264    FP  rep2 #200 PATH-022               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [234.97693199897185 ms]
+15:24:41.497        rep2 #201 PATH-024               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.82121499828645 ms]
+15:24:41.678    FP  rep2 #202 PATH-025               exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [178.7196179975581 ms]
+15:24:41.861    FP  rep2 #203 PATH-026               exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [180.80701399958343 ms]
+15:24:42.025    FP  rep2 #204 PATH-027               exp ALLOW  pred BLOCK  File inclusion attack detected  [162.82693999892217 ms]
+15:24:42.259        rep2 #205 PATH-028               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.82839799826615 ms]
+15:24:42.495        rep2 #206 PORT-001               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.8693929996225 ms]
+15:24:42.732        rep2 #207 PORT-002               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.8853319999762 ms]
+15:24:42.968        rep2 #208 PORT-003               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.09939799967106 ms]
+15:24:43.201        rep2 #209 PORT-004               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.2420070009248 ms]
+15:24:43.436        rep2 #210 PORT-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.79404400091153 ms]
+15:24:43.667        rep2 #211 PORT-007               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.40629100048682 ms]
+15:24:43.902        rep2 #212 PORT-008               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.72131900012027 ms]
+15:24:44.135    FP  rep2 #213 PORT-009               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.2703070017742 ms]
+15:24:44.365    FP  rep2 #214 PORT-010               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [228.05417099880287 ms]
+15:24:44.599    FP  rep2 #215 PORT-011               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.16344200025196 ms]
+15:24:44.831    FP  rep2 #216 PORT-012               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.28402700219885 ms]
+15:24:45.068        rep2 #217 PORT-013               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.95688700131723 ms]
+15:24:45.301        rep2 #218 PORT-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.20267199919908 ms]
+15:24:45.533        rep2 #219 PORT-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.19072000149754 ms]
+15:24:45.764        rep2 #220 PORT-016               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.29874200053746 ms]
+15:24:45.996        rep2 #221 PORT-017               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.78593399966485 ms]
+15:24:46.229        rep2 #222 PORT-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.63078700215556 ms]
+15:24:46.465        rep2 #223 PORT-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.43470500205876 ms]
+15:24:46.698        rep2 #224 PORT-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.45610600092914 ms]
+15:24:46.863    FP  rep2 #225 PORT-022               exp ALLOW  pred BLOCK  Open redirect payload detected  [163.20333900148398 ms]
+15:24:47.097    FP  rep2 #226 PORT-023               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.7498689990316 ms]
+15:24:47.261    FP  rep2 #227 PORT-024               exp ALLOW  pred BLOCK  Open redirect payload detected  [161.82054200180573 ms]
+15:24:47.442    FP  rep2 #228 HDR-002,UAxPC-003      exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [179.7629290012992 ms]
+15:24:47.678        rep2 #229 HDR-004                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.26152699883096 ms]
+15:24:47.912    FP  rep2 #230 HDR-005                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.7158869993582 ms]
+15:24:48.149        rep2 #231 HDR-006                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.8476049992314 ms]
+15:24:48.384        rep2 #232 HDR-008,UAxPC-004      exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.25261699937982 ms]
+15:24:48.621        rep2 #233 HDR-009                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.41305600156193 ms]
+15:24:48.859        rep2 #234 HDR-010                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [236.66242800027248 ms]
+15:24:49.094        rep2 #235 HDR-011                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.96138600219274 ms]
+15:24:49.332        rep2 #236 HDR-014                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.50160599916126 ms]
+15:24:49.571        rep2 #237 HDR-015                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [237.72331399959512 ms]
+15:24:49.812        rep2 #238 HDR-016                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [238.38826199789764 ms]
+15:24:50.049        rep2 #239 HDR-017                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.55123100231867 ms]
+15:24:50.281    FP  rep2 #240 HDR-019,UAxPC-007      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.9787580013799 ms]
+15:24:50.513    FP  rep2 #241 HDR-021                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.60346000036225 ms]
+15:24:50.744    FP  rep2 #242 HDR-022                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.76772900074138 ms]
+15:24:50.976        rep2 #243 HDR-023                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.54102299991064 ms]
+15:24:51.208    FP  rep2 #244 HDR-025,UAxPC-008      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.50366800068878 ms]
+15:24:51.379    FP  rep2 #245 HDR-026                exp ALLOW  pred BLOCK  File inclusion attack detected  [162.12039400124922 ms]
+15:24:51.614    FP  rep2 #246 HDR-027                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.32783400110202 ms]
+15:24:51.848        rep2 #247 HDR-028                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.4276860015525 ms]
+15:24:52.081        rep2 #248 UA-002                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.0195179998118 ms]
+15:24:52.316        rep2 #249 UA-003                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.14828100026352 ms]
+15:24:52.551        rep2 #250 UA-004                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.68211699926178 ms]
+15:24:52.717    FP  rep2 #251 UA-005                 exp ALLOW  pred BLOCK  Open redirect payload detected  [164.1625180018309 ms]
+15:24:52.954        rep2 #252 UA-006                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.54680099894176 ms]
+15:24:53.190        rep2 #253 UA-007                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.20354400150245 ms]
+15:24:53.425        rep2 #254 UA-008                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.4065860011615 ms]
+15:24:53.660    FP  rep2 #255 UA-010                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.83708499729983 ms]
+15:24:53.901    FP  rep2 #256 UA-011                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [238.5197639996477 ms]
+15:24:54.140    FP  rep2 #257 UA-012                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [237.32263700003386 ms]
+15:24:54.373    FP  rep2 #258 UA-013                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.81346300023142 ms]
+15:24:54.607    FP  rep2 #259 UA-014                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.40771600103471 ms]
+15:24:54.839    FP  rep2 #260 UA-015                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [229.44793100032257 ms]
+15:24:55.073    FP  rep2 #261 UA-016                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.01884199806955 ms]
+15:24:55.307        rep2 #262 UA-018                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.61833099948126 ms]
+15:24:55.542        rep2 #263 UA-019                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.3956170004967 ms]
+15:24:55.774        rep2 #264 UA-020                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.59048499978962 ms]
+15:24:56.004        rep2 #265 UA-021                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.02242700001807 ms]
+15:24:56.231        rep2 #266 UA-022                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [224.74847700141254 ms]
+15:24:56.459        rep2 #267 UA-023                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.20495899880189 ms]
+15:24:56.690        rep2 #268 UA-024                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.53162699923269 ms]
+15:24:56.923        rep2 #269 EVALSWAP-001           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.72348499772488 ms]
+15:24:57.155        rep2 #270 EVALSWAP-002           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.23296500105062 ms]
+15:24:57.389        rep2 #271 EVALSWAP-003           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.02976099855732 ms]
+15:24:57.625        rep2 #272 EVALSWAP-004           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.42337999949814 ms]
+15:24:57.859        rep2 #273 EVALSWAP-005           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.27873699943302 ms]
+15:24:58.089        rep2 #274 EVALSWAP-006           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.78250600094907 ms]
+15:24:58.318        rep2 #275 EVALSWAP-007           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.74904100151616 ms]
+15:24:58.549        rep2 #276 EVALSWAP-008           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.71734499858576 ms]
+15:24:58.778        rep2 #277 EVALSWAP-009           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.1986179985106 ms]
+15:24:59.010        rep2 #278 EVALSWAP-010           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.5832210004155 ms]
+15:24:59.243        rep2 #279 EVALSWAP-011           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.52283300057752 ms]
+15:24:59.478        rep2 #280 EVALSWAP-012           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.61226199995144 ms]
+15:24:59.708        rep2 #281 EVALSWAP-013           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.28112800198141 ms]
+15:24:59.939        rep2 #282 EVALSWAP-014           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.60932200294337 ms]
+15:25:00.172        rep2 #283 EVALSWAP-015           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.33761899953242 ms]
+15:25:00.399        rep2 #284 EVALSWAP-016           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [224.9619009999151 ms]
+15:25:00.630        rep2 #285 EVALSWAP-017           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.7442849992658 ms]
+15:25:00.864        rep2 #286 EVALSWAP-018           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.13739000129863 ms]
+15:25:01.098        rep2 #287 EVALSWAP-019           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.04965699915192 ms]
+15:25:01.333        rep2 #288 EVALSWAP-020           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.37782099770266 ms]
+15:25:01.567        rep2 #289 EVALSWAP-021           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.1117770006822 ms]
+15:25:01.799        rep2 #290 EVALSWAP-022           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.895573000249 ms]
+15:25:02.034        rep2 #291 EVALSWAP-023           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.2817339991161 ms]
+15:25:02.263        rep2 #292 EVALSWAP-024           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.3991020010726 ms]
+15:25:02.500        rep2 #293 EVALSWAP-025           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.31420899942168 ms]
+15:25:02.739        rep2 #294 EVALSWAP-026           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [236.73676699763746 ms]
+15:25:02.968        rep2 #295 EVALSWAP-027           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.64461000042502 ms]
+15:25:03.200        rep2 #296 EVALSWAP-028           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.34219200033112 ms]
+15:25:03.428        rep2 #297 EVALSWAP-029           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.7553720010037 ms]
+15:25:03.662        rep2 #298 EVALSWAP-030           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.43765000006533 ms]
+15:25:03.897        rep3 #299 HOST-001,PATH-002…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.45126499750768 ms]
+15:25:04.134    FP  rep3 #300 HOST-002,PATH-023…     exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [234.65780900005484 ms]
+15:25:04.369    FP  rep3 #301 HOST-003               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.55285100114997 ms]
+15:25:04.605    FP  rep3 #302 HOST-004               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.72323800140293 ms]
+15:25:04.841        rep3 #303 HOST-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.55235200142488 ms]
+15:25:05.077        rep3 #304 HOST-006               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.41831800158252 ms]
+15:25:05.303        rep3 #305 HOST-007,PORT-018      exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [224.2841609986499 ms]
+15:25:05.535        rep3 #306 HOST-008               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.09404399979394 ms]
+15:25:05.765        rep3 #307 HOST-009,PATH-009…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.94358700048178 ms]
+15:25:05.998    FP  rep3 #308 HOST-010,HDR-020…      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.28719799933606 ms]
+15:25:06.231    FP  rep3 #309 HOST-011               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.19983099968522 ms]
+15:25:06.465    FP  rep3 #310 HOST-012               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.20608300087042 ms]
+15:25:06.700        rep3 #311 HOST-013               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.50328000014997 ms]
+15:25:06.938        rep3 #312 HOST-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.28854899996077 ms]
+15:25:07.168        rep3 #313 HOST-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.99228499934543 ms]
+15:25:07.404        rep3 #314 HOST-016               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.60293500081752 ms]
+15:25:07.637        rep3 #315 HOST-017,PATH-016…     exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.1407289998897 ms]
+15:25:07.869        rep3 #316 HOST-018               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.73543899934157 ms]
+15:25:08.102        rep3 #317 HOST-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.0930689998495 ms]
+15:25:08.334        rep3 #318 HOST-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.44091099998332 ms]
+15:25:08.567        rep3 #319 HOST-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.6195029996161 ms]
+15:25:08.800        rep3 #320 HOST-022               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.43384099946707 ms]
+15:25:09.032        rep3 #321 HOST-023               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.84785700100474 ms]
+15:25:09.262        rep3 #322 HOST-024               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.5763529978576 ms]
+15:25:09.489        rep3 #323 HOST-025               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.06840899950475 ms]
+15:25:09.719        rep3 #324 HOST-026               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.67861300255754 ms]
+15:25:09.949        rep3 #325 HOST-027               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.0734089979669 ms]
+15:25:10.178        rep3 #326 HOST-028               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.53751200050465 ms]
+15:25:10.408        rep3 #327 HOST-029               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.422224001406 ms]
+15:25:10.648        rep3 #328 HOST-030               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [238.46169000171358 ms]
+15:25:10.889        rep3 #329 HOST-031               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [239.04014200161328 ms]
+15:25:11.127        rep3 #330 HOST-032               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.55289000069024 ms]
+15:25:11.343    FP  rep3 #331 PATH-001               exp ALLOW  pred BLOCK  HTTP request smuggling attack detected  [214.4532349993824 ms]
+15:25:11.571        rep3 #332 PATH-003               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.53323299871408 ms]
+15:25:11.801        rep3 #333 PATH-004               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.7573499995924 ms]
+15:25:12.032        rep3 #334 PATH-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.50437699910253 ms]
+15:25:12.193    FP  rep3 #335 PATH-006               exp ALLOW  pred BLOCK  File inclusion attack detected  [159.16476500206045 ms]
+15:25:12.423        rep3 #336 PATH-007               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.9731790004007 ms]
+15:25:12.637    FP  rep3 #337 PATH-008               exp ALLOW  pred BLOCK  HTTP request smuggling attack detected  [211.79394499995396 ms]
+15:25:12.871        rep3 #338 PATH-010               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.65030800030218 ms]
+15:25:13.102        rep3 #339 PATH-011               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.93304499666556 ms]
+15:25:13.339        rep3 #340 PATH-012               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.1166150001518 ms]
+15:25:13.503    FP  rep3 #341 PATH-013               exp ALLOW  pred BLOCK  File inclusion attack detected  [162.1391950029647 ms]
+15:25:13.736        rep3 #342 PATH-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.10480699688196 ms]
+15:25:13.969        rep3 #343 PATH-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.71988399897236 ms]
+15:25:14.200        rep3 #344 PATH-017               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.88984000019263 ms]
+15:25:14.434        rep3 #345 PATH-018               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.8896879987733 ms]
+15:25:14.673        rep3 #346 PATH-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.13826600051834 ms]
+15:25:14.907        rep3 #347 PATH-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.53302999708103 ms]
+15:25:15.143        rep3 #348 PATH-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.60401399986586 ms]
+15:25:15.368    FP  rep3 #349 PATH-022               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [223.67204100009985 ms]
+15:25:15.599        rep3 #350 PATH-024               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.9864790000138 ms]
+15:25:15.786    FP  rep3 #351 PATH-025               exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [184.94220700085862 ms]
+15:25:15.971    FP  rep3 #352 PATH-026               exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [182.24782000106643 ms]
+15:25:16.133    FP  rep3 #353 PATH-027               exp ALLOW  pred BLOCK  File inclusion attack detected  [160.2772490005009 ms]
+15:25:16.362        rep3 #354 PATH-028               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.7613350013562 ms]
+15:25:16.594        rep3 #355 PORT-001               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.3220770006883 ms]
+15:25:16.828        rep3 #356 PORT-002               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.0624059975671 ms]
+15:25:17.059        rep3 #357 PORT-003               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.23605300093186 ms]
+15:25:17.297        rep3 #358 PORT-004               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.4310490009084 ms]
+15:25:17.531        rep3 #359 PORT-005               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.37645600238466 ms]
+15:25:17.761        rep3 #360 PORT-007               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.57660199931706 ms]
+15:25:17.992        rep3 #361 PORT-008               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.52146500028903 ms]
+15:25:18.227    FP  rep3 #362 PORT-009               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.32021399962832 ms]
+15:25:18.466    FP  rep3 #363 PORT-010               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [236.6638210005476 ms]
+15:25:18.701    FP  rep3 #364 PORT-011               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.5212769974314 ms]
+15:25:18.934    FP  rep3 #365 PORT-012               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [231.45577000104822 ms]
+15:25:19.169        rep3 #366 PORT-013               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.49938400113024 ms]
+15:25:19.402        rep3 #367 PORT-014               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.4528880015132 ms]
+15:25:19.640        rep3 #368 PORT-015               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.53396799979964 ms]
+15:25:19.875        rep3 #369 PORT-016               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.43410699817468 ms]
+15:25:20.111        rep3 #370 PORT-017               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.74695399979828 ms]
+15:25:20.342        rep3 #371 PORT-019               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.81186100150808 ms]
+15:25:20.575        rep3 #372 PORT-020               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.5244409981242 ms]
+15:25:20.805        rep3 #373 PORT-021               exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [227.4507129986887 ms]
+15:25:20.970    FP  rep3 #374 PORT-022               exp ALLOW  pred BLOCK  Open redirect payload detected  [163.22074700292433 ms]
+15:25:21.203    FP  rep3 #375 PORT-023               exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.5030400020769 ms]
+15:25:21.370    FP  rep3 #376 PORT-024               exp ALLOW  pred BLOCK  Open redirect payload detected  [164.99861900229007 ms]
+15:25:21.554    FP  rep3 #377 HDR-002,UAxPC-003      exp ALLOW  pred BLOCK  HTTP parameter pollution detected  [182.07440200058045 ms]
+15:25:21.789        rep3 #378 HDR-004                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.73225700197509 ms]
+15:25:22.029    FP  rep3 #379 HDR-005                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [238.15146299966727 ms]
+15:25:22.266        rep3 #380 HDR-006                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.7053689993336 ms]
+15:25:22.504        rep3 #381 HDR-008,UAxPC-004      exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.73292199944262 ms]
+15:25:22.741        rep3 #382 HDR-009                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.7956029989291 ms]
+15:25:22.984        rep3 #383 HDR-010                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [241.0941769994679 ms]
+15:25:23.221        rep3 #384 HDR-011                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.14491899913992 ms]
+15:25:23.457        rep3 #385 HDR-014                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.20371400061413 ms]
+15:25:23.692        rep3 #386 HDR-015                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.34022299968638 ms]
+15:25:23.929        rep3 #387 HDR-016                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.81331700168084 ms]
+15:25:24.166        rep3 #388 HDR-017                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.48510899834218 ms]
+15:25:24.404    FP  rep3 #389 HDR-019,UAxPC-007      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [235.39103399889427 ms]
+15:25:24.640    FP  rep3 #390 HDR-021                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [234.04805199970724 ms]
+15:25:24.883    FP  rep3 #391 HDR-022                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.8551840002765 ms]
+15:25:25.116        rep3 #392 HDR-023                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.2784210005484 ms]
+15:25:25.343    FP  rep3 #393 HDR-025,UAxPC-008      exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [225.4369479996967 ms]
+15:25:25.503    FP  rep3 #394 HDR-026                exp ALLOW  pred BLOCK  File inclusion attack detected  [157.87209699919913 ms]
+15:25:25.736    FP  rep3 #395 HDR-027                exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [230.89898100079154 ms]
+15:25:25.969        rep3 #396 HDR-028                exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.20272700180067 ms]
+15:25:26.201        rep3 #397 UA-002                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.3363459975808 ms]
+15:25:26.429        rep3 #398 UA-003                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [225.95745400030864 ms]
+15:25:26.660        rep3 #399 UA-004                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.56914800286177 ms]
+15:25:26.827    FP  rep3 #400 UA-005                 exp ALLOW  pred BLOCK  Open redirect payload detected  [165.007797000726 ms]
+15:25:27.064        rep3 #401 UA-006                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.14756500298972 ms]
+15:25:27.301        rep3 #402 UA-007                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.58951100130798 ms]
+15:25:27.537        rep3 #403 UA-008                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.44431099758367 ms]
+15:25:27.772    FP  rep3 #404 UA-010                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [232.7171510005428 ms]
+15:25:28.011    FP  rep3 #405 UA-011                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [236.80007200164255 ms]
+15:25:28.250    FP  rep3 #406 UA-012                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [237.5815999985207 ms]
+15:25:28.485    FP  rep3 #407 UA-013                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.34167000211892 ms]
+15:25:28.721    FP  rep3 #408 UA-014                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [233.57321400180808 ms]
+15:25:28.959    FP  rep3 #409 UA-015                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [236.4514760010934 ms]
+15:25:29.196    FP  rep3 #410 UA-016                 exp ALLOW  pred BLOCK  Server-side request forgery attack detected  [235.83810100171831 ms]
+15:25:29.435        rep3 #411 UA-018                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [237.77309500292176 ms]
+15:25:29.670        rep3 #412 UA-019                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.19551999884425 ms]
+15:25:29.904        rep3 #413 UA-020                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.23942900201655 ms]
+15:25:30.138        rep3 #414 UA-021                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.13136900085374 ms]
+15:25:30.371        rep3 #415 UA-022                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.1816670007829 ms]
+15:25:30.601        rep3 #416 UA-023                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [228.041205999034 ms]
+15:25:30.829        rep3 #417 UA-024                 exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [226.28536900083418 ms]
+15:25:31.061        rep3 #418 EVALSWAP-001           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.87964200001443 ms]
+15:25:31.300        rep3 #419 EVALSWAP-002           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.97376000057557 ms]
+15:25:31.533        rep3 #420 EVALSWAP-003           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.32873700160417 ms]
+15:25:31.769        rep3 #421 EVALSWAP-004           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.57755100005306 ms]
+15:25:32.005        rep3 #422 EVALSWAP-005           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.21553399748518 ms]
+15:25:32.237        rep3 #423 EVALSWAP-006           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.15117899922188 ms]
+15:25:32.473        rep3 #424 EVALSWAP-007           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.54488800032414 ms]
+15:25:32.710        rep3 #425 EVALSWAP-008           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.99408399948152 ms]
+15:25:32.946        rep3 #426 EVALSWAP-009           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.4488740018278 ms]
+15:25:33.182        rep3 #427 EVALSWAP-010           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.19848999744863 ms]
+15:25:33.416        rep3 #428 EVALSWAP-011           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.09069599761278 ms]
+15:25:33.648        rep3 #429 EVALSWAP-012           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.54543099695002 ms]
+15:25:33.883        rep3 #430 EVALSWAP-013           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.01514400009182 ms]
+15:25:34.120        rep3 #431 EVALSWAP-014           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.51102499914123 ms]
+15:25:34.352        rep3 #432 EVALSWAP-015           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.88865599836572 ms]
+15:25:34.585        rep3 #433 EVALSWAP-016           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.92918100155657 ms]
+15:25:34.820        rep3 #434 EVALSWAP-017           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.6480960000481 ms]
+15:25:35.053        rep3 #435 EVALSWAP-018           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.36527599854162 ms]
+15:25:35.285        rep3 #436 EVALSWAP-019           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [229.83967199979816 ms]
+15:25:35.517        rep3 #437 EVALSWAP-020           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [230.74738300056197 ms]
+15:25:35.752        rep3 #438 EVALSWAP-021           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.80485400027828 ms]
+15:25:35.990        rep3 #439 EVALSWAP-022           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.96017800082336 ms]
+15:25:36.227        rep3 #440 EVALSWAP-023           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.37873399961973 ms]
+15:25:36.468        rep3 #441 EVALSWAP-024           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [232.85522800142644 ms]
+15:25:36.705        rep3 #442 EVALSWAP-025           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.80496800038964 ms]
+15:25:36.942        rep3 #443 EVALSWAP-026           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.72593499920913 ms]
+15:25:37.179        rep3 #444 EVALSWAP-027           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [234.5783839991782 ms]
+15:25:37.416        rep3 #445 EVALSWAP-028           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [235.33250100081204 ms]
+15:25:37.652        rep3 #446 EVALSWAP-029           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [233.86732699873392 ms]
+15:25:37.885        rep3 #447 EVALSWAP-030           exp ALLOW  pred ALLOW  Normal HTTP request with no attack patterns detected  [231.69560899987118 ms]
+15:25:37.886  PROXY — 1 warm-up + 26 curl commands x 3 = 78 requests
+15:25:38.172       warmup-proxy rep0 HOST-001,PATH-002      Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:38.425       proxy rep1 HOST-001,PATH-002      Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:39.301    FP proxy rep1 HOST-002,PATH-023      Host=127.0.0.1:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:40.178    FP proxy rep1 HOST-003               Host=127.0.0.2:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:41.051    FP proxy rep1 HOST-004               Host=[::1]:9000           /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:41.319       proxy rep1 HOST-005               Host=192.168.1.20:9000    /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:41.576       proxy rep1 HOST-006               Host=10.0.0.15:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:41.839       proxy rep1 HOST-007               Host=app.fwlab.test:9000  /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:42.100       proxy rep1 HOST-008               Host=shop.example.com:9000 /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:42.940    FP proxy rep1 PATH-001               Host=localhost:9000       /                              -> proxy BLOCK HTTP 403  destination not reached
+15:25:43.213       proxy rep1 PATH-004               Host=localhost:9000       /products?id=42                -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:43.475       proxy rep1 PATH-007               Host=localhost:9000       /miembros/imagenes/zarauz.jpg  -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:44.330    FP proxy rep1 PATH-022               Host=127.0.0.1:9000       /                              -> proxy BLOCK HTTP 403  destination not reached
+15:25:44.606       proxy rep1 PATH-028               Host=127.0.0.1:9000       /miembros/imagenes/zarauz.jpg  -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:44.862       proxy rep1 PORT-008               Host=localhost:18080      /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:45.725    FP proxy rep1 PORT-009               Host=localhost:19000      /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:46.618    FP proxy rep1 PORT-012               Host=localhost:65000      /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:47.459    FP proxy rep1 HDR-002                Host=localhost:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:47.734       proxy rep1 HDR-003                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:47.993       proxy rep1 HDR-004                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:48.849    FP proxy rep1 HDR-005                Host=localhost:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:49.134       proxy rep1 HDR-006                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:49.989    FP proxy rep1 HDR-020                Host=127.0.0.1:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:50.261       proxy rep1 HDR-023                Host=127.0.0.1:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:50.523       proxy rep1 UA-001                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:50.783       proxy rep1 UA-003                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:51.041       proxy rep1 UA-004                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:51.296       proxy rep2 HOST-001,PATH-002      Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:52.155    FP proxy rep2 HOST-002,PATH-023      Host=127.0.0.1:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:53.038    FP proxy rep2 HOST-003               Host=127.0.0.2:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:53.922    FP proxy rep2 HOST-004               Host=[::1]:9000           /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:54.213       proxy rep2 HOST-005               Host=192.168.1.20:9000    /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:54.463       proxy rep2 HOST-006               Host=10.0.0.15:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:54.713       proxy rep2 HOST-007               Host=app.fwlab.test:9000  /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:54.970       proxy rep2 HOST-008               Host=shop.example.com:9000 /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:55.817    FP proxy rep2 PATH-001               Host=localhost:9000       /                              -> proxy BLOCK HTTP 403  destination not reached
+15:25:56.096       proxy rep2 PATH-004               Host=localhost:9000       /products?id=42                -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:56.356       proxy rep2 PATH-007               Host=localhost:9000       /miembros/imagenes/zarauz.jpg  -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:57.215    FP proxy rep2 PATH-022               Host=127.0.0.1:9000       /                              -> proxy BLOCK HTTP 403  destination not reached
+15:25:57.487       proxy rep2 PATH-028               Host=127.0.0.1:9000       /miembros/imagenes/zarauz.jpg  -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:57.736       proxy rep2 PORT-008               Host=localhost:18080      /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:25:58.585    FP proxy rep2 PORT-009               Host=localhost:19000      /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:25:59.460    FP proxy rep2 PORT-012               Host=localhost:65000      /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:00.279    FP proxy rep2 HDR-002                Host=localhost:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:00.551       proxy rep2 HDR-003                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:00.803       proxy rep2 HDR-004                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:01.664    FP proxy rep2 HDR-005                Host=localhost:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:01.941       proxy rep2 HDR-006                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:02.811    FP proxy rep2 HDR-020                Host=127.0.0.1:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:03.082       proxy rep2 HDR-023                Host=127.0.0.1:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:03.336       proxy rep2 UA-001                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:03.586       proxy rep2 UA-003                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:03.838       proxy rep2 UA-004                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:04.098       proxy rep3 HOST-001,PATH-002      Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:04.962    FP proxy rep3 HOST-002,PATH-023      Host=127.0.0.1:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:05.843    FP proxy rep3 HOST-003               Host=127.0.0.2:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:06.718    FP proxy rep3 HOST-004               Host=[::1]:9000           /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:06.993       proxy rep3 HOST-005               Host=192.168.1.20:9000    /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:07.246       proxy rep3 HOST-006               Host=10.0.0.15:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:07.502       proxy rep3 HOST-007               Host=app.fwlab.test:9000  /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:07.753       proxy rep3 HOST-008               Host=shop.example.com:9000 /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:08.595    FP proxy rep3 PATH-001               Host=localhost:9000       /                              -> proxy BLOCK HTTP 403  destination not reached
+15:26:08.867       proxy rep3 PATH-004               Host=localhost:9000       /products?id=42                -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:09.120       proxy rep3 PATH-007               Host=localhost:9000       /miembros/imagenes/zarauz.jpg  -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:09.976    FP proxy rep3 PATH-022               Host=127.0.0.1:9000       /                              -> proxy BLOCK HTTP 403  destination not reached
+15:26:10.242       proxy rep3 PATH-028               Host=127.0.0.1:9000       /miembros/imagenes/zarauz.jpg  -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:10.490       proxy rep3 PORT-008               Host=localhost:18080      /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:11.346    FP proxy rep3 PORT-009               Host=localhost:19000      /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:12.229    FP proxy rep3 PORT-012               Host=localhost:65000      /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:13.054    FP proxy rep3 HDR-002                Host=localhost:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:13.331       proxy rep3 HDR-003                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:13.583       proxy rep3 HDR-004                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:14.436    FP proxy rep3 HDR-005                Host=localhost:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:14.713       proxy rep3 HDR-006                Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:15.581    FP proxy rep3 HDR-020                Host=127.0.0.1:9000       /index.html                    -> proxy BLOCK HTTP 403  destination not reached
+15:26:15.857       proxy rep3 HDR-023                Host=127.0.0.1:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:16.124       proxy rep3 UA-001                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:16.386       proxy rep3 UA-003                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:16.641       proxy rep3 UA-004                 Host=localhost:9000       /index.html                    -> proxy ALLOW HTTP 200  destination RECEIVED
+15:26:16.655  CAPTURE — 79 /classify bodies parsed from proxy_strace.log for 79 proxy requests
+15:26:16.655  RESEND — each captured text POSTed directly to /classify (78 calls)
+15:26:16.890    resend call 01 HOST-001   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:17.122    resend call 02 HOST-002   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:17.355    resend call 03 HOST-003   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:17.590    resend call 04 HOST-004   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:17.818    resend call 05 HOST-005   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:18.059    resend call 06 HOST-006   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:18.293    resend call 07 HOST-007   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:18.527    resend call 08 HOST-008   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:18.743    resend call 09 PATH-001   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:18.981    resend call 10 PATH-004   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:19.215    resend call 11 PATH-007   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:19.453    resend call 12 PATH-022   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:19.690    resend call 13 PATH-028   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:19.928    resend call 14 PORT-008   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:20.166    resend call 15 PORT-009   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:20.403    resend call 16 PORT-012   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:20.586    resend call 17 HDR-002    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:20.813    resend call 18 HDR-003    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:21.046    resend call 19 HDR-004    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:21.276    resend call 20 HDR-005    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:21.508    resend call 21 HDR-006    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:21.747    resend call 22 HDR-020    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:21.982    resend call 23 HDR-023    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:22.216    resend call 24 UA-001     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:22.454    resend call 25 UA-003     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:22.690    resend call 26 UA-004     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:22.927    resend call 27 HOST-001   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:23.161    resend call 28 HOST-002   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:23.395    resend call 29 HOST-003   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:23.634    resend call 30 HOST-004   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:23.870    resend call 31 HOST-005   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:24.108    resend call 32 HOST-006   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:24.344    resend call 33 HOST-007   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:24.582    resend call 34 HOST-008   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:24.802    resend call 35 PATH-001   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:25.042    resend call 36 PATH-004   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:25.281    resend call 37 PATH-007   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:25.518    resend call 38 PATH-022   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:25.750    resend call 39 PATH-028   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:25.988    resend call 40 PORT-008   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:26.224    resend call 41 PORT-009   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:26.462    resend call 42 PORT-012   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:26.646    resend call 43 HDR-002    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:26.882    resend call 44 HDR-003    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:27.117    resend call 45 HDR-004    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:27.351    resend call 46 HDR-005    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:27.583    resend call 47 HDR-006    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:27.818    resend call 48 HDR-020    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:28.055    resend call 49 HDR-023    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:28.287    resend call 50 UA-001     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:28.519    resend call 51 UA-003     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:28.750    resend call 52 UA-004     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:28.983    resend call 53 HOST-001   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:29.213    resend call 54 HOST-002   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:29.447    resend call 55 HOST-003   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:29.682    resend call 56 HOST-004   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:29.917    resend call 57 HOST-005   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:30.154    resend call 58 HOST-006   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:30.389    resend call 59 HOST-007   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:30.625    resend call 60 HOST-008   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:30.843    resend call 61 PATH-001   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:31.081    resend call 62 PATH-004   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:31.319    resend call 63 PATH-007   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:31.561    resend call 64 PATH-022   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:31.801    resend call 65 PATH-028   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:32.038    resend call 66 PORT-008   proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:32.272    resend call 67 PORT-009   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:32.508    resend call 68 PORT-012   proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:32.689    resend call 69 HDR-002    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:32.926    resend call 70 HDR-003    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:33.163    resend call 71 HDR-004    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:33.401    resend call 72 HDR-005    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:33.640    resend call 73 HDR-006    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:33.878    resend call 74 HDR-020    proxy BLOCK / direct BLOCK  same  captured==constructed: True
+15:26:34.116    resend call 75 HDR-023    proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:34.354    resend call 76 UA-001     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:34.592    resend call 77 UA-003     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:34.830    resend call 78 UA-004     proxy ALLOW / direct ALLOW  same  captured==constructed: True
+15:26:35.408  SUMMARY (diagnostic, not an FPR)
+15:26:35.408    37 false positives among 149 constructed benign unique texts; deterministic texts 149/149; invalid calls 0
+15:26:35.408    pairs HOST      {'ALLOW->BLOCK': 6, 'ALLOW->ALLOW': 22}
+15:26:35.408    pairs PATH      {'ALLOW->BLOCK': 4, 'ALLOW->ALLOW': 14, 'BLOCK->BLOCK': 4, 'BLOCK->ALLOW': 2}
+15:26:35.408    pairs PORT      {'ALLOW->ALLOW': 15, 'ALLOW->BLOCK': 7}
+15:26:35.408    pairs HDR       {'ALLOW->BLOCK': 2, 'ALLOW->ALLOW': 12, 'BLOCK->BLOCK': 8, 'BLOCK->ALLOW': 2}
+15:26:35.409    pairs UAxPC     {'ALLOW->ALLOW': 2, 'ALLOW->BLOCK': 1, 'BLOCK->BLOCK': 3}
+15:26:35.409    pairs UA        {'ALLOW->ALLOW': 13, 'ALLOW->BLOCK': 1, 'BLOCK->BLOCK': 7}
+15:26:35.409    pairs EVALSWAP  {'ALLOW->ALLOW': 20}
+15:26:35.409    API vs proxy: decision 78/78, reason 78/78; captured==constructed 78/78
+15:26:35.409    enforcement ALLOW / HTTP 200 / received: 48
+15:26:35.409    enforcement BLOCK / HTTP 403 / not received: 30
+15:26:35.409  DONE — summary.json written

@@ -106,8 +106,16 @@ context. No change has been made, which is correct at this stage.
 files of the 2026-09-17 experiment lived in a session scratchpad under `/tmp` and were lost
 at the next reboot. Only an audit summary survives, outside the repository. It is not a
 substitute for the raw data: its figures, used as examples in §7 and §8, cannot be
-re-verified. The experiment must be repeated with persistent results before its findings
-count as evidence.
+re-verified, so that run stands as a historical antecedent and not as evidence. **It was
+repeated correctly on 2026-09-18 and persisted as `reports/diagnostics/real-http-fp-v1/`**,
+which keeps the pre-registered cases, every raw record, the four process logs, the code and
+the manifest inside the repository. That run, not the lost one, is the evidence on this
+finding.
+
+This changes nothing in the rules above. `real-http-fp-v1` is a **diagnostic** under §7, so
+its 37 BLOCK decisions over 149 constructed benign texts are a **diagnostic count, not an
+FPR** and not a rate of any kind: the case mix was built to provoke failures. The model's
+measured FPR remains the one from the formal split.
 
 ## 5. Mandatory metrics
 

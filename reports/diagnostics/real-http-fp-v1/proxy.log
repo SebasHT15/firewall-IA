@@ -1,0 +1,580 @@
+[15:22:40.376] Loading script data_plane.py
+[15:22:40.392] HTTP(S) proxy listening at 127.0.0.1:8080.
+[15:22:40.393] data plane ready: classifier=http://127.0.0.1:8000/classify timeout=3.0s policy=fail-closed
+[15:22:59.270][127.0.0.1:55486] client connect
+[15:22:59.270][127.0.0.1:55486] client disconnect
+[15:25:37.892][127.0.0.1:50056] client connect
+[15:25:37.895] [0e687dca] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:38.167] [0e687dca] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 273 ms)
+[15:25:38.168][127.0.0.1:50056] server connect 127.0.0.1:9000
+127.0.0.1:50056: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:38.171][127.0.0.1:50056] server disconnect 127.0.0.1:9000
+[15:25:38.171][127.0.0.1:50056] client disconnect
+[15:25:38.177][127.0.0.1:50068] client connect
+[15:25:38.178] [b5d637f8] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:38.420] [b5d637f8] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 242 ms)
+[15:25:38.421][127.0.0.1:50068] server connect 127.0.0.1:9000
+127.0.0.1:50068: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:38.424][127.0.0.1:50068] server disconnect 127.0.0.1:9000
+[15:25:38.424][127.0.0.1:50068] client disconnect
+[15:25:38.430][127.0.0.1:50084] client connect
+[15:25:38.433] [e5c76a5a] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:25:38.695] [e5c76a5a] BLOCK GET 127.0.0.1:9000/index.html reason='Server-side request forgery attack detected' (classifier 262 ms)
+127.0.0.1:50084: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:38.696][127.0.0.1:50084] client disconnect
+[15:25:39.312][127.0.0.1:50088] client connect
+[15:25:39.314] [0b7c28ae] received GET 127.0.0.2:9000/index.html (body 0 bytes)
+[15:25:39.573] [0b7c28ae] BLOCK GET 127.0.0.2:9000/index.html reason='Server-side request forgery attack detected' (classifier 259 ms)
+127.0.0.1:50088: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:39.574][127.0.0.1:50088] client disconnect
+[15:25:40.187][127.0.0.1:50098] client connect
+[15:25:40.189] [cfd9e63a] received GET ::1:9000/index.html (body 0 bytes)
+[15:25:40.446] [cfd9e63a] BLOCK GET ::1:9000/index.html reason='Server-side request forgery attack detected' (classifier 256 ms)
+127.0.0.1:50098: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:40.448][127.0.0.1:50098] client disconnect
+[15:25:41.060][127.0.0.1:50106] client connect
+[15:25:41.062] [4287a04c] received GET 192.168.1.20:9000/index.html (body 0 bytes)
+[15:25:41.315] [4287a04c] ALLOW GET 192.168.1.20:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 252 ms)
+[15:25:41.316][127.0.0.1:50106] server connect 127.0.0.1:9000
+127.0.0.1:50106: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:41.318][127.0.0.1:50106] server disconnect 127.0.0.1:9000
+[15:25:41.320][127.0.0.1:50106] client disconnect
+[15:25:41.325][127.0.0.1:50114] client connect
+[15:25:41.327] [5ec23f17] received GET 10.0.0.15:9000/index.html (body 0 bytes)
+[15:25:41.572] [5ec23f17] ALLOW GET 10.0.0.15:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 245 ms)
+[15:25:41.573][127.0.0.1:50114] server connect 127.0.0.1:9000
+127.0.0.1:50114: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:41.575][127.0.0.1:50114] server disconnect 127.0.0.1:9000
+[15:25:41.577][127.0.0.1:50114] client disconnect
+[15:25:41.582][127.0.0.1:50124] client connect
+[15:25:41.584] [8cdef449] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+[15:25:41.835] [8cdef449] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 251 ms)
+[15:25:41.836][127.0.0.1:50124] server connect 127.0.0.1:9000
+127.0.0.1:50124: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:41.838][127.0.0.1:50124] server disconnect 127.0.0.1:9000
+[15:25:41.838][127.0.0.1:50124] client disconnect
+[15:25:41.844][127.0.0.1:50128] client connect
+[15:25:41.845] [ecc2c172] received GET shop.example.com:9000/index.html (body 0 bytes)
+[15:25:42.097] [ecc2c172] ALLOW GET shop.example.com:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 251 ms)
+[15:25:42.098][127.0.0.1:50128] server connect 127.0.0.1:9000
+127.0.0.1:50128: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:42.099][127.0.0.1:50128] server disconnect 127.0.0.1:9000
+[15:25:42.099][127.0.0.1:50128] client disconnect
+[15:25:42.104][127.0.0.1:50130] client connect
+[15:25:42.104] [c08ad61a] received GET localhost:9000/ (body 0 bytes)
+[15:25:42.336] [c08ad61a] BLOCK GET localhost:9000/ reason='HTTP request smuggling attack detected' (classifier 232 ms)
+127.0.0.1:50130: GET http://127.0.0.1:9000/
+              << 403 Forbidden 32b
+[15:25:42.337][127.0.0.1:50130] client disconnect
+[15:25:42.950][127.0.0.1:41022] client connect
+[15:25:42.951] [646a9896] received GET localhost:9000/products (body 0 bytes)
+[15:25:43.210] [646a9896] ALLOW GET localhost:9000/products reason='Normal HTTP request with no attack patterns detected' (classifier 258 ms)
+[15:25:43.210][127.0.0.1:41022] server connect 127.0.0.1:9000
+127.0.0.1:41022: GET http://127.0.0.1:9000/products?id=42 HTTP/1.1
+     << HTTP/1.0 200 OK 16b
+[15:25:43.212][127.0.0.1:41022] server disconnect 127.0.0.1:9000
+[15:25:43.213][127.0.0.1:41022] client disconnect
+[15:25:43.219][127.0.0.1:41036] client connect
+[15:25:43.221] [1cbee946] received GET localhost:9000/miembros/imagenes/zarauz.jpg (body 0 bytes)
+[15:25:43.472] [1cbee946] ALLOW GET localhost:9000/miembros/imagenes/zarauz.jpg reason='Normal HTTP request with no attack patterns detected' (classifier 251 ms)
+[15:25:43.473][127.0.0.1:41036] server connect 127.0.0.1:9000
+127.0.0.1:41036: GET http://127.0.0.1:9000/miembros/imagenes/zarauz.jpg HTTP/1.1
+     << HTTP/1.0 200 OK 11b
+[15:25:43.474][127.0.0.1:41036] server disconnect 127.0.0.1:9000
+[15:25:43.475][127.0.0.1:41036] client disconnect
+[15:25:43.481][127.0.0.1:41046] client connect
+[15:25:43.482] [1fa1962e] received GET 127.0.0.1:9000/ (body 0 bytes)
+[15:25:43.726] [1fa1962e] BLOCK GET 127.0.0.1:9000/ reason='Server-side request forgery attack detected' (classifier 243 ms)
+127.0.0.1:41046: GET http://127.0.0.1:9000/
+              << 403 Forbidden 32b
+[15:25:43.727][127.0.0.1:41046] client disconnect
+[15:25:44.340][127.0.0.1:41056] client connect
+[15:25:44.342] [7938cfe7] received GET 127.0.0.1:9000/miembros/imagenes/zarauz.jpg (body 0 bytes)
+[15:25:44.604] [7938cfe7] ALLOW GET 127.0.0.1:9000/miembros/imagenes/zarauz.jpg reason='Normal HTTP request with no attack patterns detected' (classifier 261 ms)
+[15:25:44.604][127.0.0.1:41056] server connect 127.0.0.1:9000
+127.0.0.1:41056: GET http://127.0.0.1:9000/miembros/imagenes/zarauz.jpg HTTP/1.1
+     << HTTP/1.0 200 OK 11b
+[15:25:44.605][127.0.0.1:41056] server disconnect 127.0.0.1:9000
+[15:25:44.606][127.0.0.1:41056] client disconnect
+[15:25:44.612][127.0.0.1:41058] client connect
+[15:25:44.613] [e61d0128] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:44.859] [e61d0128] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 246 ms)
+[15:25:44.860][127.0.0.1:41058] server connect 127.0.0.1:9000
+127.0.0.1:41058: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:44.861][127.0.0.1:41058] server disconnect 127.0.0.1:9000
+[15:25:44.862][127.0.0.1:41058] client disconnect
+[15:25:44.868][127.0.0.1:41064] client connect
+[15:25:44.869] [a059f603] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:45.118] [a059f603] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 249 ms)
+127.0.0.1:41064: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:45.120][127.0.0.1:41064] client disconnect
+[15:25:45.736][127.0.0.1:41074] client connect
+[15:25:45.738] [7547a88f] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:46.011] [7547a88f] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 272 ms)
+127.0.0.1:41074: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:46.014][127.0.0.1:41074] client disconnect
+[15:25:46.627][127.0.0.1:41090] client connect
+[15:25:46.633] [1b46632d] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:46.853] [1b46632d] BLOCK GET localhost:9000/index.html reason='HTTP parameter pollution detected' (classifier 220 ms)
+127.0.0.1:41090: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:46.854][127.0.0.1:41090] client disconnect
+[15:25:47.469][127.0.0.1:41096] client connect
+[15:25:47.472] [700466b5] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:47.732] [700466b5] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 259 ms)
+[15:25:47.732][127.0.0.1:41096] server connect 127.0.0.1:9000
+127.0.0.1:41096: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:47.733][127.0.0.1:41096] server disconnect 127.0.0.1:9000
+[15:25:47.734][127.0.0.1:41096] client disconnect
+[15:25:47.739][127.0.0.1:41112] client connect
+[15:25:47.741] [30c8f357] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:47.990] [30c8f357] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 249 ms)
+[15:25:47.991][127.0.0.1:41112] server connect 127.0.0.1:9000
+127.0.0.1:41112: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:47.992][127.0.0.1:41112] server disconnect 127.0.0.1:9000
+[15:25:47.994][127.0.0.1:41112] client disconnect
+[15:25:47.998][127.0.0.1:41120] client connect
+[15:25:47.999] [d4564b67] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:48.243] [d4564b67] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 244 ms)
+127.0.0.1:41120: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:48.244][127.0.0.1:41120] client disconnect
+[15:25:48.861][127.0.0.1:41122] client connect
+[15:25:48.864] [aaab2fc0] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:49.129] [aaab2fc0] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 265 ms)
+[15:25:49.130][127.0.0.1:41122] server connect 127.0.0.1:9000
+127.0.0.1:41122: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:49.133][127.0.0.1:41122] server disconnect 127.0.0.1:9000
+[15:25:49.133][127.0.0.1:41122] client disconnect
+[15:25:49.138][127.0.0.1:41134] client connect
+[15:25:49.139] [f23ee703] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:25:49.385] [f23ee703] BLOCK GET 127.0.0.1:9000/index.html reason='Server-side request forgery attack detected' (classifier 246 ms)
+127.0.0.1:41134: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:49.386][127.0.0.1:41134] client disconnect
+[15:25:50.000][127.0.0.1:41136] client connect
+[15:25:50.002] [4038875e] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:25:50.258] [4038875e] ALLOW GET 127.0.0.1:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 256 ms)
+[15:25:50.259][127.0.0.1:41136] server connect 127.0.0.1:9000
+127.0.0.1:41136: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:50.260][127.0.0.1:41136] server disconnect 127.0.0.1:9000
+[15:25:50.261][127.0.0.1:41136] client disconnect
+[15:25:50.267][127.0.0.1:41150] client connect
+[15:25:50.270] [da476f6c] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:50.519] [da476f6c] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 249 ms)
+[15:25:50.520][127.0.0.1:41150] server connect 127.0.0.1:9000
+127.0.0.1:41150: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:50.522][127.0.0.1:41150] server disconnect 127.0.0.1:9000
+[15:25:50.523][127.0.0.1:41150] client disconnect
+[15:25:50.528][127.0.0.1:41162] client connect
+[15:25:50.529] [332b6b93] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:50.780] [332b6b93] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 250 ms)
+[15:25:50.781][127.0.0.1:41162] server connect 127.0.0.1:9000
+127.0.0.1:41162: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:50.782][127.0.0.1:41162] server disconnect 127.0.0.1:9000
+[15:25:50.783][127.0.0.1:41162] client disconnect
+[15:25:50.789][127.0.0.1:41164] client connect
+[15:25:50.790] [a5922503] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:51.038] [a5922503] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 248 ms)
+[15:25:51.040][127.0.0.1:41164] server connect 127.0.0.1:9000
+127.0.0.1:41164: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:51.041][127.0.0.1:41164] server disconnect 127.0.0.1:9000
+[15:25:51.041][127.0.0.1:41164] client disconnect
+[15:25:51.047][127.0.0.1:41166] client connect
+[15:25:51.048] [2384bbe9] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:51.294] [2384bbe9] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 245 ms)
+[15:25:51.294][127.0.0.1:41166] server connect 127.0.0.1:9000
+127.0.0.1:41166: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:51.295][127.0.0.1:41166] server disconnect 127.0.0.1:9000
+[15:25:51.295][127.0.0.1:41166] client disconnect
+[15:25:51.302][127.0.0.1:41172] client connect
+[15:25:51.305] [1e793a59] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:25:51.550] [1e793a59] BLOCK GET 127.0.0.1:9000/index.html reason='Server-side request forgery attack detected' (classifier 245 ms)
+127.0.0.1:41172: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:51.551][127.0.0.1:41172] client disconnect
+[15:25:52.165][127.0.0.1:41178] client connect
+[15:25:52.167] [05fb1708] received GET 127.0.0.2:9000/index.html (body 0 bytes)
+[15:25:52.434] [05fb1708] BLOCK GET 127.0.0.2:9000/index.html reason='Server-side request forgery attack detected' (classifier 267 ms)
+127.0.0.1:41178: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:52.435][127.0.0.1:41178] client disconnect
+[15:25:53.048][127.0.0.1:59562] client connect
+[15:25:53.050] [a9805908] received GET ::1:9000/index.html (body 0 bytes)
+[15:25:53.317] [a9805908] BLOCK GET ::1:9000/index.html reason='Server-side request forgery attack detected' (classifier 267 ms)
+127.0.0.1:59562: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:53.318][127.0.0.1:59562] client disconnect
+[15:25:53.933][127.0.0.1:59578] client connect
+[15:25:53.939] [3fac0afe] received GET 192.168.1.20:9000/index.html (body 0 bytes)
+[15:25:54.210] [3fac0afe] ALLOW GET 192.168.1.20:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 270 ms)
+[15:25:54.211][127.0.0.1:59578] server connect 127.0.0.1:9000
+127.0.0.1:59578: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:54.212][127.0.0.1:59578] server disconnect 127.0.0.1:9000
+[15:25:54.212][127.0.0.1:59578] client disconnect
+[15:25:54.217][127.0.0.1:59592] client connect
+[15:25:54.218] [5cdb3ec2] received GET 10.0.0.15:9000/index.html (body 0 bytes)
+[15:25:54.461] [5cdb3ec2] ALLOW GET 10.0.0.15:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 243 ms)
+[15:25:54.462][127.0.0.1:59592] server connect 127.0.0.1:9000
+127.0.0.1:59592: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:54.463][127.0.0.1:59592] server disconnect 127.0.0.1:9000
+[15:25:54.463][127.0.0.1:59592] client disconnect
+[15:25:54.468][127.0.0.1:59600] client connect
+[15:25:54.470] [b8e34bb8] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+[15:25:54.711] [b8e34bb8] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 241 ms)
+[15:25:54.711][127.0.0.1:59600] server connect 127.0.0.1:9000
+127.0.0.1:59600: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:54.712][127.0.0.1:59600] server disconnect 127.0.0.1:9000
+[15:25:54.712][127.0.0.1:59600] client disconnect
+[15:25:54.719][127.0.0.1:59602] client connect
+[15:25:54.721] [5c977630] received GET shop.example.com:9000/index.html (body 0 bytes)
+[15:25:54.967] [5c977630] ALLOW GET shop.example.com:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 246 ms)
+[15:25:54.968][127.0.0.1:59602] server connect 127.0.0.1:9000
+127.0.0.1:59602: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:54.969][127.0.0.1:59602] server disconnect 127.0.0.1:9000
+[15:25:54.970][127.0.0.1:59602] client disconnect
+[15:25:54.974][127.0.0.1:59614] client connect
+[15:25:54.975] [00325aab] received GET localhost:9000/ (body 0 bytes)
+[15:25:55.213] [00325aab] BLOCK GET localhost:9000/ reason='HTTP request smuggling attack detected' (classifier 239 ms)
+127.0.0.1:59614: GET http://127.0.0.1:9000/
+              << 403 Forbidden 32b
+[15:25:55.214][127.0.0.1:59614] client disconnect
+[15:25:55.828][127.0.0.1:59616] client connect
+[15:25:55.830] [aa00e99d] received GET localhost:9000/products (body 0 bytes)
+[15:25:56.093] [aa00e99d] ALLOW GET localhost:9000/products reason='Normal HTTP request with no attack patterns detected' (classifier 262 ms)
+[15:25:56.094][127.0.0.1:59616] server connect 127.0.0.1:9000
+127.0.0.1:59616: GET http://127.0.0.1:9000/products?id=42 HTTP/1.1
+     << HTTP/1.0 200 OK 16b
+[15:25:56.095][127.0.0.1:59616] server disconnect 127.0.0.1:9000
+[15:25:56.095][127.0.0.1:59616] client disconnect
+[15:25:56.101][127.0.0.1:59624] client connect
+[15:25:56.102] [6dc058df] received GET localhost:9000/miembros/imagenes/zarauz.jpg (body 0 bytes)
+[15:25:56.352] [6dc058df] ALLOW GET localhost:9000/miembros/imagenes/zarauz.jpg reason='Normal HTTP request with no attack patterns detected' (classifier 249 ms)
+[15:25:56.353][127.0.0.1:59624] server connect 127.0.0.1:9000
+127.0.0.1:59624: GET http://127.0.0.1:9000/miembros/imagenes/zarauz.jpg HTTP/1.1
+     << HTTP/1.0 200 OK 11b
+[15:25:56.355][127.0.0.1:59624] server disconnect 127.0.0.1:9000
+[15:25:56.356][127.0.0.1:59624] client disconnect
+[15:25:56.362][127.0.0.1:59632] client connect
+[15:25:56.363] [e1c51245] received GET 127.0.0.1:9000/ (body 0 bytes)
+[15:25:56.609] [e1c51245] BLOCK GET 127.0.0.1:9000/ reason='Server-side request forgery attack detected' (classifier 246 ms)
+127.0.0.1:59632: GET http://127.0.0.1:9000/
+              << 403 Forbidden 32b
+[15:25:56.610][127.0.0.1:59632] client disconnect
+[15:25:57.227][127.0.0.1:59644] client connect
+[15:25:57.229] [c7377cfd] received GET 127.0.0.1:9000/miembros/imagenes/zarauz.jpg (body 0 bytes)
+[15:25:57.484] [c7377cfd] ALLOW GET 127.0.0.1:9000/miembros/imagenes/zarauz.jpg reason='Normal HTTP request with no attack patterns detected' (classifier 255 ms)
+[15:25:57.484][127.0.0.1:59644] server connect 127.0.0.1:9000
+127.0.0.1:59644: GET http://127.0.0.1:9000/miembros/imagenes/zarauz.jpg HTTP/1.1
+     << HTTP/1.0 200 OK 11b
+[15:25:57.487][127.0.0.1:59644] server disconnect 127.0.0.1:9000
+[15:25:57.487][127.0.0.1:59644] client disconnect
+[15:25:57.493][127.0.0.1:59658] client connect
+[15:25:57.494] [845f858c] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:57.734] [845f858c] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 239 ms)
+[15:25:57.735][127.0.0.1:59658] server connect 127.0.0.1:9000
+127.0.0.1:59658: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:25:57.736][127.0.0.1:59658] server disconnect 127.0.0.1:9000
+[15:25:57.737][127.0.0.1:59658] client disconnect
+[15:25:57.742][127.0.0.1:59662] client connect
+[15:25:57.743] [d3768608] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:57.981] [d3768608] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 237 ms)
+127.0.0.1:59662: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:57.982][127.0.0.1:59662] client disconnect
+[15:25:58.596][127.0.0.1:59670] client connect
+[15:25:58.600] [36f2b8fd] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:58.855] [36f2b8fd] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 255 ms)
+127.0.0.1:59670: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:58.856][127.0.0.1:59670] client disconnect
+[15:25:59.470][127.0.0.1:59680] client connect
+[15:25:59.472] [03a391f9] received GET localhost:9000/index.html (body 0 bytes)
+[15:25:59.673] [03a391f9] BLOCK GET localhost:9000/index.html reason='HTTP parameter pollution detected' (classifier 202 ms)
+127.0.0.1:59680: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:25:59.676][127.0.0.1:59680] client disconnect
+[15:26:00.290][127.0.0.1:59690] client connect
+[15:26:00.292] [0564cdd9] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:00.549] [0564cdd9] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 256 ms)
+[15:26:00.549][127.0.0.1:59690] server connect 127.0.0.1:9000
+127.0.0.1:59690: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:00.550][127.0.0.1:59690] server disconnect 127.0.0.1:9000
+[15:26:00.551][127.0.0.1:59690] client disconnect
+[15:26:00.557][127.0.0.1:59698] client connect
+[15:26:00.558] [2e29ed2b] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:00.800] [2e29ed2b] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 241 ms)
+[15:26:00.800][127.0.0.1:59698] server connect 127.0.0.1:9000
+127.0.0.1:59698: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:00.802][127.0.0.1:59698] server disconnect 127.0.0.1:9000
+[15:26:00.804][127.0.0.1:59698] client disconnect
+[15:26:00.809][127.0.0.1:59704] client connect
+[15:26:00.811] [92f4de00] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:01.057] [92f4de00] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 247 ms)
+127.0.0.1:59704: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:01.059][127.0.0.1:59704] client disconnect
+[15:26:01.674][127.0.0.1:59706] client connect
+[15:26:01.675] [e3868ec2] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:01.937] [e3868ec2] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 262 ms)
+[15:26:01.937][127.0.0.1:59706] server connect 127.0.0.1:9000
+127.0.0.1:59706: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:01.940][127.0.0.1:59706] server disconnect 127.0.0.1:9000
+[15:26:01.940][127.0.0.1:59706] client disconnect
+[15:26:01.946][127.0.0.1:59718] client connect
+[15:26:01.948] [2ee3e8e2] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:26:02.204] [2ee3e8e2] BLOCK GET 127.0.0.1:9000/index.html reason='Server-side request forgery attack detected' (classifier 256 ms)
+127.0.0.1:59718: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:02.205][127.0.0.1:59718] client disconnect
+[15:26:02.822][127.0.0.1:36828] client connect
+[15:26:02.827] [9441bc29] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:26:03.079] [9441bc29] ALLOW GET 127.0.0.1:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 252 ms)
+[15:26:03.080][127.0.0.1:36828] server connect 127.0.0.1:9000
+127.0.0.1:36828: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:03.081][127.0.0.1:36828] server disconnect 127.0.0.1:9000
+[15:26:03.081][127.0.0.1:36828] client disconnect
+[15:26:03.087][127.0.0.1:36838] client connect
+[15:26:03.089] [ce328174] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:03.332] [ce328174] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 242 ms)
+[15:26:03.333][127.0.0.1:36838] server connect 127.0.0.1:9000
+127.0.0.1:36838: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:03.335][127.0.0.1:36838] server disconnect 127.0.0.1:9000
+[15:26:03.336][127.0.0.1:36838] client disconnect
+[15:26:03.341][127.0.0.1:36848] client connect
+[15:26:03.342] [e8dd80a9] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:03.583] [e8dd80a9] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 241 ms)
+[15:26:03.584][127.0.0.1:36848] server connect 127.0.0.1:9000
+127.0.0.1:36848: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:03.585][127.0.0.1:36848] server disconnect 127.0.0.1:9000
+[15:26:03.587][127.0.0.1:36848] client disconnect
+[15:26:03.592][127.0.0.1:36862] client connect
+[15:26:03.593] [4f9e59b6] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:03.833] [4f9e59b6] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 240 ms)
+[15:26:03.835][127.0.0.1:36862] server connect 127.0.0.1:9000
+127.0.0.1:36862: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:03.837][127.0.0.1:36862] server disconnect 127.0.0.1:9000
+[15:26:03.838][127.0.0.1:36862] client disconnect
+[15:26:03.843][127.0.0.1:36874] client connect
+[15:26:03.845] [c21ba682] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:04.094] [c21ba682] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 250 ms)
+[15:26:04.095][127.0.0.1:36874] server connect 127.0.0.1:9000
+127.0.0.1:36874: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:04.097][127.0.0.1:36874] server disconnect 127.0.0.1:9000
+[15:26:04.098][127.0.0.1:36874] client disconnect
+[15:26:04.104][127.0.0.1:36884] client connect
+[15:26:04.106] [9f075651] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:26:04.357] [9f075651] BLOCK GET 127.0.0.1:9000/index.html reason='Server-side request forgery attack detected' (classifier 251 ms)
+127.0.0.1:36884: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:04.358][127.0.0.1:36884] client disconnect
+[15:26:04.972][127.0.0.1:36888] client connect
+[15:26:04.974] [94778608] received GET 127.0.0.2:9000/index.html (body 0 bytes)
+[15:26:05.239] [94778608] BLOCK GET 127.0.0.2:9000/index.html reason='Server-side request forgery attack detected' (classifier 265 ms)
+127.0.0.1:36888: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:05.240][127.0.0.1:36888] client disconnect
+[15:26:05.855][127.0.0.1:36902] client connect
+[15:26:05.857] [92f2fd45] received GET ::1:9000/index.html (body 0 bytes)
+[15:26:06.113] [92f2fd45] BLOCK GET ::1:9000/index.html reason='Server-side request forgery attack detected' (classifier 256 ms)
+127.0.0.1:36902: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:06.115][127.0.0.1:36902] client disconnect
+[15:26:06.729][127.0.0.1:36906] client connect
+[15:26:06.730] [5abe326a] received GET 192.168.1.20:9000/index.html (body 0 bytes)
+[15:26:06.990] [5abe326a] ALLOW GET 192.168.1.20:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 259 ms)
+[15:26:06.991][127.0.0.1:36906] server connect 127.0.0.1:9000
+127.0.0.1:36906: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:06.992][127.0.0.1:36906] server disconnect 127.0.0.1:9000
+[15:26:06.992][127.0.0.1:36906] client disconnect
+[15:26:06.998][127.0.0.1:36910] client connect
+[15:26:06.999] [ef2c64df] received GET 10.0.0.15:9000/index.html (body 0 bytes)
+[15:26:07.242] [ef2c64df] ALLOW GET 10.0.0.15:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 243 ms)
+[15:26:07.243][127.0.0.1:36910] server connect 127.0.0.1:9000
+127.0.0.1:36910: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:07.245][127.0.0.1:36910] server disconnect 127.0.0.1:9000
+[15:26:07.246][127.0.0.1:36910] client disconnect
+[15:26:07.249][127.0.0.1:36922] client connect
+[15:26:07.252] [ded4d9e5] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+[15:26:07.500] [ded4d9e5] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 247 ms)
+[15:26:07.501][127.0.0.1:36922] server connect 127.0.0.1:9000
+127.0.0.1:36922: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:07.502][127.0.0.1:36922] server disconnect 127.0.0.1:9000
+[15:26:07.502][127.0.0.1:36922] client disconnect
+[15:26:07.508][127.0.0.1:36926] client connect
+[15:26:07.509] [9bb88b08] received GET shop.example.com:9000/index.html (body 0 bytes)
+[15:26:07.750] [9bb88b08] ALLOW GET shop.example.com:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 240 ms)
+[15:26:07.750][127.0.0.1:36926] server connect 127.0.0.1:9000
+127.0.0.1:36926: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:07.752][127.0.0.1:36926] server disconnect 127.0.0.1:9000
+[15:26:07.753][127.0.0.1:36926] client disconnect
+[15:26:07.759][127.0.0.1:36938] client connect
+[15:26:07.761] [ee886c23] received GET localhost:9000/ (body 0 bytes)
+[15:26:07.989] [ee886c23] BLOCK GET localhost:9000/ reason='HTTP request smuggling attack detected' (classifier 227 ms)
+127.0.0.1:36938: GET http://127.0.0.1:9000/
+              << 403 Forbidden 32b
+[15:26:07.990][127.0.0.1:36938] client disconnect
+[15:26:08.605][127.0.0.1:36954] client connect
+[15:26:08.607] [ca1cd633] received GET localhost:9000/products (body 0 bytes)
+[15:26:08.863] [ca1cd633] ALLOW GET localhost:9000/products reason='Normal HTTP request with no attack patterns detected' (classifier 255 ms)
+[15:26:08.864][127.0.0.1:36954] server connect 127.0.0.1:9000
+127.0.0.1:36954: GET http://127.0.0.1:9000/products?id=42 HTTP/1.1
+     << HTTP/1.0 200 OK 16b
+[15:26:08.866][127.0.0.1:36954] server disconnect 127.0.0.1:9000
+[15:26:08.868][127.0.0.1:36954] client disconnect
+[15:26:08.873][127.0.0.1:36968] client connect
+[15:26:08.874] [1479f27a] received GET localhost:9000/miembros/imagenes/zarauz.jpg (body 0 bytes)
+[15:26:09.118] [1479f27a] ALLOW GET localhost:9000/miembros/imagenes/zarauz.jpg reason='Normal HTTP request with no attack patterns detected' (classifier 243 ms)
+[15:26:09.118][127.0.0.1:36968] server connect 127.0.0.1:9000
+127.0.0.1:36968: GET http://127.0.0.1:9000/miembros/imagenes/zarauz.jpg HTTP/1.1
+     << HTTP/1.0 200 OK 11b
+[15:26:09.119][127.0.0.1:36968] server disconnect 127.0.0.1:9000
+[15:26:09.120][127.0.0.1:36968] client disconnect
+[15:26:09.126][127.0.0.1:36976] client connect
+[15:26:09.129] [ea22df46] received GET 127.0.0.1:9000/ (body 0 bytes)
+[15:26:09.371] [ea22df46] BLOCK GET 127.0.0.1:9000/ reason='Server-side request forgery attack detected' (classifier 241 ms)
+127.0.0.1:36976: GET http://127.0.0.1:9000/
+              << 403 Forbidden 32b
+[15:26:09.372][127.0.0.1:36976] client disconnect
+[15:26:09.986][127.0.0.1:36984] client connect
+[15:26:09.987] [ba851ae8] received GET 127.0.0.1:9000/miembros/imagenes/zarauz.jpg (body 0 bytes)
+[15:26:10.240] [ba851ae8] ALLOW GET 127.0.0.1:9000/miembros/imagenes/zarauz.jpg reason='Normal HTTP request with no attack patterns detected' (classifier 253 ms)
+[15:26:10.241][127.0.0.1:36984] server connect 127.0.0.1:9000
+127.0.0.1:36984: GET http://127.0.0.1:9000/miembros/imagenes/zarauz.jpg HTTP/1.1
+     << HTTP/1.0 200 OK 11b
+[15:26:10.242][127.0.0.1:36984] server disconnect 127.0.0.1:9000
+[15:26:10.242][127.0.0.1:36984] client disconnect
+[15:26:10.248][127.0.0.1:36998] client connect
+[15:26:10.249] [04483e19] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:10.488] [04483e19] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 238 ms)
+[15:26:10.489][127.0.0.1:36998] server connect 127.0.0.1:9000
+127.0.0.1:36998: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:10.490][127.0.0.1:36998] server disconnect 127.0.0.1:9000
+[15:26:10.490][127.0.0.1:36998] client disconnect
+[15:26:10.496][127.0.0.1:37006] client connect
+[15:26:10.497] [14df5afb] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:10.741] [14df5afb] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 244 ms)
+127.0.0.1:37006: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:10.742][127.0.0.1:37006] client disconnect
+[15:26:11.357][127.0.0.1:37008] client connect
+[15:26:11.359] [415b4248] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:11.624] [415b4248] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 265 ms)
+127.0.0.1:37008: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:11.625][127.0.0.1:37008] client disconnect
+[15:26:12.240][127.0.0.1:37022] client connect
+[15:26:12.247] [81ed76dd] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:12.449] [81ed76dd] BLOCK GET localhost:9000/index.html reason='HTTP parameter pollution detected' (classifier 202 ms)
+127.0.0.1:37022: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:12.450][127.0.0.1:37022] client disconnect
+[15:26:13.063][127.0.0.1:35048] client connect
+[15:26:13.065] [a09b2774] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:13.328] [a09b2774] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 263 ms)
+[15:26:13.329][127.0.0.1:35048] server connect 127.0.0.1:9000
+127.0.0.1:35048: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:13.330][127.0.0.1:35048] server disconnect 127.0.0.1:9000
+[15:26:13.330][127.0.0.1:35048] client disconnect
+[15:26:13.336][127.0.0.1:35052] client connect
+[15:26:13.337] [a61baae9] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:13.579] [a61baae9] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 242 ms)
+[15:26:13.580][127.0.0.1:35052] server connect 127.0.0.1:9000
+127.0.0.1:35052: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:13.583][127.0.0.1:35052] server disconnect 127.0.0.1:9000
+[15:26:13.583][127.0.0.1:35052] client disconnect
+[15:26:13.589][127.0.0.1:35064] client connect
+[15:26:13.590] [41431aaf] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:13.830] [41431aaf] BLOCK GET localhost:9000/index.html reason='Server-side request forgery attack detected' (classifier 240 ms)
+127.0.0.1:35064: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:13.831][127.0.0.1:35064] client disconnect
+[15:26:14.445][127.0.0.1:35070] client connect
+[15:26:14.447] [2b14485e] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:14.710] [2b14485e] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 262 ms)
+[15:26:14.711][127.0.0.1:35070] server connect 127.0.0.1:9000
+127.0.0.1:35070: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:14.712][127.0.0.1:35070] server disconnect 127.0.0.1:9000
+[15:26:14.712][127.0.0.1:35070] client disconnect
+[15:26:14.718][127.0.0.1:35074] client connect
+[15:26:14.721] [bf5294d3] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:26:14.974] [bf5294d3] BLOCK GET 127.0.0.1:9000/index.html reason='Server-side request forgery attack detected' (classifier 253 ms)
+127.0.0.1:35074: GET http://127.0.0.1:9000/index.html
+              << 403 Forbidden 32b
+[15:26:14.977][127.0.0.1:35074] client disconnect
+[15:26:15.591][127.0.0.1:35082] client connect
+[15:26:15.593] [195e94a8] received GET 127.0.0.1:9000/index.html (body 0 bytes)
+[15:26:15.854] [195e94a8] ALLOW GET 127.0.0.1:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 260 ms)
+[15:26:15.855][127.0.0.1:35082] server connect 127.0.0.1:9000
+127.0.0.1:35082: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:15.856][127.0.0.1:35082] server disconnect 127.0.0.1:9000
+[15:26:15.858][127.0.0.1:35082] client disconnect
+[15:26:15.862][127.0.0.1:35088] client connect
+[15:26:15.864] [8299d8d5] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:16.116] [8299d8d5] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 252 ms)
+[15:26:16.117][127.0.0.1:35088] server connect 127.0.0.1:9000
+127.0.0.1:35088: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:16.123][127.0.0.1:35088] server disconnect 127.0.0.1:9000
+[15:26:16.124][127.0.0.1:35088] client disconnect
+[15:26:16.129][127.0.0.1:35092] client connect
+[15:26:16.130] [2c895db7] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:16.382] [2c895db7] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 252 ms)
+[15:26:16.383][127.0.0.1:35092] server connect 127.0.0.1:9000
+127.0.0.1:35092: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:16.385][127.0.0.1:35092] server disconnect 127.0.0.1:9000
+[15:26:16.385][127.0.0.1:35092] client disconnect
+[15:26:16.390][127.0.0.1:35096] client connect
+[15:26:16.391] [fcc41c0b] received GET localhost:9000/index.html (body 0 bytes)
+[15:26:16.636] [fcc41c0b] ALLOW GET localhost:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 245 ms)
+[15:26:16.637][127.0.0.1:35096] server connect 127.0.0.1:9000
+127.0.0.1:35096: GET http://127.0.0.1:9000/index.html HTTP/1.1
+     << HTTP/1.0 200 OK 29b
+[15:26:16.640][127.0.0.1:35096] server disconnect 127.0.0.1:9000
+[15:26:16.640][127.0.0.1:35096] client disconnect
+[15:52:33.985] Removing script data_plane.py
+[15:52:33.988] Un-loading script: data_plane.py
+[15:52:33.989] data plane addon unloaded while the proxy is running: blocking ALL traffic (503) until mitmdump is restarted
