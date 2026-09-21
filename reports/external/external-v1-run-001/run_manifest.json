@@ -1,0 +1,29 @@
+{
+  "run_id": "external-v1-run-001",
+  "phase": "F — execution (pre-execution metadata)",
+  "generated_utc": "2026-09-21T22:21:59.683849+00:00",
+  "freeze_commit": "36df2ee",
+  "frozen_integrity_hash": "ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b",
+  "frozen_artifact_sha256": "721dfdaa6425463ae0ce26520f6d47986fdc7388468b55d7b1a5bffed822d342",
+  "status_at_write": "PRE-EXECUTION",
+  "v4_exposure": "zero (no /classify contacted yet)",
+  "levels": {
+    "L1": "ground truth vs V4 decision",
+    "L2": "V4 decision vs gateway behaviour",
+    "L3": "ground truth vs destination delivery"
+  },
+  "execution_plan": {
+    "gateway": "400 frozen cases x 3 repetitions = 1200 executions",
+    "direct_consistency": "100 cases x 3 = 300 direct /classify calls",
+    "headline": "repetition 1; nondeterministic cases flagged and excluded",
+    "path": "frozen request -> data-plane -> control-plane /classify -> V4 -> enforcement -> lab-app (capture-proxy is NOT the enforcing gateway)"
+  },
+  "consistency_subset": {
+    "seed": "external-v1-run-001-consistency",
+    "per_cell": 10,
+    "key_formula": "SHA256(seed|primary_cell|case_id|request_sha256)",
+    "declared_before_execution": true,
+    "not_based_on_v4": true
+  },
+  "d32_no_overwrite": "the runner refuses to overwrite a run id that already has results"
+}
