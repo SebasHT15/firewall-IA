@@ -163,6 +163,77 @@ services:
       - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs:ro
     restart: "no"
 
+  # ── External Test v1 services (profile: extv1) ──────────────────────────
+  # All three sit behind a profile, so `docker compose up`, the smoke tests and the
+  # professor demo behave exactly as verified in reports/lab/docker-lab-v1/. The
+  # smoke-test `destination` service above is NOT modified or replaced.
+
+  # The External v1 destination: a real interactive application (pages, forms, cookie
+  # sessions, JSON API, query parameters) with the same append-only receipt log.
+  # Deliberately NOT vulnerable — External v1 measures classification and enforcement,
+  # not exploitation. See docs/external_test_v1_protocol.md section 5.1.
+  lab-app:
+    build:
+      context: docker/lab-app
+    image: firewall-ia/lab-app:lab
+    profiles: ["extv1"]
+    networks:
+      firewall-lab:
+        aliases:
+          - shop.fwlab.test
+          - api.fwlab.test
+    user: "${LAB_UID:-1000}:${LAB_GID:-1000}"
+    volumes:
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:9100/healthz', timeout=3).status==200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: "no"
+
+  # CAPTURE-ONLY proxy for the DRAFT phase. Same image and same mitmproxy version as the
+  # firewall data plane, and it imports the SAME render_request(), so a captured text is
+  # byte-identical to what the data plane would hand to /classify. It classifies nothing,
+  # blocks nothing and never contacts the control plane: ground truth must be assigned
+  # before V4 sees anything (D37).
+  capture-proxy:
+    image: firewall-ia/data-plane:lab      # reuses the built data-plane image, no rebuild
+    profiles: ["extv1"]
+    networks: [firewall-lab]
+    depends_on:
+      lab-app:
+        condition: service_healthy
+    environment:
+      CAPTURE_OUT: /logs/capture/${CAPTURE_FILE:-capture.jsonl}
+      CAPTURE_TAG: ${CAPTURE_TAG:-}
+    volumes:
+      - ./scripts/external:/opt/external:ro
+      # data_plane.py resolves config.yaml next to its parent directory and reads it at
+      # import time; the capture addon imports that module for its renderer.
+      - ./docker/config.docker.yaml:/app/config.yaml:ro
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    command: ["mitmdump", "-s", "/opt/external/capture_addon.py",
+              "--listen-host", "0.0.0.0", "-p", "8081"]
+    restart: "no"
+
+  # Traffic generation: Chromium via Playwright for browser flows, httpx and curl for API
+  # and authorized attack flows, and the raw-socket replay client. One-shot, like `client`.
+  generator:
+    build:
+      context: docker/generator
+    image: firewall-ia/generator:lab
+    profiles: ["extv1"]
+    networks: [firewall-lab]
+    volumes:
+      # Scripts are mounted, not baked, so DRAFT iteration needs no rebuild.
+      - ./scripts/external:/opt/external:ro
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    working_dir: /opt/external
+    restart: "no"
+
 networks:
   firewall-lab:
     driver: bridge
