@@ -1,0 +1,269 @@
+firewall-IA Docker Lab smoke run 20260921T004432Z
+log: ./docker/.lab-logs/smoke-20260921T004432Z.log
+
+[1m== A. startup and readiness[0m
+ Network firewall-ia-lab_firewall-lab Creating 
+ Network firewall-ia-lab_firewall-lab Creating 
+ Network firewall-ia-lab_firewall-lab Created 
+ Network firewall-ia-lab_firewall-lab Created 
+ Container firewall-ia-lab-destination-1 Creating 
+ Container firewall-ia-lab-control-plane-1 Creating 
+ Container firewall-ia-lab-control-plane-1 Created 
+ Container firewall-ia-lab-data-plane-1 Creating 
+ Container firewall-ia-lab-destination-1 Created 
+ Container firewall-ia-lab-data-plane-1 Created 
+ Container firewall-ia-lab-destination-1 Starting 
+ Container firewall-ia-lab-control-plane-1 Starting 
+ Container firewall-ia-lab-destination-1 Started 
+ Container firewall-ia-lab-control-plane-1 Started 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-data-plane-1 Starting 
+ Container firewall-ia-lab-data-plane-1 Started 
+waiting for the control plane healthcheck (model load)
+[32mPASS[0m control plane healthy (/health reports model_loaded: true)
+NAME                              IMAGE                           COMMAND                  SERVICE         CREATED         STATUS                   PORTS
+firewall-ia-lab-control-plane-1   firewall-ia/control-plane:lab   "python3 -m uvicorn …"   control-plane   6 seconds ago   Up 5 seconds (healthy)   8000/tcp
+firewall-ia-lab-data-plane-1      firewall-ia/data-plane:lab      "mitmdump -s data_pl…"   data-plane      6 seconds ago   Up Less than a second    127.0.0.1:8080->8080/tcp
+firewall-ia-lab-destination-1     firewall-ia/destination:lab     "python3 /srv/serve.…"   destination     6 seconds ago   Up 6 seconds (healthy)   9000/tcp
+destination receipts before smoke traffic: 0
+
+[1m== B. ALLOW path[0m
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Image firewall-ia/client:lab Pulling 
+ Image firewall-ia/client:lab pull access denied for firewall-ia/client, repository does not exist or may require 'docker login' 
+time="2026-09-20T18:44:39-06:00" level=warning msg="buildx Docker CLI plugin not found: falling back to the classic builder. BuildKit-only build features (multi-arch, secrets, ssh, additional contexts, ...) will not be available"
+ Image firewall-ia/client:lab Building 
+ Image firewall-ia/client:lab Building 
+Sending build context to Docker daemon  8.415kB
+Step 1/6 : FROM python:3.12-slim
+ ---> 2f17fc044b57
+Step 2/6 : ENV PYTHONUNBUFFERED=1
+ ---> Running in 6155a365f368
+ ---> Removed intermediate container 6155a365f368
+ ---> 3622b6174918
+Step 3/6 : COPY smoke_test.py /srv/smoke_test.py
+ ---> 95ec95e417fa
+Step 4/6 : ENTRYPOINT ["python3", "/srv/smoke_test.py"]
+ ---> Running in 11e14cd636e1
+ ---> Removed intermediate container 11e14cd636e1
+ ---> 8b44ab5a91e2
+Step 5/6 : CMD ["all"]
+ ---> Running in f14e7159e937
+ ---> Removed intermediate container f14e7159e937
+ ---> 134d8f26633e
+Step 6/6 : LABEL com.docker.compose.image.builder=classic
+ ---> Running in 8cd74d18d8e0
+ ---> Removed intermediate container 8cd74d18d8e0
+ ---> b557e7c4fd66
+Successfully built b557e7c4fd66
+Successfully tagged firewall-ia/client:lab
+ Image firewall-ia/client:lab Built 
+ Image firewall-ia/client:lab Built 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-f20c80410028 Creating 
+ Container firewall-ia-lab-client-run-f20c80410028 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[ALLOW] GET http://app.fwlab.test:9000/index.html
+[ALLOW] via proxy http://data-plane:8080
+[ALLOW] status=200 (expected 200)
+[ALLOW] destination received 1 new request(s) (expected >=1)
+[ALLOW]   receipt: GET /index.html host=app.fwlab.test:9000
+[ALLOW] body[:120]=b'<!doctype html>\n<meta charset="utf-8">\n<title>firewall-IA lab destination</title>\n<h1>destination reached</h1>\n<p>This p'
+[ALLOW] PASS
+
+--- summary ---
+PASS  case_allow
+[32mPASS[0m ALLOW forwarded and received
+
+[1m== C. BLOCK path[0m
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-de9f21516f73 Creating 
+ Container firewall-ia-lab-client-run-de9f21516f73 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[BLOCK] GET http://app.fwlab.test:9000/products.html?id=1%27%20OR%20%271%27%3D%271
+[BLOCK] via proxy http://data-plane:8080
+[BLOCK] status=403 (expected 403)
+[BLOCK] destination received 0 new request(s) (expected 0)
+[BLOCK] body[:120]=b'Request blocked by firewall-IA.\n'
+[BLOCK] PASS
+
+--- summary ---
+PASS  case_block
+[32mPASS[0m BLOCK answered 403 and not forwarded
+
+[1m== D. fail-closed path (classifier made unavailable)[0m
+ Container firewall-ia-lab-control-plane-1 Stopping 
+ Container firewall-ia-lab-control-plane-1 Stopped 
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-control-plane-1 Starting 
+ Container firewall-ia-lab-control-plane-1 Started 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-06d6d0f81674 Creating 
+ Container firewall-ia-lab-client-run-06d6d0f81674 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[FAILCLOSED] the control plane must be stopped by the caller (docker compose stop control-plane)
+
+[FAILCLOSED] GET http://app.fwlab.test:9000/index.html
+[FAILCLOSED] via proxy http://data-plane:8080
+[FAILCLOSED] status=200 (expected 503)
+[FAILCLOSED] destination received 1 new request(s) (expected 0)
+[FAILCLOSED]   receipt: GET /index.html host=app.fwlab.test:9000
+[FAILCLOSED] body[:120]=b'<!doctype html>\n<meta charset="utf-8">\n<title>firewall-IA lab destination</title>\n<h1>destination reached</h1>\n<p>This p'
+[FAILCLOSED] FAIL
+
+--- summary ---
+FAIL  case_failclosed
+
+[31mFAIL[0m fail-closed case
+
+[1m== restoring the control plane[0m
+[32mPASS[0m control plane healthy again
+
+[1m== E. normal operation restored[0m
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-915486a8a2a2 Creating 
+ Container firewall-ia-lab-client-run-915486a8a2a2 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[ALLOW] GET http://app.fwlab.test:9000/index.html
+[ALLOW] via proxy http://data-plane:8080
+[ALLOW] status=200 (expected 200)
+[ALLOW] destination received 1 new request(s) (expected >=1)
+[ALLOW]   receipt: GET /index.html host=app.fwlab.test:9000
+[ALLOW] body[:120]=b'<!doctype html>\n<meta charset="utf-8">\n<title>firewall-IA lab destination</title>\n<h1>destination reached</h1>\n<p>This p'
+[ALLOW] PASS
+
+--- summary ---
+PASS  case_allow
+[32mPASS[0m ALLOW works again after restart
+
+[1m== service logs (kept with this run)[0m
+----- control-plane -----
+control-plane-1  | INFO:     Started server process [1]
+control-plane-1  | INFO:     Waiting for application startup.
+control-plane-1  | 2026-09-21 00:44:34,755 INFO    firewall.control_plane: startup: loading adapter /opt/firewall-ia/adapter
+control-plane-1  | Loading model from /opt/firewall-ia/adapter ...
+control-plane-1  | Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:   4%|▍         | 8/201 [00:00<00:02, 79.81it/s]Loading weights:  25%|██▍       | 50/201 [00:00<00:00, 276.42it/s]Loading weights:  47%|████▋     | 95/201 [00:00<00:00, 347.57it/s]Loading weights:  67%|██████▋   | 135/201 [00:00<00:00, 367.68it/s]Loading weights:  86%|████████▌ | 172/201 [00:00<00:00, 333.51it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 257.35it/s]
+control-plane-1  | 2026-09-21 00:44:37,147 INFO    firewall.control_plane: startup: model ready on cuda in 2.4 s
+control-plane-1  | INFO:     Application startup complete.
+control-plane-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+control-plane-1  | INFO:     127.0.0.1:37884 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 00:44:42,429 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 00:44:42,892 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=460.1
+control-plane-1  | INFO:     172.18.0.4:55428 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 00:44:44,545 INFO    firewall.control_plane: classify: received request (158 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 00:44:44,716 INFO    firewall.control_plane: classify: status=ok decision=BLOCK reason='SQL injection payload detected' model_latency_ms=169.8
+control-plane-1  | INFO:     172.18.0.4:59348 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | INFO:     Shutting down
+control-plane-1  | INFO:     Waiting for application shutdown.
+control-plane-1  | 2026-09-21 00:44:45,075 INFO    firewall.control_plane: shutdown
+control-plane-1  | INFO:     Application shutdown complete.
+control-plane-1  | INFO:     Finished server process [1]
+control-plane-1  | INFO:     Started server process [1]
+control-plane-1  | INFO:     Waiting for application startup.
+control-plane-1  | 2026-09-21 00:44:48,026 INFO    firewall.control_plane: startup: loading adapter /opt/firewall-ia/adapter
+control-plane-1  | Loading model from /opt/firewall-ia/adapter ...
+control-plane-1  | Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  29%|██▉       | 58/201 [00:00<00:00, 566.84it/s]Loading weights:  74%|███████▎  | 148/201 [00:00<00:00, 753.37it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 768.90it/s]
+control-plane-1  | 2026-09-21 00:44:49,659 INFO    firewall.control_plane: startup: model ready on cuda in 1.6 s
+control-plane-1  | INFO:     Application startup complete.
+control-plane-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+control-plane-1  | INFO:     127.0.0.1:58316 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 00:44:52,479 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 00:44:52,929 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=447.1
+control-plane-1  | INFO:     172.18.0.4:59362 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 00:44:54,782 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 00:44:55,014 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=231.2
+control-plane-1  | INFO:     172.18.0.4:47476 - "POST /classify HTTP/1.1" 200 OK
+----- data-plane -----
+data-plane-1  | [00:44:38.847] Loading script data_plane/data_plane.py
+data-plane-1  | [00:44:38.860] HTTP(S) proxy listening at *:8080.
+data-plane-1  | [00:44:38.861] data plane ready: classifier=http://control-plane:8000/classify timeout=3.0s policy=fail-closed
+data-plane-1  | [00:44:42.396][172.18.0.5:37290] client connect
+data-plane-1  | [00:44:42.397][172.18.0.5:37290] client disconnect
+data-plane-1  | [00:44:42.403][172.18.0.5:37300] client connect
+data-plane-1  | [00:44:42.404] [79de8b71] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [00:44:42.894] [79de8b71] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 489 ms)
+data-plane-1  | [00:44:42.895][172.18.0.5:37300] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:37300: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [00:44:42.897][172.18.0.5:37300] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [00:44:42.897][172.18.0.5:37300] client disconnect
+data-plane-1  | [00:44:44.534][172.18.0.5:52628] client connect
+data-plane-1  | [00:44:44.535][172.18.0.5:52628] client disconnect
+data-plane-1  | [00:44:44.539][172.18.0.5:52640] client connect
+data-plane-1  | [00:44:44.540] [304ebd34] received GET app.fwlab.test:9000/products.html (body 0 bytes)
+data-plane-1  | [00:44:44.717] [304ebd34] BLOCK GET app.fwlab.test:9000/products.html reason='SQL injection payload detected' (classifier 178 ms)
+data-plane-1  | 172.18.0.5:52640: GET http://app.fwlab.test:9000/products.html?id=1%27%20OR%2…
+data-plane-1  |                << 403 Forbidden 32b
+data-plane-1  | [00:44:44.718][172.18.0.5:52640] client disconnect
+data-plane-1  | [00:44:52.468][172.18.0.5:52654] client connect
+data-plane-1  | [00:44:52.469][172.18.0.5:52654] client disconnect
+data-plane-1  | [00:44:52.472][172.18.0.5:52666] client connect
+data-plane-1  | [00:44:52.474] [7426f597] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [00:44:52.931] [7426f597] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 457 ms)
+data-plane-1  | [00:44:52.932][172.18.0.5:52666] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:52666: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [00:44:52.934][172.18.0.5:52666] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [00:44:52.934][172.18.0.5:52666] client disconnect
+data-plane-1  | [00:44:54.771][172.18.0.5:55060] client connect
+data-plane-1  | [00:44:54.772][172.18.0.5:55060] client disconnect
+data-plane-1  | [00:44:54.776][172.18.0.5:55066] client connect
+data-plane-1  | [00:44:54.777] [0386565b] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [00:44:55.016] [0386565b] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 239 ms)
+data-plane-1  | [00:44:55.017][172.18.0.5:55066] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:55066: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [00:44:55.019][172.18.0.5:55066] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [00:44:55.019][172.18.0.5:55066] client disconnect
+----- destination -----
+destination-1  | destination ready: port=9000 root=/srv/www access_log=/logs/destination-access.jsonl
+destination-1  | RECEIVED {"ts": "2026-09-21T00:44:42.896022+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+destination-1  | RECEIVED {"ts": "2026-09-21T00:44:52.932959+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+destination-1  | RECEIVED {"ts": "2026-09-21T00:44:55.017941+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+
+[1m== summary[0m
+destination receipt log: ./docker/.lab-logs/destination-access.jsonl
+this run's log:          ./docker/.lab-logs/smoke-20260921T004432Z.log
+[31m1 check(s) failed[0m

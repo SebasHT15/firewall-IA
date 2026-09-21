@@ -301,5 +301,41 @@ class TestUnloadGuard(unittest.TestCase):
             self.assertEqual(tctx.options.block_list, [])
 
 
+class TestDockerLabConfig(unittest.TestCase):
+    """docker/config.docker.yaml is bind-mounted over config.yaml inside the
+    data-plane container, so the same loader must accept it.
+
+    The Docker Lab deliberately duplicates two keys instead of adding an
+    environment override to this validated component. Duplication invites drift,
+    so the one key that is allowed to differ is pinned here and the one that is
+    not is asserted equal.
+    """
+
+    DOCKER_CONFIG = os.path.join(REPO_ROOT, "docker", "config.docker.yaml")
+    ROOT_CONFIG = os.path.join(REPO_ROOT, "config.yaml")
+
+    def test_docker_config_loads_and_points_at_the_control_plane_service(self):
+        url, timeout = data_plane.load_config(self.DOCKER_CONFIG)
+        # A Docker service name, not 127.0.0.1: inside a container, loopback is
+        # that container.
+        self.assertEqual(url, "http://control-plane:8000/classify")
+        self.assertGreater(timeout, 0)
+
+    def test_docker_timeout_does_not_drift_from_the_root_config(self):
+        _, docker_timeout = data_plane.load_config(self.DOCKER_CONFIG)
+        _, root_timeout = data_plane.load_config(self.ROOT_CONFIG)
+        self.assertEqual(
+            docker_timeout, root_timeout,
+            "docker/config.docker.yaml and config.yaml must keep the same "
+            "classifier timeout; if they diverge on purpose, say why in both files",
+        )
+
+    def test_root_config_still_targets_localhost(self):
+        # The local, non-Docker workflow must keep working: the Docker Lab is an
+        # addition, not a migration.
+        url, _ = data_plane.load_config(self.ROOT_CONFIG)
+        self.assertEqual(url, "http://127.0.0.1:8000/classify")
+
+
 if __name__ == "__main__":
     unittest.main()

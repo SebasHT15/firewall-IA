@@ -24,6 +24,18 @@ Thumbs.db
 
 # Logs
 *.log
+# EXCEPT logs kept with an experiment record. A report's raw process logs ARE the
+# evidence (docs/ml_evaluation_methodology.md section 13), so they must be durable in the
+# repository, not machine-local. Without this negation the blanket *.log rule above
+# silently excluded every process log of reports/diagnostics/real-http-fp-v1/ — the same
+# failure mode that lost the 2026-09-17 raw data.
+!reports/**/*.log
 
 # Data plane environment (requirements-data-plane.txt)
 .venv-dataplane/
+
+# Docker Lab logs (destination receipt log, per-run output). The directory itself
+# is tracked via .gitkeep so it exists after a clone: the destination container
+# runs as a non-root user and cannot create it.
+docker/.lab-logs/*
+!docker/.lab-logs/.gitkeep

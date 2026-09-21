@@ -1,0 +1,6 @@
+Keeps this directory in the repository.
+
+The Docker Lab's destination container writes its JSONL receipt log here, as the
+invoking user. The directory must exist before `docker compose up`, otherwise
+Docker creates it root-owned and the destination (which runs as LAB_UID:LAB_GID)
+cannot write to it. Its contents are gitignored.

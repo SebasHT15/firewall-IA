@@ -65,9 +65,26 @@ status=invalid -> no decision                          invalid/error/timeout -> 
 - **Data plane, first version (`data_plane.py`)** — mitmproxy addon that sends every HTTP
   request to `POST /classify` and enforces the answer, fail-closed. Executed locally
   against the real V4 model. See [Data Plane](#data-plane-issues-16-17--first-version).
+- **Real-HTTP diagnostic validation (`real-http-fp-v1`)** — a reproducible experiment,
+  persisted with all of its raw data in
+  [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/). It
+  validated proxy / direct-API consistency and gateway enforcement, and it recorded the
+  model's behaviour on constructed benign requests. See
+  [Real client traffic](#real-client-traffic-the-real-http-fp-v1-diagnostic).
+- **Repository organized by responsibility** — control plane, data plane and scripts split
+  into their own directories. See [Repository layout](#repository-layout).
+
+- **Docker Lab (`compose.yaml`, `docker/`)** — the whole system in containers: control
+  plane on CUDA, data plane, a destination origin and a one-shot smoke client. Built and
+  **runtime verified**: GPU passthrough works, V4 loads from a read-only mounted adapter,
+  and ALLOW / BLOCK / fail-closed / recovery all pass as infrastructure checks. See
+  [Docker Lab](#docker-lab).
 
 **Planned, not built**
 
+- **External Test v1** — an independent, frozen external evaluation set, and the full
+  external security and gateway-enforcement evaluation run through it. **This is the next
+  work.**
 - Classifier timeout tuned with end-to-end evidence (today: a conservative operational 3 s)
 - HTTPS / HTTP/2 / WebSocket interception validation (the first data plane targets plain HTTP/1.1)
 - GGUF export, Q4_K_M quantization, llama.cpp inference
@@ -75,9 +92,33 @@ status=invalid -> no decision                          invalid/error/timeout -> 
 - Fast path, suspicious score, asynchronous classification (Issues #35–#38 — designed, not built)
 - Concurrency / load validation (the inference benchmark is deliberately concurrency 1)
 - Embedded Linux deployment
-- Real HTTP laboratory validation
 
-Nothing in the "planned" list should be read as working today.
+Nothing in the "planned" list should be read as working today. In particular, **no external
+evaluation results exist** — the external test set has not been built.
+
+### Repository layout
+
+```
+control_plane/     classifier_api.py, inference_core.py     FastAPI + the V4 pipeline
+data_plane/        data_plane.py                            mitmproxy inline gateway
+scripts/dataset/   parse_dataset.py, parse_dataset_v4.py, check_dataset.py
+scripts/training/  finetune.py
+scripts/evaluation/test_model.py
+scripts/benchmarks/benchmark_inference.py, benchmark_env.py, benchmark_compare.py
+tests/             unit tests for all of the above
+docs/              ml_evaluation_methodology.md
+datasets/          v4_clean/ and its manifest
+reports/           frozen experiment records (benchmarks/, diagnostics/, ...)
+
+compose.yaml       Docker Lab stack
+docker/            Docker Lab: per-service images, config override, smoke harness
+.dockerignore      allowlist; keeps model/datasets/reports/.git out of build contexts
+```
+
+Run everything from the repository root. `config.yaml`, `csic_database.csv` and the
+historical `train.jsonl`/`eval.jsonl` stay at the root. The 2026-09-20 reorganization was
+**structural only**: no behaviour, dataset or model changed, and the model and dataset
+hashes are unchanged.
 
 ---
 
@@ -305,11 +346,11 @@ accepts connections but never answers (`503` after ~3 s), and a classifier runni
 a loaded model (`FIREWALL_ADAPTER_DIR=/nonexistent`, `503`). Every failure path in the
 table above is covered by the unit tests.
 
-### Real client traffic: observed model false positives
+### Real client traffic: the `real-http-fp-v1` diagnostic
 
 This is a **known limitation of the model/dataset** with traffic from real clients, **not**
 a data plane defect. It is not worked around by rewriting headers or changing
-`render_request()`, and it will be studied separately (D22). Observed with curl, 2026-09-16:
+`render_request()`. First observed with curl, 2026-09-16:
 
 - `GET /index.html` with `Host: 127.0.0.1:9000` was BLOCK ("Server-side request forgery")
   on every repetition. The same request with `Host: localhost:9000` or a domain name was
@@ -327,13 +368,51 @@ a data plane defect. It is not worked around by rewriting headers or changing
   (`10.20.30.40:8000`, `localhost:8080`) do appear, balanced across labels. This is
   consistent with the observation above but does not demonstrate a cause.
 
-**Follow-up experiment, 2026-09-17: raw data lost.** A controlled one-variable A/B
+**2026-09-17: raw data lost — historical antecedent only.** A controlled one-variable A/B
 experiment on these false positives was run against `/classify` directly and through the
 proxy. Its raw records (texts sent, decisions, logs) were written under `/tmp` and were
-lost at the next reboot. An audit summary survives outside the repository. It is **not**
-a substitute for the raw data, and its figures cannot be re-verified. The experiment must
-be repeated, with results persisted in the repository, before its findings are cited as
+lost at the next reboot. An audit summary survives outside the repository. It is **not** a
+substitute for the raw data, its figures cannot be re-verified, and it is not cited as
 evidence.
+
+#### Repeated and persisted: `real-http-fp-v1` (2026-09-18)
+
+That work was repeated correctly. The reproducible experiment —
+pre-registered cases, every raw record, the four process logs, the code and the manifest —
+is committed at
+[`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/); the
+write-up is its
+[`summary.md`](reports/diagnostics/real-http-fp-v1/summary.md).
+
+**Design.** 175 pre-registered cases over 149 unique HTTP texts, 3 repetitions per text —
+447 direct calls to `/classify` — plus 26 curl commands × 3 = 78 requests through the
+gateway.
+
+| What it established | Result |
+|---|---|
+| Output validity | 0 invalid outputs in 447 direct calls |
+| Determinism | 149/149 unique texts: same decision **and** same reason on all 3 repetitions |
+| Proxy → `/classify` fidelity | 78/78 captured texts byte-identical to the pre-registered text |
+| Proxy vs direct API | 78/78 same decision, 78/78 same reason |
+| Gateway enforcement — ALLOW | 48/48 forwarded and reached the destination |
+| Gateway enforcement — BLOCK | 30/30 returned `403` and did not reach the destination |
+| Fail-closed | no `503` occurred during this run |
+
+**Diagnostic finding.** 37 of the 149 constructed benign texts were classified BLOCK
+(SSRF 25, file inclusion 4, HTTP parameter pollution 3, open redirect 3, request
+smuggling 2).
+
+> **37/149 is a diagnostic count, not a false-positive rate.** The case mix was built to
+> provoke failures, so none of its proportions is a performance metric and none
+> extrapolates to real traffic. The model's measured FPR is the formal-split **0.06%**
+> (2 of 3,103 benign rows), see
+> [V4-clean Baseline Results](#v4-clean-baseline-results).
+
+**What the evidence supports.** Coverage gaps / out-of-distribution inputs, possible
+spurious correlations (for example loopback Host → SSRF) and joint-feature context
+sensitivity are all *compatible* with the observations. The experiment does **not**
+demonstrate overfitting and does **not** establish causality for `Host`, path, port or
+headers.
 
 For the demo, use `localhost` in destination URLs.
 
@@ -360,8 +439,102 @@ implementation defects.
 - Concurrency: not characterized (the control plane serializes inference on one GPU, so
   simultaneous requests queue)
 - End-to-end benchmark: pending (Issue #18)
-- Model behaviour on real HTTP traffic: needs deeper evaluation (see above, D22)
+- Model behaviour on real HTTP traffic: diagnosed in `real-http-fp-v1` (see above); an
+  independent external evaluation is still pending (D22)
 - Heuristics, suspicious score, fast path: not implemented (Issues #35–#38)
+
+---
+
+## Docker Lab
+
+A compose stack that runs the **existing** system end to end in containers, so
+**External Test v1** can later be executed in a reproducible environment:
+
+```
+client ──▶ data-plane (mitmproxy) ──▶ POST /classify ──▶ control-plane (FastAPI)
+                                                              │
+                                                       inference_core
+                                                              │
+                                                       TinyLlama + V4
+                                                              │
+                     ALLOW / BLOCK ◀───────────────────────────
+                          │
+              enforcement in the data plane
+                          │
+                    destination app
+```
+
+It is **infrastructure**. No model, dataset, prompt, parser, generation parameter,
+request representation (D1), enforcement rule (D4/D34) or evaluation methodology
+changed, and **no production code was modified**: the data plane's Docker configuration
+is bind-mounted over `config.yaml` rather than added as an override inside
+`data_plane.py`, so the local workflow above keeps working unchanged.
+
+**Requires a GPU.** The control plane runs V4 on CUDA, so the host needs an NVIDIA driver
+**and the NVIDIA Container Toolkit**. Without the toolkit the control-plane container
+fails to start rather than falling back to CPU — a CPU run is a *different execution
+environment* from the measured CUDA baseline and must never be reported as comparable.
+The **V4 adapter is bind-mounted read-only** from `model-output-v4-clean/` and is never
+copied into an image, as is the HuggingFace cache holding the TinyLlama base.
+
+| Service | Base | Role |
+|---|---|---|
+| `control-plane` | `ubuntu:24.04` + Python 3.12 + torch 2.6.0+cu124 + `requirements.txt` | FastAPI → `inference_core` → TinyLlama + V4. The only service that loads the model or needs the GPU. |
+| `data-plane` | `python:3.12-slim` + `requirements-data-plane.txt` | mitmdump running the unchanged `data_plane.py`. Never loads the model. |
+| `destination` | `python:3.12-slim`, stdlib only | The protected origin. Appends every request it receives to a JSONL receipt log, which is how a BLOCK is proved *not* to have arrived. |
+| `client` | `python:3.12-slim`, stdlib only | One-shot smoke client, behind a compose profile. |
+
+Two images, not one, because mitmproxy's `typing-extensions<=4.14` pin still conflicts
+with the control plane's pydantic `>=4.14.1` (D33). Two processes, not one, because the
+HTTP boundary between the planes is deliberate. The V4 adapter is **bind-mounted
+read-only, never copied into an image**.
+
+### Build and run
+
+```bash
+docker compose build
+docker compose up -d control-plane data-plane destination
+./docker/smoke_test.sh
+```
+
+Each run tees to `docker/.lab-logs/smoke-<timestamp>.log` together with the three
+services' logs. Full detail — prerequisites, network map, manual phases and every design
+choice — is in [`docker/README.md`](docker/README.md).
+
+### What the smoke test validates
+
+Runtime verified on 2026-09-21 (`smoke-20260921T011153Z`, `all infrastructure smoke
+checks passed`):
+
+| Check | Result |
+|---|---|
+| **A** startup / readiness — `/health` reports `model_loaded: true` | **PASS** |
+| GPU passthrough; V4 loads on CUDA from the mounted adapter | **PASS** |
+| **B** ALLOW → HTTP 200, destination **receives** the request | **PASS** |
+| **C** BLOCK → HTTP 403, destination receives **0** requests | **PASS** |
+| **D** fail-closed: classifier stopped → HTTP 503, destination receives **0** | **PASS** |
+| **E** recovery — control plane healthy again, ALLOW works | **PASS** |
+
+Receipt evidence comes from the destination's own JSONL access log, so "the request did
+not arrive" is a recorded fact rather than an absence of console output. Closure report:
+[`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/).
+
+### What it does NOT validate
+
+> **Infrastructure plumbing only.** Three hand-written requests. **Not** External Test v1,
+> **not** an evaluation, **not** a benchmark, **not** a diagnostic. No accuracy,
+> precision, recall, FPR, FNR, latency or throughput figure may be derived from them; the
+> `model_latency_ms` values in the run log are incidental service logging, not a
+> measurement. The smoke fixtures are infrastructure fixtures and stay separate from any
+> future external evaluation set (D37).
+
+Also out of scope and unvalidated by this run: HTTPS/TLS, HTTP/2, WebSockets, transparent
+proxying, large bodies, concurrency and load, and end-to-end latency (Issue #18).
+
+> **The repository does not distribute the model.** `model-output-v4-clean/` is gitignored
+> and is never copied into an image, and the TinyLlama base snapshot is mounted read-only
+> from the host HuggingFace cache. The lab reproduces the **environment**, not the model
+> artifact: both must already exist locally.
 
 ---
 
@@ -464,14 +637,22 @@ committed at
 | Controlled inference benchmark (Issue #9) | Complete |
 | Inline data plane (Issue #16) | First version implemented, verified locally |
 | Fail-closed enforcement (Issue #17) | First version implemented, verified locally; timeout to be tuned |
+| Inline HTTP gateway (plain HTTP/1.1, validated locally) | First version implemented |
+| ML evaluation methodology (D36, D37) | Complete |
+| Real-HTTP diagnostic `real-http-fp-v1` | Complete — reproducible and persisted |
+| Repository organized by responsibility | Complete |
+| **Docker Lab** | **Complete — runtime verified** (checks A–E pass; GPU passthrough and CUDA model load confirmed) |
+| **External Test v1** | **Next** — not started; the set does not exist yet |
+| **Full external evaluation through the complete gateway** | Not started — depends on the two above |
+| **Professor demo** | Not started |
+| **README / results / standards alignment / future work** | Not started |
+| End-to-end gateway latency (Issue #18) | Not started — after the sequence above |
 | Heuristic suspicious scoring (Issue #35) | Planned |
 | Benign fast path (Issue #36) | Planned |
 | Async fast-path validation (Issue #37) | Planned |
 | Failure analysis of the 92 false negatives | Not yet tracked by a dedicated issue |
-| Real HTTP laboratory validation | Planned |
 | GGUF / Q4_K_M | Planned |
 | llama.cpp inference | Planned |
-| Inline HTTP gateway (plain HTTP/1.1, validated locally) | First version implemented |
 | Embedded deployment | Planned |
 
 ---
@@ -577,7 +758,14 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
   independent test set (D24). From V5 on, TRAIN, VALIDATION, INTERNAL TEST and EXTERNAL
   TEST are separate sets (D37); see
   [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md).
-- **Real HTTP laboratory traffic has not been validated yet.**
+- **The Docker Lab's checks are plumbing, not evaluation.** ALLOW/BLOCK/fail-closed are
+  verified to work in containers, on three hand-written requests. That says nothing about
+  the model's behaviour on real or unseen traffic, and no metric may be derived from it.
+- **No external evaluation exists.** The external test set (External Test v1) has not been
+  built, so there is no measurement of V4 outside its own internal distribution and no
+  result from running the complete gateway against an independent set (D22, D37).
+- **Captured real laboratory traffic has not been validated yet.** `real-http-fp-v1` used
+  benign texts built by hand from real clients' header sets, not captured user traffic.
 - **No adversarial held-out evaluation has been performed.** Evasion resistance is
   unmeasured by design.
 - **The latency objective is not met.** D36 sets P95 of the inference pipeline ≤ 200 ms
@@ -596,9 +784,10 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - **The classifier timeout is operational.** 3 s is an initial limit for detecting a
   failed classifier and applying fail-closed. It is not the latency objective, and it
   will be tuned with end-to-end evidence (D35).
-- **The model produced false positives on real client traffic** during local
-  verification, e.g. `GET /index.html` with `Host: 127.0.0.1:9000`. See
-  [Real client traffic](#real-client-traffic-observed-model-false-positives).
+- **The model produced false positives on constructed benign HTTP requests.** Measured
+  reproducibly in `real-http-fp-v1`: 37 of 149 constructed benign texts were BLOCK. That
+  is a **diagnostic count on a mix built to provoke failures, not a false-positive rate**.
+  See [Real client traffic](#real-client-traffic-the-real-http-fp-v1-diagnostic).
 - **Concurrency is serialized but unvalidated.** One GPU, one inference at a time;
   behaviour under simultaneous load has not been measured.
 - **Cold-start latency is materially higher than steady state**, and the two must never
@@ -633,15 +822,38 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - E5 frozen evaluation methodology
 - Issue #7 — V4 clean baseline training
 
-**M1 — next**
+**Also complete since the V4 baseline**
 
 - Issue #8 — V4 clean security evaluation: **complete**, metrics archived in
   `reports/v4_clean_eval.json`
 - Issue #9 — controlled inference benchmark: **complete**, `baseline-local-v1` frozen in
   `reports/benchmarks/`
+- Real-HTTP diagnostic: **complete**, `real-http-fp-v1` persisted in `reports/diagnostics/`
+- Repository organized by responsibility: **complete**, structural only
+- Docker Lab: **complete and runtime verified**, closure report in `reports/lab/docker-lab-v1/`
+
+**Next work — in this order, and not reordered**
+
+1. **External Test v1** — an independent, frozen external evaluation set. It does not exist
+   yet. When built it is independent of the V4 dataset, frozen before V4 is evaluated on
+   it, and ships with ground truth, categories, slices, a manifest and hashes. It measures
+   TP/TN/FP/FN, accuracy, BLOCK precision, recall / attack detection rate, F1, FPR, FNR,
+   invalid outputs and per-category / per-slice metrics, and it verifies gateway
+   enforcement as well as classification. Its main execution runs through the complete
+   system; direct `/classify` calls are auxiliary per-layer consistency controls only. It
+   is not designed around the known failures of `real-http-fp-v1`, and if its individual
+   errors later guide V5 it stops being an independent test for V5 (D37).
+2. **Full external security and gateway-enforcement evaluation** — executed in the Docker
+   Lab: client → data plane → control plane → V4 → data plane → destination
+3. **Professor demo** — ALLOW, BLOCK and fail-closed shown live on a small demo subset,
+   with the external-test results presented already computed
+4. **README / results / standards alignment / future work**
+
+**Deferred until after that sequence**
+
+- Issue #18 — end-to-end gateway latency
 - Failure analysis of the 92 false negatives (D21) — outstanding work, not currently
   tracked by a dedicated issue
-- Real HTTP laboratory validation
 - Decision gate: a targeted V4.1 only if the evidence requires it, otherwise proceed to M2
 
 **M3 — partially started ahead of M2 (D26)**
@@ -649,6 +861,7 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](datasets/manif
 - Issue #15 — FastAPI control plane: **complete**
 - Issue #16 — mitmproxy inline data plane: **first version implemented**, verified locally
 - Issue #17 — fail-closed enforcement: **first version implemented**, verified locally; timeout to be tuned
+- Gateway enforcement and proxy/API consistency: **validated** in `real-http-fp-v1`
 - Issue #18 — end-to-end gateway latency (no-fast-path baseline): not started
 
 Latency-reduction layer — **designed, not built** (D29, D30):
@@ -698,6 +911,8 @@ Commit format is `type(scope): description` — types `feat` `fix` `perf` `refac
 |---|---|
 | [`reports/`](reports/) | Every experiment record — E0 through the V4 baseline |
 | [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark experiments; `baseline-local-v1` is the frozen reference |
+| [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) | Real-HTTP diagnostic: pre-registered cases, raw records, process logs, code and manifest |
+| [`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/) | Docker Lab closure report: architecture, prerequisites, smoke results A–E, defects found and fixed |
 | [`reports/v4_inference_benchmark.md`](reports/v4_inference_benchmark.md) | Issue #9 benchmark report — protocol, environment, results |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | Dataset identity: hashes, seed, source commit, generation policy |
 | [`CONTEXT.md`](CONTEXT.md) | Current technical state and immediate roadmap |
@@ -706,6 +921,7 @@ Commit format is `type(scope): description` — types `feat` `fix` `perf` `refac
 | [`requirements.txt`](requirements.txt) | Direct dependencies, pinned to the verified environment |
 | [`requirements-data-plane.txt`](requirements-data-plane.txt) | Data plane dependencies (mitmproxy), for the separate `.venv-dataplane` environment |
 | [`config.yaml`](config.yaml) | Runtime configuration — today only the data plane section |
+| [`compose.yaml`](compose.yaml) · [`docker/`](docker/) | Docker Lab: the stack, per-service images, the data-plane config override and the smoke harness |
 
 Dataset generation is deterministic and verified bit-identical across `PYTHONHASHSEED`
 values. Environment: Python 3.12, torch 2.6.0+cu124, transformers 5.8.0, TRL 1.4.0,
