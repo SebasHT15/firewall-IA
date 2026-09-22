@@ -1,0 +1,272 @@
+{
+  "run_id": "external-v1-run-001",
+  "freeze_commit": "36df2ee",
+  "generated_utc": "2026-09-22T04:57:29.878684+00:00",
+  "headline_note": "L1 from gateway channel, repetition 1, nondeterministic cases excluded.",
+  "prevalence": "50/50 by construction (200 ALLOW / 200 BLOCK); not operational prevalence.",
+  "L1": {
+    "n": 400,
+    "TP": 199,
+    "TN": 132,
+    "FP": 68,
+    "FN": 1,
+    "invalid_outputs": 0,
+    "invalid_output_rate": 0.0,
+    "accuracy": {
+      "num": 331,
+      "den": 400,
+      "pct": 82.75
+    },
+    "precision_block": {
+      "num": 199,
+      "den": 267,
+      "pct": 74.53183520599251
+    },
+    "recall_block_ADR": {
+      "num": 199,
+      "den": 200,
+      "pct": 99.5
+    },
+    "f1_block": 0.8522483940042827,
+    "FPR": {
+      "num": 68,
+      "den": 200,
+      "pct": 34.0
+    },
+    "FNR": {
+      "num": 1,
+      "den": 200,
+      "pct": 0.5
+    },
+    "per_cell": {
+      "browser-navigation": {
+        "confusion": {
+          "TP": 0,
+          "FP": 7,
+          "FN": 0,
+          "TN": 33
+        },
+        "recall_block": null,
+        "fpr": {
+          "num": 7,
+          "den": 40,
+          "pct": 17.5
+        }
+      },
+      "browser-forms-session": {
+        "confusion": {
+          "TP": 0,
+          "FP": 4,
+          "FN": 0,
+          "TN": 36
+        },
+        "recall_block": null,
+        "fpr": {
+          "num": 4,
+          "den": 40,
+          "pct": 10.0
+        }
+      },
+      "api-json": {
+        "confusion": {
+          "TP": 0,
+          "FP": 21,
+          "FN": 0,
+          "TN": 19
+        },
+        "recall_block": null,
+        "fpr": {
+          "num": 21,
+          "den": 40,
+          "pct": 52.5
+        }
+      },
+      "api-query": {
+        "confusion": {
+          "TP": 0,
+          "FP": 12,
+          "FN": 0,
+          "TN": 28
+        },
+        "recall_block": null,
+        "fpr": {
+          "num": 12,
+          "den": 40,
+          "pct": 30.0
+        }
+      },
+      "unseen-structure": {
+        "confusion": {
+          "TP": 0,
+          "FP": 24,
+          "FN": 0,
+          "TN": 16
+        },
+        "recall_block": null,
+        "fpr": {
+          "num": 24,
+          "den": 40,
+          "pct": 60.0
+        }
+      },
+      "sqli": {
+        "confusion": {
+          "TP": 40,
+          "FP": 0,
+          "FN": 0,
+          "TN": 0
+        },
+        "recall_block": {
+          "num": 40,
+          "den": 40,
+          "pct": 100.0
+        },
+        "fpr": null
+      },
+      "cmdi": {
+        "confusion": {
+          "TP": 40,
+          "FP": 0,
+          "FN": 0,
+          "TN": 0
+        },
+        "recall_block": {
+          "num": 40,
+          "den": 40,
+          "pct": 100.0
+        },
+        "fpr": null
+      },
+      "xss": {
+        "confusion": {
+          "TP": 40,
+          "FP": 0,
+          "FN": 0,
+          "TN": 0
+        },
+        "recall_block": {
+          "num": 40,
+          "den": 40,
+          "pct": 100.0
+        },
+        "fpr": null
+      },
+      "path-traversal": {
+        "confusion": {
+          "TP": 40,
+          "FP": 0,
+          "FN": 0,
+          "TN": 0
+        },
+        "recall_block": {
+          "num": 40,
+          "den": 40,
+          "pct": 100.0
+        },
+        "fpr": null
+      },
+      "ssrf": {
+        "confusion": {
+          "TP": 39,
+          "FP": 0,
+          "FN": 1,
+          "TN": 0
+        },
+        "recall_block": {
+          "num": 39,
+          "den": 40,
+          "pct": 97.5
+        },
+        "fpr": null
+      }
+    },
+    "excluded_nondeterministic": []
+  },
+  "L2": {
+    "conformant": {
+      "num": 1200,
+      "den": 1200,
+      "pct": 100.0
+    },
+    "note": "data-plane-log"
+  },
+  "L3": {
+    "benign_delivered": 132,
+    "benign_broken": 68,
+    "attack_stopped": 199,
+    "attack_delivered": 1,
+    "note": "'attack_delivered' = a BLOCK request reached lab-app; NOT exploitation."
+  },
+  "RQ2_generalization": {
+    "sqli": {
+      "external_recall": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "internal_recall_pct": 90.94,
+      "internal_recall": [
+        743,
+        817
+      ]
+    },
+    "cmdi": {
+      "external_recall": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "internal_recall_pct": 87.31,
+      "internal_recall": [
+        117,
+        134
+      ]
+    },
+    "xss": {
+      "external_recall": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "internal_recall_pct": 100.0,
+      "internal_recall": [
+        null,
+        null
+      ]
+    },
+    "path-traversal": {
+      "external_recall": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "internal_recall_pct": 100.0,
+      "internal_recall": [
+        null,
+        null
+      ]
+    },
+    "ssrf": {
+      "external_recall": {
+        "num": 39,
+        "den": 40,
+        "pct": 97.5
+      },
+      "internal_recall_pct": 98.41,
+      "internal_recall": [
+        62,
+        63
+      ]
+    }
+  },
+  "direct_consistency": {
+    "checked": 100,
+    "agree": 100,
+    "disagree": []
+  },
+  "nondeterminism": {
+    "gateway": 0,
+    "direct": 0
+  },
+  "latency_note": "model_latency observations only; NOT a formal latency benchmark (issue #18)."
+}
