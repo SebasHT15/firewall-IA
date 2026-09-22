@@ -1,0 +1,244 @@
+# firewall-IA — Docker Lab.
+#
+# A reproducible laboratory that runs the EXISTING system end to end:
+#
+#   client -> data plane (mitmproxy) -> POST /classify -> control plane (FastAPI)
+#          -> inference_core -> TinyLlama V4 -> ALLOW/BLOCK -> enforcement -> destination
+#
+# INFRASTRUCTURE ONLY. Nothing here changes the model, the dataset, the request
+# representation (D1), the inference contract, the classification logic, the
+# fail-closed policy (D4/D34) or the evaluation methodology. The two planes stay
+# two processes in two images on purpose (D33): merging them would be convenient
+# and wrong.
+#
+# Prerequisites and full reproduction steps: docker/README.md.
+#
+#   docker compose build
+#   docker compose up -d control-plane data-plane destination
+#   ./docker/smoke_test.sh
+#
+# Settings come from a .env file beside this one; docker/.env.example is the template.
+
+name: firewall-ia-lab
+
+services:
+
+  # ── Control plane ───────────────────────────────────────────────────────
+  # FastAPI over inference_core over TinyLlama + the V4 adapter. The only service
+  # that loads the model, and the only one that needs the GPU.
+  control-plane:
+    build:
+      context: .
+      dockerfile: docker/control-plane/Dockerfile
+    image: firewall-ia/control-plane:lab
+    networks: [firewall-lab]
+    # NOT published to the host. Only the data plane needs to reach it, and it does
+    # so over the Docker network. To inspect /classify by hand, uncomment:
+    # ports: ["127.0.0.1:8000:8000"]
+    environment:
+      FIREWALL_ADAPTER_DIR: /opt/firewall-ia/adapter
+      # HF_HUB_CACHE points at the read-only host cache so the container reuses the
+      # TinyLlama base snapshot this project was verified against, instead of
+      # downloading a possibly different revision. HF_HOME stays writable and
+      # separate, because huggingface_hub wants a home directory even offline.
+      HF_HOME: /opt/hf-home
+      HF_HUB_CACHE: /opt/hf-cache/hub
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    volumes:
+      # The V4 adapter, read-only. It is gitignored and is never copied into an
+      # image. ${...} defaults keep this working with no .env file.
+      - ${LAB_ADAPTER_DIR:-./model-output-v4-clean}:/opt/firewall-ia/adapter:ro
+      # The host HuggingFace hub cache, read-only: the base model is ~2.2 GB and
+      # must not be re-downloaded or written to from the container.
+      - ${LAB_HF_HUB_CACHE:-${HOME}/.cache/huggingface/hub}:/opt/hf-cache/hub:ro
+      - hf-home:/opt/hf-home
+    healthcheck:
+      # /health always answers 200 while the process is up; readiness is the
+      # `model_loaded` flag (D28), so the check asserts that flag, not the status
+      # code. Until it passes, the data plane is not started.
+      test: ["CMD", "python3", "-c",
+             "import json,urllib.request,sys; d=json.load(urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)); sys.exit(0 if d.get('model_loaded') else 1)"]
+      interval: 10s
+      timeout: 10s
+      retries: 30          # model load is seconds; the first container start is not
+      start_period: 120s   # the model must be resident before the gateway accepts traffic
+    deploy:
+      resources:
+        reservations:
+          devices:
+            # Requires the NVIDIA Container Toolkit on the host. Without it this
+            # service fails to start rather than silently running on CPU: a CPU run
+            # is a DIFFERENT execution environment from the measured CUDA baseline
+            # and must never be reported as equivalent. See docker/README.md.
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: "no"
+
+  # ── Data plane ──────────────────────────────────────────────────────────
+  # mitmproxy running the unchanged data_plane.py addon. Never loads the model.
+  data-plane:
+    build:
+      context: .
+      dockerfile: docker/data-plane/Dockerfile
+    image: firewall-ia/data-plane:lab
+    networks: [firewall-lab]
+    depends_on:
+      control-plane:
+        # Start only once the model is actually loaded. This is convenience, not
+        # safety: if the classifier disappears later the addon still fails closed.
+        condition: service_healthy
+    ports:
+      # The lab's only published port, on loopback only. Lets a human drive the
+      # gateway from the host: curl -x http://127.0.0.1:8080 http://app.fwlab.test:9000/
+      # (that host resolves inside the lab; from the host use the client service).
+      - "${LAB_PROXY_PUBLISH:-127.0.0.1:8080}:8080"
+    volumes:
+      # The Docker-specific data-plane configuration, mounted over the path
+      # data_plane.py reads. The repository-root config.yaml is untouched, so the
+      # local non-Docker workflow keeps working unchanged.
+      - ./docker/config.docker.yaml:/app/config.yaml:ro
+    restart: "no"
+
+  # ── Destination ─────────────────────────────────────────────────────────
+  # The protected origin. Deliberately trivial: it serves two static pages and
+  # appends every request it receives to a JSONL receipt log, which is how the
+  # smoke tests prove a BLOCKed request did NOT arrive.
+  destination:
+    build:
+      context: docker/destination
+    image: firewall-ia/destination:lab
+    networks:
+      firewall-lab:
+        aliases:
+          # An ordinary lab hostname. real-http-fp-v1 observed hostnames of this
+          # shape as ALLOW in every context tested, while loopback hosts flipped to
+          # BLOCK; using one keeps the ALLOW smoke case about transport rather than
+          # about the model. Disclosed in docker/client/smoke_test.py.
+          - app.fwlab.test
+    # Receipt logs land on the host as the invoking user, not as root.
+    user: "${LAB_UID:-1000}:${LAB_GID:-1000}"
+    volumes:
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    healthcheck:
+      # So a smoke case can never mistake "destination not up yet" for "the gateway
+      # stopped the request". The probe runs inside the container and is therefore
+      # NOT recorded in the receipt log the smoke tests count.
+      test: ["CMD", "python3", "-c",
+             "import socket,sys; s=socket.create_connection(('127.0.0.1',9000),timeout=3); s.close()"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: "no"
+
+  # ── Smoke-test client ───────────────────────────────────────────────────
+  # One-shot. Under a profile so `docker compose up` brings up the lab without
+  # firing traffic at it. Run it with: docker compose run --rm client [phase]
+  client:
+    build:
+      context: docker/client
+    image: firewall-ia/client:lab
+    profiles: ["smoke"]
+    networks: [firewall-lab]
+    depends_on:
+      # `docker compose run` starts dependencies, so a smoke case never races the
+      # origin coming up.
+      #
+      # WARNING for the fail-closed case: data-plane depends on control-plane with
+      # `condition: service_healthy`, so `compose run client` resolves that chain and
+      # RESTARTS a control plane you just stopped, waiting until it is healthy. Run the
+      # fail-closed case with `--no-deps` (docker/smoke_test.sh does).
+      destination:
+        condition: service_healthy
+      data-plane:
+        condition: service_started
+    environment:
+      LAB_PROXY_URL: http://data-plane:8080
+      LAB_DESTINATION: app.fwlab.test:9000
+      ACCESS_LOG: /logs/destination-access.jsonl
+    volumes:
+      # Read-only: the client reads receipts, it never writes them.
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs:ro
+    restart: "no"
+
+  # ── External Test v1 services (profile: extv1) ──────────────────────────
+  # All three sit behind a profile, so `docker compose up`, the smoke tests and the
+  # professor demo behave exactly as verified in reports/lab/docker-lab-v1/. The
+  # smoke-test `destination` service above is NOT modified or replaced.
+
+  # The External v1 destination: a real interactive application (pages, forms, cookie
+  # sessions, JSON API, query parameters) with the same append-only receipt log.
+  # Deliberately NOT vulnerable — External v1 measures classification and enforcement,
+  # not exploitation. See docs/external_test_v1_protocol.md section 5.1.
+  lab-app:
+    build:
+      context: docker/lab-app
+    image: firewall-ia/lab-app:lab
+    profiles: ["extv1"]
+    networks:
+      firewall-lab:
+        aliases:
+          - shop.fwlab.test
+          - api.fwlab.test
+    user: "${LAB_UID:-1000}:${LAB_GID:-1000}"
+    volumes:
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    healthcheck:
+      test: ["CMD", "python3", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:9100/healthz', timeout=3).status==200 else 1)"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: "no"
+
+  # CAPTURE-ONLY proxy for the DRAFT phase. Same image and same mitmproxy version as the
+  # firewall data plane, and it imports the SAME render_request(), so a captured text is
+  # byte-identical to what the data plane would hand to /classify. It classifies nothing,
+  # blocks nothing and never contacts the control plane: ground truth must be assigned
+  # before V4 sees anything (D37).
+  capture-proxy:
+    image: firewall-ia/data-plane:lab      # reuses the built data-plane image, no rebuild
+    profiles: ["extv1"]
+    networks: [firewall-lab]
+    depends_on:
+      lab-app:
+        condition: service_healthy
+    environment:
+      CAPTURE_OUT: /logs/capture/${CAPTURE_FILE:-capture.jsonl}
+      CAPTURE_TAG: ${CAPTURE_TAG:-}
+    volumes:
+      - ./scripts/external:/opt/external:ro
+      # data_plane.py resolves config.yaml next to its parent directory and reads it at
+      # import time; the capture addon imports that module for its renderer.
+      - ./docker/config.docker.yaml:/app/config.yaml:ro
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    command: ["mitmdump", "-s", "/opt/external/capture_addon.py",
+              "--listen-host", "0.0.0.0", "-p", "8081"]
+    restart: "no"
+
+  # Traffic generation: Chromium via Playwright for browser flows, httpx and curl for API
+  # and authorized attack flows, and the raw-socket replay client. One-shot, like `client`.
+  generator:
+    build:
+      context: docker/generator
+    image: firewall-ia/generator:lab
+    profiles: ["extv1"]
+    networks: [firewall-lab]
+    volumes:
+      # Scripts are mounted, not baked, so DRAFT iteration needs no rebuild.
+      - ./scripts/external:/opt/external:ro
+      - ${LAB_LOG_DIR:-./docker/.lab-logs}:/logs
+    working_dir: /opt/external
+    restart: "no"
+
+networks:
+  firewall-lab:
+    driver: bridge
+
+volumes:
+  # Writable HuggingFace home. The hub cache itself is the read-only host bind
+  # mount above; this only holds whatever huggingface_hub insists on writing.
+  hf-home:

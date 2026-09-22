@@ -1,0 +1,27 @@
+# firewall-IA — Data Plane configuration INSIDE the Docker Lab.
+#
+# WHY THIS FILE EXISTS, and why it duplicates two keys from the repository-root
+# config.yaml:
+#
+#   data_plane.py resolves its configuration path relative to its own location
+#   (repository root / config.yaml) and is a validated component (Issues #16/#17,
+#   D34). The Docker Lab is infrastructure and must not change it, so instead of
+#   adding an environment-variable override to production code, compose bind-mounts
+#   THIS file over /app/config.yaml inside the data-plane container only.
+#
+#   The root config.yaml is untouched and still drives the local (non-Docker)
+#   workflow. Exactly one key differs: the classifier URL, because 127.0.0.1 inside
+#   the data-plane container is the data-plane container, not the control plane.
+#
+# Keep classifier_timeout_seconds in sync with the root config.yaml. If they ever
+# diverge deliberately, say why here.
+
+data_plane:
+  # Docker service name on the `firewall-lab` network, resolved by Docker's
+  # embedded DNS. Not 127.0.0.1: see above.
+  classifier_url: http://control-plane:8000/classify
+
+  # Identical to the root config.yaml. Operational limit for detecting a failed or
+  # hung classifier, NOT the project's latency objective (D35, D36). When it
+  # expires the request is blocked (fail-closed).
+  classifier_timeout_seconds: 3.0

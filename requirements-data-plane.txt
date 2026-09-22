@@ -1,0 +1,25 @@
+# firewall-IA — Data Plane dependencies (data_plane.py, tests/test_data_plane.py)
+#
+# Kept SEPARATE from requirements.txt on purpose. On Python < 3.13, mitmproxy 12.2.3
+# pins typing-extensions<=4.14, while pydantic 2.13.4 — used by the control plane —
+# requires typing-extensions>=4.14.1. Installing mitmproxy into the ML/control-plane
+# interpreter would downgrade a dependency of the verified control plane.
+#
+# The data plane never loads the model: it only talks HTTP to the control plane. So it
+# runs in its own isolated environment, and nothing here is installed into python3.12's
+# global/user site-packages:
+#
+#     uv venv --python 3.12 --seed .venv-dataplane
+#     .venv-dataplane/bin/python -m pip install -r requirements-data-plane.txt
+#
+# Versions installed and verified in that environment (Python 3.12.13).
+
+# Proxy runtime: mitmdump loads data_plane.py as an addon script.
+mitmproxy==12.2.3
+
+# HTTP client for POST /classify (async, so waiting on the classifier does not block
+# mitmproxy's event loop). Same version the control plane tests already pin.
+httpx==0.28.1
+
+# Reads config.yaml.
+PyYAML==6.0.3

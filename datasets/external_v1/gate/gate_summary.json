@@ -1,0 +1,125 @@
+{
+  "schema": "external-v1-phase-d-gate/1",
+  "status": "DRAFT",
+  "generated_utc": "2026-09-21T19:30:47.365694+00:00",
+  "frozen": false,
+  "trimmed_to_40": false,
+  "classify_contacted": false,
+  "v4_inference": "none",
+  "canonicalization": "scripts/dataset/parse_dataset_v4.canonical_key (D16, approved)",
+  "sources_checked": [
+    "V4 train split",
+    "V4 eval split",
+    "reports/diagnostics/real-http-fp-v1/cases.jsonl",
+    "Docker smoke fixtures (docker/client/smoke_test.py)",
+    "internal (other External v1 candidates)"
+  ],
+  "near_duplicate_heuristic": "Deterministic heuristic, documented exactly:\n\n      representation : canonical_key(payload_decoded) for BLOCK, else canonical_key(request_text)\n      tokens         : set of [a-z0-9]{3,} words of that representation\n      similarity     : Jaccard = |A n B| / |A u B|\n      prefilter      : inverted index over V4 tokens with document frequency <= df_cap\n                       (ultra-common tokens are non-discriminative and skipped); a candidate is\n                       only Jaccard-compared to V4 rows sharing >=1 indexed token\n      WARN           : Jaccard >= threshold (0.60); a WARN is manual-review evidence and does\n                       NOT exclude the candidate.",
+  "claim": "No exact or canonical collision was found against the checked V4 development data (train+eval, 31,340 rows) and prior project evaluation fixtures. No claim is made about TinyLlama pretraining, global payload novelty, formal OOD, or absence of semantic similarity.",
+  "per_cell": {
+    "browser-navigation": {
+      "captured": 47,
+      "gt_accepted": 47,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 5,
+      "near_dup_warn": 0,
+      "final_eligible": 42
+    },
+    "browser-forms-session": {
+      "captured": 48,
+      "gt_accepted": 48,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 11,
+      "near_dup_warn": 0,
+      "final_eligible": 37
+    },
+    "api-json": {
+      "captured": 48,
+      "gt_accepted": 48,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 48
+    },
+    "api-query": {
+      "captured": 48,
+      "gt_accepted": 48,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 48
+    },
+    "unseen-structure": {
+      "captured": 44,
+      "gt_accepted": 44,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 44
+    },
+    "sqli": {
+      "captured": 50,
+      "gt_accepted": 50,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 50
+    },
+    "cmdi": {
+      "captured": 48,
+      "gt_accepted": 48,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 48
+    },
+    "xss": {
+      "captured": 51,
+      "gt_accepted": 51,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 51
+    },
+    "path-traversal": {
+      "captured": 54,
+      "gt_accepted": 54,
+      "excluded_gt": 0,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 54
+    },
+    "ssrf": {
+      "captured": 51,
+      "gt_accepted": 49,
+      "excluded_gt": 2,
+      "excluded_exact_collision": 0,
+      "excluded_canonical_collision": 0,
+      "excluded_internal_duplicate": 0,
+      "near_dup_warn": 0,
+      "final_eligible": 49
+    }
+  },
+  "deficits_below_40": {
+    "browser-forms-session": 37
+  },
+  "all_cells_meet_40": false
+}

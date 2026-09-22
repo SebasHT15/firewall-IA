@@ -80,6 +80,7 @@ label quality in the baseline and the future research question intact.
 - **Date:** 2026-08-16
 - **Status:** APPROVED
 - **Implementation:** N/A (a target, not a build task)
+- **SUPERSEDED BY D36** (2026-09-18). The original entry below is preserved unchanged.
 
 **Decision.** Initial engineering target: **end-to-end added latency P95 ≤ 200 ms.**
 
@@ -101,7 +102,7 @@ choosing a classifier timeout, which is in turn a prerequisite for D4.
 
 - **Date:** 2026-08-16
 - **Status:** APPROVED
-- **Implementation:** OUT OF CURRENT SCOPE — applies when the inline gateway is built
+- **Implementation:** **DONE (first version) — `data_plane.py`, 2026-09-16; see D34**
 
 **Decision.** Default architecture decision: **FAIL-CLOSED.**
 
@@ -1104,14 +1105,531 @@ been delivered. Pretending otherwise would misrepresent the security property.
 
 ---
 
+## D31 — Model-side latency is measured with a device-synchronized stopwatch
+
+- **Date:** 2026-09-09
+- **Status:** APPROVED
+- **Implementation:** DONE — `inference_core.classify_timed()` / `device_sync()` (Issue #9)
+
+**Decision.** The canonical model-side latency measurement is the time spent inside
+`generate()`, bracketed by an explicit device synchronization on both sides.
+
+```
+IN  scope   generate()
+OUT scope   prompt construction · tokenization · host->device transfer ·
+            decoding · contract parsing
+```
+
+The out-of-scope stages are still timed, but they are reported as separate pipeline
+stages and are never pooled into the primary metric. The scope carries an identifier —
+`generate-only/device-synchronized/v1` — and two results with different scope
+identifiers are **not comparable**, whatever units they are printed in.
+
+**This is a stopwatch correction, not a model improvement.** CUDA kernel launches are
+asynchronous: a timer stopped immediately after `generate()` returns can measure the
+*submission* of work rather than its completion. `torch.cuda.synchronize()` removes that
+class of error by construction. Nothing about the model, adapter, prompt, generation
+parameters, parsing or quantization changed, and the decision returned for a given
+request is unchanged (verified: identical output through both code paths).
+
+**Measured effect of the correction on this machine.** Interleaved A/B measurement,
+n=40 per arm, same requests, same process, run twice:
+
+| measurement | unsynchronized mean | synchronized mean | delta |
+|---|---:|---:|---:|
+| before the baseline runs | 223.75 ms | 223.77 ms | **+0.020 ms (+0.009%)** |
+| after the baseline runs (`verify-timing`) | 235.08 ms | 234.17 ms | **−0.909 ms (−0.387%)** |
+
+The delta is **below 0.4% and inconsistent in sign**, i.e. indistinguishable from the
+machine's own run-to-run noise. The explanation is that HuggingFace `generate()` already
+forces a synchronization on every decoding step when it evaluates stopping criteria, so
+the older timer was, in practice, already measuring completed work. The decoded output is
+identical through both code paths.
+
+Reproduce: `python3.12 benchmark_inference.py verify-timing --experiment <id> --limit 40`.
+Record: `reports/benchmarks/baseline-local-v1/timing_method_ab.json`.
+
+The correction is therefore kept for **guaranteed** correctness rather than for a
+different number, and it must hold under future backends that may not synchronize
+internally. It also means the historical figures were not inflated or deflated by
+missing synchronization — but they remain **historical antecedents** rather than
+comparands, because they were produced under a different protocol (single run, no
+separation of load / cold start / warm-up from steady state). See **D32**.
+
+**Rationale.** A latency programme whose first act is to optimize the engine (M2, D23)
+must be able to prove that a later reduction is real. That requires knowing that the
+stopwatch measures finished GPU work under every future backend, including ones that do
+not happen to synchronize internally. Establishing the guarantee now — and quantifying
+that it changes nothing today — is cheaper than discovering later that a "reduction" was
+an artifact of asynchronous submission.
+
+---
+
+## D32 — Benchmark experiment identity, immutability and comparison rules
+
+- **Date:** 2026-09-09
+- **Status:** APPROVED
+- **Implementation:** DONE — `benchmark_inference.py`, `benchmark_compare.py` (Issue #9)
+
+**Decision.** Every inference benchmark is an **experiment with an identity**, stored
+under `reports/benchmarks/<experiment-id>/`, and comparisons between experiments follow
+fixed rules.
+
+**Identity.** An experiment records its timing scope, dataset SHA-256, request selection
+and order, protocol version, batch size, concurrency, run count, model and adapter
+hashes, effective quantization, and the full machine environment. The reference
+experiment is **`baseline-local-v1`**.
+
+**Immutability.** `baseline-local-v1` is a fixed reference. A new measurement takes a new
+experiment id; the harness refuses to overwrite an experiment that already has results.
+A candidate may be compared against the original baseline **and** against its own
+immediately preceding version.
+
+**Comparison.**
+
+```
+percentage reduction  =  100 * (baseline - candidate) / baseline
+speedup factor        =  baseline / candidate
+```
+
+These are distinct quantities — a 50% reduction is a 2.0x speedup — and are reported
+separately, per statistic. A negative reduction is a regression and is reported as such.
+Missing values, zero references and negative references are reported as undefined, never
+silently rendered as 0%.
+
+**Two results are not comparable merely because both are in milliseconds.** Timing scope,
+dataset hash, request count, selection policy, request order, protocol version, batch
+size and concurrency must match. A mismatch is **blocking**: the comparison is stamped
+NOT COMPARABLE and the tool exits non-zero.
+
+**Attribution.**
+
+- A **hardware** change (GPU, CPU, device) does not block a comparison but invalidates
+  any claim of a software improvement. The base version of the software must be re-run on
+  the new hardware, and the candidate compared against *that*.
+- When hardware and software both changed, the difference is reported as a **joint
+  effect**. Causality is not attributed to either alone.
+- A speed improvement is **never** presented without naming any accompanying quality
+  degradation. The comparison tool raises this pairing automatically.
+
+**Rationale.** The point of a baseline is to make a future claim falsifiable. Without a
+recorded identity, "P95 dropped 40%" is unverifiable: the two runs could differ in
+dataset, in what the stopwatch covered, in the machine, or in how many requests were
+measured. Encoding the compatibility rules in the tool rather than in prose means an
+invalid comparison fails loudly instead of being asserted confidently — and it is the
+reason the historical 270.8 ms is blocked automatically when someone tries to use it as
+a comparand (**D31**).
+
+---
+
+## D33 — Separate Python environments for the data plane and the ML/control plane
+
+- **Date:** 2026-09-16
+- **Status:** APPROVED
+- **Implementation:** DONE — `.venv-dataplane`, `requirements-data-plane.txt` (Issue #16)
+
+**Decision.** The data plane (mitmproxy) runs in its own Python environment,
+`.venv-dataplane`, with its own dependency file, `requirements-data-plane.txt`.
+`requirements.txt` remains the ML/control-plane stack and does not list mitmproxy. No data
+plane dependency is installed into the ML interpreter, and no ML dependency is changed to
+make mitmproxy fit.
+
+**Rationale.** mitmproxy 12.2.3 pins `typing-extensions<=4.14` on Python < 3.13, while
+pydantic 2.13.4, used by the control plane, requires `typing-extensions>=4.14.1`. A shared
+interpreter would downgrade a dependency of the verified control plane. The planes only
+talk over HTTP (D34), so separate environments cost nothing functionally. This is a scoped
+exception to the "no virtual environments" preference in `CONTEXT.md` §2, which still
+applies to the ML stack.
+
+---
+
+## D34 — Data plane enforcement: decisions over HTTP, 403 / 503, fail-closed
+
+- **Date:** 2026-09-16
+- **Status:** APPROVED
+- **Implementation:** DONE (first version) — `data_plane.py` (Issues #16, #17)
+
+**Decision.**
+
+- The proxy obtains every decision from the control plane over HTTP (`POST /classify`,
+  unchanged D25 contract). It **never loads the model**.
+- `ALLOW` — HTTP 200 with `status: "ok"` and `decision: "ALLOW"` — lets the request
+  continue to the destination. Nothing else does.
+- `BLOCK` from the model: the proxy answers **`403`**, and the request is not forwarded.
+- Classifier failure or no valid decision (timeout, connection error, non-200 answer,
+  invalid JSON, `status: "invalid"`, missing or unknown decision, or an unexpected error
+  inside the addon): the proxy answers **`503`**, and the request is not forwarded.
+- **Fail-closed (D4) is confirmed** as the live behaviour.
+- The internal HTTP client uses `trust_env=False`, so `HTTP_PROXY`/`HTTPS_PROXY` cannot
+  route the classifier call back into the same proxy.
+
+**Evidence.** `tests/test_data_plane.py` (21 tests). Manual run on 2026-09-16 with the real
+V4 model:
+
+- ALLOW reached the destination (`200`).
+- A SQL injection request got `403` and never reached the destination.
+- With the classifier stopped, a benign request got `503` and never reached the
+  destination.
+
+mitmproxy 12.2.3 forwards a request whose hook raised, and keeps proxying when a hot
+reload of the script fails. Both behaviours were verified, and both are closed in
+`data_plane.py`.
+
+**Rationale.** Separate 403 and 503 answers keep "the model judged this request malicious"
+distinct from "no decision could be obtained" for both client and operator. This carries
+the D28 distinction through to traffic. `trust_env=False` removes the request loop that a
+shell configured to use the gateway would otherwise create.
+
+---
+
+## D35 — D3 is a performance objective; the classifier timeout is operational
+
+- **Date:** 2026-09-16
+- **Status:** APPROVED
+- **Implementation:** DONE — `config.yaml`, `data_plane.classifier_timeout_seconds: 3.0`
+
+**Decision.**
+
+- **P95 end-to-end ≤ 200 ms (D3) is a project performance objective.** It is **not** a
+  blocking or acceptance criterion for the first data plane implementation.
+- Existing latency figures are **model-side / control-plane** measurements: the Issue #8
+  evaluation, the preliminary Issue #15 observation and `baseline-local-v1`. **No formal
+  end-to-end benchmark of the complete system exists yet** (Issue #18).
+- The data plane's classifier timeout is configurable, with an **initial value of 3 s**.
+  It is an **operational limit** for detecting a failed or hung classifier and applying
+  fail-closed (D34). It **does not represent the latency objective**, and it **will be
+  tuned with end-to-end evidence**.
+
+**Relationship to earlier entries.** Their text is preserved; none is superseded.
+
+- D3's decision is unchanged. Its rationale described a stated latency budget as a
+  prerequisite for choosing a classifier timeout, but the timeout is no longer chosen
+  that way.
+- D23, D26 and D29 describe model-side P95 as already exceeding "the entire 200 ms
+  end-to-end budget". Those statements compare a model-side figure with the objective's
+  value, and they motivate prioritizing inference optimization (M2) and the fast path.
+  They are not end-to-end measurements and not a failed requirement; D23 already states
+  that its comparison is not a formal D3 failure.
+
+**Rationale.** A 200 ms timeout would sit below the measured steady-state model-side P50
+(238.82 ms, `baseline-local-v1`), so it would have failed closed on at least half of the
+requests in that measurement. The timeout answers "is the classifier broken?". The
+objective answers "is the gateway fast enough?", a question only an end-to-end benchmark
+can settle.
+
+---
+
+## D36 — Latency objective: P95 of the inference pipeline ≤ 200 ms (supersedes D3)
+
+- **Date:** 2026-09-18
+- **Status:** APPROVED — **supersedes D3**
+- **Implementation:** N/A (an objective, not a build task). **Not met** by the current
+  baseline.
+
+**Decision.** The project latency objective is:
+
+> **P95 of the latency added by the model inference pipeline ≤ 200 ms, in steady state.**
+
+The inference pipeline is everything needed to turn one raw HTTP request into a valid
+ALLOW/BLOCK decision:
+
+- preparation for inference: prompt construction, tokenization, host→device transfer;
+- model execution: `generate()`;
+- post-processing: decoding and contract parsing into a valid `ALLOW` / `BLOCK` decision.
+
+Excluded: initial model load · cold start (the first inference in a fresh process) and
+warm-up · HTTP transport to and from the control plane · network latency · the data
+plane / proxy · the destination server · complete end-to-end system latency.
+
+**Measurement.**
+
+- Steady state only. Model load, cold start and warm-up are measured and reported
+  separately. They are never pooled into the objective's statistic and never discarded.
+- Instrument: `benchmark_inference.py` under the `baseline-local-v1` protocol (batch size
+  1, concurrency 1, recorded hardware). The statistic is `steady_pipeline_p95_ms`, scope
+  `prompt+tokenize+transfer+generate+decode+parse`, which the harness already records.
+  `generate()` stays the benchmark's primary comparison metric (D31, D32), and it accounts
+  for almost all of the pipeline.
+- `model_latency_ms` from `/classify` covers `generate()` only, and `test_model.py` pools
+  the cold first inference into its latency figures. Neither is the objective's
+  instrument.
+
+**Current status: not met.** `baseline-local-v1` (2026-09-09, RTX 4090 Laptop GPU,
+n = 18,618): steady-state pipeline P95 **269.58 ms**; `generate()` alone 269.01 ms. The
+≤ 200 ms figure is an **optimization objective** and must not be presented as met. On this
+machine P95 moves by about 11% between back-to-back runs, so progress claims must control
+run order and thermal state (D32).
+
+**Rationale.** The objective measures the cost of adding the ML component to the gateway,
+not the total latency of every component in the system. The proxy, HTTP transport,
+network and destination server exist with or without a classifier, and they depend on
+deployment choices unrelated to the model. Stated at the inference pipeline, the objective
+can be measured today with the existing harness, and the comparison with
+`baseline-local-v1` is direct rather than a lower bound.
+
+**Relationship to earlier entries.** Their text is preserved; none is rewritten.
+
+- **D3 is superseded.** Its objective (end-to-end added latency P95 ≤ 200 ms) no longer
+  applies. Its instruction to measure model-only, model + API, proxy overhead and
+  end-to-end latency separately, with P50, P95, P99 and throughput, still stands.
+- **D19, D23, D26, D29 and D35** describe the 200 ms objective as an end-to-end budget.
+  That description is superseded. Their conclusions stand, and D23's becomes stronger: the
+  inference latency is now compared with the objective directly, not as a one-sided lower
+  bound, and the current HuggingFace path does not meet it. GGUF / Q4_K_M / llama.cpp
+  (M2) stays on the critical path.
+- **D35 otherwise stands.** The objective is not an acceptance criterion for the first
+  data plane, and the 3 s classifier timeout is an operational limit not derived from it.
+- **The fast path (D29, D30) is not the mechanism for meeting D36.** D36 measures the
+  performance of the inference pipeline. The fast path is a future optimization of overall
+  latency and load that avoids some inferences; it does not reduce the time of an
+  inference.
+- **End-to-end latency** is still measured and reported per layer (Issue #18). No
+  end-to-end threshold is defined at present.
+- Artifacts produced before this entry (`reports/e5_evaluation_methodology.txt`,
+  `reports/v4_clean_baseline_results.txt`, `reports/v4_inference_benchmark.md`,
+  `reports/benchmarks/baseline-local-v1/`) use the D3 wording and are not rewritten.
+
+---
+
+## D37 — Evaluation data roles from V5 on: train, validation, internal test, external test
+
+- **Date:** 2026-09-18
+- **Status:** APPROVED
+- **Implementation:** NOT YET — applies from V5. V4 is not changed retrospectively.
+
+**Decision.** From V5 on, every model version is developed and evaluated with four
+separate data roles:
+
+| Role | Used for | Never used for |
+|---|---|---|
+| **TRAIN** | fitting the weights | — |
+| **VALIDATION** | checkpoint selection, hyperparameters and development decisions | reporting final results |
+| **INTERNAL TEST** | independent evaluation inside the internal pipeline's distribution | selecting a checkpoint or tuning the model |
+| **EXTERNAL TEST** | independent evaluation with respect to the internal pipeline: measuring generalization and comparing versions | correcting the model: its individual examples do not guide dataset or model changes |
+
+- Sets are separated by logical identity before rendering (D16), external sets included.
+- **A test set that guides a change is no longer a test set.** Reporting aggregate and
+  per-slice metrics does not affect a test set. If the individual errors of a test set are
+  inspected and those errors guide a dataset or model change, that set stops being an
+  independent test and becomes **development / error-analysis data**. The change is
+  recorded with the set, and claims about the next version need a test set that has not
+  been used that way.
+- Individual failures are studied, hypotheses formed and A/B tests seeded on
+  development / error-analysis data (`docs/ml_evaluation_methodology.md` §1, §4).
+- Comparing two versions requires a test set that neither version was trained or tuned on.
+
+**V4 did not fully meet this separation.** `datasets/v4_clean/eval.jsonl` served as
+VALIDATION, because `load_best_model_at_end` selected `checkpoint-2200` on its `eval_loss`,
+and afterwards as the internal evaluation behind every reported V4 metric. It is held out
+from training (0.00% exact leakage, grouped split per D16) but it is **not** an independent
+internal test (D24). V4 has no external test. **V4 is not changed retrospectively:** its
+results stand as reported, with this limitation stated.
+
+**Consequences for V5.** VALIDATION is a grouped split carved from training groups, so the
+internal test is only ever reported. If individual V4 eval errors, such as the 92 false
+negatives under analysis (D21), guide V5 changes, `eval.jsonl` becomes development data for
+those changes and cannot serve as an independent test of V5.
+
+**Rationale.** A set used to select or correct a model is optimized against, so its metrics
+become optimistic. Fixing the roles in advance keeps the internal and external tests
+unbiased, and makes any contamination a recorded event rather than something discovered
+after results are reported.
+
+**Relationship to earlier entries.** Nothing is superseded. D37 extends **D24**, which
+fixed the terminology for V4's eval split, and generalizes the contamination rule of
+**D22** from real-traffic validation to every test set. The metric definitions of **D19**
+are unchanged.
+
+---
+
+## D38 — External test construction: capture, label, gate and freeze before model exposure
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** DONE — External Test v1, frozen at `36df2ee`
+
+**Decision.** An external test set is built in this order, and no case reaches the model —
+directly or through the gateway — until the last step is committed:
+
+1. **Capture.** Real clients drive applications the project owns, inside the authorized
+   lab, through a capture-only path with no classifier. The frozen request text is the
+   captured bytes, never a hand-written or hand-edited string.
+2. **Ground truth.** Assigned from the intent of the flow that produced each request,
+   never from a model output. Two-pass review; ambiguous cases are excluded, not guessed,
+   and every exclusion is logged.
+3. **Independence gate.** Blocking checks for exact and canonical collisions
+   (`parse_dataset_v4.canonical_key`, D16) against the model's train and eval data, prior
+   diagnostics and fixtures, plus internal duplicates. Freeze cannot proceed while any
+   check fails.
+4. **Deterministic selection** to the composition declared in advance: a seeded,
+   content-independent key, sorted, first *n* per cell. Seed and key formula are recorded;
+   no manual choice and no model output enter the selection.
+5. **Freeze.** Cases, a manifest with `status: FROZEN`, SHA-256 sums and an aggregate
+   integrity hash, committed.
+6. **Only then** execution.
+
+Composition, class balance, slices and metric definitions are fixed in a written
+protocol before the data exists. The independence claim is limited to the development
+data actually checked: no claim is made about the base model's pretraining corpus, global
+novelty or out-of-distribution status.
+
+**Rationale.** Labels or selections made after the model has been seen can be steered by
+its output, knowingly or not. D19 froze the V4 metric definitions before training for the
+same reason. `real-http-fp-v1` used benign texts built by hand from real clients' header
+sets; capturing real traffic replaces that construction step.
+
+**Relationship to earlier entries.** Realizes, for V4, the laboratory validation required
+by **D22** and the EXTERNAL TEST role defined by **D37**. Uses the D16 canonicalization.
+Nothing is superseded. Protocol: `docs/external_test_v1_protocol.md`.
+
+---
+
+## D39 — Frozen external test sets are immutable; any change requires a new version
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** DONE — External Test v1 (`datasets/external_v1/manifest.json`)
+
+**Decision.**
+
+- A frozen external set is immutable from the commit containing its manifest with
+  `status: FROZEN`, `artifact_sha256` and `frozen_utc`. That commit must be an ancestor of
+  every run that cites the set.
+- **Any change to any case requires a new version** (External v2, v3, …), never an edit —
+  including correcting a label later found to be wrong, removing a case or rebalancing a
+  cell. A mislabel is disclosed as a known defect of the version it is in.
+- **Reserve cases are not substitutes.** Eligible cases the seeded selection did not pick
+  are kept as evidence of the selection and never replace a frozen case.
+- A run verifies the frozen integrity hash before executing and refuses to reuse an
+  existing run id (the **D32** rule).
+- **Raw execution evidence is never rewritten.** When a raw log holds more than one run or
+  session, the analysis uses a derived file beside it; the original stays byte-for-byte
+  as captured.
+
+**Rationale.** A test set that can be edited after its results are known can be optimized
+against. Immutability turns every later change into a recorded new version instead of a
+silent revision of the old one.
+
+**Relationship to earlier entries.** Extends to evaluation sets the immutability and
+identity rules **D32** set for benchmark experiments. Recorded in the External v1 manifest
+(`immutability`).
+
+---
+
+## D40 — Using External Test v1 errors for V5 makes it V5 development data; External v2 is required for V5
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** NOT YET — triggers when V5 error analysis starts
+
+**Decision.** Reporting External v1's aggregate and per-cell metrics does not consume it.
+The moment individual External v1 cases or errors — for example its false positives — are
+inspected to form hypotheses or to guide any V5 change (dataset, prompt, model,
+threshold, checkpoint), External v1 becomes **V5 development / error-analysis data**:
+
+- the transition and its date are recorded beside the set, in a separate record — the
+  frozen manifest is not edited (D39);
+- **any claim about V5's external performance requires External v2**, built under D38
+  before V5 is exposed to it, and collision-gated against External v1 as well as against
+  V5's own development data;
+- **External v2 must execute the proxy-to-classifier byte-equivalence check** that External
+  v1 preregistered (protocol §11) but did not run: for every gateway execution, the exact
+  bytes the data plane sends to `/classify` are captured, hashed and compared with the
+  frozen `request_text`, and every mismatch is recorded. The capture tooling is verified
+  present and working in the execution environment before any case is sent; a run that
+  cannot capture does not start. Client-side hashes of the text sent, and direct-vs-gateway
+  decision agreement, do not substitute for this check;
+- **External v2 must implement and run the CSIC-ancestry warning check** that External v1
+  pre-registered (protocol §7, check 7) but did not execute, before freeze, against a local
+  copy of the CSIC data verified by the SHA-256 in `docs/data_sources.md`. External v1's
+  missing check is not reconstructed after exposure;
+- External v1 remains the valid record of **V4's** external result. A V4-vs-V5 comparison
+  on External v1 must be labelled as a comparison on V5 development data.
+
+**Rationale.** Once its errors have guided the changes, a set measures how well V5 was fitted
+to it, not how V5 generalizes. The byte-check requirement exists because External v1's
+run-001 could not execute it (no `strace` in the data-plane runtime), so External v1 has no
+direct byte-for-byte evidence that the classifier input equalled the frozen text for its
+400 gateway cases. Decision agreement is not proof of byte equivalence.
+
+**Relationship to earlier entries.** Applies the general rule of **D37** to External v1
+and V5, and makes the consequence — External v2 — an explicit commitment. The External v1
+manifest records the same tripwire (`d37_tripwire`).
+
+---
+
+## D41 — Gateway evaluations report L1, L2 and L3 separately
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** DONE — External Test v1 (`external-v1-run-001`)
+
+**Decision.** Every evaluation executed through the gateway reports three levels and never
+merges them into one number:
+
+| Level | Compares | Error means |
+|---|---|---|
+| **L1 — model** | ground truth vs the model's decision | FP, FN, invalid output |
+| **L2 — enforcement** | the model's decision vs the gateway's observed behaviour (HTTP status + destination receipt), under the D34 contract, whether or not the decision was correct | enforcement fault |
+| **L3 — end-to-end** | ground truth vs delivery to the destination | BLOCK-labelled request delivered, benign request broken |
+
+- Every L3 failure is attributed to a model error or an enforcement error. Example: ground
+  truth BLOCK, model ALLOW, request forwarded → L1 false negative, L2 conformant, L3
+  BLOCK-labelled request delivered.
+- **Delivery is not exploitation.** A delivered BLOCK-labelled request reached the
+  destination; attack success is not measured and is never implied.
+- Headline L1 metrics come from the primary gateway channel, repetition 1. Cases that
+  differ across repetitions are flagged, counted and excluded from the headline, never
+  majority-voted. Direct `/classify` calls are a per-layer consistency control and never a
+  headline metric.
+
+**Rationale.** A single end-to-end figure cannot tell a model that misjudged a request from
+a gateway that mishandled a correct decision, and those failures have different fixes.
+
+**Relationship to earlier entries.** Builds on the enforcement contract of **D34**.
+Defined for v1 in `docs/external_test_v1_protocol.md` §2; this entry makes it the rule for
+every later gateway evaluation.
+
+---
+
+## D42 — External-test and diagnostic rates are reported as test-specific, never as operational rates
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** N/A — reporting rule
+
+**Decision.**
+
+- FPR, precision and accuracy measured on a test with a constructed class balance are
+  always reported with their numerator, denominator and the test's name — for example
+  "68/200 benign cases in External Test v1" — and **never** as an operational or
+  production FPR, precision or prevalence. External v1 is 50/50 by construction.
+- Diagnostic counts on case mixes built to provoke failures (for example
+  `real-http-fp-v1`, 37/149) are diagnostic counts, not rates.
+- A generalization gap is not described as proven overfitting without a study designed
+  to test that. An unseen-structure or distribution-shift slice measures robustness; it is
+  not described as OOD detection, which the model does not perform.
+- Latency observed during an evaluation run is an observation, not a benchmark: the Decision D36
+  objective is measured only by its instrument, and end-to-end latency only by Issue #18.
+
+**Rationale.** Precision and accuracy depend on class prevalence, and a single lab
+application with a fixed 50/50 mix does not represent any deployment's traffic. Reported
+without its context, a test-specific rate reads as a deployment property.
+
+**Relationship to earlier entries.** Extends the reporting discipline of **D18** and
+**D19** to external tests and diagnostics. Consistent with the limitations pre-registered
+in `docs/external_test_v1_protocol.md` §13.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
 |----|-------|--------|----------------|
 | D1 | HTTP request representation — neutralize envelope shortcuts | APPROVED | NOT YET |
 | D2 | CSIC excluded anomalies — keep out of baseline | APPROVED FOR FUTURE WORK | N/A |
-| D3 | Latency target — P95 ≤ 200 ms end-to-end added | APPROVED | N/A |
-| D4 | Failure behavior — FAIL-CLOSED | APPROVED | OUT OF CURRENT SCOPE |
+| D3 | Latency target — P95 ≤ 200 ms end-to-end added | **SUPERSEDED BY D36** | N/A |
+| D4 | Failure behavior — FAIL-CLOSED | APPROVED | **DONE (first version, D34)** |
 | D5 | Remove `###END###`, use native termination | APPROVED | **DONE (E4)** |
 | D6 | Dataset versioning — manifest-based, no `git rm` yet | APPROVED | NOT YET |
 | D7 | Scientific integrity over the historical 91% | APPROVED | N/A |
@@ -1138,6 +1656,18 @@ been delivered. Pretending otherwise would misrepresent the security property.
 | D28 | Control Plane readiness behaviour — 200/`model_loaded`, 503 | APPROVED | **DONE (#15)** |
 | D29 | Heuristic suspicious scoring and benign fast path (allow-only) | APPROVED | NOT YET (#35, #36, #38) |
 | D30 | Deferred model validation for fast-path traffic — no online learning | APPROVED | NOT YET (#37) |
+| D31 | Model-side latency measured with a device-synchronized stopwatch | APPROVED | **DONE (#9)** |
+| D32 | Benchmark experiment identity, immutability and comparison rules | APPROVED | **DONE (#9)** |
+| D33 | Separate Python environments for the data plane and the ML/control plane | APPROVED | **DONE (#16)** |
+| D34 | Data plane enforcement — HTTP decisions, 403 / 503, fail-closed | APPROVED | **DONE (first version, #16/#17)** |
+| D35 | D3 is a performance objective; classifier timeout (3 s) is operational | APPROVED | **DONE** |
+| D36 | Latency objective — P95 of the inference pipeline ≤ 200 ms, steady state (supersedes D3) | APPROVED | N/A — **not met** (269.58 ms) |
+| D37 | Evaluation data roles from V5 — train / validation / internal test / external test; a test set whose errors guide changes becomes development data | APPROVED | NOT YET — from V5; V4 not changed |
+| D38 | External test construction — capture, label, gate and freeze before model exposure | APPROVED | **DONE (External v1, `36df2ee`)** |
+| D39 | Frozen external sets immutable — any change needs a new version; reserves never substitute; raw evidence never rewritten | APPROVED | **DONE (External v1)** |
+| D40 | Using External v1 errors for V5 makes it V5 development data — External v2 required for V5 claims, with the proxy-to-`/classify` byte check and the CSIC-ancestry check External v1 did not run | APPROVED | NOT YET — triggers at V5 error analysis |
+| D41 | Gateway evaluations report L1 model / L2 enforcement / L3 end-to-end separately | APPROVED | **DONE (`external-v1-run-001`)** |
+| D42 | External-test and diagnostic rates are test-specific, never operational | APPROVED | N/A (reporting rule) |
 
 ---
 

@@ -1,0 +1,417 @@
+firewall-IA Docker Lab smoke run 20260921T011153Z
+log: ./docker/.lab-logs/smoke-20260921T011153Z.log
+
+[1m== A. startup and readiness[0m
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+waiting for the control plane healthcheck (model load)
+[32mPASS[0m control plane healthy (/health reports model_loaded: true)
+NAME                              IMAGE                           COMMAND                  SERVICE         CREATED          STATUS                    PORTS
+firewall-ia-lab-control-plane-1   firewall-ia/control-plane:lab   "python3 -m uvicorn …"   control-plane   27 minutes ago   Up 27 minutes (healthy)   8000/tcp
+firewall-ia-lab-data-plane-1      firewall-ia/data-plane:lab      "mitmdump -s data_pl…"   data-plane      27 minutes ago   Up 27 minutes             127.0.0.1:8080->8080/tcp
+firewall-ia-lab-destination-1     firewall-ia/destination:lab     "python3 /srv/serve.…"   destination     27 minutes ago   Up 27 minutes (healthy)   9000/tcp
+destination receipts before smoke traffic: 3
+
+[1m== B. ALLOW path[0m
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-39aa62254b88 Creating 
+ Container firewall-ia-lab-client-run-39aa62254b88 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[ALLOW] GET http://app.fwlab.test:9000/index.html
+[ALLOW] via proxy http://data-plane:8080
+[ALLOW] status=200 (expected 200)
+[ALLOW] destination received 1 new request(s) (expected >=1)
+[ALLOW]   receipt: GET /index.html host=app.fwlab.test:9000
+[ALLOW] body[:120]=b'<!doctype html>\n<meta charset="utf-8">\n<title>firewall-IA lab destination</title>\n<h1>destination reached</h1>\n<p>This p'
+[ALLOW] PASS
+
+--- summary ---
+PASS  case_allow
+[32mPASS[0m ALLOW forwarded and received
+
+[1m== C. BLOCK path[0m
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-3a5cdeaefdac Creating 
+ Container firewall-ia-lab-client-run-3a5cdeaefdac Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[BLOCK] GET http://app.fwlab.test:9000/products.html?id=1%27%20OR%20%271%27%3D%271
+[BLOCK] via proxy http://data-plane:8080
+[BLOCK] status=403 (expected 403)
+[BLOCK] destination received 0 new request(s) (expected 0)
+[BLOCK] body[:120]=b'Request blocked by firewall-IA.\n'
+[BLOCK] PASS
+
+--- summary ---
+PASS  case_block
+[32mPASS[0m BLOCK answered 403 and not forwarded
+
+[1m== D. fail-closed path (classifier made unavailable)[0m
+ Container firewall-ia-lab-control-plane-1 Stopping 
+ Container firewall-ia-lab-control-plane-1 Stopped 
+[32mPASS[0m control plane confirmed 'exited' before the request
+ Container firewall-ia-lab-client-run-e33806cb5d14 Creating 
+ Container firewall-ia-lab-client-run-e33806cb5d14 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[FAILCLOSED] the control plane must be stopped by the caller (docker compose stop control-plane)
+
+[FAILCLOSED] GET http://app.fwlab.test:9000/index.html
+[FAILCLOSED] via proxy http://data-plane:8080
+[FAILCLOSED] status=503 (expected 503)
+[FAILCLOSED] destination received 0 new request(s) (expected 0)
+[FAILCLOSED] body[:120]=b'Request blocked by firewall-IA: classifier unavailable (fail-closed).\n'
+[FAILCLOSED] PASS
+
+--- summary ---
+PASS  case_failclosed
+[32mPASS[0m fail-closed 503 and not forwarded (classifier 'exited' throughout)
+
+[1m== restoring the control plane[0m
+[32mPASS[0m control plane healthy again
+
+[1m== E. normal operation restored[0m
+ Container firewall-ia-lab-data-plane-1 Running 
+ Container firewall-ia-lab-destination-1 Running 
+ Container firewall-ia-lab-control-plane-1 Running 
+ Container firewall-ia-lab-control-plane-1 Waiting 
+ Container firewall-ia-lab-control-plane-1 Healthy 
+ Container firewall-ia-lab-destination-1 Waiting 
+ Container firewall-ia-lab-destination-1 Healthy 
+ Container firewall-ia-lab-client-run-39e23472f082 Creating 
+ Container firewall-ia-lab-client-run-39e23472f082 Created 
+firewall-IA Docker Lab — INFRASTRUCTURE SMOKE TEST
+not an evaluation, not a benchmark, no model metric may be derived from it
+proxy=http://data-plane:8080 destination=app.fwlab.test:9000 access_log=/logs/destination-access.jsonl
+[ready] proxy data-plane:8080 accepts connections
+
+[ALLOW] GET http://app.fwlab.test:9000/index.html
+[ALLOW] via proxy http://data-plane:8080
+[ALLOW] status=200 (expected 200)
+[ALLOW] destination received 1 new request(s) (expected >=1)
+[ALLOW]   receipt: GET /index.html host=app.fwlab.test:9000
+[ALLOW] body[:120]=b'<!doctype html>\n<meta charset="utf-8">\n<title>firewall-IA lab destination</title>\n<h1>destination reached</h1>\n<p>This p'
+[ALLOW] PASS
+
+--- summary ---
+PASS  case_allow
+[32mPASS[0m ALLOW works again after restart
+
+[1m== service logs (kept with this run)[0m
+----- control-plane -----
+control-plane-1  | Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  29%|██▉       | 58/201 [00:00<00:00, 566.84it/s]Loading weights:  74%|███████▎  | 148/201 [00:00<00:00, 753.37it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 768.90it/s]
+control-plane-1  | 2026-09-21 00:44:49,659 INFO    firewall.control_plane: startup: model ready on cuda in 1.6 s
+control-plane-1  | INFO:     Application startup complete.
+control-plane-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+control-plane-1  | INFO:     127.0.0.1:58316 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 00:44:52,479 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 00:44:52,929 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=447.1
+control-plane-1  | INFO:     172.18.0.4:59362 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 00:44:54,782 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 00:44:55,014 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=231.2
+control-plane-1  | INFO:     172.18.0.4:47476 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48966 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54348 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52640 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:49108 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48004 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:39150 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59826 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40296 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43030 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:57720 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:46630 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:39282 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54286 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:57720 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53182 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59060 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:47422 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:39442 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33264 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52302 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43842 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40450 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52986 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43888 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37264 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:36080 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37350 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53842 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58110 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33832 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45972 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:42200 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:55806 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:50972 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:46764 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54216 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58972 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43260 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37512 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:42680 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:35648 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52696 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53596 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45802 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:35428 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37738 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:44674 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58454 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58568 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:35024 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:47784 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59684 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:55090 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52692 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33498 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59566 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33966 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:55008 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:47062 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:36128 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45742 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:57028 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40200 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37684 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:41540 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40478 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:50286 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:49338 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40410 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:49964 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43014 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33504 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53290 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:56566 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38150 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52022 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48698 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38870 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:56134 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:49340 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59456 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38516 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58774 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37502 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:44284 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:34060 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:46756 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58424 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33248 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:39054 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48936 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40848 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:34748 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:49590 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:44090 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:50216 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37400 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43758 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59858 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38004 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58390 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:35670 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:56138 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38964 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:34964 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:40378 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:55716 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45476 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:42090 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58002 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:37618 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59966 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:41656 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:35450 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:56318 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:60566 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53564 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48200 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53806 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45670 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:33530 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:57358 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:39396 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45326 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:59870 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:56702 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:35802 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:34870 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:50828 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54080 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:46652 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:57850 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54010 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:46810 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53222 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52216 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54942 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45924 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52626 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54408 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:60704 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:54128 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:58072 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:42638 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:42864 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:60330 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48744 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:41294 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:46796 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:48748 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38074 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38506 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:43754 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:45410 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:50766 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:42592 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:53662 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:52010 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:34154 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:60888 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 01:11:55,437 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 01:11:55,690 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=235.7
+control-plane-1  | INFO:     172.18.0.4:59670 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | INFO:     127.0.0.1:38352 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 01:11:57,352 INFO    firewall.control_plane: classify: received request (158 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 01:11:57,517 INFO    firewall.control_plane: classify: status=ok decision=BLOCK reason='SQL injection payload detected' model_latency_ms=164.4
+control-plane-1  | INFO:     172.18.0.4:59672 - "POST /classify HTTP/1.1" 200 OK
+control-plane-1  | INFO:     Shutting down
+control-plane-1  | INFO:     Waiting for application shutdown.
+control-plane-1  | 2026-09-21 01:11:57,879 INFO    firewall.control_plane: shutdown
+control-plane-1  | INFO:     Application shutdown complete.
+control-plane-1  | INFO:     Finished server process [1]
+control-plane-1  | INFO:     Started server process [1]
+control-plane-1  | INFO:     Waiting for application startup.
+control-plane-1  | Loading model from /opt/firewall-ia/adapter ...
+control-plane-1  | 2026-09-21 01:12:01,527 INFO    firewall.control_plane: startup: loading adapter /opt/firewall-ia/adapter
+control-plane-1  | Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  26%|██▋       | 53/201 [00:00<00:00, 528.61it/s]Loading weights:  70%|██████▉   | 140/201 [00:00<00:00, 725.97it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 753.18it/s]
+control-plane-1  | 2026-09-21 01:12:03,195 INFO    firewall.control_plane: startup: model ready on cuda in 1.7 s
+control-plane-1  | INFO:     Application startup complete.
+control-plane-1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+control-plane-1  | INFO:     127.0.0.1:40788 - "GET /health HTTP/1.1" 200 OK
+control-plane-1  | 2026-09-21 01:12:07,452 INFO    firewall.control_plane: classify: received request (125 bytes)
+control-plane-1  | [transformers] Both `max_new_tokens` (=40) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+control-plane-1  | 2026-09-21 01:12:07,899 INFO    firewall.control_plane: classify: status=ok decision=ALLOW reason='Normal HTTP request with no attack patterns detected' model_latency_ms=444.5
+control-plane-1  | INFO:     172.18.0.4:42536 - "POST /classify HTTP/1.1" 200 OK
+----- data-plane -----
+data-plane-1  | [00:44:38.847] Loading script data_plane/data_plane.py
+data-plane-1  | [00:44:38.860] HTTP(S) proxy listening at *:8080.
+data-plane-1  | [00:44:38.861] data plane ready: classifier=http://control-plane:8000/classify timeout=3.0s policy=fail-closed
+data-plane-1  | [00:44:42.396][172.18.0.5:37290] client connect
+data-plane-1  | [00:44:42.397][172.18.0.5:37290] client disconnect
+data-plane-1  | [00:44:42.403][172.18.0.5:37300] client connect
+data-plane-1  | [00:44:42.404] [79de8b71] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [00:44:42.894] [79de8b71] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 489 ms)
+data-plane-1  | [00:44:42.895][172.18.0.5:37300] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:37300: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [00:44:42.897][172.18.0.5:37300] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [00:44:42.897][172.18.0.5:37300] client disconnect
+data-plane-1  | [00:44:44.534][172.18.0.5:52628] client connect
+data-plane-1  | [00:44:44.535][172.18.0.5:52628] client disconnect
+data-plane-1  | [00:44:44.539][172.18.0.5:52640] client connect
+data-plane-1  | [00:44:44.540] [304ebd34] received GET app.fwlab.test:9000/products.html (body 0 bytes)
+data-plane-1  | [00:44:44.717] [304ebd34] BLOCK GET app.fwlab.test:9000/products.html reason='SQL injection payload detected' (classifier 178 ms)
+data-plane-1  | 172.18.0.5:52640: GET http://app.fwlab.test:9000/products.html?id=1%27%20OR%2…
+data-plane-1  |                << 403 Forbidden 32b
+data-plane-1  | [00:44:44.718][172.18.0.5:52640] client disconnect
+data-plane-1  | [00:44:52.468][172.18.0.5:52654] client connect
+data-plane-1  | [00:44:52.469][172.18.0.5:52654] client disconnect
+data-plane-1  | [00:44:52.472][172.18.0.5:52666] client connect
+data-plane-1  | [00:44:52.474] [7426f597] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [00:44:52.931] [7426f597] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 457 ms)
+data-plane-1  | [00:44:52.932][172.18.0.5:52666] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:52666: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [00:44:52.934][172.18.0.5:52666] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [00:44:52.934][172.18.0.5:52666] client disconnect
+data-plane-1  | [00:44:54.771][172.18.0.5:55060] client connect
+data-plane-1  | [00:44:54.772][172.18.0.5:55060] client disconnect
+data-plane-1  | [00:44:54.776][172.18.0.5:55066] client connect
+data-plane-1  | [00:44:54.777] [0386565b] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [00:44:55.016] [0386565b] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 239 ms)
+data-plane-1  | [00:44:55.017][172.18.0.5:55066] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:55066: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [00:44:55.019][172.18.0.5:55066] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [00:44:55.019][172.18.0.5:55066] client disconnect
+data-plane-1  | [01:11:55.426][172.18.0.5:51054] client connect
+data-plane-1  | [01:11:55.426][172.18.0.5:51054] client disconnect
+data-plane-1  | [01:11:55.430][172.18.0.5:51062] client connect
+data-plane-1  | [01:11:55.432] [ea55db98] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [01:11:55.692] [ea55db98] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 260 ms)
+data-plane-1  | [01:11:55.693][172.18.0.5:51062] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:51062: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [01:11:55.695][172.18.0.5:51062] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [01:11:55.695][172.18.0.5:51062] client disconnect
+data-plane-1  | [01:11:57.341][172.18.0.5:51068] client connect
+data-plane-1  | [01:11:57.341][172.18.0.5:51068] client disconnect
+data-plane-1  | [01:11:57.346][172.18.0.5:51080] client connect
+data-plane-1  | [01:11:57.346] [9dc60809] received GET app.fwlab.test:9000/products.html (body 0 bytes)
+data-plane-1  | [01:11:57.519] [9dc60809] BLOCK GET app.fwlab.test:9000/products.html reason='SQL injection payload detected' (classifier 172 ms)
+data-plane-1  | 172.18.0.5:51080: GET http://app.fwlab.test:9000/products.html?id=1%27%20OR%2…
+data-plane-1  |                << 403 Forbidden 32b
+data-plane-1  | [01:11:57.519][172.18.0.5:51080] client disconnect
+data-plane-1  | [01:11:59.063][172.18.0.3:52576] client connect
+data-plane-1  | [01:11:59.063][172.18.0.3:52576] client disconnect
+data-plane-1  | [01:11:59.067][172.18.0.3:52590] client connect
+data-plane-1  | [01:11:59.068] [2bdc2723] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [01:11:59.074] [2bdc2723] BLOCK (fail-closed) GET app.fwlab.test:9000/index.html cause=classifier unreachable (ConnectError) (after 5 ms)
+data-plane-1  | 172.18.0.3:52590: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 503 Service Unavailable 70b
+data-plane-1  | [01:11:59.075][172.18.0.3:52590] client disconnect
+data-plane-1  | [01:12:07.441][172.18.0.5:42486] client connect
+data-plane-1  | [01:12:07.441][172.18.0.5:42486] client disconnect
+data-plane-1  | [01:12:07.445][172.18.0.5:42498] client connect
+data-plane-1  | [01:12:07.446] [263d167c] received GET app.fwlab.test:9000/index.html (body 0 bytes)
+data-plane-1  | [01:12:07.900] [263d167c] ALLOW GET app.fwlab.test:9000/index.html reason='Normal HTTP request with no attack patterns detected' (classifier 455 ms)
+data-plane-1  | [01:12:07.902][172.18.0.5:42498] server connect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | 172.18.0.5:42498: GET http://app.fwlab.test:9000/index.html
+data-plane-1  |                << 200 OK 256b
+data-plane-1  | [01:12:07.903][172.18.0.5:42498] server disconnect app.fwlab.test:9000 (172.18.0.2:9000)
+data-plane-1  | [01:12:07.904][172.18.0.5:42498] client disconnect
+----- destination -----
+destination-1  | destination ready: port=9000 root=/srv/www access_log=/logs/destination-access.jsonl
+destination-1  | RECEIVED {"ts": "2026-09-21T00:44:42.896022+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+destination-1  | RECEIVED {"ts": "2026-09-21T00:44:52.932959+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+destination-1  | RECEIVED {"ts": "2026-09-21T00:44:55.017941+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+destination-1  | RECEIVED {"ts": "2026-09-21T01:11:55.693941+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+destination-1  | RECEIVED {"ts": "2026-09-21T01:12:07.902382+00:00", "method": "GET", "path": "/index.html", "host_header": "app.fwlab.test:9000", "user_agent": "Python-urllib/3.12", "client_ip": "172.18.0.4"}
+
+[1m== summary[0m
+destination receipt log: ./docker/.lab-logs/destination-access.jsonl
+this run's log:          ./docker/.lab-logs/smoke-20260921T011153Z.log
+[32mall infrastructure smoke checks passed[0m
+These are plumbing checks. They are NOT External Test v1 and imply no model metric.

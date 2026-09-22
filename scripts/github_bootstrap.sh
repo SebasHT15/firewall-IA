@@ -453,7 +453,8 @@ $(dep N10)
 - [ ] Classifier crash/error blocks
 - [ ] Invalid response blocks
 - [ ] Each failure mode tested explicitly, not assumed
-- [ ] Timeout value chosen and justified against the D3 latency budget
+- [ ] Classifier timeout configurable, initial value 3 s: an operational threshold to detect classifier unavailability and apply fail-closed
+- [ ] Timeout not derived from D3: P95 end-to-end <= 200 ms is a future performance objective, not a timeout basis (D35)
 - [ ] Behaviour documented as a security property
 
 ## Note
@@ -464,7 +465,7 @@ The fallback mechanism (proxy or simpler local mechanism temporarily taking over
 
 mkissue N12 "Benchmark end-to-end gateway latency" "M3 — Inline Gateway" "performance,priority:critical" \
 "## Objective
-First measurement against the D3 target: end-to-end added latency P95 <= 200 ms.
+First measurement of the latency the gateway adds end to end, decomposed per layer: inference pipeline, \`/classify\`, proxy → classifier, end-to-end. The 200 ms objective is **not** evaluated here: under **D36** it applies to the steady-state P95 of the inference pipeline, measured by \`benchmark_inference.py\` (\`baseline-local-v1\`: 269.58 ms, not met). No end-to-end threshold is currently defined.
 
 $(dep N10 N11)
 
@@ -473,9 +474,9 @@ $(dep N10 N11)
 - [ ] Gateway path measured
 - [ ] Added latency computed as the difference
 - [ ] P50/P95/P99 reported, never average alone
-- [ ] Model / model+API / proxy overhead separated where practical
+- [ ] Per-layer latency separated where practical: inference pipeline / \`/classify\` / proxy → classifier / end-to-end (the decomposition D3 required, kept by D36)
 - [ ] Throughput and requests-per-second recorded
-- [ ] D3 target evaluated correctly — against END-TO-END added latency, not model-side
+- [ ] End-to-end results are not compared against the 200 ms objective, which is D36's inference-pipeline objective. Every latency figure names its layer.
 - [ ] Cold-start / first-inference latency reported as a separate set from steady-state, never pooled and never silently discarded
 - [ ] Measured with the benign fast path (N22) absent or disabled, so this run is the no-fast-path baseline N24 calibrates against
 
@@ -563,7 +564,7 @@ Measure what the fast path buys and what it costs, and choose its threshold from
 $(dep N12 N22 N23)
 
 ## Note
-Deliberately separate from N12. Folding it in would make the first D3 measurement wait on N21-N23, and the no-fast-path baseline must exist before anything is calibrated against it. It also mixes a security metric (disagreement rate) into a pure latency measurement.
+Deliberately separate from N12. Folding it in would make the first end-to-end measurement wait on N21-N23, and the no-fast-path baseline must exist before anything is calibrated against it. It also mixes a security metric (disagreement rate) into a pure latency measurement.
 
 ## Acceptance criteria
 - [ ] Baseline measured with the fast path disabled, on the same traffic set as the enabled run
@@ -572,7 +573,7 @@ Deliberately separate from N12. Folding it in would make the first D3 measuremen
 - [ ] Disagreement rate with numerator and denominator; every model-BLOCK-over-fast-ALLOW case listed
 - [ ] P50/P95/P99 for baseline, enabled overall, FAST_PATH only, MODEL_PATH only — never an average alone
 - [ ] Cold-start reported as a separate set from steady-state, neither pooled nor silently discarded
-- [ ] Result stated against D3 as end-to-end ADDED latency, not model-side
+- [ ] Latency gain stated as end-to-end ADDED latency, per layer, not model-side. Not presented as progress on D36: the fast path changes how many requests wait for inference, not how long the inference pipeline takes
 - [ ] A threshold recommended, with the measurement that justifies it
 - [ ] A stated keep/drop conclusion weighing latency gain against disagreement rate
 
@@ -591,7 +592,7 @@ $(dep N8 N12)
 - [ ] RAM requirements
 - [ ] Storage requirements including model footprint
 - [ ] Inference runtime support
-- [ ] Latency needs derived from the D3 budget
+- [ ] Latency needs derived from D36: steady-state P95 of the inference pipeline ≤ 200 ms, measured on each candidate platform under the \`baseline-local-v1\` protocol. End-to-end figures from N12 are reported for context, with no threshold
 - [ ] Throughput needs
 - [ ] Power and thermal considerations
 - [ ] Comparison criteria documented before any platform is named

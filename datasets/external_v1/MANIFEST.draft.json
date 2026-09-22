@@ -1,0 +1,142 @@
+{
+  "schema": "external-v1-manifest/1",
+  "name": "External Test v1",
+  "phase": "C — pre-exposure DRAFT candidate pool",
+  "status": "DRAFT",
+  "generated_utc": "2026-09-21T18:15:24.087989+00:00",
+  "protocol": "docs/external_test_v1_protocol.md",
+  "pre_exposure_attestation": {
+    "v4_exposure": "ZERO",
+    "control_plane_started": false,
+    "firewall_data_plane_started": false,
+    "classify_contacted": false,
+    "note": "Capture uses a CAPTURE-ONLY proxy; no model is in the path (D37)."
+  },
+  "composition_target_final": {
+    "total": 400,
+    "ALLOW": 200,
+    "BLOCK": 200,
+    "per_benign_slice": 40,
+    "per_block_category": 40,
+    "benign_slices": [
+      "browser-navigation",
+      "browser-forms-session",
+      "api-json",
+      "api-query",
+      "unseen-structure"
+    ],
+    "block_categories": {
+      "sqli": "SQL injection",
+      "cmdi": "Command injection",
+      "xss": "Cross-site scripting",
+      "path-traversal": "Path traversal",
+      "ssrf": "Server-side request forgery"
+    },
+    "balance": "50/50 ALLOW/BLOCK, fixed before exposure; not changed after results."
+  },
+  "draft_counts": {
+    "benign_slices_client_driven": {
+      "api-json": 48,
+      "api-query": 48,
+      "unseen-structure": 44
+    },
+    "block_categories": {
+      "SQL injection": 50,
+      "Command injection": 48,
+      "Cross-site scripting": 51,
+      "Path traversal": 54,
+      "Server-side request forgery": 51
+    },
+    "totals": {
+      "ALLOW_enumerable": 140,
+      "BLOCK_draft": 254
+    }
+  },
+  "browser_slices_captured_at_runtime": {
+    "browser-navigation": {
+      "target_final": 40,
+      "method": "captured whole via Playwright/Chromium; count known only after capture"
+    },
+    "browser-forms-session": {
+      "target_final": 40,
+      "method": "captured whole via Playwright/Chromium; count known only after capture"
+    }
+  },
+  "provenance": {
+    "path": "real client -> capture-proxy (capture-only) -> lab-app",
+    "renderer_identity": "capture_addon imports data_plane.render_request; the captured text is exactly what the firewall would hand /classify (protocol 4.2).",
+    "clients": {
+      "browser-navigation": "Playwright/Chromium",
+      "browser-forms-session": "Playwright/Chromium",
+      "api-json": "Python httpx",
+      "api-query": "curl",
+      "unseen-structure": "mixed (curl + httpx)",
+      "sqli/cmdi/xss/path-traversal/ssrf": "curl + httpx"
+    },
+    "correlation": "capture-file offset windows (boundaries.json); no marker in any request under test (protocol 11).",
+    "no_hand_editing": "request_text is the captured text, copied verbatim; never edited after capture."
+  },
+  "ground_truth_fields": [
+    "expected_decision",
+    "attack_category",
+    "benign_slice",
+    "ground_truth_basis",
+    "label_confidence",
+    "review_status",
+    "client_profile",
+    "host_type",
+    "method",
+    "route",
+    "route_family",
+    "body_type",
+    "payload_placement",
+    "request_text",
+    "request_sha256",
+    "capture (file/tag/flow/seq/flow_id/utc)"
+  ],
+  "unseen_structure_evidence": {
+    "source": "datasets/v4_clean/ (train.jsonl + eval.jsonl)",
+    "rows": 31340,
+    "distinct_header_names_in_corpus": 15,
+    "methods_observed": [
+      "GET",
+      "POST",
+      "PUT",
+      "PATCH",
+      "DELETE",
+      "HEAD"
+    ],
+    "lab_port_9100_support": 0,
+    "framing": "unseen-input robustness (RQ4); NOT OOD detection, no novelty score.",
+    "detail": "build/unseen_structure_support.json"
+  },
+  "independence": {
+    "precheck": {
+      "clean": true,
+      "collisions": 0,
+      "v4_rows_screened": 31340
+    },
+    "authoritative_gate": "Phase D, protocol section 7 (exact + canonical + duplicate + diagnostic + smoke + near-dup + CSIC). NOT RUN HERE.",
+    "not_reused_from": [
+      "PayloadsAllTheThings (V4 training source @ e961fef)",
+      "reports/diagnostics/real-http-fp-v1/cases.jsonl",
+      "docker/client/smoke_test.py fixtures",
+      "V4 predictions (V4 never consulted)"
+    ],
+    "claim_limit": "Independence is verified (in Phase D) against V4 fine-tuning and development data only; no claim about TinyLlama pretraining."
+  },
+  "artifacts": {
+    "build/spec_preview.jsonl": "authored ENUMERABLE candidates + ground truth; request_text pending capture",
+    "build/counts.json": "draft counts and targets",
+    "build/unseen_structure_support.json": "V4-corpus structural support evidence",
+    "build/independence_precheck.json": "courtesy screen result",
+    "candidates/": "populated after capture by label_candidates.py"
+  },
+  "freeze": {
+    "frozen": false,
+    "artifact_sha256": null,
+    "frozen_utc": null,
+    "note": "NOT frozen. Phase D independence gate and deterministic trim to 40/cell have NOT run. Do not treat as FROZEN."
+  },
+  "limitations_pointer": "docs/external_test_v1_protocol.md section 13"
+}
