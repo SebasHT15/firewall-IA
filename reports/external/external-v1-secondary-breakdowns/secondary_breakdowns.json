@@ -1,0 +1,496 @@
+{
+  "analysis": "External Test v1 — SECONDARY breakdowns (pre-registered, protocol §4.3/§10)",
+  "label": "SECONDARY — not headline. No causal claim. 50/50 construction; not production prevalence.",
+  "run_id": "external-v1-run-001",
+  "freeze_commit": "36df2ee",
+  "frozen_integrity_hash": "ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b",
+  "population": "gateway channel, repetition 1, nondeterministic cases excluded (as score_l1)",
+  "headline_n": 400,
+  "excluded_nondeterministic": [],
+  "headline_confusion": {
+    "TP": 199,
+    "FP": 68,
+    "FN": 1,
+    "TN": 132
+  },
+  "support_rule": ">= 30 OK; 1-29 INSUFFICIENT DATA; 0 NOT EVALUABLE (per rate, on its own denominator)",
+  "rule_of_three": "approximate zero-event bound defined by protocol §3 / methodology §5: upper bound ~= 3/n on a zero-error rate (recall: on the miss rate, so recall >= ~1 - 3/n); not an exact confidence interval; reported beside the observed value; capped at 100% and uninformative for n <= 3",
+  "breakdowns": {
+    "client_profile": {
+      "values": {
+        "chromium": {
+          "n": 80,
+          "allow_support": 80,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 11,
+            "FN": 0,
+            "TN": 69
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 11,
+            "den": 80,
+            "pct": 13.75,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        },
+        "curl": {
+          "n": 272,
+          "allow_support": 79,
+          "block_support": 193,
+          "confusion": {
+            "TP": 192,
+            "FP": 35,
+            "FN": 1,
+            "TN": 44
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 35,
+            "den": 79,
+            "pct": 44.30379746835443,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 192,
+            "den": 193,
+            "pct": 99.48186528497409,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          }
+        },
+        "httpx": {
+          "n": 48,
+          "allow_support": 41,
+          "block_support": 7,
+          "confusion": {
+            "TP": 7,
+            "FP": 22,
+            "FN": 0,
+            "TN": 19
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 22,
+            "den": 41,
+            "pct": 53.65853658536585,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 7,
+            "den": 7,
+            "pct": 100.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "miss rate (FNR)",
+              "upper_bound_pct": 42.857142857142854,
+              "informative": true,
+              "recall_lower_bound_pct": 57.142857142857146
+            }
+          }
+        }
+      },
+      "reconciles_with_headline": true
+    },
+    "host_type": {
+      "values": {
+        "api-alias": {
+          "n": 86,
+          "allow_support": 60,
+          "block_support": 26,
+          "confusion": {
+            "TP": 26,
+            "FP": 27,
+            "FN": 0,
+            "TN": 33
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 27,
+            "den": 60,
+            "pct": 45.0,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 26,
+            "den": 26,
+            "pct": 100.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "miss rate (FNR)",
+              "upper_bound_pct": 11.538461538461538,
+              "informative": true,
+              "recall_lower_bound_pct": 88.46153846153847
+            }
+          }
+        },
+        "shop-alias": {
+          "n": 314,
+          "allow_support": 140,
+          "block_support": 174,
+          "confusion": {
+            "TP": 173,
+            "FP": 41,
+            "FN": 1,
+            "TN": 99
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 41,
+            "den": 140,
+            "pct": 29.285714285714285,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 173,
+            "den": 174,
+            "pct": 99.42528735632185,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          }
+        }
+      },
+      "reconciles_with_headline": true
+    },
+    "method": {
+      "values": {
+        "GET": {
+          "n": 324,
+          "allow_support": 144,
+          "block_support": 180,
+          "confusion": {
+            "TP": 179,
+            "FP": 39,
+            "FN": 1,
+            "TN": 105
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 39,
+            "den": 144,
+            "pct": 27.083333333333332,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 179,
+            "den": 180,
+            "pct": 99.44444444444444,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          }
+        },
+        "HEAD": {
+          "n": 1,
+          "allow_support": 1,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "TN": 1
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 0,
+            "den": 1,
+            "pct": 0.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "FPR",
+              "upper_bound_pct": 100.0,
+              "informative": false
+            }
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        },
+        "OPTIONS": {
+          "n": 5,
+          "allow_support": 5,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 4,
+            "FN": 0,
+            "TN": 1
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 4,
+            "den": 5,
+            "pct": 80.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        },
+        "PATCH": {
+          "n": 1,
+          "allow_support": 1,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 1,
+            "FN": 0,
+            "TN": 0
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 1,
+            "den": 1,
+            "pct": 100.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        },
+        "POST": {
+          "n": 66,
+          "allow_support": 46,
+          "block_support": 20,
+          "confusion": {
+            "TP": 20,
+            "FP": 22,
+            "FN": 0,
+            "TN": 24
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 22,
+            "den": 46,
+            "pct": 47.82608695652174,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 20,
+            "den": 20,
+            "pct": 100.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "miss rate (FNR)",
+              "upper_bound_pct": 15.0,
+              "informative": true,
+              "recall_lower_bound_pct": 85.0
+            }
+          }
+        },
+        "PUT": {
+          "n": 3,
+          "allow_support": 3,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 2,
+            "FN": 0,
+            "TN": 1
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 2,
+            "den": 3,
+            "pct": 66.66666666666667,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        }
+      },
+      "reconciles_with_headline": true
+    },
+    "body_type": {
+      "values": {
+        "csv": {
+          "n": 1,
+          "allow_support": 1,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "TN": 1
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 0,
+            "den": 1,
+            "pct": 0.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "FPR",
+              "upper_bound_pct": 100.0,
+              "informative": false
+            }
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        },
+        "form": {
+          "n": 26,
+          "allow_support": 13,
+          "block_support": 13,
+          "confusion": {
+            "TP": 13,
+            "FP": 3,
+            "FN": 0,
+            "TN": 10
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 3,
+            "den": 13,
+            "pct": 23.076923076923077,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 13,
+            "den": 13,
+            "pct": 100.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "miss rate (FNR)",
+              "upper_bound_pct": 23.076923076923077,
+              "informative": true,
+              "recall_lower_bound_pct": 76.92307692307692
+            }
+          }
+        },
+        "json": {
+          "n": 40,
+          "allow_support": 33,
+          "block_support": 7,
+          "confusion": {
+            "TP": 7,
+            "FP": 22,
+            "FN": 0,
+            "TN": 11
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 22,
+            "den": 33,
+            "pct": 66.66666666666667,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 7,
+            "den": 7,
+            "pct": 100.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "miss rate (FNR)",
+              "upper_bound_pct": 42.857142857142854,
+              "informative": true,
+              "recall_lower_bound_pct": 57.142857142857146
+            }
+          }
+        },
+        "none": {
+          "n": 330,
+          "allow_support": 150,
+          "block_support": 180,
+          "confusion": {
+            "TP": 179,
+            "FP": 43,
+            "FN": 1,
+            "TN": 107
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 43,
+            "den": 150,
+            "pct": 28.666666666666668,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          },
+          "recall_block": {
+            "num": 179,
+            "den": 180,
+            "pct": 99.44444444444444,
+            "evidence_status": "OK",
+            "rule_of_three": null
+          }
+        },
+        "text": {
+          "n": 3,
+          "allow_support": 3,
+          "block_support": 0,
+          "confusion": {
+            "TP": 0,
+            "FP": 0,
+            "FN": 0,
+            "TN": 3
+          },
+          "invalid_outputs": 0,
+          "fpr": {
+            "num": 0,
+            "den": 3,
+            "pct": 0.0,
+            "evidence_status": "INSUFFICIENT DATA",
+            "rule_of_three": {
+              "error_rate": "FPR",
+              "upper_bound_pct": 100.0,
+              "informative": false
+            }
+          },
+          "recall_block": {
+            "num": 0,
+            "den": 0,
+            "pct": null,
+            "evidence_status": "NOT EVALUABLE",
+            "rule_of_three": null
+          }
+        }
+      },
+      "reconciles_with_headline": true
+    }
+  },
+  "not_produced": {
+    "route_family": "Pre-registered in protocol §4.3 (not in the §10 breakdown list). Not present in the frozen case metadata (datasets/external_v1/cases.jsonl). Its only definition, spec_lib.Spec.route_family, was applied to enumerable specs before exposure and never to the 80 browser-captured cases; assigning route families now would be a new, post-exposure methodological choice. Pre-registered, not produced."
+  }
+}

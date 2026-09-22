@@ -6,7 +6,7 @@ firewall-IA. It does not replace the frozen metric definitions of E5 (D19,
 governs how evaluations are designed, read and acted on. Examples come from the V4 work;
 their numbers live in the cited reports.
 
-> **Latency objective:** D36 (P95 of the inference pipeline ≤ 200 ms in steady state),
+> **Latency objective:** Decision D36 (P95 of the inference pipeline ≤ 200 ms in steady state),
 > which supersedes D3. See §11.
 
 ---
@@ -18,7 +18,7 @@ their numbers live in the cited reports.
 | **TRAIN** | fitting the weights | yes | `datasets/v4_clean/train.jsonl` |
 | **VALIDATION** | checkpoint, hyperparameter and configuration selection; development decisions | yes | `eval.jsonl` (see below) |
 | **INTERNAL TEST** | independent evaluation of the chosen model inside the distribution the generator defines | **no**, report only | `eval.jsonl`, but not independent (see below) |
-| **EXTERNAL TEST** (frozen) | independent evaluation outside the internal distribution, on traffic that took no part in training or tuning | **no**, report only | does not exist yet |
+| **EXTERNAL TEST** (frozen) | independent evaluation outside the internal distribution, on traffic that took no part in training or tuning | **no**, report only | External Test v1 — [`datasets/external_v1/`](../datasets/external_v1/), frozen at `36df2ee`, executed as `external-v1-run-001` (aggregate metrics reported; individual errors not yet used — D40) |
 | **ERROR-ANALYSIS / DEV** | inspecting individual failures, forming hypotheses, seeding A/B tests | yes | the 2026-09-16/17 diagnostic requests |
 
 Rules:
@@ -56,6 +56,12 @@ curl requests still come back BLOCK: a loopback `Host`, the path `/`, `Host` por
 19000 up. Train and eval contain **0** rows with a loopback `Host`, **0** with the path `/`
 or `/index.html`, and only ports 8000 and 8080. The internal eval is silent on those inputs.
 It gives no evidence either way.
+
+*(Added at first-stage close, 2026-09-21.)* External Test v1 has since measured the gap on
+frozen, independently captured lab traffic: 68/200 benign cases BLOCK (60% in
+`unseen-structure`, 52.5% in `api-json`) against BLOCK recall 199/200. That is a
+test-specific rate under a 50/50 construction, not an operational FPR, and it does not by
+itself establish a cause ([`../README.md`](../README.md#5-external-test-v1), D42).
 
 Rules: before any claim about how the gateway will behave, evaluate on an external test
 built from the traffic it will actually see: real clients, local and lab hosts, the
@@ -221,13 +227,13 @@ an experiment id (D32).
 | **Proxy → classifier** | the data plane's classifier call, round trip | `data_plane.py` log `(classifier N ms)` |
 | **End-to-end** | extra time a client sees compared with going straight to the destination | none (Issue #18) |
 
-**Objective (D36): P95 of the latency added by the inference pipeline ≤ 200 ms, in steady
+**Objective (Decision D36): P95 of the latency added by the inference pipeline ≤ 200 ms, in steady
 state.** Model load, cold start and warm-up are reported separately; HTTP transport,
 network, proxy and destination are excluded. It is measured under the `baseline-local-v1`
 protocol: batch 1, concurrency 1, recorded hardware. The reference today is P95 **269.58
 ms** (`generate()` alone 269.01 ms), so the objective is **not met**, and it must not be
 presented as met. It is **not** an end-to-end objective; end-to-end latency is still
-measured and reported, with no threshold defined. Reports produced before D36 use D3's
+measured and reported, with no threshold defined. Reports produced before Decision D36 use D3's
 end-to-end wording and are not rewritten.
 
 - Cold start, warm-up and steady state are separate populations and are never pooled
