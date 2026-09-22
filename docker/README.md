@@ -19,9 +19,10 @@ client ──▶ data plane (mitmproxy) ──▶ POST /classify ──▶ contr
 
 **This is infrastructure.** It changes no model, dataset, prompt, parser,
 generation parameter, request representation (D1), enforcement rule (D4/D34) or
-evaluation methodology. Its purpose is to be the environment in which
-**External Test v1** is later executed. It is not that test, and the smoke checks
-below are not an evaluation.
+evaluation methodology. It is the environment in which **External Test v1** was
+executed (`external-v1-run-001`, see
+[`../reports/external/external-v1-run-001/`](../reports/external/external-v1-run-001/)).
+The smoke checks and the demo below are not that test and not an evaluation.
 
 ---
 
@@ -47,6 +48,13 @@ directory. `.lab-logs/` here holds the machine-local originals and stays gitigno
 
 **These are plumbing checks, not an evaluation.** See the warning under
 [Smoke tests](#smoke-tests).
+
+**Demo — runtime verified from a clean lab.** `./docker/demo.sh` ([Demo](#demo)) was run
+twice in a row starting from `docker compose down` (all profiles, zero lab containers)
+and a cached `docker compose build`: runs `demo-20260922T052457Z` and
+`demo-20260922T052519Z` (UTC) both ended `DEMO PASS`, and the canonical
+`./docker/smoke_test.sh` passed again right after (`smoke-20260922T052724Z`). Logs are
+machine-local under `.lab-logs/`.
 
 ---
 
@@ -114,6 +122,9 @@ docker/
   destination/                  Dockerfile, serve.py, www/
   client/                       Dockerfile, smoke_test.py
   smoke_test.sh                 host-side runner for the four checks
+  demo.sh                       host-side live demo, reusing the smoke client (see Demo)
+  lab-app/                      External Test v1 application           (profile extv1)
+  generator/                    External Test v1 traffic generation    (profile extv1)
 .dockerignore                   allowlist: keeps model/datasets/reports/.git out of build contexts
 ```
 
@@ -129,7 +140,9 @@ docker/
 - **No production code was modified.** `data_plane.py` reads `config.yaml` next to
   the repository root; the lab bind-mounts `docker/config.docker.yaml` over it
   rather than adding an environment override to a validated component. The root
-  `config.yaml` is untouched, so the local workflow in the main README still works.
+  `config.yaml` is untouched, so the local workflow
+  ([`../docs/technical_reference.md`](../docs/technical_reference.md#running-it-locally-three-terminals-from-the-repository-root))
+  still works.
 - **The adapter is mounted, never copied.** `FIREWALL_ADAPTER_DIR` already existed
   in `inference_core.py`; the lab sets it to `/opt/firewall-ia/adapter` and
   bind-mounts the host directory read-only.
@@ -149,6 +162,13 @@ another.
 | data-plane | `data-plane:8080` | `127.0.0.1:8080` (loopback only) |
 | destination | `destination:9000`, alias `app.fwlab.test:9000` | **no** |
 | client | — (one-shot) | — |
+| lab-app *(profile `extv1`)* | `lab-app:9100`, aliases `shop.fwlab.test`, `api.fwlab.test` | **no** |
+| capture-proxy *(profile `extv1`)* | `capture-proxy:8081` — capture-only, classifies nothing | **no** |
+| generator *(profile `extv1`)* | — (one-shot) | — |
+
+The `extv1` services exist for External Test v1 (capture and execution; see
+[`../docs/external_test_v1_protocol.md`](../docs/external_test_v1_protocol.md)). They sit
+behind a profile, so `docker compose up`, the smoke test and the demo never start them.
 
 The destination also answers to `app.fwlab.test`. That alias is chosen, and
 disclosed, because `reports/diagnostics/real-http-fp-v1/` observed ordinary
@@ -176,8 +196,13 @@ docker compose logs -f
 Stop it:
 
 ```bash
-docker compose down
+docker compose --profile smoke --profile extv1 down
 ```
+
+Name both profiles. A plain `docker compose down` leaves containers started under a
+profile (for example `lab-app`) running, and then cannot remove the `firewall-lab`
+network because it is still in use. `down` without `-v` removes containers and the
+network only; images, the `hf-home` volume and `.lab-logs/` are kept.
 
 ### Smoke tests
 
@@ -223,6 +248,41 @@ cat docker/.lab-logs/destination-access.jsonl
 > diagnostic. No accuracy, precision, recall, FPR, FNR or latency figure may be
 > derived from them. The smoke fixtures are infrastructure fixtures and stay
 > conceptually separate from any future external evaluation set (D37).
+
+---
+
+## Demo
+
+A short, deterministic live walk-through of the gateway for an audience. It reuses the
+smoke client and its fixtures unchanged — every request, expected status and
+destination-receipt check is `client/smoke_test.py`'s — and adds only sequencing and
+on-screen evidence: the control plane's `/health`, and the data plane's own decision line
+(decision and reason) for each request.
+
+```bash
+docker compose build        # once, beforehand; a cached rebuild takes seconds
+./docker/demo.sh            # add --step to pause for Enter between stages
+```
+
+| Stage | What happens | Expected |
+|---|---|---|
+| **[1/5] startup** | `down` (both profiles, containers + network only), `up -d --wait` control-plane, data-plane, destination | `/health` → `model_loaded: true`; `startup: model ready on cuda`; `data plane ready ... policy=fail-closed` |
+| **[2/5] ALLOW** | `client allow` — `GET /index.html` | `200`, destination receives 1 request |
+| **[3/5] BLOCK** | `client block` — SQL injection in `?id=` | `403`, destination receives 0 |
+| **[4/5] fail-closed** | `stop control-plane`, assert stopped, `run --no-deps client failclosed`, assert still stopped | `503`, destination receives 0 |
+| **[5/5] recovery** | `start control-plane`, wait for healthy, `client allow` | `200`, destination receives 1 request |
+
+It ends with `DEMO PASS`. Any unexpected result prints `DEMO FAIL` with the stage and
+the smoke client's full output, exits non-zero, and — if the demo had stopped the control
+plane — restarts it first. Each run is tee'd to `.lab-logs/demo-<timestamp>.log`.
+
+- **Not External Test v1.** The fixtures are the smoke fixtures, addressed to
+  `app.fwlab.test:9000`; no frozen External v1 case targets that host
+  (`tests/test_demo_script.py` checks this).
+- **Not an evaluation.** The `classifier NNN ms` values in the decision lines are
+  incidental service logging, not a latency measurement (Issue #18 is the benchmark).
+- **Re-runnable.** Receipts are counted relative to the log's length before each request,
+  so repeated runs do not interfere.
 
 ---
 

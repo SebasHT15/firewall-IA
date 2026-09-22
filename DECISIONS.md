@@ -1442,6 +1442,186 @@ are unchanged.
 
 ---
 
+## D38 — External test construction: capture, label, gate and freeze before model exposure
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** DONE — External Test v1, frozen at `36df2ee`
+
+**Decision.** An external test set is built in this order, and no case reaches the model —
+directly or through the gateway — until the last step is committed:
+
+1. **Capture.** Real clients drive applications the project owns, inside the authorized
+   lab, through a capture-only path with no classifier. The frozen request text is the
+   captured bytes, never a hand-written or hand-edited string.
+2. **Ground truth.** Assigned from the intent of the flow that produced each request,
+   never from a model output. Two-pass review; ambiguous cases are excluded, not guessed,
+   and every exclusion is logged.
+3. **Independence gate.** Blocking checks for exact and canonical collisions
+   (`parse_dataset_v4.canonical_key`, D16) against the model's train and eval data, prior
+   diagnostics and fixtures, plus internal duplicates. Freeze cannot proceed while any
+   check fails.
+4. **Deterministic selection** to the composition declared in advance: a seeded,
+   content-independent key, sorted, first *n* per cell. Seed and key formula are recorded;
+   no manual choice and no model output enter the selection.
+5. **Freeze.** Cases, a manifest with `status: FROZEN`, SHA-256 sums and an aggregate
+   integrity hash, committed.
+6. **Only then** execution.
+
+Composition, class balance, slices and metric definitions are fixed in a written
+protocol before the data exists. The independence claim is limited to the development
+data actually checked: no claim is made about the base model's pretraining corpus, global
+novelty or out-of-distribution status.
+
+**Rationale.** Labels or selections made after the model has been seen can be steered by
+its output, knowingly or not. D19 froze the V4 metric definitions before training for the
+same reason. `real-http-fp-v1` used benign texts built by hand from real clients' header
+sets; capturing real traffic replaces that construction step.
+
+**Relationship to earlier entries.** Realizes, for V4, the laboratory validation required
+by **D22** and the EXTERNAL TEST role defined by **D37**. Uses the D16 canonicalization.
+Nothing is superseded. Protocol: `docs/external_test_v1_protocol.md`.
+
+---
+
+## D39 — Frozen external test sets are immutable; any change requires a new version
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** DONE — External Test v1 (`datasets/external_v1/manifest.json`)
+
+**Decision.**
+
+- A frozen external set is immutable from the commit containing its manifest with
+  `status: FROZEN`, `artifact_sha256` and `frozen_utc`. That commit must be an ancestor of
+  every run that cites the set.
+- **Any change to any case requires a new version** (External v2, v3, …), never an edit —
+  including correcting a label later found to be wrong, removing a case or rebalancing a
+  cell. A mislabel is disclosed as a known defect of the version it is in.
+- **Reserve cases are not substitutes.** Eligible cases the seeded selection did not pick
+  are kept as evidence of the selection and never replace a frozen case.
+- A run verifies the frozen integrity hash before executing and refuses to reuse an
+  existing run id (the **D32** rule).
+- **Raw execution evidence is never rewritten.** When a raw log holds more than one run or
+  session, the analysis uses a derived file beside it; the original stays byte-for-byte
+  as captured.
+
+**Rationale.** A test set that can be edited after its results are known can be optimized
+against. Immutability turns every later change into a recorded new version instead of a
+silent revision of the old one.
+
+**Relationship to earlier entries.** Extends to evaluation sets the immutability and
+identity rules **D32** set for benchmark experiments. Recorded in the External v1 manifest
+(`immutability`).
+
+---
+
+## D40 — Using External Test v1 errors for V5 makes it V5 development data; External v2 is required for V5
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** NOT YET — triggers when V5 error analysis starts
+
+**Decision.** Reporting External v1's aggregate and per-cell metrics does not consume it.
+The moment individual External v1 cases or errors — for example its false positives — are
+inspected to form hypotheses or to guide any V5 change (dataset, prompt, model,
+threshold, checkpoint), External v1 becomes **V5 development / error-analysis data**:
+
+- the transition and its date are recorded beside the set, in a separate record — the
+  frozen manifest is not edited (D39);
+- **any claim about V5's external performance requires External v2**, built under D38
+  before V5 is exposed to it, and collision-gated against External v1 as well as against
+  V5's own development data;
+- **External v2 must execute the proxy-to-classifier byte-equivalence check** that External
+  v1 preregistered (protocol §11) but did not run: for every gateway execution, the exact
+  bytes the data plane sends to `/classify` are captured, hashed and compared with the
+  frozen `request_text`, and every mismatch is recorded. The capture tooling is verified
+  present and working in the execution environment before any case is sent; a run that
+  cannot capture does not start. Client-side hashes of the text sent, and direct-vs-gateway
+  decision agreement, do not substitute for this check;
+- **External v2 must implement and run the CSIC-ancestry warning check** that External v1
+  pre-registered (protocol §7, check 7) but did not execute, before freeze, against a local
+  copy of the CSIC data verified by the SHA-256 in `docs/data_sources.md`. External v1's
+  missing check is not reconstructed after exposure;
+- External v1 remains the valid record of **V4's** external result. A V4-vs-V5 comparison
+  on External v1 must be labelled as a comparison on V5 development data.
+
+**Rationale.** Once its errors have guided the changes, a set measures how well V5 was fitted
+to it, not how V5 generalizes. The byte-check requirement exists because External v1's
+run-001 could not execute it (no `strace` in the data-plane runtime), so External v1 has no
+direct byte-for-byte evidence that the classifier input equalled the frozen text for its
+400 gateway cases. Decision agreement is not proof of byte equivalence.
+
+**Relationship to earlier entries.** Applies the general rule of **D37** to External v1
+and V5, and makes the consequence — External v2 — an explicit commitment. The External v1
+manifest records the same tripwire (`d37_tripwire`).
+
+---
+
+## D41 — Gateway evaluations report L1, L2 and L3 separately
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** DONE — External Test v1 (`external-v1-run-001`)
+
+**Decision.** Every evaluation executed through the gateway reports three levels and never
+merges them into one number:
+
+| Level | Compares | Error means |
+|---|---|---|
+| **L1 — model** | ground truth vs the model's decision | FP, FN, invalid output |
+| **L2 — enforcement** | the model's decision vs the gateway's observed behaviour (HTTP status + destination receipt), under the D34 contract, whether or not the decision was correct | enforcement fault |
+| **L3 — end-to-end** | ground truth vs delivery to the destination | BLOCK-labelled request delivered, benign request broken |
+
+- Every L3 failure is attributed to a model error or an enforcement error. Example: ground
+  truth BLOCK, model ALLOW, request forwarded → L1 false negative, L2 conformant, L3
+  BLOCK-labelled request delivered.
+- **Delivery is not exploitation.** A delivered BLOCK-labelled request reached the
+  destination; attack success is not measured and is never implied.
+- Headline L1 metrics come from the primary gateway channel, repetition 1. Cases that
+  differ across repetitions are flagged, counted and excluded from the headline, never
+  majority-voted. Direct `/classify` calls are a per-layer consistency control and never a
+  headline metric.
+
+**Rationale.** A single end-to-end figure cannot tell a model that misjudged a request from
+a gateway that mishandled a correct decision, and those failures have different fixes.
+
+**Relationship to earlier entries.** Builds on the enforcement contract of **D34**.
+Defined for v1 in `docs/external_test_v1_protocol.md` §2; this entry makes it the rule for
+every later gateway evaluation.
+
+---
+
+## D42 — External-test and diagnostic rates are reported as test-specific, never as operational rates
+
+- **Date:** 2026-09-21
+- **Status:** APPROVED
+- **Implementation:** N/A — reporting rule
+
+**Decision.**
+
+- FPR, precision and accuracy measured on a test with a constructed class balance are
+  always reported with their numerator, denominator and the test's name — for example
+  "68/200 benign cases in External Test v1" — and **never** as an operational or
+  production FPR, precision or prevalence. External v1 is 50/50 by construction.
+- Diagnostic counts on case mixes built to provoke failures (for example
+  `real-http-fp-v1`, 37/149) are diagnostic counts, not rates.
+- A generalization gap is not described as proven overfitting without a study designed
+  to test that. An unseen-structure or distribution-shift slice measures robustness; it is
+  not described as OOD detection, which the model does not perform.
+- Latency observed during an evaluation run is an observation, not a benchmark: the Decision D36
+  objective is measured only by its instrument, and end-to-end latency only by Issue #18.
+
+**Rationale.** Precision and accuracy depend on class prevalence, and a single lab
+application with a fixed 50/50 mix does not represent any deployment's traffic. Reported
+without its context, a test-specific rate reads as a deployment property.
+
+**Relationship to earlier entries.** Extends the reporting discipline of **D18** and
+**D19** to external tests and diagnostics. Consistent with the limitations pre-registered
+in `docs/external_test_v1_protocol.md` §13.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -1483,6 +1663,11 @@ are unchanged.
 | D35 | D3 is a performance objective; classifier timeout (3 s) is operational | APPROVED | **DONE** |
 | D36 | Latency objective — P95 of the inference pipeline ≤ 200 ms, steady state (supersedes D3) | APPROVED | N/A — **not met** (269.58 ms) |
 | D37 | Evaluation data roles from V5 — train / validation / internal test / external test; a test set whose errors guide changes becomes development data | APPROVED | NOT YET — from V5; V4 not changed |
+| D38 | External test construction — capture, label, gate and freeze before model exposure | APPROVED | **DONE (External v1, `36df2ee`)** |
+| D39 | Frozen external sets immutable — any change needs a new version; reserves never substitute; raw evidence never rewritten | APPROVED | **DONE (External v1)** |
+| D40 | Using External v1 errors for V5 makes it V5 development data — External v2 required for V5 claims, with the proxy-to-`/classify` byte check and the CSIC-ancestry check External v1 did not run | APPROVED | NOT YET — triggers at V5 error analysis |
+| D41 | Gateway evaluations report L1 model / L2 enforcement / L3 end-to-end separately | APPROVED | **DONE (`external-v1-run-001`)** |
+| D42 | External-test and diagnostic rates are test-specific, never operational | APPROVED | N/A (reporting rule) |
 
 ---
 

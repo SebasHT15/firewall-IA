@@ -11,65 +11,749 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D37). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D42). Read it before proposing architectural changes.
 > - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
+> - `docs/external_test_v1_protocol.md` — External Test v1 methodology (pre-registered; status note at the top).
+> - `docs/technical_reference.md` — component detail moved out of the README at stage close.
 > - `reports/` — experiment and audit outputs. Never overwrite a report; add a new one.
 
 ---
 
-## Current checkpoint (2026-09-21)
+## Current checkpoint — first functional gateway stage closed (2026-09-21)
 
-**Read this first.** It states where the project is and what comes next. Everything below
-explains how it got here; where an older section disagrees with this one, this one is
-current.
+**Read this first.** This is the authoritative snapshot of where the project is. Every
+section below it is the audit trail of how it got here; where an older section disagrees
+with this one, this one is current.
+**Every metric with its source** — dataset, internal evaluation, runtime, all latency
+experiments, `real-http-fp-v1`, External v1 construction / fidelity / execution / L1–L3,
+Docker, thresholds and what is not yet measured — is in "Quantitative snapshot — v0.1.0"
+right after this checkpoint.
 
-**Completed**
+### Stage and branch
 
-- V4 clean baseline trained and evaluated (§3)
-- Control plane implemented and validated (§5)
-- Data plane / inline HTTP gateway implemented (§5b)
-- ALLOW / BLOCK / fail-closed validated (§5b, §5c)
-- ML evaluation methodology established (`docs/ml_evaluation_methodology.md`)
-- **D36** (latency objective) and **D37** (evaluation data roles) recorded
-- Reproducible diagnostic `reports/diagnostics/real-http-fp-v1/` completed and persisted (§5c)
-- Proxy / direct-API consistency validated (§5c)
-- Gateway enforcement validated (§5c)
-- Repository reorganized by responsibility (§9)
-- **Docker Lab COMPLETE and runtime verified** (§5d) — built and run. GPU
-  passthrough works, the control plane runs on CUDA, V4 loads from the read-only
-  mounted adapter, and the five infrastructure checks A–E all pass
-  (startup/readiness, ALLOW, BLOCK, fail-closed, recovery). Closure report and
-  committed raw logs: `reports/lab/docker-lab-v1/` (`raw/`). **Infrastructure only — not External Test v1, not
-  a benchmark, no model metric.**
+- **Stage:** the first functional firewall-IA gateway stage is closed: trained V4 model,
+  operational control plane, operational inline HTTP data plane, fail-closed enforcement,
+  reproducible Docker Lab, an independent External Test v1, and a known external
+  benign-generalization limitation. **Not production-ready.**
+- **Branch:** `demo/wednesday`, from `main` at `699266f` (merge of PR #46, External Test
+  v1). Stage-close documentation and `docker/demo.sh` were prepared here. The commit, tag
+  and release are done by the project owner; no git tags existed before this stage
+  (proposed first tag: `v0.1.0`).
+- **License:** MIT (`LICENSE`, Copyright (c) 2026 SebasHT15) for the repository's original
+  code and documentation. It does not relicense third-party material: the TinyLlama base
+  model, CSIC 2010, PayloadsAllTheThings, libraries, tools and container images.
+- **Data not distributed by v0.1.0:** `csic_database.csv` and the historical root
+  `train.jsonl` / `eval.jsonl` were removed from tracking at stage close (not from Git
+  history) and are gitignored; local copies are kept. The CSV is still needed locally to
+  regenerate V4; the root JSONL files are historical only. Sizes, SHA-256 and regeneration
+  inputs: `docs/data_sources.md`.
 
-**Current baseline**
+### Architecture — implemented
 
-- TinyLlama **V4** (`model-output-v4-clean`, checkpoint 2200) — **unchanged** by all of the
-  work above
-- **`datasets/v4_clean/` unchanged** — hashes still match `datasets/manifest_v4_clean.json`
-- No V5, no V4.1
-- No external test set
-- No fast path, no suspicious score, no asynchronous classification
-- No GGUF / llama.cpp, no embedded deployment
+```
+client → data plane (mitmproxy, data_plane/data_plane.py)
+       → POST /classify → control plane (FastAPI, control_plane/classifier_api.py)
+       → inference_core → TinyLlama-1.1B-Chat + V4 adapter → ALLOW / BLOCK
+       → enforcement in the data plane → protected destination
+```
 
-**Next — in this order**
+| Classifier outcome | Gateway | Forwarded |
+|---|---|---|
+| `status: ok` + ALLOW | destination response | yes |
+| `status: ok` + BLOCK | 403 | no |
+| `status: invalid` | 503 | no |
+| timeout, connection failure, non-200, malformed response, unexpected error | 503 | no |
 
-1. **External Test v1** — an independent, frozen external evaluation set (§13).
-   **Not started.**
-2. **Full external security + gateway-enforcement evaluation** —
-   client → data plane → control plane → V4 → data plane → destination, executed
-   in the Docker Lab (§5d)
-3. **Professor demo** — ALLOW, BLOCK and fail-closed shown live on a small demo subset,
-   with the external-test results presented already computed
-4. **README / results / standards alignment / future work**
+Fail-closed (D4, D34). Two processes, two Python environments (D33). Runtime: HF
+transformers + PEFT, V4 QLoRA adapter, CUDA. GGUF / llama.cpp is future work (D23).
+Application-layer only; not a stateful network firewall; authorized inline interception.
 
-Do not reorder these. *(Docker Lab was step 1 of this sequence and is now done,
-§5d; the remaining order is unchanged.)*
+### V4 internal baseline — unchanged
 
-**Not to be reopened before that sequence produces evidence that requires it:** the
-diagnostic false positives, another documentation audit, V5, the fast path, the suspicious
-score, llama.cpp/GGUF, embedded hardware and inference optimization. They stay recorded in
-§3, §5c and §13 as later work.
+`model-output-v4-clean` (checkpoint 2200) on `datasets/v4_clean/eval.jsonl`, 6,206 rows:
+**TP 3,011 · FN 92 · FP 2 · TN 3,101** · accuracy 98.49% · precision (BLOCK) 99.93% ·
+recall / ADR 97.04% · F1 98.46% · FPR ≈0.0645% · FNR 2.96% · invalid 0 (§3).
+The eval split also selected the checkpoint, so this is an **internal development
+evaluation, not an independent test** (D24, D37).
+
+### V4 inference latency — model-side evidence, not end-to-end (§3, §5)
+
+Four evidence classes, never merged: **A** preliminary diagnostics · **B** the
+`baseline-local-v1` formal inference benchmark · **C** External v1 observational timing ·
+**D** the Issue #18 formal end-to-end benchmark (pending).
+
+**B. Formal inference benchmark — `baseline-local-v1`** (Issue #9, 2026-09-09; `reports/v4_inference_benchmark.md`,
+`reports/benchmarks/baseline-local-v1/`). 3 fresh processes × the full 6,206-row eval split
+= **18,618 classifications**; RTX 4090 Laptop GPU, batch 1, concurrency 1, device-synchronized
+`generate()` timer (D31); frozen, never overwritten (D32).
+
+| Population | Result |
+|---|---|
+| steady state, `generate()` only, pooled (n = 18,618) | mean **227.86** · P50 **238.82** · P95 **269.01** · P99 **275.90** ms (min 155.80 · max 337.16 · stdev 32.43) |
+| steady state, **full inference pipeline** (prompt → tokenize → transfer → `generate()` → decode → parse; the Decision D36 instrument) | **P95 269.58 ms** |
+| model load, per process — reported separately | 2275.5 · 2251.6 · 2416.6 ms |
+| first inference (cold start), per process — reported separately | 418.2 · 410.4 · 446.2 ms |
+| warm-up, 4 per run — reported separately | 159.5–271.2 ms |
+
+Run-to-run P95 spread 11.17% (244.03 / 266.55 / 273.21 ms), tracking GPU thermal state.
+
+**A. Preliminary diagnostic — Issue #15 control plane (2026-09-05), NOT the
+benchmark.** Model load on CUDA ≈ **2.4 s**. First inference / warm-up **512.8 ms**,
+measured separately and excluded from the steady-state statistics. Earlier steady-state
+diagnostic, model warm, **n = 30: P50 232.5 · mean 211.5 · min 159.5 · max 241.9 ms.**
+Historical antecedent: the Issue #8 evaluation run's model-side P95 of 270.8 ms
+(unsynchronized timer) — not comparable to `baseline-local-v1` (6 blocking differences).
+
+**C. External v1 observational timing** (`external-v1-run-001`, derived; Q4-C). Two
+different quantities: gateway `model_latency_ms` = the **data plane's wall time around its
+`POST /classify` call** (n = 1,200: P50 220 · P95 255 ms); direct `model_latency_ms` = the
+**control plane's `generate()`-only time** (n = 300 on the predeclared subset: P50 193.10 ·
+P95 247.89 ms). Different scopes and populations — not pooled, not compared as the same
+measurement, not end-to-end.
+
+**D. Formal end-to-end benchmark — Issue #18: pending.** No end-to-end figure exists.
+
+**Conclusion.** The Decision D36 target — P95 of the steady-state inference pipeline ≤ 200 ms — is
+**not met** (269.58 ms, class B). It is an optimization objective, not an acceptance
+criterion (D35).
+
+**Rules.** Cold start / first inference stays separate; warm-up is never pooled into
+steady state; the n = 30 run is never called the formal benchmark; inference-side latency
+is never called end-to-end latency. The `model_latency_ms` / `classifier NNN ms` values in
+External v1 records, smoke logs and the demo are observations; the External v1 series and
+what each one measures are in the quantitative snapshot (Q4-C). **No progress on Issue #18 is
+claimed** — #18 remains the formal gateway end-to-end latency benchmark and has not started.
+
+### `real-http-fp-v1` — diagnostic, complete (§5c)
+
+149 unique benign texts, 175 pre-registered cases, 447 direct `/classify` calls, 78 gateway
+requests. 149/149 deterministic (decision + reason); 78/78 captured proxy texts
+byte-identical to the registered text; 78/78 gateway vs direct same decision + reason;
+ALLOW 48/48 forwarded, BLOCK 30/30 → 403 and not delivered; 0 × 503. 37/149 constructed
+benign texts were BLOCK (SSRF 25, file inclusion 4, HPP 3, open redirect 3, smuggling 2) —
+**a diagnostic count on a provocative mix, not an FPR.** Conclusion: for the tested cases
+the proxy did not introduce the false positives.
+
+### Docker Lab and demo — runtime verified (§5d)
+
+- Services: `control-plane` (CUDA), `data-plane`, `destination`, one-shot `client`
+  (profile `smoke`); `lab-app`, `capture-proxy`, `generator` (profile `extv1`).
+- Smoke checks A–E pass (`reports/lab/docker-lab-v1/`): startup, ALLOW → 200 delivered,
+  BLOCK → 403 not delivered, classifier stopped → 503 not delivered, recovery.
+- **`docker/demo.sh`** — the professor demo, five stages over the same smoke fixtures.
+  Runtime verified from a clean lab: `docker compose down` (both profiles, zero lab
+  containers), cached build, then two consecutive `DEMO PASS` runs
+  (`demo-20260922T052457Z`, `demo-20260922T052519Z`, UTC) and a canonical smoke pass
+  (`smoke-20260922T052724Z`). Logs are machine-local under `docker/.lab-logs/`.
+- A plain `docker compose down` leaves profiled containers (e.g. `lab-app`) running and
+  cannot remove the network; stop the lab with
+  `docker compose --profile smoke --profile extv1 down`.
+
+### External Test v1 — methodology and identifiers
+
+Protocol: `docs/external_test_v1_protocol.md`. Decisions: **D38–D42**. Purpose:
+generalization, distribution-shift sensitivity and unseen-input robustness of V4, with
+model quality, gateway enforcement and end-to-end outcome kept separate. **Not formal OOD
+detection.**
+
+- **Order:** capture → label → review → independence gate → deterministic freeze →
+  execution. **V4 exposure before freeze: zero.**
+- **Capture (Phase C):** real clients (Chromium/Playwright, `httpx`, `curl`) against the
+  lab app through the capture-only proxy — no classifier in the path. DRAFT 489 requests
+  (ALLOW 235 / BLOCK 254).
+- **Review + gate (Phase D):** two-pass ground-truth review, 2 ambiguous SSRF cases
+  excluded; 16 internal duplicates excluded; **0 exact and 0 canonical collisions** against
+  V4 train + eval (31,340 rows), `real-http-fp-v1` and the Docker smoke fixtures.
+  `browser-forms-session` fell to 37 eligible (repeated browser GETs) → documented
+  pre-freeze supplement: 15 captured, 2 duplicates, 13 new eligible → 50. All ten cells
+  ≥ 40 eligible; 484 eligible in total.
+- **Freeze (Phase E):** commit **`36df2ee`**, `frozen_utc` 2026-09-21T19:57:25Z.
+  400 cases, 200 ALLOW / 200 BLOCK, **10 cells × 40**: `browser-navigation`,
+  `browser-forms-session` (29 original + 11 supplement), `api-json`, `api-query`,
+  `unseen-structure`; `sqli`, `cmdi`, `xss`, `path-traversal`, `ssrf`.
+  Seed `external-v1-freeze-v1`; key `SHA256(seed|primary_cell|case_id|request_sha256)`,
+  ascending, first 40 per cell. 400 unique case ids, 400 unique request SHA-256, all
+  `request_text` byte-identical to the captured evidence.
+  `cases.jsonl` SHA-256 `721dfdaa6425463ae0ce26520f6d47986fdc7388468b55d7b1a5bffed822d342`;
+  **integrity hash `ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b`.**
+  84 eligible reserves preserved as selection evidence — **not substitutes**.
+  **Immutable: any change requires External v2** (D39).
+- **Execution (Phase F):** runner `scripts/external/external_v1_run.py` anchored at
+  **`9656df9`**; run id `external-v1-run-001`
+  (`reports/external/external-v1-run-001/`). Gateway channel 400 × 3 = 1,200 requests;
+  direct consistency channel: 100 predeclared cases (seed
+  `external-v1-run-001-consistency`, 10 per cell) × 3 = 300 `/classify` calls.
+- **Data-plane log handling:** `raw/data-plane.log` also contains earlier sessions and is
+  preserved unchanged. `raw/data-plane-phase-f.log` is a derived view starting at the final
+  `data plane ready` line; it holds exactly 1,200 decision lines and is the log used for
+  L1/L2/L3 assembly. Never delete or overwrite the raw log.
+- **Disclosed deviation from protocol §11 — methodology limitation.** The preregistered
+  proxy-to-`/classify` byte-equivalence check was not executed during
+  `external-v1-run-001` because the data-plane runtime did not contain `strace`. Therefore,
+  External Test v1 does not contain direct byte-for-byte evidence that the classifier input
+  for all 400 gateway cases was identical to the frozen `request_text`.
+  The existing byte-fidelity checks from the capture/replay infrastructure (Phase B: 8/8
+  `curl`, 12/12 Chromium replayed byte-exact through the capture proxy, same
+  `render_request()`, committed at `reports/external/external-v1-phase-b-fidelity/`;
+  offline round-trip test) and prior HTTP diagnostics
+  (`real-http-fp-v1`: 78/78 `strace`-captured proxy texts byte-identical, different
+  requests) provide supporting evidence, and the predeclared 100-case direct-vs-gateway
+  check showed 100/100 decision agreement. However, **decision agreement is not itself
+  proof of byte equivalence and must not be presented as such.** In `results.jsonl`,
+  `sent_sha256` / `text_matches_registered` are computed client-side from the frozen text
+  the replay client sent; they are not evidence of what the classifier received.
+  This deviation does not change any recorded L1/L2/L3 result or frozen artifact. It is
+  corrected prospectively: **External Test v2 must capture and compare the data plane's
+  `/classify` input for every gateway execution** (D40).
+- **Disclosed deviation from protocol §7 — CSIC-ancestry check not executed.** Check 7 of
+  the pre-registered gate (payload substring vs `csic_database.csv`, a non-blocking WARN
+  with a logged manual ruling) was not implemented or run; the gate's `sources_checked`
+  omit CSIC. Exact and canonical collisions against the CSIC-derived rows inside V4 train +
+  eval were checked; the substring screen against the raw CSIC file was not. It could not
+  have blocked the freeze and changes no frozen case or L1/L2/L3 result. It is not
+  reconstructed post-exposure. **External Test v2 must implement and run it before freeze**
+  (D40), using a local CSIC copy verified per `docs/data_sources.md`.
+
+### External Test v1 — results (`external-v1-run-001`)
+
+Execution errors 0 (gateway and direct) · nondeterminism 0 (gateway and direct) ·
+direct-vs-gateway **decision** agreement **100/100** on the predeclared 100-case subset
+(decision consistency, not byte equivalence — see the §11 deviation above).
+
+**L1 — model** (gateway channel, repetition 1): n 400 · **TP 199 · TN 132 · FP 68 · FN 1**
+· invalid 0 · accuracy 82.75% (331/400) · precision (BLOCK) 74.53% (199/267) · recall /
+ADR 99.50% (199/200) · F1 85.22% · **FPR 34.00% (68/200)** · FNR 0.50% (1/200).
+
+| Benign slice | FP | TN | FPR | | Category | External recall | Internal V4 recall |
+|---|---:|---:|---:|---|---|---:|---:|
+| browser-navigation | 7 | 33 | 17.5% | | SQL injection | 40/40 | 743/817 = 90.94% |
+| browser-forms-session | 4 | 36 | 10.0% | | Command injection | 40/40 | 117/134 = 87.31% |
+| api-json | 21 | 19 | 52.5% | | XSS | 40/40 | 100% |
+| api-query | 12 | 28 | 30.0% | | Path traversal | 40/40 | 100% |
+| unseen-structure | 24 | 16 | 60.0% | | SSRF | 39/40 | 62/63 = 98.41% |
+
+59 of the 68 false positives are in `api-json`, `api-query` and `unseen-structure`. The one
+false negative is SSRF. Zero-miss categories (SQLi, CMDi, XSS, path traversal) are observed at
+40 / 40 = 100%; separately, the pre-registered rule-of-three gives an approximate upper bound
+on their miss rate of 3/40 = 7.5% (recall ≥ ≈ 92.5%) — an approximate zero-event bound, not an
+exact confidence interval (Q9).
+
+**L2 — enforcement:** **1,200 / 1,200 conformant.** **L3 — end to end:** benign delivered
+132 · benign broken 68 · BLOCK-labelled stopped 199 · BLOCK-labelled delivered 1
+("delivered" = reached lab-app, **not** exploitation).
+
+**Interpretation — the strongest supported conclusion:** V4 keeps very high external BLOCK
+recall but shows a substantial external generalization gap on benign traffic, especially
+`api-json` and `unseen-structure`. The gateway behaved correctly: L2 1,200/1,200 — every
+decision the data plane received was enforced as specified — direct-vs-gateway decision
+agreement 100/100 on the predeclared subset, no nondeterminism. This is decision-level
+evidence; External v1 has no direct byte-level evidence of classifier input (§11
+deviation).
+
+**Must not be claimed:** that 34% is an operational/production FPR (the set is 50/50 by
+construction, one lab app); that overfitting is proven; a cause for the false positives;
+OOD detection; any latency result (the `model_latency_ms` values are observations, not
+Issue #18) (D42).
+
+### Known primary limitation
+
+**Benign external generalization.** External v1 false positives, concentrated in API and
+unseen-structure traffic. Not yet analysed: **no individual External v1 false positive has
+been inspected for model-improvement decisions.** Doing so starts V5 error analysis and
+makes External v1 V5 development data; External v2 is then required for any V5 claim
+(D40). Other open limitations: Decision D36 latency objective not met (269.58 ms vs ≤ 200 ms);
+Issue #18 pending; HTTPS / HTTP/2 / WebSockets unvalidated; concurrency untested; no
+evasion suite; 92 internal false negatives not yet analysed (D21); External v1 has no
+direct proxy-to-`/classify` byte-equivalence evidence (§11 deviation above).
+
+### Current scope — the Wednesday professor demo
+
+- Live: `docker compose build` beforehand, then `./docker/demo.sh` (optionally `--step`):
+  startup → ALLOW → BLOCK → fail-closed → recovery → `DEMO PASS`. Smoke fixtures only.
+- **Never replay External Test v1 cases live**; present its results already computed
+  (`README.md` §5, `reports/external/external-v1-run-001/summary.md`).
+- The demo is plumbing, not an evaluation; no metric is derived from it.
+
+### Baseline state — unchanged by this stage
+
+- V4 weights and adapter unchanged; `datasets/v4_clean/` unchanged (hashes match
+  `datasets/manifest_v4_clean.json`).
+- External Test v1 frozen set unchanged; integrity re-verified at stage close.
+- No V5, no V4.1; no fast path, suspicious score or asynchronous validation; no GGUF /
+  llama.cpp; no embedded deployment.
+
+### Security and engineering references
+
+Alignment and reference only — no certification or compliance claim. Requirements
+engineering (ISO/IEC/IEEE 29148:2018 + EARS), application-security references (OWASP),
+cybersecurity and AI-risk references (NIST, ISO/IEC, CIS, CWE), the principles actually
+implemented, and the controls that remain future work: see the section
+"Security and engineering references — alignment, not compliance" right after this
+checkpoint.
+
+### Next work — after the release, not started
+
+Proposed order, to be confirmed by the owner before starting:
+
+1. **V5 error analysis** — External v1 false positives (API / unseen-structure) and the 92
+   internal false negatives (D21). Record the D40 transition when it starts.
+2. **External v2** — built under D38 before V5 is exposed to it; required for any V5 claim.
+   Must restore the proxy-to-`/classify` byte capture and comparison for every gateway
+   execution, with the capture tooling verified in the execution environment before any
+   case is sent, and must run the pre-registered CSIC-ancestry warning check before freeze
+   (D40).
+3. **Issue #18** — formal end-to-end latency benchmark (no-fast-path baseline).
+4. **M2** — GGUF / Q4_K_M / llama.cpp and a quantized security regression.
+5. Fast path / suspicious score / asynchronous validation (Issues #35–#38), then embedded
+   deployment (M4).
+
+**Not to be started as part of the release:** V4 tuning or retraining, inspection of
+individual External v1 errors, any change to External v1, fast path, llama.cpp, Issue #18.
+
+---
+
+## Quantitative snapshot — v0.1.0 (every metric, with its source)
+
+*(Stage close, 2026-09-22.)* The complete inventory of quantitative evidence produced in
+the first stage. Every figure names the experiment that produced it; **measured** figures
+come from committed records, **derived** figures are computed read-only from committed raw
+evidence (method named), and **pending** means not measured. Diagnostic, observational and
+benchmark evidence are kept in separate rows and never pooled. Full tables, supports and
+provenance stay in the cited reports.
+
+### Q1. Dataset quality and integrity — `datasets/v4_clean/` (measured)
+
+Sources: `datasets/manifest_v4_clean.json`, `reports/e0_dataset_integrity_v4_clean.txt`,
+`reports/e2_e3_clean_dataset.txt`.
+
+| Metric | Value |
+|---|---|
+| Rows | **31,340** total · train **25,134** (80.20%) · eval **6,206** (19.80%) |
+| Labels | ALLOW 15,670 / BLOCK 15,670 (50.00% / 50.00%); train 12,567 / 12,567; eval 3,103 / 3,103 |
+| Exact train→eval leakage | **0 / 6,206 = 0.00%**; distinct leaked inputs 0 |
+| Exact duplicates | train 0.00% (25,134 unique) · eval 0.00% (6,206 unique) · combined 31,340 unique |
+| Deterministic label reveals (purity ≥ 99% at coverage ≥ 1%) | **0** |
+| Strongest non-payload baseline (fit on train, scored on eval) | Content-Type 51.16% (+1.16% vs 50.00% majority); `Host` 49.73% |
+| Grouped split (D16), logical groups train / eval | attack 8,037 / 1,940 · CSIC 6,577 / 1,674 · synthetic benign 15,802 / 3,983 |
+| E0 gate result | **WARNING, 0 blocking failures** — W1 BLOCK category imbalance 571.4 : 1 (4,000 vs 7); W2 three categories < 0.10% (smuggling 7, deserialization 16, HPP 20) |
+| Determinism | regeneration bit-identical under `PYTHONHASHSEED` = 0, 1, 12345, random |
+| Artifact SHA-256 | train `4459f686…`, eval `61f15591…` — re-verified against the manifest at stage close |
+
+**Why V4-clean was necessary** (historical corpus, `reports/e0_dataset_integrity_current.txt`):
+99,132 rows (79,305 / 19,827); train→eval leakage **26.65%** (5,283 eval rows verbatim in
+train); `Host` alone classified **93.72%** of eval (+43.81% over majority); **9**
+deterministic label reveals (e.g. `Host: target.internal.com` → BLOCK, 42,979 rows, 43.36%);
+E0 verdict FAIL with 3 blocking failures.
+
+### Q2. Internal V4 security evaluation — held-out split (measured)
+
+Sources: `reports/v4_clean_eval.json`, `reports/v4_clean_baseline_results.txt`; checkpoint
+from `reports/v4_clean_training.txt`.
+
+| Metric | Value |
+|---|---|
+| Confusion matrix (n = 6,206) | TP 3,011 · TN 3,101 · FP 2 · FN 92 |
+| Accuracy | 6,112 / 6,206 = 98.49% |
+| Precision (BLOCK) | 3,011 / 3,013 = 99.93% |
+| Recall / ADR (BLOCK) | 3,011 / 3,103 = 97.04% |
+| F1 (BLOCK) | 98.46% |
+| FPR | 2 / 3,103 = 0.0645% |
+| FNR | 92 / 3,103 = 2.96% |
+| Invalid outputs | 0 / 6,206 |
+| False-negative distribution | SQL injection 74 · command injection 17 · SSRF 1 (91 / 92 = 98.9% in two categories) |
+
+Per category (BLOCK support 3,103; D18 status; reason accuracy is secondary — the share of
+detected attacks given the correct category reason):
+
+| Category | Support | Binary recall | Reason accuracy | Status |
+|---|---:|---|---|---|
+| SQL injection | 817 | 743 / 817 = 90.94% | 737 / 743 | OK |
+| Cross-site scripting | 708 | 708 / 708 | 702 / 708 | OK |
+| Path traversal | 506 | 506 / 506 | 490 / 506 | OK |
+| File inclusion | 494 | 494 / 494 | 492 / 494 | OK |
+| Command injection | 134 | 117 / 134 = 87.31% | 111 / 117 | OK |
+| Server-side template injection | 88 | 88 / 88 | 88 / 88 | OK |
+| SSRF | 63 | 62 / 63 = 98.41% | 55 / 62 | OK |
+| Open redirect | 51 | 51 / 51 | 50 / 51 | OK |
+| CRLF injection | 112 (21 logical groups) | 112 / 112 | 112 / 112 | INSUFFICIENT DATA |
+| XXE | 27 | 27 / 27 | 27 / 27 | INSUFFICIENT DATA |
+| GraphQL injection | 22 | 22 / 22 | 22 / 22 | INSUFFICIENT DATA |
+| LDAP injection | 21 | 21 / 21 | 18 / 21 | INSUFFICIENT DATA |
+| NoSQL injection | 17 | 17 / 17 | 15 / 17 | INSUFFICIENT DATA |
+| JWT manipulation | 16 | 16 / 16 | 16 / 16 | INSUFFICIENT DATA |
+| XPath injection | 11 | 11 / 11 | 6 / 11 | INSUFFICIENT DATA |
+| CSRF | 8 | 8 / 8 | 8 / 8 | INSUFFICIENT DATA |
+| Insecure deserialization | 5 | 5 / 5 | 2 / 5 | INSUFFICIENT DATA |
+| HTTP parameter pollution | 3 | 3 / 3 | 2 / 3 | INSUFFICIENT DATA |
+| HTTP request smuggling | 0 (7 train rows) | — | — | NOT EVALUABLE |
+
+**Limitation:** the same split selected the checkpoint — `checkpoint-2200`, minimum
+`eval_loss` 0.463187 over 17 evaluation checkpoints (4 epochs, 3,144 steps, final train loss
+0.4696, 7,651 s) — so this is an internal development evaluation, not an independent test
+(D24, D37). INSUFFICIENT DATA rows are exploratory only (D18).
+
+**Legacy manual diagnostic suite** (`reports/v4_clean_manual_diagnostic.json`; diagnostic,
+not a metric): 135 cases (109 BLOCK / 26 ALLOW) — TP 104 · TN 20 · FP 6 · FN 5; accuracy
+124 / 135 = 91.85%; recall 104 / 109 = 95.41%; 6 / 26 known-benign cases BLOCK.
+
+### Q3. Model runtime and reproducibility (measured)
+
+| Metric | Value | Source |
+|---|---|---|
+| Model load on CUDA | 2.4 s (1 observation) | Issue #15 control-plane check (§5) |
+| Model load, per fresh process | 2,275.5 · 2,251.6 · 2,416.6 ms | `baseline-local-v1` |
+| Model load in the Docker Lab | `model ready on cuda in` 1.7 s (smoke), 2.1 / 1.8 / 2.0 / 1.7 s (demo runs) — log observations | `reports/lab/docker-lab-v1/raw/`; `docker/.lab-logs/` |
+| Output-contract validity (invalid outputs) | 0 / 6,206 internal eval · 0 / 18,618 benchmark · 0 / 30 control-plane check · 0 / 447 `real-http-fp-v1` · 0 / 1,500 External v1 (1,200 gateway + 300 direct, all `status: ok`) · 0 / 135 manual suite | respective reports |
+| Determinism | 30 / 30 identical on repeat (Issue #15) · 3 benchmark runs bit-identical, 0 / 6,206 rows differ in decision or reason · 149 / 149 unique texts identical over 3 repetitions (`real-http-fp-v1`) · External v1: 0 / 400 gateway cases and 0 / 100 direct cases differ across 3 repetitions | §5; `baseline-local-v1/summary.json`; `real-http-fp-v1/summary.json`; `external-v1-run-001/summary.json` |
+| Generation length | mean 11.63 generated tokens; **0 / 18,618** hit the 40-token bound; mean prompt 191.89 tokens | `baseline-local-v1` |
+| Memory, recorded incidentally (not a resource benchmark) | peak PyTorch allocator 935.5 MiB allocated / 1,170.0 MiB reserved, this process only (`baseline-local-v1`); peak evaluation VRAM 2,476 MiB (Issue #8 run) | `baseline-local-v1/summary.json`; §3 |
+
+### Q4. Latency — four experiments, never merged
+
+**A. Early runtime diagnostic — Issue #15 control plane (preliminary, measured).** First
+inference **512.8 ms**, measured separately and excluded. Steady state, model warm,
+**n = 30: mean 211.5 · P50 232.5 · min 159.5 · max 241.9 ms.** No P95/P99 was recorded.
+`generate()`-only (`model_latency_ms`).
+
+*Other recorded observations, kept separate:* Issue #8 evaluation run
+(`reports/v4_clean_eval.json`, unsynchronized timer, n = 6,206 including the cold first
+inference): mean 229.05 · P50 241.78 · P95 270.84 · P99 286.56 · min 163.11 · max 467.53 ·
+stdev 31.85 ms — historical antecedent, not comparable to B. `real-http-fp-v1` direct
+`model_latency_ms` (generate()-only, repeated texts, warm-up excluded), n = 447: min
+157.87 · P50 230.82 · P95 236.20 · max 242.11 ms — diagnostic observation.
+
+**B. `baseline-local-v1` — the formal inference benchmark (measured).**
+`reports/benchmarks/baseline-local-v1/summary.json`: 3 fresh processes × 6,206 requests =
+**18,618** steady-state classifications; batch 1, concurrency 1; device-synchronized timer
+(D31); nearest-rank percentiles; no sample removed (186 above P99 retained).
+
+| Population | n | mean | P50 | P95 | P99 | min | max | stdev |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| steady state, `generate()` only (ms) | 18,618 | 227.86 | 238.82 | **269.01** | 275.90 | 155.80 | 337.16 | 32.43 |
+| steady state, full inference pipeline (ms) | 18,618 | 228.33 | 239.26 | **269.58** | 276.54 | 156.19 | 338.52 | 32.43 |
+
+Reported separately, never pooled: first inference (cold start) 418.2 · 410.4 · 446.2 ms
+(one per process); warm-up 12 samples (4 per run), 159.5–271.2 ms; model load (Q3).
+Per-run `generate()` P95 244.03 · 266.55 · 273.21 ms (spread 11.17%).
+**Decision D36 objective — steady-state pipeline P95 ≤ 200 ms: NOT met (269.58 ms).**
+
+**C. External Test v1 latency observations (derived; observational only).** Computed
+read-only from `external-v1-run-001` by `scripts/external/summarize_latency_observations.py`
+(`benchmark_inference.summarize`, nearest-rank). The gateway values were checked against
+`raw/data-plane-phase-f.log`: 1,200 decision lines, identical values in identical order. All
+observations valid (0 null).
+
+| Series — what it measures | n | min | mean | P50 | P95 | P99 | max |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| gateway `model_latency_ms` — the **data plane's wall time around its `POST /classify` call** (integer ms, from the data-plane log); includes the HTTP call and all server-side handling — not model-side, not end-to-end | 1,200 | 163 | 213.50 | 220 | 255 | 268 | 570 |
+| ↳ repetition 1 / 2 / 3 | 400 each | 163 / 168 / 170 | 209.72 / 215.64 / 215.14 | 215 / 226 / 228 | 253 / 257 / 254 | 264 / 274 / 259 | 570 / 287 / 284 |
+| direct `model_latency_ms` — the **control plane's `generate()`-only time** from the `/classify` response (predeclared 100-case subset × 3) | 300 | 157.38 | 201.33 | 193.10 | 247.89 | 258.13 | 264.18 |
+| direct `wall_ms` — the runner's client-side `POST /classify` round trip (same 300 calls) | 300 | 159.36 | 203.49 | 195.02 | 250.19 | 260.37 | 267.03 |
+
+The gateway and direct series cover different populations (400 vs 100 cases) and different
+scopes, so they are not a paired comparison. Per-decision gateway figures are in
+`docs/technical_reference.md`. The raw gateway records also carry a client-side `elapsed_ms`
+per replayed request; it is **deliberately not summarized** — a sequential single-client
+replay including the lab app, with no warm-up or thermal control, is not the Issue #18
+measurement and must not stand in for it.
+
+**D. Formal gateway end-to-end latency — Issue #18: PENDING.** No client-to-destination
+P50 / P95 / P99 exists. None may be quoted.
+
+### Q5. `real-http-fp-v1` — diagnostic (measured)
+
+Source: `reports/diagnostics/real-http-fp-v1/summary.json`, `summary.md`.
+
+| Metric | Value |
+|---|---|
+| Pre-registered cases / unique benign texts | 175 / 149 |
+| Direct `/classify` executions | 447 (149 × 3), plus 3 warm-up |
+| Gateway executions | 78 (26 curl commands × 3), plus 1 warm-up; 79 captures |
+| Deterministic (decision + reason, 3 repetitions) | 149 / 149 |
+| Invalid outputs | 0 / 447 |
+| Byte fidelity, proxy → `/classify` (strace capture) | 78 / 78 captured texts identical to the constructed text |
+| Direct vs gateway agreement | 78 / 78 decision · 78 / 78 reason |
+| Gateway ALLOW → 200 → received | 48 |
+| Gateway BLOCK → 403 → not received | 30 |
+| Gateway 503 / errors | 0 |
+| Benign texts classified BLOCK | **37 / 149** unique texts (111 / 447 calls) — SSRF 25 · file inclusion 4 · HPP 3 · open redirect 3 · request smuggling 2 |
+| By case family, BLOCK / cases | HOST 6 / 32 · PATH 9 / 28 · PORT 7 / 24 · HDR 12 / 29 · UAxPC 5 / 8 · UA 9 / 24 · EVALSWAP 0 / 30 |
+
+**37/149 is diagnostic evidence on a deliberately provocative mix — NOT a production FPR.**
+
+### Q6. External Test v1 construction and independence (measured)
+
+Sources: `datasets/external_v1/gate/gate_summary.json`, `gate/internal_duplicates.json`,
+`gate_supplement/gate_summary.json`, `candidates_supplement/supplement_meta.json`,
+`manifest.json`, `SHA256SUMS`.
+
+| Cell | Captured | GT-excluded | Internal duplicates | Eligible (Phase D) | Eligible (final) | Selected | Reserves |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| browser-navigation | 47 | 0 | 5 | 42 | 42 | 40 | 2 |
+| browser-forms-session | 48 | 0 | 11 | 37 | 50 (+13 supplement) | 40 (29 + 11 supplement) | 10 |
+| api-json | 48 | 0 | 0 | 48 | 48 | 40 | 8 |
+| api-query | 48 | 0 | 0 | 48 | 48 | 40 | 8 |
+| unseen-structure | 44 | 0 | 0 | 44 | 44 | 40 | 4 |
+| sqli | 50 | 0 | 0 | 50 | 50 | 40 | 10 |
+| cmdi | 48 | 0 | 0 | 48 | 48 | 40 | 8 |
+| xss | 51 | 0 | 0 | 51 | 51 | 40 | 11 |
+| path-traversal | 54 | 0 | 0 | 54 | 54 | 40 | 14 |
+| ssrf | 51 | 2 | 0 | 49 | 49 | 40 | 9 |
+| **Total** | **489** (ALLOW 235 / BLOCK 254) | **2** | **16** | **471** | **484** | **400** | **84** |
+
+- Ground-truth review: 11 flagged in pass 1, 11 re-reviewed in pass 2 → 9 accepted, 2
+  excluded (the two SSRF cases above); `review/ground_truth_review_summary.json`.
+- **Exact collisions 0 · canonical collisions 0** across all 489 candidates, against V4
+  train + eval (31,340 rows), `real-http-fp-v1` (149 texts), the Docker smoke fixtures and
+  the other candidates; near-duplicate warnings **0**.
+- The pre-registered **CSIC-ancestry warning check (§7, check 7) was not executed** — see the
+  §7 deviation in the checkpoint.
+- Internal duplicates: **5 exact groups, 16 non-keepers** excluded.
+- Pre-freeze supplement (`browser-forms-session`): 15 captured · 2 duplicates of existing
+  candidates · 0 exact / 0 canonical collisions · 0 near-duplicate warnings · **13 new
+  eligible** → 50.
+- Frozen set: **400** cases, 200 ALLOW / 200 BLOCK, 10 × 40; **400** unique case ids;
+  **400** unique request SHA-256; 0 `request_text` hash mismatches; freeze commit
+  **`36df2ee`**; `cases.jsonl` SHA-256 `721dfdaa…`; aggregate integrity hash
+  **`ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b`** (re-verified at
+  stage close); V4 exposure before freeze 0.
+
+### Q7. Capture / replay fidelity — Phase B (measured; evidence committed at stage close)
+
+| Check | Result |
+|---|---|
+| `curl` capture → raw-socket replay → capture, SHA-256 compared | **8 / 8 byte-exact** |
+| Chromium / Playwright, predeclared subset (first 12 of 22 captured; 10 not replayed by design) | **12 / 12 byte-exact** |
+| Offline round trip `render → wire → mitmproxy parse → render_request()` | identity (unit tests, `tests/test_external_capture.py`) |
+
+Checker semantics: `scripts/external/fidelity_check.py` requires, with `--expect N`, exactly N
+selected on both sides and all matching; a declared subset is not reported as a count
+mismatch (`tests/test_fidelity_check.py`). **Evidence:**
+`reports/external/external-v1-phase-b-fidelity/` — the four original capture/replay files
+(`raw/capture.jsonl`, `raw/replay_results.jsonl`, `raw/browser_smoke.jsonl`,
+`raw/browser_smoke_replay.jsonl`) copied byte-for-byte on 2026-09-22 from the machine-local
+`docker/.lab-logs/capture/` (sources unmodified, SHA-256 verified identical, `SHA256SUMS`),
+plus the checker's output re-run on the copies (derived). No traffic was regenerated; the
+original result is also recorded in the message of commit `16da803`. This is capture-proxy
+fidelity, not a capture of the data plane's `/classify` input in External v1 (see the §11
+deviation above).
+
+### Q8. External Test v1 execution — `external-v1-run-001` (measured)
+
+| Metric | Value |
+|---|---|
+| Gateway executions | 1,200 (400 × 3); execution errors **0** (`raw/gateway_meta.json`) |
+| Direct `/classify` executions | 300 (100 predeclared × 3); execution errors **0** (`raw/direct_meta.json`) |
+| Gateway nondeterminism | 0 cases |
+| Direct nondeterminism | 0 cases |
+| Direct vs gateway **decision** agreement | 100 / 100 (decision consistency, not byte equivalence) |
+| Derived Phase F data-plane session | 1,200 decision lines (`raw/data-plane-phase-f.log`, derived from the unchanged `raw/data-plane.log`) |
+
+### Q9. External Test v1 — L1 model (measured; gateway channel, repetition 1)
+
+| Metric | Value |
+|---|---|
+| Confusion matrix (n = 400) | TP 199 · TN 132 · FP 68 · FN 1 · invalid 0 |
+| Invalid outputs — observed | 0 / 400 |
+| Invalid outputs — rule-of-three bound (approx.) | upper bound on the invalid-output rate ≈ 3/400 = 0.75% |
+| Accuracy | 331 / 400 = 82.75% |
+| Precision (BLOCK) | 199 / 267 = 74.53% |
+| Recall / ADR (BLOCK) | 199 / 200 = 99.50% |
+| F1 (BLOCK) | 85.22% |
+| FPR — on this test's 200 benign cases | 68 / 200 = 34.00% |
+| FNR | 1 / 200 = 0.50% |
+
+| Benign slice | FP | TN | FPR | | Category | TP | FN | External recall — observed | Rule-of-three bound, zero misses only (approx.) | Internal V4 recall |
+|---|---:|---:|---|---|---|---:|---:|---|---|---|
+| browser-navigation | 7 | 33 | 7 / 40 = 17.5% | | SQL injection | 40 | 0 | 40 / 40 = 100% | miss rate ≤ ≈ 3/40 = 7.5% (recall ≥ ≈ 92.5%) | 743 / 817 = 90.94% |
+| browser-forms-session | 4 | 36 | 4 / 40 = 10.0% | | Command injection | 40 | 0 | 40 / 40 = 100% | miss rate ≤ ≈ 3/40 = 7.5% (recall ≥ ≈ 92.5%) | 117 / 134 = 87.31% |
+| api-json | 21 | 19 | 21 / 40 = 52.5% | | XSS | 40 | 0 | 40 / 40 = 100% | miss rate ≤ ≈ 3/40 = 7.5% (recall ≥ ≈ 92.5%) | 708 / 708 = 100% |
+| api-query | 12 | 28 | 12 / 40 = 30.0% | | Path traversal | 40 | 0 | 40 / 40 = 100% | miss rate ≤ ≈ 3/40 = 7.5% (recall ≥ ≈ 92.5%) | 506 / 506 = 100% |
+| unseen-structure | 24 | 16 | 24 / 40 = 60.0% | | SSRF | 39 | 1 | 39 / 40 = 97.5% | — (1 miss observed; no zero-error bound) | 62 / 63 = 98.41% |
+
+59 / 68 false positives are in `api-json`, `api-query` and `unseen-structure`. Per-cell n =
+40, so per-cell rates carry wide uncertainty. The rule-of-three column is the methodology's approximate zero-event bound (rule of three, protocol §3 / methodology §5), not an exact confidence interval:
+the observed 40 / 40 stands as recorded, and the bound is stated beside it, never instead of
+it. No benign slice has zero false positives, and the overall FNR (1 / 200) is not a
+zero-error rate, so no other headline row carries the bound. The internal V4 column is from
+the E5 evaluation (2026-08-18), which predates this reporting rule and is shown as recorded.
+
+**SECONDARY breakdowns — pre-registered (protocol §4.3 / §10), derived at stage close**
+(`reports/external/external-v1-secondary-breakdowns/`, generated by
+`scripts/external/secondary_breakdowns.py` from the frozen case metadata and the committed
+run records, with the frozen D19 scorer and the runner's headline population — gateway
+channel, repetition 1). Not headline; no causal claim; 50/50 construction. Every dimension
+reconciles exactly with the headline confusion matrix. Status per rate, on its own
+denominator (≥ 30 OK · 1–29 INSUFFICIENT DATA · 0 NOT EVALUABLE):
+
+| Dimension = value | ALLOW / BLOCK | FPR (over ALLOW) | Recall (over BLOCK) |
+|---|---|---|---|
+| client_profile = chromium | 80 / 0 | 11 / 80 = 13.8% · OK | — NOT EVALUABLE |
+| client_profile = curl | 79 / 193 | 35 / 79 = 44.3% · OK | 192 / 193 = 99.5% · OK |
+| client_profile = httpx | 41 / 7 | 22 / 41 = 53.7% · OK | 7 / 7 · INSUFFICIENT DATA |
+| host_type = api-alias | 60 / 26 | 27 / 60 = 45.0% · OK | 26 / 26 · INSUFFICIENT DATA |
+| host_type = shop-alias | 140 / 174 | 41 / 140 = 29.3% · OK | 173 / 174 = 99.4% · OK |
+| method = GET | 144 / 180 | 39 / 144 = 27.1% · OK | 179 / 180 = 99.4% · OK |
+| method = POST | 46 / 20 | 22 / 46 = 47.8% · OK | 20 / 20 · INSUFFICIENT DATA |
+| method = OPTIONS / PUT / HEAD / PATCH | 5 / 3 / 1 / 1 ALLOW, 0 BLOCK | 4 / 5 · 2 / 3 · 0 / 1 · 1 / 1 — all INSUFFICIENT DATA | — NOT EVALUABLE |
+| body_type = none | 150 / 180 | 43 / 150 = 28.7% · OK | 179 / 180 = 99.4% · OK |
+| body_type = json | 33 / 7 | 22 / 33 = 66.7% · OK | 7 / 7 · INSUFFICIENT DATA |
+| body_type = form | 13 / 13 | 3 / 13 · INSUFFICIENT DATA | 13 / 13 · INSUFFICIENT DATA |
+| body_type = text / csv | 3 / 1 ALLOW, 0 BLOCK | 0 / 3 · 0 / 1 — INSUFFICIENT DATA | — NOT EVALUABLE |
+
+In the report, each zero-error rate also carries the rule-of-three approximate zero-event
+bound (3/n on the error rate, capped at 100%, uninformative for n ≤ 3) in a separate column —
+beside the observed value, not an exact confidence interval. **`route_family`**
+(listed in §4.3 but not in §10) is **pre-registered, not produced**: it is not in the frozen
+case metadata and was only ever computed for enumerable specs, never for the 80
+browser-captured cases, so assigning it now would be a post-exposure methodological choice.
+The dimensions overlap the primary cells (e.g. every `chromium` case is a browser slice), so
+these rows are not independent of the per-cell table.
+
+### Q10. External Test v1 — L2 enforcement (measured)
+
+**1,200 / 1,200** gateway executions conformant with the D34 contract (source: data-plane
+decision log + HTTP status + lab-app receipts).
+
+### Q11. External Test v1 — L3 end to end (measured)
+
+Benign delivered **132** · benign broken **68** · BLOCK-labelled stopped **199** ·
+BLOCK-labelled delivered **1**. "BLOCK delivered" means the request reached the protected
+destination (lab-app) — **not** successful exploitation.
+
+### Q12. Docker and fail-closed validation (measured)
+
+| Check | Evidence |
+|---|---|
+| Healthy / model loaded | `/health` `model_loaded: true`; `startup: model ready on cuda in 1.7 s` (`smoke-20260921T011153Z`) |
+| ALLOW → 200 → destination received | `status=200`, destination received 1 new request (`GET /index.html`) |
+| BLOCK → 403 → not reached | `status=403`, destination received 0 new requests |
+| Classifier unavailable → 503 → not reached | control plane `exited` before and after; `status=503`, destination received 0 |
+| Recovery | healthy again; ALLOW `status=200`, received |
+| Demo from a clean lab | 2 × `DEMO PASS` (`demo-20260922T052457Z`, `demo-20260922T052519Z`); destination log +4 receipts (2 ALLOW per run), 0 for BLOCK or fail-closed; `smoke-20260922T052724Z` PASS |
+| Failure paths in unit tests | every row of the fail-closed table, `tests/test_data_plane.py` (24 tests) |
+| `real-http-fp-v1` gateway | 0 × 503 (fail-closed not exercised in that run) |
+
+Sources: `reports/lab/docker-lab-v1/README.md` and `raw/`; demo logs machine-local under
+`docker/.lab-logs/`.
+
+### Q13. Operational thresholds
+
+Classifier timeout **3.0 s** (`config.yaml`, mirrored in `docker/config.docker.yaml`, drift
+test in `tests/test_data_plane.py`): an **operational failure limit** after which the
+request is blocked (fail-closed). It is **not** a latency target and not derived from
+latency measurements (D35); the latency objective is Decision D36.
+
+### Q14. Not yet measured — pending or not formally verified
+
+| Metric | Status |
+|---|---|
+| Formal client-to-destination end-to-end P50 / P95 / P99 (Issue #18) | **pending** |
+| Concurrency; behaviour under concurrent load | pending (inference is serialized on one GPU) |
+| Throughput / requests per second | pending |
+| Formal RAM / VRAM / CPU / GPU resource benchmark | pending (only the incidental peaks in Q3) |
+| HTTPS / TLS · HTTP/2 · WebSockets | not validated |
+| Fast-path split, disagreement rate, fast-path latency (#35–#38) | pending — not implemented |
+| GGUF / llama.cpp security and performance comparison (M2) | pending — not implemented |
+| Embedded hardware measurements (M4) | pending |
+| Adversarial / evasion robustness (E6) | pending |
+| External v1 secondary breakdowns | `client_profile`, `host_type`, `method`, `body_type` **produced** at stage close (derived, Q9); `route_family` pre-registered, **not produced** (Q9) |
+| External v1 proxy-to-`/classify` byte-equivalence | **not executed** in run-001 (§11 deviation); required in External v2 (D40) |
+| External v1 CSIC-ancestry warning check (protocol §7, check 7) | **not executed** (non-blocking WARN; §7 deviation); required in External v2 (D40) |
+
+### Q15. Reporting rules for every number above
+
+Include n or numerator/denominator; name the producing experiment; never mix diagnostic,
+observational and benchmark evidence; External v1's 50/50 prevalence is a construction, and
+34% is not a production FPR (D42); External v1 does not prove overfitting and is not formal
+OOD detection; `model_latency_ms` is never end-to-end latency; cold start and steady state
+are never combined; raw evidence is preserved and derived summaries are named as derived;
+External v1 is never re-run or modified to complete a metric (D39).
+
+---
+
+## Security and engineering references — alignment, not compliance
+
+*(Added at stage close, 2026-09-21.)* firewall-IA is **informed by selected practices** from
+the frameworks below, which serve as reference frameworks and design guidance. **The project
+is not certified against, has not been assessed against, and does not claim compliance or
+conformity with any of them.** A control is described as implemented only where this
+repository holds evidence for it. Where a framework is named without a version below, no
+specific edition has been selected; verify the current edition before citing it (the D9
+rule).
+
+### 1. Requirements engineering
+
+- **ISO/IEC/IEEE 29148:2018** — the main reference for **system** requirements
+  engineering. firewall-IA is treated as a system, not only software: the gateway, the data
+  plane, the control plane, the ML classifier, the deployment/runtime environment and the
+  future embedded hardware. 29148 is a requirements-engineering standard; it is **not** a
+  cybersecurity standard or certification.
+- **EARS (Easy Approach to Requirements Syntax)** — requirement phrasing, used especially
+  for normal behaviour, unwanted behaviour and failure conditions. Illustration of the form,
+  restating behaviour already fixed by D34 (not quoted from an SRS): *"If the classifier
+  does not return a valid decision, then the data plane shall answer 503 and shall not
+  forward the request."*
+- **Where it lives.** The requirements documents are not tracked in this repository, and no
+  entry in `DECISIONS.md` records the choice of 29148 / EARS.
+
+### 2. Application / web security references
+
+| Reference | Role in this project | Not claimed |
+|---|---|---|
+| **OWASP Top 10** | Problem-domain reference: the attack classes V4 labels include injection-type attacks, XSS and SSRF named among its risks | that V4 covers the Top 10 |
+| **OWASP API Security Top 10** | API threat context; relevant to the `api-json` / `api-query` traffic in External v1 | API-security coverage |
+| **OWASP ASVS** | Catalogue of verification requirements; a source for future security requirements | ASVS verification at any level |
+| **OWASP Core Rule Set (CRS)** | The traditional rule-based WAF reference and a possible future baseline/comparator — the conventional comparison of **D9** (FUTURE WORK: not implemented; must avoid circularity with CSIC's keyword-derived labels; verify version and licensing before citing) | that firewall-IA implements, embeds or matches CRS |
+
+### 3. Cybersecurity and risk references
+
+| Reference | Role in this project | Not claimed |
+|---|---|---|
+| **NIST CSF 2.0** | Outcome vocabulary for placing the gateway (a protective control at the HTTP layer) within wider security outcomes | CSF profile or tier |
+| **NIST AI RMF 1.0** | Reference for AI-component risk practice: measured error rates, test-set independence, documented limitations (D37–D42) | AI RMF conformance |
+| **NIST SSDF (SP 800-218)** | Secure-development reference: versioned artefacts, tests, reproducible and hash-pinned evidence | SSDF attestation |
+| **ISO/IEC 27001 / 27002 / 27005** | ISMS requirements, control guidance and information-security risk management, as reference for a future deployment context | ISMS, certification, or a 27002 control set |
+| **ISO/IEC 42001 / ISO/IEC 23894** | AI management system and AI risk-management guidance, as reference for governing the ML component | AI management system or certification |
+| **CIS Controls** | Prioritized safeguards; reference for future host and deployment hardening | any implementation group |
+| **MITRE CWE** | Weakness vocabulary for the attack categories, e.g. External v1's CWE-89 (SQL injection), CWE-78 (OS command injection), CWE-79 (XSS), CWE-22 (path traversal), CWE-918 (SSRF) | weakness coverage beyond the evaluated categories |
+
+MITRE ATT&CK and D3FEND are not used by this project's documentation and are deliberately
+not mapped.
+
+### 4. Engineering principles implemented and evidenced
+
+| Principle | Evidence |
+|---|---|
+| Authorized inline gateway — authorized interception, lab-only traffic against owned services | project identity (§1); D22 scope limit; External v1 protocol §4.1 |
+| Fail-closed; secure default on classifier failure (timeout, connection failure, non-200, malformed answer, addon exception) | D4, D34; `tests/test_data_plane.py`; smoke check D; demo stage 4 |
+| Classifier decision separated from gateway enforcement — the control plane classifies, the data plane enforces | D25, D34; two processes (D33) |
+| Deterministic ALLOW / BLOCK contract | D25 (`ALLOW \| BLOCK` + reason, or `invalid`); greedy decoding (`do_sample=False`, `control_plane/inference_core.py`); 149/149 deterministic in `real-http-fp-v1`; 0 nondeterminism in External v1 |
+| Blocked traffic is not forwarded | destination receipt logs; `real-http-fp-v1` 30/30; External v1 L2 1,200/1,200 |
+| An invalid model or API response never silently ALLOWs | D25 (never coerced), D34 (503); regression test in `tests/test_classifier_api.py` |
+| Logging and evidence preservation — per-run logs kept with results; the addon logs no query strings or bodies | methodology §13; `docker/.lab-logs/`; `reports/*/raw/` |
+| Reproducible evaluation | D19, D32; manifests and SHA-256 hashes; deterministic dataset generation |
+| Frozen external evaluation before model exposure | D38; External v1 manifest (`v4_exposure_at_freeze: zero`) |
+| L1 model quality / L2 enforcement / L3 end-to-end reported separately | D41 |
+| Model errors distinguished from gateway errors — 403 (model BLOCK) vs 503 (no valid decision); L1 vs L2 attribution | D34, D41 |
+| No online learning; no automatic model-weight modification | D30; the adapter is mounted read-only in the Docker Lab (`compose.yaml`) |
+| Raw experimental evidence preserved, never rewritten | D39; `reports/external/external-v1-run-001/raw/` |
+
+### 5. Controls discussed but NOT implemented or NOT validated
+
+Not completed controls, and not to be described as such:
+
+- **Least-privilege hardening** — some lab properties point that way (read-only adapter and
+  cache mounts, non-root destination, control plane not published, proxy port on loopback
+  only), but no systematic least-privilege design or review has been done
+- **API authentication / authorization** — `/classify` and `/health` have none; they are
+  reachable only on loopback locally or inside the lab network
+- **Rate limiting**
+- **Structured telemetry / SIEM integration** — logs are plain text and JSONL files
+- **Broader defense-in-depth deployment** — the gateway has only been run in the local lab
+- **Formal threat modelling**
+- **HTTPS / TLS validation**, **HTTP/2 validation**, **WebSocket validation**
+- **Embedded deployment hardening** (M4)
 
 ---
 
@@ -213,7 +897,7 @@ EOS terminated 100% of generations, none hit the 40-token cap.
 
 **These are HuggingFace model-side inference times, NOT end-to-end gateway latency.**
 
-**Latency objective — D36 (supersedes D3):** P95 of the latency added by the inference
+**Latency objective — Decision D36 (supersedes D3):** P95 of the latency added by the inference
 pipeline (tokenization and preparation, `generate()`, decoding and parsing) ≤ 200 ms in
 steady state. It excludes model load, cold start and warm-up (reported separately), HTTP
 transport, network, proxy and destination. It is an **optimization objective**, not an
@@ -242,10 +926,10 @@ Peak memory, PyTorch allocator, this process only: 935.5 MiB allocated / 1170.0 
 reserved. Non-generate pipeline stages total ~0.58 ms at P95. Generated tokens mean 11.63
 (r = 0.934 with latency); 0 of 18,618 hit the 40-token cap.
 
-**Against D36:** steady-state inference-pipeline P95 (`steady_pipeline_p95_ms`, scope
+**Against Decision D36:** steady-state inference-pipeline P95 (`steady_pipeline_p95_ms`, scope
 `prompt+tokenize+transfer+generate+decode+parse`) is **269.58 ms**. The objective of
 ≤ 200 ms is not met. The artifacts in `reports/benchmarks/baseline-local-v1/` were written
-before D36 and still describe the objective as D3's end-to-end budget; they are not
+before Decision D36 and still describe the objective as D3's end-to-end budget; they are not
 rewritten.
 
 Quality at that latency, same E5 metrics: attack detection 97.04%, 2 FP and 92 FN per run,
@@ -278,7 +962,9 @@ Single run, single seed, no confidence intervals · evasion resistance unmeasure
 does not transfer to production traffic · CSIC label circularity (F6) · reason matching is
 deliberately strict · `eval.jsonl` was used both for checkpoint selection (validation) and
 for the internal evaluation, so it is held out from training but **not** an independent test
-set (**D24**) · latency is model-side, laptop-class, batch size 1.
+set (**D24**) · latency is model-side, laptop-class, batch size 1. *(Stage close,
+2026-09-21:)* External Test v1 has since measured the distribution-shift limitation
+directly — 68/200 benign cases BLOCK on that test — see "Current checkpoint".
 
 **Rule from V5 on** (**D37**, `docs/ml_evaluation_methodology.md` §1): TRAIN → training ·
 VALIDATION → checkpoint/configuration selection · INTERNAL TEST → independent internal
@@ -321,13 +1007,18 @@ issue #8 says, and it still has no dedicated issue.
 **The current ordered work, from here** (the same order as "Current checkpoint" above — do
 not reorder):
 
-7. **External Test v1** — an independent, frozen external evaluation set; does not exist
-   yet (§13, "External Test v1")
-8. **Full external evaluation through the complete gateway** (**D22**) — client → data
-   plane → control plane → V4 → data plane → destination
-9. **Professor demo** — ALLOW, BLOCK and fail-closed live on a small demo subset, with the
-   external-test results already computed
-10. **README / results / standards alignment / future work**
+7. ~~**External Test v1**~~ — **FROZEN 2026-09-21** at `36df2ee` (400 cases, 10 × 40).
+8. ~~**Full external evaluation through the complete gateway**~~ (**D22**) — **DONE
+   2026-09-21**, `external-v1-run-001`: 1,200 gateway + 300 direct executions; L1/L2/L3 in
+   "Current checkpoint".
+9. ~~**Professor demo**~~ — **PREPARED 2026-09-21**: `docker/demo.sh`, runtime verified from
+   a clean lab, smoke fixtures only; External v1 results are presented already computed.
+10. ~~**README / results**~~ — **DONE at stage close**: README rewritten around the current
+    state; detail moved to `docs/technical_reference.md`. Standards alignment remains
+    future work.
+
+*(Stage close:)* the ordered list below is historical; the next work after the release is
+listed in "Current checkpoint".
 
 **Later, only after that sequence:**
 
@@ -573,7 +1264,8 @@ under different conditions and are not two measurements of the same quantity. Se
   (fail-closed).
 
 Decisions: **D33** (separate environment), **D34** (enforcement), **D35** (D3 objective vs.
-timeout; the objective itself is now **D36**). Full description and reproduction steps: README, "Data Plane".
+timeout; the objective itself is now **Decision D36**). Full description and reproduction steps:
+`docs/technical_reference.md`, "Data Plane" (moved from the README at stage close).
 
 - **Separate environment (D33).** mitmproxy 12.2.3 pins `typing-extensions<=4.14` on
   Python 3.12, while pydantic 2.13.4 needs `>=4.14.1`. The data plane uses
@@ -673,8 +1365,9 @@ and its proportions are **not** performance metrics for the model.
 
 ## 5d. Docker Lab — COMPLETE, RUNTIME VERIFIED (2026-09-21)
 
-A containerized laboratory that runs the existing system end to end, so
-**External Test v1** can later be executed in a reproducible environment. It is
+A containerized laboratory that runs the existing system end to end. **External Test
+v1 was executed in it** (`external-v1-run-001`, see "Current checkpoint"), and the
+professor demo runs in it (`docker/demo.sh`, "Demo" below). It is
 **infrastructure**: no model, dataset, prompt, parser, generation parameter,
 request representation (D1), enforcement rule (D4/D34) or evaluation methodology
 changed. Full documentation: `docker/README.md`.
@@ -695,6 +1388,12 @@ Nothing was moved; the §9 organization is unchanged.
 | `data-plane` | `python:3.12-slim` + `requirements-data-plane.txt` | mitmdump running the unchanged `data_plane.py`. Never loads the model. |
 | `destination` | `python:3.12-slim`, stdlib only | The protected origin. Serves two static pages and appends every received request to a JSONL receipt log — this is how a BLOCK is proved *not* to have arrived. |
 | `client` | `python:3.12-slim`, stdlib only | One-shot smoke client under a compose profile, so `docker compose up` does not fire traffic. |
+
+*(Added for External Test v1, profile `extv1`, never started by `up`, the smoke test or the
+demo:)* `lab-app` (the External v1 application, aliases `shop.fwlab.test` /
+`api.fwlab.test`, port 9100, deliberately not exploitable), `capture-proxy` (capture-only,
+same image and `render_request()` as the data plane, classifies nothing) and `generator`
+(Chromium/Playwright, `httpx`, `curl`, raw-socket replay).
 
 ### Design choices, and why
 
@@ -815,6 +1514,35 @@ evaluation set (**D37**). The frozen
 `reports/benchmarks/baseline-local-v1/` and
 `reports/diagnostics/real-http-fp-v1/` are never overwritten.
 
+### Demo — `docker/demo.sh` (stage close, 2026-09-21)
+
+The professor demo. A host-side script with **no test logic of its own**: every request,
+fixture, expected status and receipt check is the smoke client's
+(`docker/client/smoke_test.py`); the script sequences five stages and prints `/health` and
+the data plane's decision line for each request.
+
+`[1/5]` startup — `docker compose --profile smoke --profile extv1 down --remove-orphans`
+(containers + network only), `up -d --wait`, `/health` must report `model_loaded: true`,
+`data plane ready ... policy=fail-closed` · `[2/5]` ALLOW → 200 delivered · `[3/5]` BLOCK
+(SQLi fixture) → 403 not delivered · `[4/5]` stop control plane, assert stopped,
+`run --no-deps client failclosed` → 503 not delivered, assert still stopped · `[5/5]`
+restart, wait healthy, ALLOW again → `DEMO PASS`. First unexpected result → `DEMO FAIL`,
+non-zero exit, control plane restarted if the demo stopped it. `--step` pauses between
+stages. Each run tees to `docker/.lab-logs/demo-<ts>.log`.
+
+**Runtime verification.** From a clean lab (all profiles down, zero lab containers, cached
+build): `demo-20260922T052457Z` and `demo-20260922T052519Z` both `DEMO PASS`; the
+destination receipt log gained exactly the four expected ALLOW receipts and none for
+BLOCK or fail-closed; `smoke-20260922T052724Z` passed right after. A missing-adapter
+precondition failure exits 1 without touching any container. Static checks:
+`tests/test_demo_script.py` (11 tests, including that no frozen External v1 case targets
+the smoke destination `app.fwlab.test`).
+
+Before the first clean-state run, the live container logs were copied to
+`docker/.lab-logs/pre-demo-container-logs-20260922T052045Z/` (machine-local, gitignored);
+the data-plane container log was byte-identical to the committed
+`reports/external/external-v1-run-001/raw/data-plane.log`.
+
 ### Still out of scope for the lab
 
 Unchanged from the local gateway's scope, and **not** validated by this run:
@@ -883,12 +1611,18 @@ The weakest part of the current dataset is **legitimate-traffic diversity** (syn
 `inference_core.py` · `data_plane/` — `data_plane.py` · `scripts/dataset/` — `parse_dataset.py`,
 `parse_dataset_v4.py`, `check_dataset.py` · `scripts/training/` — `finetune.py` ·
 `scripts/evaluation/` — `test_model.py` · `scripts/benchmarks/` — `benchmark_inference.py`,
-`benchmark_env.py`, `benchmark_compare.py`. `config.yaml`, `csic_database.csv` and the historical
-`train.jsonl`/`eval.jsonl` stay at the root.
+`benchmark_env.py`, `benchmark_compare.py` · `scripts/external/` — External Test v1 capture,
+labelling, Phase D gate, freeze and run tooling · `datasets/external_v1/` — the frozen set
+and its evidence · `reports/external/external-v1-run-001/` — the execution record ·
+`docs/` — methodology, External v1 protocol, technical reference, data sources.
+`config.yaml` stays at the root. *(Stage close:)* `csic_database.csv` and the historical
+`train.jsonl`/`eval.jsonl` are kept at the root **locally only** — untracked and gitignored
+since v0.1.0 (`docs/data_sources.md`); `datasets/v4_clean/*.jsonl` are also untracked and
+regenerated locally against `datasets/manifest_v4_clean.json`.
 
 **Docker Lab files (2026-09-20).** `compose.yaml` at the repository root; all
 Docker assets under `docker/` (`config.docker.yaml`, one directory per service,
-`smoke_test.sh`, `.env.example`, `README.md`); `.dockerignore` at the root. Nothing
+`smoke_test.sh`, `demo.sh`, `.env.example`, `README.md`); `.dockerignore` at the root. Nothing
 in the layout above was moved. See §5d.
 
 **Reorganization, 2026-09-20 — structural only.** Files were grouped by responsibility; no
@@ -922,7 +1656,7 @@ Three modes, cleanly separated:
 - `--mode manual` — the legacy 135 hand-authored cases, reclassified as a **MANUAL DIAGNOSTIC / REGRESSION SUITE**. Preserved verbatim, prints a banner explaining why it is not the headline metric.
 - `--mode self-test` — verifies the metric code on fixtures with **no model required**.
 
-Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** — `generate()` per row, with the cold first inference pooled in. It is not the D36 objective's instrument; that is `benchmark_inference.py`'s steady-state pipeline P95.
+Reports three levels that are **never combined into one accuracy number**: (1) binary security decision with BLOCK as the positive class, full confusion matrix, precision/recall/F1, and FPR/FNR normalised over their own class populations; (2) attack category/reason, measured only over correctly-blocked attacks so a reason mismatch can never reduce binary recall; (3) latency (count/mean/P50/P95/P99/min/max/stdev), **model-side inference only** — `generate()` per row, with the cold first inference pooled in. It is not the Decision D36 objective's instrument; that is `benchmark_inference.py`'s steady-state pipeline P95.
 
 Invalid outputs are never coerced — counted as incorrect, mapped opposite to expected, reported as a separate rate alongside a parseable-only view. D18 is enforced by an `evidence_status` column (`OK` / `INSUFFICIENT DATA` / `NOT EVALUABLE`); every percentage carries its numerator and denominator. `--json` emits the machine-readable record.
 
@@ -960,6 +1694,8 @@ Measures, from the JSONL files each run (nothing hardcoded): per-category counts
 **Gate rule: no training run starts while this reports FAIL.**
 
 ### `csic_database.csv`
+*(Stage close: local only — not distributed since v0.1.0; SHA-256 and placement in
+`docs/data_sources.md`. Required by `parse_dataset_v4.py`.)*
 CSIC 2010. 61,065 rows × 17 cols. Label col `Unnamed: 0` (`"Normal"`/`"Anomalous"`). Used: `Method`, `URL`, `User-Agent`, `cookie`, `content-type`, `content`. `URL` cell format: `http://localhost:8080/tienda1/path?query HTTP/1.1`. Col `lenght` is an original-data typo.
 
 ---
@@ -970,7 +1706,7 @@ CSIC 2010. 61,065 rows × 17 cols. Label col `Unnamed: 0` (`"Normal"`/`"Anomalou
 - **18,478 CSIC Anomalous excluded:** structural anomalies (buffer overflow, integer tampering, cookie poisoning) with no keyword-detectable payload; generic label can't be validated from content. ~73.7% of CSIC Anomalous. **Per D2, these stay excluded from the clean baseline** and are preserved conceptually as a separate future experimental dataset.
 - **CSIC attack diversity is narrow:** ~70% SQL, low payload variety (see §4).
 - **`--` SQL keyword rule is broad** in `categorize_csic_anomalous()`; acceptable for e-commerce context, revisit if extended.
-- **Latency: the ~800ms/request figure is UNVERIFIED and confounded.** No model exists to measure. It was also inflated by forced 40-token generation (§12 F5), so it was never a measure of decision latency. **Per D3 the design target is now defined: end-to-end added latency P95 ≤ 200 ms** — a target, not a demonstrated capability. Future measurement must decompose into model-only / model+API / proxy overhead / end-to-end, each with P50, P95, P99 and throughput. *(2026-09-18: the target is superseded by **D36** — P95 of the inference pipeline ≤ 200 ms in steady state, not end-to-end; see §3. The decomposition requirement still applies.)*
+- **Latency: the ~800ms/request figure is UNVERIFIED and confounded.** No model exists to measure. It was also inflated by forced 40-token generation (§12 F5), so it was never a measure of decision latency. **Per D3 the design target is now defined: end-to-end added latency P95 ≤ 200 ms** — a target, not a demonstrated capability. Future measurement must decompose into model-only / model+API / proxy overhead / end-to-end, each with P50, P95, P99 and throughput. *(2026-09-18: the target is superseded by **Decision D36** — P95 of the inference pipeline ≤ 200 ms in steady state, not end-to-end; see §3. The decomposition requirement still applies.)*
 - **Failure behaviour: FAIL-CLOSED** per **D4**. If the classifier times out, crashes, is unavailable, or returns an invalid decision, traffic is blocked by default. A fallback mechanism is explicitly out of current scope.
 
 ---
@@ -1234,7 +1970,7 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 |------|-----------|--------|
 | **E0** | Dataset integrity gate (`check_dataset.py`) | **DONE 2026-08-16** — current dataset reports **FAIL**, as expected |
 | **E1** | Port `finetune.py` to TRL 1.4 / transformers 5.8; smoke-test | **DONE 2026-08-17 — PASS** (`reports/e1_training_pipeline_smoke.txt`). Tooling unblocked. |
-| — | Documentation correction (this file + `DECISIONS.md` + `README.md`) | CONTEXT + DECISIONS done 2026-08-16; **README still stale** |
+| — | Documentation correction (this file + `DECISIONS.md` + `README.md`) | CONTEXT + DECISIONS done 2026-08-16; README rewritten at stage close (2026-09-21) |
 | **E2** | Envelope neutralization — shared envelope + shape matching | **DONE 2026-08-17** (`reports/e2_e3_clean_dataset.txt`). Strongest incidental baseline 93.72% → 51.16%. |
 | **E3** | Leakage-free grouped split | **DONE 2026-08-17.** Leakage 26.65% → 0.00%; duplicates → 0.00%. |
 | **E4** | `###END###` removal (D5) | **DONE 2026-08-17** (`reports/e4_remove_end_token.txt`). Dataset regenerated; E0 metrics byte-identical. |
@@ -1247,38 +1983,35 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | — | Real-HTTP diagnostic `real-http-fp-v1` | **DONE 2026-09-18** — reproducible and persisted, see §5c |
 | — | Repository reorganization by responsibility | **DONE 2026-09-20** — structural only, see §9 |
 | — | **Docker Lab** — reproducible environment for the whole system | **DONE 2026-09-21 — runtime verified.** Checks A–E pass, see §5d and `reports/lab/docker-lab-v1/` |
-| — | **External Test v1** — independent, frozen external set | **NEXT — NOT STARTED**, does not exist yet (below) |
-| — | **Full external evaluation through the complete gateway** (D22) | NOT STARTED — depends on the two above |
-| — | **Professor demo** — ALLOW / BLOCK / fail-closed + demo subset | NOT STARTED |
-| — | **README / results / standards alignment / future work** | NOT STARTED |
-| **#18** | End-to-end latency | NOT STARTED — after the sequence above |
+| — | **External Test v1** — independent, frozen external set | **FROZEN 2026-09-21** at `36df2ee` (D38, D39) |
+| — | **Full external evaluation through the complete gateway** (D22) | **DONE 2026-09-21** — `external-v1-run-001`, L1/L2/L3 (D41) |
+| — | **Professor demo** — ALLOW / BLOCK / fail-closed / recovery | **PREPARED 2026-09-21** — `docker/demo.sh`, runtime verified (§5d) |
+| — | **README / results** | **DONE at stage close**; standards alignment and future-work write-up remain |
+| — | **V5 error analysis** of External v1 false positives (D40) | NOT STARTED — after the release; consumes External v1 for V5 |
+| — | **External v2** | NOT STARTED — required before any V5 claim (D40) |
+| **#18** | End-to-end latency | NOT STARTED — after the release |
 | — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
 | **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED |
 | — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis (#9 is done) |
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |
 | **E8** | Quantization tradeoff (FP16 vs GGUF Q4_K_M) | NOT STARTED |
-| **E9** | Inline overhead decomposition (per layer: inference pipeline / API / proxy / end-to-end; D3 decomposition, D36 objective) | NOT STARTED |
+| **E9** | Inline overhead decomposition (per layer: inference pipeline / API / proxy / end-to-end; D3 decomposition, Decision D36 objective) | NOT STARTED |
 | **E7** | Conventional rule-based baseline | **FUTURE / OPTIONAL per D9** — do not implement now |
 
 **Gate rule:** no training run starts while `check_dataset.py` reports FAIL.
 
-### External Test v1 — does not exist yet
+### External Test v1 — frozen and executed (stage close, 2026-09-21)
 
-Nothing of it is built. When it is built, per **D37** and
-`docs/ml_evaluation_methodology.md`:
-
-- It is **independent of the V4 dataset**, and **frozen before V4 is evaluated on it**.
-- It ships with ground truth, categories, slices, a manifest and hashes.
-- It measures TP/TN/FP/FN, accuracy, BLOCK precision, recall / attack detection rate, F1,
-  FPR, FNR, invalid outputs, and per-category / per-slice metrics.
-- It also verifies **gateway enforcement**, not only classification.
-- The **main execution runs through the complete system** — client → data plane → control
-  plane → V4 → data plane → destination. Direct `/classify` calls are auxiliary per-layer
-  consistency controls only.
-- It is **not** designed around the already known failures of `real-http-fp-v1` (§5c).
-- If its individual errors are later used to guide V5, it stops being an independent test
-  for V5 (**D37**) and becomes development / error-analysis data.
+*(This subsection previously read "does not exist yet"; that requirement list was met.)*
+Built and run per **D37** and `docs/external_test_v1_protocol.md`: independent of the V4
+dataset by exact and canonical collision gate, frozen before V4 saw any case (`36df2ee`),
+shipped with ground truth, cells, manifest and hashes, executed through the complete
+system with direct `/classify` calls as a consistency control only, and not designed
+around the concrete failures of `real-http-fp-v1` (its cases were collision-gated out).
+Identifiers, methodology and results: "Current checkpoint" at the top of this file.
+Decisions: D38 (construction), D39 (immutability), D40 (use for V5 → External v2),
+D41 (L1/L2/L3), D42 (reporting).
 
 **Core scope per D8:** clean dataset → validated classifier → GGUF/quantized deployment → inline HTTP gateway → security validation → sufficient performance evaluation → physical embedded deployment. Deep comparative studies and architecture extensions are **not** core.
 
@@ -1294,15 +2027,28 @@ Nothing of it is built. When it is built, per **D37** and
    first, so you know which of their behaviours are already-identified defects rather than
    things to rediscover.
 4. Check training status: `ls ~/Desktop/firewall-IA/model-output-v4-clean/`. **As of 2026-08-18 the V4-clean baseline EXISTS** (best checkpoint 2200). `model-output-v3/` never existed and is not the current model.
-5. Confirm dataset: `wc -l datasets/v4_clean/train.jsonl` (expect 25,134) and `datasets/v4_clean/eval.jsonl` (expect 6,206). The root `train.jsonl`/`eval.jsonl` are the HISTORICAL leaky corpus — do not train on them.
+5. Confirm dataset: `wc -l datasets/v4_clean/train.jsonl` (expect 25,134) and `datasets/v4_clean/eval.jsonl` (expect 6,206). The root `train.jsonl`/`eval.jsonl` are the HISTORICAL leaky corpus — do not train on them;
+   since v0.1.0 they are local-only and untracked (`docs/data_sources.md`).
 6. **Run the integrity gate:** `python3.12 scripts/dataset/check_dataset.py --train datasets/v4_clean/train.jsonl --eval datasets/v4_clean/eval.jsonl`. No training starts while it reports FAIL. WARNING (category scarcity) is expected and acceptable.
 7. Confirm no missing categories: run `parse_dataset.py` only if regenerating, and check for `[SKIP]` lines. `[SKIP]` is an ERROR, not a warning.
 8. Verify PayloadsAllTheThings is at the recorded commit `e961fef231d8327bae83b563fab50aec2e6b77c0` (§6) if categories look off.
 9. **Docker Lab:** built and runtime verified on 2026-09-21 (§5d). Bring it up with
    `docker compose up -d control-plane data-plane destination` and re-check it with
-   `./docker/smoke_test.sh`. Its checks are infrastructure plumbing only — never
-   quote them as model results.
+   `./docker/smoke_test.sh`; the demo is `./docker/demo.sh`. Stop it with
+   `docker compose --profile smoke --profile extv1 down`. Its checks are infrastructure
+   plumbing only — never quote them as model results.
+10. **External Test v1 is frozen.** Never edit `datasets/external_v1/` cases or ground
+    truth, never substitute reserves, never rewrite `reports/external/external-v1-run-001/`
+    raw evidence (D39). Re-verify with
+    `python3.12 -m unittest tests.test_freeze_external_v1 tests.test_external_v1_run`.
+    Inspecting individual External v1 errors starts V5 development (D40).
 
 ### Language discipline
 
 Never state that the system is "more secure" or "faster" than a conventional mechanism unless an experiment in `reports/` demonstrates it. Distinguish observation / measurement / hypothesis / interpretation / conclusion. Prefer "under the tested conditions…", "the experiment indicates…", "additional testing is required…". Do not present the 91% figure as a current result (§3).
+
+External Test v1 (D42): say "68/200 benign cases in External Test v1 (34% on this test)",
+never "the FPR is 34%" or "production FPR"; "external generalization gap", not "overfitting";
+"unseen-input robustness", not "OOD detection"; "BLOCK-labelled request delivered", not
+"attack succeeded" or "exploited". Latency seen in evaluation or demo runs is an
+observation, not Issue #18.

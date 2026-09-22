@@ -1,5 +1,16 @@
 # External Test v1 — dataset (Phase C DRAFT)
 
+> **Status update — 2026-09-21: FROZEN (`36df2ee`) and EXECUTED (`external-v1-run-001`).**
+> This README documents how the Phase C DRAFT pool was built and is kept as that record;
+> the "DRAFT / not frozen" wording below describes that phase. The frozen evaluation set
+> is `cases.jsonl` (400 cases), identified by `manifest.json` (`status: FROZEN`),
+> `SHA256SUMS` and integrity hash
+> `ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b`. The 84 eligible
+> reserves in `freeze/reserve_case_ids.json` are historical selection evidence, **not**
+> substitutes. Any change to a frozen case requires External v2 (D39). Results:
+> [`../../reports/external/external-v1-run-001/`](../../reports/external/external-v1-run-001/);
+> methodology: [`../../docs/external_test_v1_protocol.md`](../../docs/external_test_v1_protocol.md).
+
 **Status: DRAFT. Pre-exposure. NOT frozen. V4 has not seen anything.**
 
 This directory holds the External Test v1 candidate pool while it is being authored and

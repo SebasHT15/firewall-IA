@@ -15,9 +15,13 @@ GATE RULE
     No training run starts while this reports FAIL.
 
 USAGE
-    python3.12 scripts/dataset/check_dataset.py
-    python3.12 scripts/dataset/check_dataset.py --train train.jsonl --eval eval.jsonl
-    python3.12 scripts/dataset/check_dataset.py --out reports/e0_dataset_integrity_current.txt
+    python3.12 scripts/dataset/check_dataset.py          # defaults: datasets/v4_clean/{train,eval}.jsonl
+    python3.12 scripts/dataset/check_dataset.py --train datasets/v4_clean/train.jsonl --eval datasets/v4_clean/eval.jsonl
+    python3.12 scripts/dataset/check_dataset.py --out reports/e0_dataset_integrity_<new-id>.txt
+
+    Existing reports under reports/ are records and are never overwritten. The historical
+    root train.jsonl/eval.jsonl are not distributed (docs/data_sources.md); pass them
+    explicitly only to re-check the historical corpus from a local copy.
 
 EXIT CODES
     0 = PASS      1 = WARNING      2 = FAIL      3 = could not run
@@ -268,8 +272,11 @@ def main() -> int:
     ap = argparse.ArgumentParser(description="firewall-IA E0 dataset integrity gate (read-only)")
     # Defaults resolve from the repository root; this file lives in scripts/dataset/.
     repo_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    ap.add_argument("--train", default=os.path.join(repo_root, "train.jsonl"))
-    ap.add_argument("--eval", dest="eval_path", default=os.path.join(repo_root, "eval.jsonl"))
+    # The current V4-clean dataset. Not the historical root train.jsonl/eval.jsonl, which
+    # are superseded and not distributed (docs/data_sources.md).
+    ap.add_argument("--train", default=os.path.join(repo_root, "datasets", "v4_clean", "train.jsonl"))
+    ap.add_argument("--eval", dest="eval_path",
+                    default=os.path.join(repo_root, "datasets", "v4_clean", "eval.jsonl"))
     ap.add_argument("--payloads-repo", default="~/PayloadsAllTheThings")
     ap.add_argument("--repo", default=repo_root)
     ap.add_argument("--out", default=None, help="also write the report to this path")

@@ -1,5 +1,72 @@
 # External Test v1 — protocol
 
+> **Status update — 2026-09-21, first-stage close: FROZEN and EXECUTED.**
+> The protocol below is kept exactly as pre-registered; where it says "DRAFT" or "not yet
+> executed" it describes the state when it was written.
+>
+> - **Frozen** at commit `36df2ee`: 400 cases (200 ALLOW / 200 BLOCK, 10 cells × 40),
+>   integrity hash `ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b`,
+>   seed `external-v1-freeze-v1`, V4 exposure before freeze zero —
+>   [`../datasets/external_v1/manifest.json`](../datasets/external_v1/manifest.json).
+> - **Executed** as `external-v1-run-001` with the runner at commit `9656df9`: 1,200 gateway
+>   requests (400 × 3) and 300 direct `/classify` calls (100 × 3), 0 execution errors, 0
+>   nondeterminism — [`../reports/external/external-v1-run-001/`](../reports/external/external-v1-run-001/).
+>   Headline results: [`../README.md`](../README.md#5-external-test-v1).
+> - **Disclosed deviation from §11 — methodology limitation of External Test v1.**
+>   The preregistered proxy-to-`/classify` byte-equivalence check was not executed during
+>   `external-v1-run-001` because the data-plane runtime did not contain `strace`.
+>   Therefore, External Test v1 does not contain direct byte-for-byte evidence that the
+>   classifier input for all 400 gateway cases was identical to the frozen `request_text`.
+>
+>   The existing byte-fidelity checks from the capture/replay infrastructure and prior HTTP
+>   diagnostics provide supporting evidence, and the predeclared 100-case direct-vs-gateway
+>   check showed 100/100 decision agreement. However, decision agreement is not itself
+>   proof of byte equivalence and must not be presented as such.
+>
+>   This deviation does not change any recorded L1/L2/L3 result or frozen artifact. It is a
+>   methodology limitation of External Test v1 and should be corrected prospectively in
+>   External Test v2.
+>
+>   What the supporting evidence is, precisely — none of it is a capture of the data
+>   plane's `/classify` input for these 400 cases:
+>   - *Capture/replay infrastructure (Phase B, §4.2):* replaying captured requests through
+>     the capture proxy, which uses the same `render_request()` as the data plane,
+>     reproduced the captured text byte for byte (8/8 `curl`, 12/12 Chromium; evidence
+>     committed at [`../reports/external/external-v1-phase-b-fidelity/`](../reports/external/external-v1-phase-b-fidelity/)); and the
+>     offline round-trip test `render → wire → mitmproxy parse → render_request()` is the
+>     identity (`tests/test_external_capture.py`).
+>   - *Prior HTTP diagnostic:* in `real-http-fp-v1`, 78/78 proxy-to-`/classify` texts
+>     captured with `strace` were byte-identical to the registered texts — different
+>     requests, an earlier session.
+>   - *Run records:* in `results.jsonl`, `sent_sha256` is the hash of the frozen text the
+>     replay client sent, computed client-side, so `text_matches_registered: true` records
+>     only that the client sent the frozen text. It is **not** evidence of what the
+>     classifier received.
+> - **Disclosed deviation from §7 — CSIC-ancestry check not executed.** Check 7 of the
+>   pre-registered gate (payload substring vs `csic_database.csv`; a non-blocking **WARN**
+>   requiring a logged manual ruling) was not implemented in the Phase D gate and was not
+>   executed: `datasets/external_v1/gate/gate_summary.json` lists the sources checked (V4
+>   train and eval, `real-http-fp-v1`, the smoke fixtures, the other candidates) and CSIC is
+>   not among them. The exact and canonical collision checks did cover the CSIC-derived rows
+>   that are part of V4 train + eval; what was not run is the substring screen against the
+>   raw CSIC file. As a WARN-level check it could not have blocked the freeze, and its
+>   absence does not change any frozen case or any recorded L1/L2/L3 result. It is **not**
+>   reconstructed after exposure, which would apply the check with choices made after the
+>   results were known. **External Test v2 must implement and run it before freeze** (D40).
+> - **External Test v2 must restore the check (D40):** the bytes the data plane sends to
+>   `/classify` are captured for every gateway execution, hashed and compared with the
+>   frozen `request_text`, with the capture tooling verified present and working in the
+>   execution environment before any case is sent.
+> - **Secondary breakdowns (§4.3, §10)** were produced at stage close from the frozen case
+>   metadata and the committed run records, without changing any case or result:
+>   `client_profile`, `host_type`, `method`, `body_type` —
+>   [`../reports/external/external-v1-secondary-breakdowns/`](../reports/external/external-v1-secondary-breakdowns/).
+>   `route_family` (§4.3) is pre-registered, not produced: it is not in the frozen metadata
+>   and was never assigned to the browser-captured cases, so producing it would require a
+>   post-exposure choice.
+> - Decisions recording this methodology: D38–D42 in [`../DECISIONS.md`](../DECISIONS.md).
+>   Any change to a frozen case now requires External v2 (§9).
+
 **Status: DRAFT protocol, approved scope, NOT yet executed.**
 Written 2026-09-21, before any External Test v1 case exists and before V4 has seen any
 proposed case. This document is frozen *before* the data, in the same order D19 froze the
