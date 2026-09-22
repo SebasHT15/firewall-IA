@@ -1,0 +1,96 @@
+{
+  "name": "External Test v1",
+  "version": "external_v1",
+  "status": "FROZEN",
+  "frozen": true,
+  "frozen_utc": "2026-09-21T19:57:25.807655+00:00",
+  "protocol": "docs/external_test_v1_protocol.md",
+  "total": 400,
+  "ALLOW": 200,
+  "BLOCK": 200,
+  "per_cell": {
+    "browser-navigation": 40,
+    "browser-forms-session": 40,
+    "api-json": 40,
+    "api-query": 40,
+    "unseen-structure": 40,
+    "sqli": 40,
+    "cmdi": 40,
+    "xss": 40,
+    "path-traversal": 40,
+    "ssrf": 40
+  },
+  "per_cell_selected": {
+    "browser-navigation": 40,
+    "browser-forms-session": 40,
+    "api-json": 40,
+    "api-query": 40,
+    "unseen-structure": 40,
+    "sqli": 40,
+    "cmdi": 40,
+    "xss": 40,
+    "path-traversal": 40,
+    "ssrf": 40
+  },
+  "browser_forms_session_composition": {
+    "original_selected": 29,
+    "supplement_selected": 11
+  },
+  "artifact_sha256": "721dfdaa6425463ae0ce26520f6d47986fdc7388468b55d7b1a5bffed822d342",
+  "integrity_hash": "ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b",
+  "integrity_hash_method": "SHA-256 of the newline-joined 'case_id|request_sha256' list, cases ordered by (cell order, selection_key ascending).",
+  "selection": {
+    "method": "seeded, content-independent per-cell SHA-256 key; sort ascending; first 40",
+    "seed": "external-v1-freeze-v1",
+    "key_formula": "SHA256(seed|primary_cell|case_id|request_sha256)",
+    "note": "No manual choice; no model output; independent of input order and content."
+  },
+  "v4_exposure_at_freeze": "zero",
+  "classify_contacted": false,
+  "freeze_before_any_classify": true,
+  "provenance": {
+    "original_draft": "candidates/cases_draft.jsonl (Phase C capture)",
+    "supplement": "candidates_supplement/browser-forms-session-supplement.jsonl (pre-freeze supplemental capture; run_tag pre-freeze-supplement-browser-forms-session)",
+    "phase_d_evidence": [
+      "review/",
+      "gate/"
+    ],
+    "supplement_evidence": [
+      "review_supplement/",
+      "gate_supplement/"
+    ],
+    "capture_files": [
+      "extv1-draft.jsonl",
+      "extv1-browser-forms-supplement.jsonl"
+    ],
+    "preserved": "All pre-freeze evidence retained; the frozen set is a DERIVED subset."
+  },
+  "eligible_totals": {
+    "browser-navigation": 42,
+    "browser-forms-session": 50,
+    "api-json": 48,
+    "api-query": 48,
+    "unseen-structure": 44,
+    "sqli": 50,
+    "cmdi": 48,
+    "xss": 51,
+    "path-traversal": 54,
+    "ssrf": 49
+  },
+  "reserves_unselected": {
+    "browser-navigation": 2,
+    "browser-forms-session": 10,
+    "api-json": 8,
+    "api-query": 8,
+    "unseen-structure": 4,
+    "sqli": 10,
+    "cmdi": 8,
+    "xss": 11,
+    "path-traversal": 14,
+    "ssrf": 9
+  },
+  "immutability": "External v1 is immutable at the commit containing this manifest.json with status FROZEN, artifact_sha256 and frozen_utc. Any later change to any case requires external_v2, including correcting a mislabel.",
+  "d37_tripwire": "Reporting aggregate/per-slice metrics does not consume the set. The moment individual External v1 errors are used to develop/train/select V5, External v1 becomes V5 development data and external_v2 is required before any V5 claim.",
+  "independence_claim": "No exact or canonical collision vs checked V4 dev data (train+eval, 31,340 rows), real-http-fp-v1, or smoke fixtures. No claim re TinyLlama pretraining, global novelty, or OOD.",
+  "limitations_pointer": "docs/external_test_v1_protocol.md section 13"
+}
