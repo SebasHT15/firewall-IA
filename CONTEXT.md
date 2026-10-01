@@ -11,7 +11,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D42). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D45). Read it before proposing architectural changes.
 > - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
 > - `docs/external_test_v1_protocol.md` — External Test v1 methodology (pre-registered; status note at the top).
 > - `docs/technical_reference.md` — component detail moved out of the README at stage close.
@@ -38,7 +38,10 @@ right after this checkpoint.
 - **Branch:** `demo/wednesday`, from `main` at `699266f` (merge of PR #46, External Test
   v1). Stage-close documentation and `docker/demo.sh` were prepared here. The commit, tag
   and release are done by the project owner; no git tags existed before this stage
-  (proposed first tag: `v0.1.0`).
+  (proposed first tag: `v0.1.0`). *(Afterwards, 2026-09-22: `demo/wednesday` was merged
+  into `develop` (PR #47, `46a6424`) and `develop` into `main` (PR #48, `5daa978`); tag
+  `v0.1.0` points at `5daa978`, published as the GitHub pre-release "v0.1.0 — First
+  functional Firewall-IA gateway stage".)*
 - **License:** MIT (`LICENSE`, Copyright (c) 2026 SebasHT15) for the repository's original
   code and documentation. It does not relicense third-party material: the TinyLlama base
   model, CSIC 2010, PayloadsAllTheThings, libraries, tools and container images.
@@ -67,6 +70,49 @@ client → data plane (mitmproxy, data_plane/data_plane.py)
 Fail-closed (D4, D34). Two processes, two Python environments (D33). Runtime: HF
 transformers + PEFT, V4 QLoRA adapter, CUDA. GGUF / llama.cpp is future work (D23).
 Application-layer only; not a stateful network firewall; authorized inline interception.
+
+### Since the stage close — Hybrid Architecture Phase 1: shadow feature extraction (2026-10-01, Issue #49)
+
+**Terminology (D45).** **V4** = the current TinyLlama model. **V5** = the next model
+revision, exactly as in D37 / D40 (and in "Next work" below). **Hybrid Architecture** = the
+proposed multi-stage design: request feature extraction → lightweight request analyzer →
+small decision model → V4 as fallback for uncertain cases → enforcement. Never write "V5"
+for the Hybrid Architecture. The branch name `feature/v5-request-feature-extraction`
+predates this rule and is kept.
+
+**State.** Implemented on that branch, reviewed, not yet committed or merged at the time of
+writing. The Hybrid Architecture is a direction, not an approved architecture; **only its
+first stage exists**.
+
+- **What exists.** `data_plane/request_features.py`: a deterministic, standard-library
+  function from the D1 text to `RequestFeatures` (schema `request-features/v2`, 34
+  features + version). `data_plane/hybrid_contracts.py`: `AnalyzerOutput`,
+  `DecisionInput`, `DecisionOutput` — contracts only, no producer or consumer; the
+  analyzer's signal vocabulary is deliberately left open.
+- **Shadow mode (D43).** The data plane renders the request once, sends it to
+  `/classify`, then describes the same string and logs a `FEATURE EXTRACTION (shadow)`
+  summary line before enforcing the verdict. Nothing reads the features: V4 is the only
+  decision; enforcement and fail-closed are unchanged; `(classifier N ms)` keeps its
+  definition (render + `/classify` call). An extractor error is logged and ignored — never
+  a 403/503. Switch: `data_plane.shadow_feature_extraction` in `config.yaml` (on); absent =
+  off, so `docker/config.docker.yaml` (lab, demo, External v1 capture proxy) runs with it off.
+- **Excluded (D44).** `Host` and `User-Agent` are never features; Phase 1 reads no header
+  but `Content-Type`; character and syntax features cover path + query + body only, undecoded.
+- **Evidence** (`reports/hybrid/phase1-feature-extraction-v2/`; v1 beside it is the
+  superseded pre-review run). Live run with real V4, 11 hand-written requests × 3, shadow
+  off then on: identical client statuses (12 × 200, 21 × 403), decisions, reasons and
+  destination receipts; 0 extractor failures; fail-closed with shadow on → 503, not
+  delivered. In-process extractor time over the 6,206 V4 eval texts × 3 (n = 18,618):
+  P50 0.0169 · P95 0.0301 · max 0.1588 ms; ≈ 53 ms for a 1 MiB body (linear in body size,
+  on mitmproxy's event loop — documented, deliberately not optimized in Phase 1). Tests:
+  ML env 281 (278 passed, 3 skipped), data-plane env 112/112.
+- **Untouched.** V4 model and adapter, `/classify` and `/health` contracts, datasets,
+  External Test v1 (not used in any way — the D40 tripwire is **not** triggered).
+- **Open before Phase 2 (not decided):** the analyzer's output vocabulary and its training
+  data (roles per D37; any use of External v1 cases or errors consumes it, D40 / D45);
+  whether a Hybrid stage may ever BLOCK without V4 (D29 forbids that for its heuristic
+  score); whether features should see decoded text or headers other than `Content-Type`;
+  the cost of large bodies on the event loop; enabling the switch in the Docker Lab.
 
 ### V4 internal baseline — unchanged
 
@@ -280,7 +326,8 @@ direct proxy-to-`/classify` byte-equivalence evidence (§11 deviation above).
   `datasets/manifest_v4_clean.json`).
 - External Test v1 frozen set unchanged; integrity re-verified at stage close.
 - No V5, no V4.1; no fast path, suspicious score or asynchronous validation; no GGUF /
-  llama.cpp; no embedded deployment.
+  llama.cpp; no embedded deployment. *(2026-10-01: still no V5 model; Hybrid Architecture
+  Phase 1 added only shadow-mode feature extraction — see above.)*
 
 ### Security and engineering references
 
@@ -1608,10 +1655,12 @@ The weakest part of the current dataset is **legitimate-traffic diversity** (syn
 ## 9. Files and What They Do
 
 **Locations** (run everything from the repository root): `control_plane/` — `classifier_api.py`,
-`inference_core.py` · `data_plane/` — `data_plane.py` · `scripts/dataset/` — `parse_dataset.py`,
+`inference_core.py` · `data_plane/` — `data_plane.py`, `request_features.py` and
+`hybrid_contracts.py` (Hybrid Architecture Phase 1, 2026-10-01) · `scripts/dataset/` — `parse_dataset.py`,
 `parse_dataset_v4.py`, `check_dataset.py` · `scripts/training/` — `finetune.py` ·
 `scripts/evaluation/` — `test_model.py` · `scripts/benchmarks/` — `benchmark_inference.py`,
-`benchmark_env.py`, `benchmark_compare.py` · `scripts/external/` — External Test v1 capture,
+`benchmark_env.py`, `benchmark_compare.py`, `benchmark_request_features.py` (extractor
+overhead) · `scripts/external/` — External Test v1 capture,
 labelling, Phase D gate, freeze and run tooling · `datasets/external_v1/` — the frozen set
 and its evidence · `reports/external/external-v1-run-001/` — the execution record ·
 `docs/` — methodology, External v1 protocol, technical reference, data sources.
@@ -2052,3 +2101,7 @@ never "the FPR is 34%" or "production FPR"; "external generalization gap", not "
 "unseen-input robustness", not "OOD detection"; "BLOCK-labelled request delivered", not
 "attack succeeded" or "exploited". Latency seen in evaluation or demo runs is an
 observation, not Issue #18.
+
+Versions vs architecture (D45): "V4" is the current model, "V5" the next model revision
+(D37 / D40), "Hybrid Architecture" the multi-stage design (feature extraction → analyzer →
+decision model → V4 fallback). Never "V5" for the Hybrid Architecture.

@@ -19,22 +19,38 @@ a missing or unknown decision, and any unexpected error inside this addon.
 A model BLOCK is answered with 403 and a classifier failure with 503, so the
 two stay distinguishable. The client is never told the model's reason.
 
+SHADOW FEATURE EXTRACTION (Hybrid Architecture Phase 1, D43). When enabled, the
+text sent to the classifier is also described by
+`request_features.extract_features()`, after the verdict, and the result is
+logged as a "FEATURE EXTRACTION (shadow)" line. Nothing reads it: the decision,
+enforcement and fail-closed are those above. An extractor error is logged and
+ignored; it never blocks a request (that would turn an experimental component
+into a new source of BLOCKs).
+
 RUN (from the repository root, in the data plane environment):
     .venv-dataplane/bin/mitmdump -s data_plane/data_plane.py --listen-host 127.0.0.1 -p 8080
 
-The classifier URL and timeout are read from config.yaml when the script loads.
+The classifier URL, timeout and shadow switch are read from config.yaml when the
+script loads. Restart mitmdump after editing this file or request_features.py.
 """
 
 import logging
 import os
 import time
+import traceback
 from typing import NamedTuple
 
 import httpx
 import yaml
 from mitmproxy import ctx, http
 
+# Sibling module: mitmproxy puts this script's directory on sys.path while
+# loading it, as the tests and capture_addon.py do explicitly.
+import request_features
+
 log = logging.getLogger("firewall.data_plane")
+# A child logger, so feature lines can be filtered apart from decision lines.
+features_log = logging.getLogger("firewall.data_plane.features")
 # httpx logs every classifier call at INFO; the ALLOW/BLOCK line already covers it.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -63,6 +79,23 @@ def load_config(path: str = CONFIG_PATH) -> tuple[str, float]:
     if not timeout > 0:
         raise ValueError(f"data_plane.classifier_timeout_seconds must be > 0, got {timeout}")
     return url, timeout
+
+
+def load_shadow_feature_extraction(path: str = CONFIG_PATH) -> bool:
+    """Return `data_plane.shadow_feature_extraction` from config.yaml (D43).
+
+    Optional: absent means off, so a configuration written before this switch
+    existed (e.g. docker/config.docker.yaml, which the External v1 capture proxy also
+    loads) keeps its exact behaviour. When present it must be a YAML boolean;
+    anything else raises, like every other invalid gateway setting.
+    """
+    with open(path, encoding="utf-8") as f:
+        section = yaml.safe_load(f)["data_plane"]
+    value = section.get("shadow_feature_extraction", False)
+    if not isinstance(value, bool):
+        raise ValueError("data_plane.shadow_feature_extraction must be true or false, "
+                         f"got {value!r}")
+    return value
 
 
 # ── Request representation (D1) ────────────────────────────────────────────
@@ -135,6 +168,37 @@ async def ask_classifier(client: httpx.AsyncClient, url: str, raw_request: str) 
     return Verdict(decision, reason if isinstance(reason, str) else None)
 
 
+# ── Shadow feature extraction (Hybrid Architecture Phase 1, D43) ───────────
+def shadow_extract(tag: str, raw_request: str) -> None:
+    """Describe the request and log the description. Returns nothing, so no
+    caller can act on it, and never raises.
+
+    The log line is a summary of numbers and request type only: no path, no
+    query values, no body (same policy as the decision lines). An extractor
+    failure is logged with the exception type and code location only, since
+    an exception message could quote the request.
+    """
+    started = time.perf_counter()
+    try:
+        f = request_features.extract_features(raw_request)
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        features_log.info(
+            "[%s] FEATURE EXTRACTION (shadow) %.3f ms %s method=%s content_type=%r "
+            "body_format=%s len=%d/%d/%d params=%d/%d repeated=%d pct_encoded=%d "
+            "symbols=%d (%.3f) non_ascii=%d entropy=%.3f",
+            tag, elapsed_ms, f.schema_version, f.method, f.content_type, f.body_format,
+            f.path_length, f.query_length, f.body_length, f.query_param_count,
+            f.body_param_count, f.repeated_param_name_count, f.percent_encoded_count,
+            f.symbol_count, f.symbol_ratio, f.non_ascii_count, f.entropy_bits_per_char)
+    except Exception as exc:
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        where = traceback.extract_tb(exc.__traceback__)[-1]
+        features_log.warning(
+            "[%s] FEATURE EXTRACTION (shadow) failed after %.3f ms: %s at %s:%d; "
+            "ignored, the request continues unchanged",
+            tag, elapsed_ms, type(exc).__name__, os.path.basename(where.filename), where.lineno)
+
+
 # ── mitmproxy addon ────────────────────────────────────────────────────────
 def blocked_response(verdict: Verdict) -> http.Response:
     """The proxy's own answer. Setting it on a flow in the `request` hook stops
@@ -147,14 +211,19 @@ def blocked_response(verdict: Verdict) -> http.Response:
 
 class FirewallGateway:
     def __init__(self, classifier_url: str, timeout_seconds: float,
-                 transport: httpx.AsyncBaseTransport | None = None) -> None:
+                 transport: httpx.AsyncBaseTransport | None = None,
+                 shadow_features: bool = False) -> None:
         self.classifier_url = classifier_url
         self.timeout_seconds = timeout_seconds
         self.transport = transport  # None in production; tests pass an httpx.MockTransport
+        self.shadow_features = shadow_features
 
     def running(self) -> None:
         log.info("data plane ready: classifier=%s timeout=%.1fs policy=fail-closed",
                  self.classifier_url, self.timeout_seconds)
+        features_log.info("feature extraction: %s",
+                          "shadow (logged only, never used for decisions)"
+                          if self.shadow_features else "off")
 
     async def request(self, flow: http.HTTPFlow) -> None:
         if flow.response is not None:
@@ -178,12 +247,21 @@ class FirewallGateway:
         log.info("[%s] received %s (body %d bytes)", tag, target, len(req.raw_content or b""))
 
         started = time.perf_counter()
+        # Rendered once: the shadow extractor below describes exactly the text
+        # the classifier received.
+        raw_request = render_request(req)
         # trust_env=False ignores HTTP_PROXY & co., so a shell configured to use
         # this proxy cannot route the classifier call back through the proxy.
         async with httpx.AsyncClient(transport=self.transport, timeout=self.timeout_seconds,
                                      trust_env=False) as client:
-            verdict = await ask_classifier(client, self.classifier_url, render_request(req))
+            verdict = await ask_classifier(client, self.classifier_url, raw_request)
         elapsed_ms = (time.perf_counter() - started) * 1000
+
+        # After the verdict: the extractor cannot affect what V4 received or
+        # decided, and its time stays out of "(classifier N ms)", which keeps
+        # its definition (render_request + the /classify call).
+        if self.shadow_features:
+            shadow_extract(tag, raw_request)  # timed and logged on its own line
 
         if verdict.decision == "ALLOW":
             log.info("[%s] ALLOW %s reason=%r (classifier %.0f ms)",
@@ -211,4 +289,4 @@ class FirewallGateway:
                   "blocking ALL traffic (503) until mitmdump is restarted")
 
 
-addons = [FirewallGateway(*load_config())]
+addons = [FirewallGateway(*load_config(), shadow_features=load_shadow_feature_extraction())]

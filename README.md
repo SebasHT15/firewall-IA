@@ -68,6 +68,16 @@ protected destination  (reached only on ALLOW)
 - **inference_core** — the only owner of prompt, model loading, generation and parsing,
   imported by both the control plane and the evaluation harness so runtime and evaluation
   cannot drift apart.
+- **Request feature extraction (Hybrid Architecture Phase 1, shadow mode)** — the data
+  plane also describes each request as a fixed set of features
+  (`data_plane/request_features.py`) and only logs them. Nothing reads them: V4 still makes
+  every decision, and enforcement and fail-closed are unchanged. `Host` and `User-Agent`
+  are never features (D43, D44;
+  [technical reference](docs/technical_reference.md#shadow-feature-extraction-hybrid-architecture-phase-1)).
+  *Terminology (D45):* **V5** is the next model revision (D37, D40); the **Hybrid
+  Architecture** is the proposed multi-stage design — feature extraction → lightweight
+  request analyzer → small decision model → V4 as fallback — of which only this first
+  stage exists.
 - **Two processes, two Python environments** (D33): mitmproxy's pins conflict with the ML
   stack, and the HTTP boundary between the planes is deliberate.
 
@@ -101,6 +111,7 @@ operational failure limit that triggers fail-closed, not a latency target (D35).
 | **Real-HTTP diagnostic** `real-http-fp-v1` | [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) |
 | **External Test v1** — frozen 400-case set, executed through the complete gateway | [§5](#5-external-test-v1), [`reports/external/external-v1-run-001/`](reports/external/external-v1-run-001/) |
 | **Docker demo / smoke path** — `docker/demo.sh`, `docker/smoke_test.sh` | [§6](#6-demo); demo runtime-verified from a clean lab |
+| **Request feature extraction, shadow mode** (Hybrid Architecture Phase 1, Issue #49) — describes requests, decides nothing | unit + gateway integration tests; live run with V4, shadow off vs on identical: [`reports/hybrid/phase1-feature-extraction-v2/`](reports/hybrid/phase1-feature-extraction-v2/) |
 
 ### Future — not implemented
 
@@ -111,6 +122,9 @@ operational failure limit that triggers fail-closed, not a latency target (D35).
 - Formal end-to-end latency benchmark (Issue #18)
 - HTTPS / TLS, HTTP/2 and WebSocket validation
 - V5 — addressing the external false positives found by External Test v1
+- Hybrid Architecture beyond feature extraction: lightweight request analyzer, small
+  decision model, V4 as fallback (only the shadow-mode extractor and the stage contracts
+  exist)
 - Concurrency / load validation; adversarial / evasion suite (E6)
 
 Nothing in this list works today.
@@ -345,6 +359,10 @@ Every metric with its source and status:
 
 ## Next steps
 
+In progress: **Hybrid Architecture Phase 1** (Issue #49) — request feature extraction in
+shadow mode, done as described above; Phase 2 (lightweight request analyzer) has not
+started.
+
 After this release, and not started yet:
 
 1. **V5 error analysis** of the External Test v1 false positives and the 92 internal false
@@ -387,6 +405,7 @@ embedded hardening. Full mapping:
 ```
 control_plane/       classifier_api.py, inference_core.py          FastAPI + the V4 pipeline
 data_plane/          data_plane.py                                 mitmproxy inline gateway
+                     request_features.py, hybrid_contracts.py      Hybrid Architecture Phase 1: shadow feature extraction, stage contracts
 scripts/dataset/     V4 dataset generation and the E0 integrity gate
 scripts/training/    finetune.py
 scripts/evaluation/  test_model.py (frozen E5 scorer)
@@ -407,7 +426,7 @@ Run everything from the repository root.
 | Path | Contents |
 |---|---|
 | [`CONTEXT.md`](CONTEXT.md) | Authoritative current technical state and plan, full latency evidence, standards mapping |
-| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D42) |
+| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D45) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |
 | [`docs/external_test_v1_protocol.md`](docs/external_test_v1_protocol.md) | External Test v1 methodology, pre-registered before the data |
@@ -417,6 +436,7 @@ Run everything from the repository root.
 | [`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/) | Docker Lab closure report and raw smoke logs |
 | [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) | Real-HTTP diagnostic: cases, raw records, process logs |
 | [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark; `baseline-local-v1` is the frozen reference |
+| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture Phase 1: shadow-mode live run (off vs on) and extractor overhead; `phase1-feature-extraction-v2` is current, `-v1` the superseded pre-review run |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | V4 dataset identity: hashes, seed, source commit |
 | [`docs/data_sources.md`](docs/data_sources.md) | Data not distributed by v0.1.0 (CSIC CSV, historical corpora): sizes, SHA-256, regeneration inputs, retained excerpts |
 | [`LICENSE`](LICENSE) | MIT License for this repository's original code and documentation (third-party material excluded — see [License](#license)) |
@@ -428,12 +448,14 @@ python3.12 -m unittest discover -s tests
 ```
 
 ```bash
-.venv-dataplane/bin/python -m unittest tests.test_data_plane tests.test_external_capture tests.test_lab_app tests.test_latency_observations
+.venv-dataplane/bin/python -m unittest tests.test_data_plane tests.test_external_capture tests.test_lab_app tests.test_latency_observations tests.test_request_features
 ```
 
-At stage close: **ML environment — 242 tests discovered, 239 passed, 3 expected skips**
-(the three mitmproxy/Flask modules); **data-plane environment — 61/61 passed** (those three
-modules plus `tests.test_latency_observations`). The first command runs in the ML
+After Hybrid Architecture Phase 1 (2026-10-01): **ML environment — 281 tests discovered,
+278 passed, 3 expected skips** (the three mitmproxy/Flask modules); **data-plane environment — 112/112
+passed** (those three modules, `tests.test_latency_observations` and
+`tests.test_request_features`, which needs only the standard library and runs in both).
+At stage close the figures were 242 / 239 / 3 and 61 / 61. The first command runs in the ML
 environment; the second runs the skipped modules in the data-plane environment (setup:
 [technical reference](docs/technical_reference.md#setup-once)). Use `python3.12`
 explicitly — on the development machine `python3` is 3.14 without the ML stack.

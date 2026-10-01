@@ -14,3 +14,11 @@ data_plane:
   # blocked (fail-closed). 3 s is a conservative starting value, to be tuned with
   # end-to-end evidence.
   classifier_timeout_seconds: 3.0
+
+  # Hybrid Architecture Phase 1 — request feature extraction in SHADOW mode
+  # (Issue #49, D43).
+  # true: every request is also described by data_plane/request_features.py and
+  # the summary is logged ("FEATURE EXTRACTION (shadow)"). Nothing reads it: V4
+  # still makes every decision; enforcement and fail-closed are unchanged, and an
+  # extractor error is logged and ignored. false, or absent: not run.
+  shadow_feature_extraction: true
