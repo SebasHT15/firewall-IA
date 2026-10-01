@@ -9,8 +9,8 @@ drift apart.
 SCOPE (Issue #15) — classification only. This service REPORTS its result,
 including the fact that a model output was unparseable (`status: "invalid"`).
 It does NOT enforce anything. The fail-closed policy of D4 belongs to the
-future Data Plane (Issues #16/#17), which will decide what to do with an
-`invalid` result, a 5xx, or a timeout.
+Data Plane (`data_plane/data_plane.py`, Issues #16/#17, D34), which decides what
+to do with an `invalid` result, a 5xx, or a timeout.
 
 An unparseable model output is NEVER coerced into a decision — not to ALLOW,
 not to BLOCK. See `inference_core.parse_prediction`.
@@ -58,7 +58,7 @@ async def lifespan(app: FastAPI):
                  app.state.device, time.perf_counter() - t0)
     except Exception:
         # Stay up so /health can report the failure and the operator (or the
-        # future Data Plane) can see an unready control plane rather than a
+        # Data Plane) can see an unready control plane rather than a
         # connection refused. /classify returns 503 while in this state.
         log.exception("startup: model failed to load — /classify will return 503")
     yield

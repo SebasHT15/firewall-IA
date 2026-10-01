@@ -1,0 +1,9 @@
+## GET /health
+{"status":"ok","model_loaded":true,"adapter_dir":"/home/sebas/Desktop/firewall-IA/model-output-v4-clean"}
+HTTP 200
+## POST /classify (benign D1 text)
+{"status":"ok","decision":"ALLOW","reason":"Normal HTTP request with no attack patterns detected","model_latency_ms":237.4761319999834}
+HTTP 200
+## POST /classify (empty request -> 422)
+{"detail":[{"type":"string_too_short","loc":["body","request"],"msg":"String should have at least 1 character","input":"","ctx":{"min_length":1}}]}
+HTTP 422

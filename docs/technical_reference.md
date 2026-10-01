@@ -8,12 +8,13 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D42: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions D1–D45: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
 Contents: [Control Plane](#control-plane-issue-15) ·
 [Data Plane](#data-plane-issues-16-17--first-version) ·
+[Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1) ·
 [Inference Benchmark](#inference-benchmark-issue-9) ·
 [External v1 latency observations](#external-test-v1--latency-observations-derived) ·
 [External v1 secondary breakdowns](#external-test-v1--secondary-breakdowns-pre-registered) ·
@@ -323,10 +324,134 @@ headers.
 runs in the Docker Lab on the validated smoke fixtures — see
 [`../docker/README.md`](../docker/README.md#demo).
 
+### Shadow feature extraction (Hybrid Architecture Phase 1)
+
+*(Added 2026-10-01, Issue #49, decisions D43, D44 and D45.)* The first stage of the proposed
+**Hybrid Architecture** — feature extraction → lightweight request analyzer → small decision
+model → V4 as fallback for uncertain cases → enforcement. "Hybrid Architecture" is not
+"V5": V5 is the next model revision of D37 / D40 (D45). **Only the first stage exists**,
+and it runs in **shadow mode**: it describes every request and nothing acts on the
+description.
+
+```
+request ─► render_request() ─► D1 text ─► POST /classify ─► V4 verdict ─┬─► extract_features(same text) ─► "FEATURE EXTRACTION (shadow)" log line   (nothing reads it)
+           └──────────── timed as "(classifier N ms)" ───────────┘      └─► ALLOW / BLOCK enforced, fail-closed   (unchanged)
+```
+
+**What it is.** `data_plane/request_features.py`, standard library only: a deterministic
+function from the D1 text to a frozen `RequestFeatures` object. It works on the same string
+V4 receives, rendered once per request, so a feature computed in the gateway and one
+computed offline over a dataset are identical. It makes **no decision**: no ALLOW, BLOCK,
+UNCERTAIN, score or threshold. The counts below are descriptions, not blocking rules.
+
+**What it does not do yet.** No lightweight request analyzer, no small decision model, no
+`UNCERTAIN`, no routing, no effect on V4, enforcement or fail-closed, no training, no
+dataset change. `data_plane/hybrid_contracts.py` defines `AnalyzerOutput`
+(`signals: Mapping[str, float]` with an open vocabulary, `confidence` in [0, 1],
+`analyzer_version`), `DecisionInput` (`features`, `analysis`) and `DecisionOutput`
+(`decision` ∈ ALLOW / BLOCK / UNCERTAIN, rejected otherwise, never coerced; `confidence` in
+[0, 1]; `reason`). They are contracts only: nothing produces or consumes them.
+
+**Excluded (D44).** `Host` and `User-Agent` are never features, directly or indirectly. The
+only header read is `Content-Type`. Character and syntax features are computed over the
+**surface** = path + query + body (the `?` separator belongs to neither), never over
+headers, and **on the text as received**: nothing is percent-decoded, so `%27` counts as an
+encoded character, not as a quote.
+
+**Features — schema `request-features/v2`:**
+
+| Group | Feature | Type | Definition |
+|---|---|---|---|
+| request | `method` | str | first token of the request line |
+| request | `path_length` | int | characters of the path (target before `?`) |
+| request | `query_length` | int | characters after `?`; 0 without query |
+| request | `body_length` | int | characters of the body (rendered text, not bytes) |
+| request | `has_body` | bool | body is non-empty |
+| request | `content_type` | str | media type of the first `Content-Type`, lowercase, parameters dropped; `""` if absent |
+| request | `body_format` | str | `none` (no body) · `form` (`application/x-www-form-urlencoded`) · `json` (`application/json` or `+json`, parsed) · `json_invalid` (JSON type, unparseable or nested deeper than 1,000) · `other` (anything else; not parsed, not sniffed) |
+| request | `query_param_count` | int | non-empty `&`-separated segments of the query |
+| request | `body_param_count` | int | form: non-empty segments; JSON: object members at any depth, as written (a repeated key counts); otherwise 0 |
+| request | `total_param_count` | int | query + body parameters |
+| request | `repeated_param_name_count` | int | parameter names (raw, query + form body) occurring more than once |
+| characters | `alnum_ratio` | float | ASCII letters and digits / surface length |
+| characters | `symbol_count` | int | ASCII punctuation characters (the 32 of `string.punctuation`) — the "special characters" |
+| characters | `symbol_ratio` | float | `symbol_count` / surface length — the symbol density |
+| characters | `non_ascii_count` | int | characters above U+007F |
+| characters | `percent_encoded_count` | int | valid `%XX` triplets, matched within path, query and body separately |
+| characters | `percent_encoded_ratio` | float | 3 × `percent_encoded_count` / surface length |
+| characters | `has_percent_encoding` | bool | `percent_encoded_count` > 0 |
+| characters | `longest_char_run` | int | longest run of one repeated character, within path, query or body |
+| characters | `entropy_bits_per_char` | float | Shannon entropy of the surface's character distribution |
+| structure | `path_depth` | int | non-empty `/` segments of the path |
+| structure | `json_depth` | int | maximum container nesting of a parsed JSON body; 0 otherwise |
+| syntax | `single_quote_count` · `double_quote_count` · `semicolon_count` · `slash_count` · `backslash_count` · `pipe_count` · `ampersand_count` · `equals_count` · `percent_count` | int | occurrences of `'` `"` `;` `/` `\` `\|` `&` `=` `%` |
+| syntax | `parenthesis_count` · `angle_bracket_count` · `brace_count` | int | occurrences of `(`+`)`, `<`+`>`, `{`+`}` |
+| — | `schema_version` | str | `request-features/v2`; bumped whenever a feature is added or redefined (v1 was the pre-review definition, only in `reports/hybrid/phase1-feature-extraction-v1/`) |
+
+Ratios are 0.0 on an empty surface. Missing parts count as empty: any string yields
+features, never an exception (a non-string is a `TypeError`). The result depends only on
+the text: JSON integers are not converted (the interpreter's int-digit limit cannot change
+`body_format`), and nesting is capped at 1,000 because the depth at which Python's parser
+gives up depends on the caller's stack (measured 9,897–9,997).
+
+**Configuration.** `config.yaml`, read when the addon loads:
+
+```yaml
+data_plane:
+  shadow_feature_extraction: true   # false, or absent: not run
+```
+
+Optional and a YAML boolean; any other value stops mitmdump at startup. The Docker Lab's
+`docker/config.docker.yaml` does not set it, so the lab, the demo and the External v1
+capture proxy run with it off. Restart mitmdump after changing it or after editing
+`request_features.py` (a hot reload of `data_plane.py` does not reload that module).
+
+**Failure policy.** An extractor exception is caught on its own and logged as
+`FEATURE EXTRACTION (shadow) failed … <ExceptionType> at <file>:<line>; ignored`, without
+the exception message (it could quote the request). The verdict already obtained from
+the classifier is enforced unchanged. It is **never** a `403` or `503`: fail-closed still means "no valid
+decision from the classifier" (D34), and an experimental component must not become a new
+source of BLOCKs (D43).
+
+**Observing it.** With the switch on, mitmdump prints at startup
+`feature extraction: shadow (logged only, never used for decisions)` (or `off`), and per
+request, after the classifier answered and before the decision line:
+
+```
+[13:22:07.867] [8e2068c3] received POST localhost:9000/products.html (body 30 bytes)
+[13:22:08.151] [8e2068c3] FEATURE EXTRACTION (shadow) 0.081 ms request-features/v2 method=POST content_type='application/x-www-form-urlencoded' body_format=form len=14/0/30 params=0/1 repeated=0 pct_encoded=0 symbols=9 (0.205) non_ascii=0 entropy=4.298
+[13:22:08.151] [8e2068c3] BLOCK POST localhost:9000/products.html reason='Server-side request forgery attack detected' (classifier 284 ms)
+```
+
+The flow tag ties them. The feature line is a summary — `len` is path/query/body
+lengths, `params` query/body counts — with no path, no query values, no body and no Host or
+User-Agent. Its `… ms` is the extractor call alone. Feature lines use the logger
+`firewall.data_plane.features` and do not match the decision-line regexes of
+`external_v1_run.py`, `summarize_latency_observations.py` or `docker/demo.sh` (tested). The
+decision line is the model decision and keeps its exact format, and its
+`(classifier N ms)` keeps its definition from before Phase 1 — `render_request()` plus the
+`/classify` call — because the extractor runs after that timer (tested).
+
+**Overhead** (measured 2026-10-01, `reports/hybrid/phase1-feature-extraction-v2/`). In
+process, over the 6,206 V4 eval texts × 3 passes (n = 18,618): min 0.0101 · mean 0.0185 ·
+P50 0.0169 · P95 0.0301 · max 0.1588 ms per request. Live in the gateway, n = 34: P50
+0.052 · P95 0.125 · max 0.132 ms. The cost grows linearly with body size (1 KiB ≈ 0.05 ms,
+10 KiB ≈ 0.47 ms, 100 KiB ≈ 4.7 ms, 1 MiB ≈ 53 ms, synthetic form bodies) and runs
+synchronously on mitmproxy's event loop. Phase 1 deliberately adds no limit,
+truncation or optimization for large bodies; it is a consideration for later phases.
+Reproduce:
+
+```bash
+.venv-dataplane/bin/python scripts/benchmarks/benchmark_request_features.py
+```
+
 ### Tests
 
 ```bash
-# data plane (24 tests; no model, no running services)
+# request feature extraction and Hybrid Architecture contracts (39 tests; standard library only, runs in either environment)
+python3.12 -m unittest tests.test_request_features -v
+
+# data plane (36 tests, including shadow mode; no model, no running services)
 .venv-dataplane/bin/python -m unittest discover -s tests -p 'test_data_plane.py' -v
 
 # everything else (ML environment); modules that need mitmproxy or Flask are reported
@@ -351,6 +476,8 @@ implementation defects.
   evaluated independently in External Test v1 *(updated at stage close;* see
   [`../README.md`](../README.md#5-external-test-v1)*)*
 - Heuristics, suspicious score, fast path: not implemented (Issues #35–#38)
+- Request feature extraction (Hybrid Architecture Phase 1): shadow mode only — logged,
+  never used for a decision (see [Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1))
 
 ---
 
