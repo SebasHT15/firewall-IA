@@ -401,21 +401,61 @@ class TestContracts(unittest.TestCase):
             with self.subTest(decision=bad), self.assertRaises(ValueError):
                 contracts.DecisionOutput(bad, 0.5, "reason")
 
-    def test_confidence_must_be_in_the_unit_interval(self):
+    def test_decision_confidence_must_be_in_the_unit_interval(self):
         for bad in (-0.01, 1.01, float("nan"), float("inf"), "0.5", True, False, None):
-            with self.subTest(confidence=bad):
-                with self.assertRaises(ValueError):
-                    contracts.DecisionOutput("BLOCK", bad, "reason")
-                with self.assertRaises(ValueError):
-                    contracts.AnalyzerOutput({}, bad, "analyzer-x")
+            with self.subTest(confidence=bad), self.assertRaises(ValueError):
+                contracts.DecisionOutput("BLOCK", bad, "reason")
 
-    def test_analyzer_signal_names_are_open(self):
-        out = contracts.AnalyzerOutput({"any-name": 0.3, "another": 2.0}, 1.0, "analyzer-x")
-        self.assertEqual(dict(out.signals), {"any-name": 0.3, "another": 2.0})
+
+class TestAnalyzerOutput(unittest.TestCase):
+    """D50: `attack` plus an optional, complete category distribution; no confidence."""
+
+    def categories(self, top="sql_injection", p=0.65):
+        rest = (1 - p) / (len(contracts.ANALYZER_CATEGORIES) - 1)
+        return {contracts.CATEGORY_PREFIX + c: (p if c == top else rest)
+                for c in contracts.ANALYZER_CATEGORIES}
+
+    def test_vocabulary_is_the_frozen_one(self):
+        self.assertEqual(contracts.ANALYZER_CATEGORIES,
+                         ("sql_injection", "xss", "path_file_access", "command_injection",
+                          "ssti", "open_redirect", "ssrf", "other_attack"))
+
+    def test_no_global_confidence(self):
+        names = {f.name for f in dataclasses.fields(contracts.AnalyzerOutput)}
+        self.assertEqual(names, {"signals", "analyzer_version"})
+
+    def test_attack_alone_or_with_a_full_category_distribution(self):
+        self.assertEqual(contracts.AnalyzerOutput({"attack": 0.12}, "a").signals["attack"], 0.12)
+        out = contracts.AnalyzerOutput({"attack": 0.94, **self.categories()}, "a")
+        self.assertAlmostEqual(sum(v for k, v in out.signals.items() if k != "attack"), 1.0)
+
+    def test_attack_is_required_and_a_probability(self):
+        with self.assertRaises(ValueError):
+            contracts.AnalyzerOutput(self.categories(), "a")
+        for bad in (-0.01, 1.01, float("nan"), float("inf"), "0.5", True, None):
+            with self.subTest(attack=bad), self.assertRaises(ValueError):
+                contracts.AnalyzerOutput({"attack": bad}, "a")
+
+    def test_unknown_signals_are_rejected(self):
+        for key in ("confidence", "category:jwt", "category:path_traversal", "sqli"):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                contracts.AnalyzerOutput({"attack": 0.5, key: 0.1}, "a")
+
+    def test_category_distribution_must_be_complete_and_sum_to_one(self):
+        partial = dict(list(self.categories().items())[:3])
+        with self.assertRaises(ValueError):
+            contracts.AnalyzerOutput({"attack": 0.9, **partial}, "a")
+        skewed = self.categories()
+        skewed["category:xss"] += 0.01
+        with self.assertRaises(ValueError):
+            contracts.AnalyzerOutput({"attack": 0.9, **skewed}, "a")
+        negative = self.categories(p=1.2)
+        with self.assertRaises(ValueError):
+            contracts.AnalyzerOutput({"attack": 0.9, **negative}, "a")
 
     def test_decision_input_joins_features_and_analysis(self):
         features = extract(req())
-        analysis = contracts.AnalyzerOutput({}, 0.0, "analyzer-x")
+        analysis = contracts.AnalyzerOutput({"attack": 0.0}, "analyzer-x")
         joined = contracts.DecisionInput(features, analysis)
         self.assertIs(joined.features, features)
         self.assertIs(joined.analysis, analysis)

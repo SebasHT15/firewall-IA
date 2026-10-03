@@ -359,9 +359,12 @@ Every metric with its source and status:
 
 ## Next steps
 
-In progress: **Hybrid Architecture Phase 1** (Issue #49) — request feature extraction in
-shadow mode, done as described above; Phase 2 (lightweight request analyzer) has not
-started.
+Hybrid Architecture: **Phase 1** (Issue #49) — request feature extraction in shadow mode,
+done as described above. **Phase 2A** (Issue #51) — the Lightweight Request Analyzer's
+targets, dataset and evaluation designed and frozen (D46–D53), with an external dataset
+survey; nothing trained
+([report](reports/hybrid/phase2a-analyzer-design/)). **Phase 2B** (training the Analyzer
+baselines) has not started.
 
 After this release, and not started yet:
 
@@ -426,7 +429,7 @@ Run everything from the repository root.
 | Path | Contents |
 |---|---|
 | [`CONTEXT.md`](CONTEXT.md) | Authoritative current technical state and plan, full latency evidence, standards mapping |
-| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D45) |
+| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D53) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |
 | [`docs/external_test_v1_protocol.md`](docs/external_test_v1_protocol.md) | External Test v1 methodology, pre-registered before the data |
@@ -451,11 +454,11 @@ python3.12 -m unittest discover -s tests
 .venv-dataplane/bin/python -m unittest tests.test_data_plane tests.test_external_capture tests.test_lab_app tests.test_latency_observations tests.test_request_features
 ```
 
-After Hybrid Architecture Phase 1 (2026-10-01): **ML environment — 281 tests discovered,
-278 passed, 3 expected skips** (the three mitmproxy/Flask modules); **data-plane environment — 112/112
+After Hybrid Architecture Phase 2A (2026-10-01): **ML environment — 286 tests discovered,
+283 passed, 3 expected skips** (the three mitmproxy/Flask modules); **data-plane environment — 117/117
 passed** (those three modules, `tests.test_latency_observations` and
 `tests.test_request_features`, which needs only the standard library and runs in both).
-At stage close the figures were 242 / 239 / 3 and 61 / 61. The first command runs in the ML
+After Phase 1 they were 281 / 278 / 3 and 112 / 112; at stage close 242 / 239 / 3 and 61 / 61. The first command runs in the ML
 environment; the second runs the skipped modules in the data-plane environment (setup:
 [technical reference](docs/technical_reference.md#setup-once)). Use `python3.12`
 explicitly — on the development machine `python3` is 3.14 without the ML stack.

@@ -1748,6 +1748,197 @@ these terms.
 
 ---
 
+## D46 — Analyzer formulation: `attack` plus an auxiliary category (Phase 2A D1)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** design frozen (Issue #51); model in Phase 2B
+
+**Decision.**
+
+- The Lightweight Request Analyzer has two levels: a primary binary signal
+  `attack = P̂(BLOCK | RequestFeatures)`, and an auxiliary category distribution given attack.
+- The category is **context**, not strong evidence for the future Decision Model, until Phase
+  2B shows that it generalizes and does not rest mainly on synthetic endpoint artifacts.
+- **Mandatory Phase 2B ablation:** the category model with all RequestFeatures v2 vs the same
+  model without the path-structure features that can proxy the synthetic endpoint (at least
+  `path_length` and `path_depth`). A strong drop makes the category low-confidence context.
+- Not used: a flat 20-class multiclass; a multilabel target built from the current labels.
+  Multilabel may be revisited only on real external evidence.
+
+**Rationale.** Phase 2A (`reports/hybrid/phase2a-analyzer-design/`): the binary label is clean,
+balanced and envelope-neutral (no runtime feature beats 53.7% on it); the category label is
+single-valued by construction precedence (410 multi-directory source payloads, 408 / 3,906 CSIC
+rows matching several keyword families), scarce for 11 of 19 reasons, and confounded with
+the synthetic endpoint (the path alone predicts the category given BLOCK at 65.3% vs 26.3%;
+the runtime `path_length` at 46.7%). Separating the two levels mirrors D19, where a category
+error never reduces binary recall.
+
+**Relationship to earlier entries.** Extends D43 (Hybrid Architecture) and follows D19's
+level separation. Nothing is superseded.
+
+---
+
+## D47 — Analyzer category vocabulary and reason mapping (Phase 2A D2)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** DONE in the contract (`hybrid_contracts.ANALYZER_CATEGORIES`); mapping
+  applied by the Phase 2B builder
+
+**Decision.** Categories: `sql_injection`, `xss`, `path_file_access`, `command_injection`,
+`ssti`, `open_redirect`, `ssrf`, `other_attack`. Mapping from V4 reasons: SQL injection →
+`sql_injection`; Cross-site scripting → `xss`; Path traversal and File inclusion →
+`path_file_access` (D49); Command injection → `command_injection`; Server-side template
+injection → `ssti`; Open redirect → `open_redirect`; Server-side request forgery → `ssrf`;
+CRLF, XXE, NoSQL, LDAP, GraphQL, CSRF, XPath, HTTP parameter pollution, insecure
+deserialization and request smuggling → `other_attack`; JWT → not a target (D48). V4 reasons
+are kept only as provenance metadata.
+
+`other_attack` is a **residual bucket** for reasons too scarce to be targets; it is not a
+semantic category and must not be described as one.
+
+**Rationale.** The seven named categories are exactly those with eval support ≥ 30 and ≥ 100
+logical groups (D18 / D19), with Path traversal and File inclusion merged; the other reasons
+have 0–112 eval rows and < 100 logical groups. Nothing is invented: every id maps 1:1 to
+existing reasons.
+
+---
+
+## D48 — JWT is excluded from Analyzer fitting; `unsupported_jwt` evaluation slice (Phase 2A D3)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** applied by the Phase 2B builder
+
+**Decision.**
+
+- JWT rows are excluded from fitting (TRAIN and VALIDATION) while RequestFeatures v2 does not
+  observe the `Authorization` evidence. They are not removed from V4-clean.
+- They form the `unsupported_jwt` evaluation slice (V4 eval: 16 rows), reported separately as a
+  known blind spot and kept out of both INTERNAL TEST views.
+- No feature based on `Authorization`, cookies or other headers is added; that needs a later
+  decision.
+
+**Rationale.** The JWT payload is placed only in `Authorization` (`parse_dataset_v4.render_request`),
+which D44 leaves unread; 70.3% of JWT rows have the coarse feature profile of benign rows of
+the same shape. Fitting them would label benign-looking surfaces as attacks. The External
+Dataset Survey found no public labelled JWT-attack dataset.
+
+**Relationship to earlier entries.** Consequence of D44's Phase 1 scope; D44 is unchanged.
+
+---
+
+## D49 — Directory Traversal and File Inclusion form one Analyzer category (Phase 2A D4)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** as D47
+
+**Decision.** Both V4 reasons map to `path_file_access`. The original reasons survive only as
+provenance and metadata.
+
+**Rationale.** 382 canonical source payloads occur in both PayloadsAllTheThings directories and
+were assigned to Directory Traversal by alphabetical order; both reasons share the
+`file_param` shape. The boundary is partly arbitrary. The closest standard umbrella is CWE-73
+(External Control of File Name or Path); an independent dataset (ModSec-WP, Zenodo
+10.5281/zenodo.21872151) also groups LFI, RFI and path traversal into one family.
+
+---
+
+## D50 — `AnalyzerOutput` semantics; no global confidence (Phase 2A D5)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** DONE — `data_plane/hybrid_contracts.py`, tests in
+  `tests/test_request_features.py`
+
+**Decision.**
+
+- `attack` — required; a calibrated estimate of `P̂(BLOCK | features)`. V4-clean is 50 / 50 by
+  construction, so it is **not** an estimate of operational attack prevalence (D42).
+- `category:<id>` — `P̂(category | attack, features)` for the D47 ids; all present and summing to
+  1, or all absent.
+- No global `confidence` field and no invented confidence score. Uncertainty, when needed, is
+  derived: closeness of `attack` to 0.5, top-1 probability, top-1 / top-2 margin, entropy.
+- The contract rejects unknown signals, a missing `attack`, values outside [0, 1], a partial
+  category set and a category sum off 1.
+
+**Relationship to earlier entries.** Replaces the open-vocabulary `AnalyzerOutput` of Phase 1
+(D43), which was explicitly a placeholder. `DecisionOutput` is unchanged.
+
+---
+
+## D51 — `hybrid_analyzer_v1`: source, roles, grouping and INTERNAL TEST views (Phase 2A D6)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED (the TRAIN ∪ VALIDATION reference set of the feature-disjoint view,
+  which came out of the grouping check this decision required, was confirmed by the owner
+  on 2026-10-01)
+- **Implementation:** NOT YET — the builder is Phase 2B
+
+**Decision.**
+
+- Source: V4-clean only, verified by its manifest hashes. V4-clean is never modified.
+- Roles: V4 train → Analyzer TRAIN + VALIDATION; V4 eval → INTERNAL TEST. No new random split.
+- **Group:** connected components over V4 train of "same canonical request OR same feature
+  vector", canonical request = `parse_dataset_v4.canonical_key` over
+  `method path?query \n content_type \n body` (headers excluded), feature vector = the 34
+  RequestFeatures v2 values; group key = the smallest canonical request in the component.
+- **VALIDATION:** 20% of groups by `sha256("hybrid-analyzer-v1-validation" + NUL + group_key)`,
+  first 8 bytes big-endian, `% 10000 < 2000` — deterministic, order-independent, independent of
+  `PYTHONHASHSEED` and of global state.
+- **INTERNAL TEST views:** `internal_test_full` (V4 eval, JWT excluded: 6,190 rows) and
+  `internal_test_feature_disjoint` (full minus rows whose feature vector occurs in any V4-train
+  row available to the Analyzer, TRAIN ∪ VALIDATION: 5,456 rows). Rows are flagged, never
+  removed; an independent flag marks a canonical request seen in TRAIN ∪ VALIDATION (127 rows).
+  Reports give both views, both counts and the view's class mix. The feature-disjoint view is
+  the primary reference for generalization claims.
+
+**Rationale.** Measured (`analysis.json`, `frozen_design`): grouping by canonical request alone
+left 465 VALIDATION rows with a feature vector present in TRAIN; the combined definition leaves
+0, with no giant group (18,720 groups, largest 417). Against fitted rows only, 331 eval rows
+whose vector appears only in VALIDATION would count as disjoint; VALIDATION drives model
+selection and calibration, so the reference set is TRAIN ∪ VALIDATION, which also makes the
+view independent of the VALIDATION salt.
+
+**Relationship to earlier entries.** Applies D16 (grouped splits), D37 (data roles; VALIDATION
+carved from training groups) and D32 / D39 (immutable, versioned evaluation artifacts). The
+feature-disjoint view has 3,033 BLOCK / 2,423 ALLOW rows, so its rates carry that prevalence
+(D42).
+
+---
+
+## D52 — Analyzer runtime is decided after a winning model is measured (Phase 2A D7)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** N/A
+
+**Decision.** Phase 2B may use a separate research environment with numpy and scikit-learn.
+Nothing is installed in the data-plane environment; D33 stands; the data plane is not changed.
+Where the Analyzer runs — stdlib inference of an exported model, the control plane, or another
+justified option — is decided only after a winning model's quality, latency, size and memory
+are measured. No deployment optimization before that.
+
+---
+
+## D53 — External Test v1 is not used before the Analyzer is frozen; then aggregate only (Phase 2A D8)
+
+- **Date:** 2026-10-01
+- **Status:** APPROVED
+- **Implementation:** N/A — a usage rule
+
+**Decision.** External v1 is not used for training, validation, model selection, feature
+selection, hyperparameter or threshold tuning, error analysis, vocabulary choice or Analyzer
+redesign. Only after the target schema, preprocessing, model, hyperparameters and any
+thresholds are frozen on TRAIN / VALIDATION / INTERNAL TEST may a single aggregate evaluation on
+External v1 be run, under D40. Its individual errors are never inspected to modify the Analyzer.
+
+**Relationship to earlier entries.** Applies D37 / D40 to the Hybrid Architecture as D45 requires.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -1797,6 +1988,14 @@ these terms.
 | D43 | Hybrid Architecture Phase 1 — request feature extraction in shadow mode on the D1 text, after the classifier call; V4 stays the only decision; extractor failure ignored, never a BLOCK | APPROVED | **DONE (Phase 1, #49)** |
 | D44 | `Host` and `User-Agent` are never request features; Phase 1 reads no header except `Content-Type` | APPROVED | **DONE (Phase 1, #49)** |
 | D45 | Terminology — "V5" is the next model version (D37/D40); the multi-stage design is the "Hybrid Architecture"; test-set rules apply to both | APPROVED | **DONE** |
+| D46 | Analyzer formulation — `attack` + auxiliary category given attack; mandatory category ablation in Phase 2B | APPROVED | design frozen (#51) |
+| D47 | Analyzer category vocabulary (7 categories + residual `other_attack`) and the V4 reason mapping | APPROVED | **DONE (contract)**; builder in 2B |
+| D48 | JWT excluded from Analyzer fitting; `unsupported_jwt` evaluation slice | APPROVED | builder in 2B |
+| D49 | Directory Traversal + File Inclusion → `path_file_access` | APPROVED | as D47 |
+| D50 | `AnalyzerOutput` — calibrated `attack`, conditional category distribution, no global confidence | APPROVED | **DONE (`hybrid_contracts.py`)** |
+| D51 | `hybrid_analyzer_v1` — V4-clean only; grouped 80/20 VALIDATION from V4 train; INTERNAL TEST full + feature-disjoint | APPROVED | NOT YET (Phase 2B) |
+| D52 | Analyzer runtime decided after a winning model is measured; D33 intact | APPROVED | N/A |
+| D53 | External v1 unused before the Analyzer is frozen; then one aggregate evaluation under D40 | APPROVED | N/A (usage rule) |
 
 ---
 

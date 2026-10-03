@@ -11,7 +11,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D45). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D53). Read it before proposing architectural changes.
 > - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
 > - `docs/external_test_v1_protocol.md` — External Test v1 methodology (pre-registered; status note at the top).
 > - `docs/technical_reference.md` — component detail moved out of the README at stage close.
@@ -108,11 +108,49 @@ first stage exists**.
   ML env 281 (278 passed, 3 skipped), data-plane env 112/112.
 - **Untouched.** V4 model and adapter, `/classify` and `/health` contracts, datasets,
   External Test v1 (not used in any way — the D40 tripwire is **not** triggered).
-- **Open before Phase 2 (not decided):** the analyzer's output vocabulary and its training
-  data (roles per D37; any use of External v1 cases or errors consumes it, D40 / D45);
-  whether a Hybrid stage may ever BLOCK without V4 (D29 forbids that for its heuristic
-  score); whether features should see decoded text or headers other than `Content-Type`;
-  the cost of large bodies on the event loop; enabling the switch in the Docker Lab.
+- **Open (not decided):** whether a Hybrid stage may ever BLOCK without V4 (D29 forbids
+  that for its heuristic score); whether features should see decoded text or headers other
+  than `Content-Type`; the cost of large bodies on the event loop; enabling the switch in
+  the Docker Lab. (The Analyzer's vocabulary and training data were settled in Phase 2A.)
+
+### Hybrid Architecture Phase 2A — Analyzer design frozen (2026-10-01, Issue #51)
+
+**State.** Design and data analysis only, on branch `feature/hybrid-phase2-analyzer-design`,
+not yet committed at the time of writing: **no model trained, no dataset created or
+modified, External v1 not read.** Report and evidence:
+`reports/hybrid/phase2a-analyzer-design/` (`analysis.json` from
+`scripts/dataset/analyze_analyzer_targets.py`; External Dataset Survey in
+`external_datasets.json` and `external_datasets_measurements.json`).
+
+- **Frozen decisions D46–D53** (issued as Phase 2A D1–D8):
+  - D46: `attack = P̂(BLOCK | RequestFeatures)` is the primary signal; the category given
+    attack is auxiliary context, and a Phase 2B ablation without `path_length` / `path_depth`
+    is mandatory;
+  - D47 / D49: categories `sql_injection`, `xss`, `path_file_access` (Path traversal + File
+    inclusion), `command_injection`, `ssti`, `open_redirect`, `ssrf`, residual `other_attack`;
+  - D48: JWT is not fitted (payload only in `Authorization`), and is reported as the
+    `unsupported_jwt` slice;
+  - D50: `AnalyzerOutput` with no global confidence, formalized in `hybrid_contracts.py`;
+  - D51: `hybrid_analyzer_v1` from V4-clean only. Grouped 80 / 20 VALIDATION from V4 train
+    (groups = canonical request OR feature vector; salt `hybrid-analyzer-v1-validation`).
+    INTERNAL TEST = V4 eval in two views: full 6,190, feature-disjoint 5,456 (the
+    generalization reference);
+  - D52: runtime decided only after a winning model is measured; D33 intact;
+  - D53: External v1 untouched until the Analyzer is frozen, then aggregate only.
+- **Key evidence:** the binary label is envelope-neutral; the category is construction-
+  confounded (path → category given BLOCK 65.3%, runtime `path_length` 46.7%, majority
+  26.3%). Labels are single-valued by precedence. Grouping by canonical request alone would
+  have leaked 465 feature vectors into VALIDATION.
+- **External Dataset Survey:** 16 public datasets traced to primary sources. Real multi-label
+  annotation exists (SR-BH 2020: 2.4% of attack rows; a 30-day ModSecurity set: 5.7% with
+  ≥ 2 CRS families), but it is CRS-derived. No labelled JWT dataset was found. **No
+  decision changed.** Later candidates for separate experiments: SR-BH 2020 (training,
+  multilabel), CRS regression tests, the 30-day ModSecurity set, ECML/PKDD 2007 and
+  GoTestWAF (evaluation).
+- **Next: Phase 2B** (not started): build `hybrid_analyzer_v1`, baselines (logistic
+  regression, random forest, HistGradientBoosting, optional small MLP) in a separate
+  research environment, selection on VALIDATION, the mandatory ablation, a latency and
+  footprint benchmark, and INTERNAL TEST in both views.
 
 ### V4 internal baseline — unchanged
 

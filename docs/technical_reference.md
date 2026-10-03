@@ -8,7 +8,7 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D45: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions D1–D53: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
@@ -346,11 +346,15 @@ UNCERTAIN, score or threshold. The counts below are descriptions, not blocking r
 
 **What it does not do yet.** No lightweight request analyzer, no small decision model, no
 `UNCERTAIN`, no routing, no effect on V4, enforcement or fail-closed, no training, no
-dataset change. `data_plane/hybrid_contracts.py` defines `AnalyzerOutput`
-(`signals: Mapping[str, float]` with an open vocabulary, `confidence` in [0, 1],
-`analyzer_version`), `DecisionInput` (`features`, `analysis`) and `DecisionOutput`
-(`decision` ∈ ALLOW / BLOCK / UNCERTAIN, rejected otherwise, never coerced; `confidence` in
-[0, 1]; `reason`). They are contracts only: nothing produces or consumes them.
+dataset change. `data_plane/hybrid_contracts.py` defines `AnalyzerOutput` (frozen in Phase
+2A, D50: `signals` with a required `attack` probability, `P̂(BLOCK | features)` on V4-clean's
+50 / 50 prior, and optionally all eight `category:<id>` probabilities given attack, summing to
+1 — ids in `ANALYZER_CATEGORIES`, D47; no global confidence; `analyzer_version`),
+`DecisionInput` (`features`, `analysis`) and `DecisionOutput` (`decision` ∈ ALLOW / BLOCK /
+UNCERTAIN, rejected otherwise, never coerced; `confidence` in [0, 1]; `reason`). They are
+contracts only: nothing produces or consumes them. The Analyzer's design (targets, dataset,
+splits, metrics) is in
+[`../reports/hybrid/phase2a-analyzer-design/`](../reports/hybrid/phase2a-analyzer-design/).
 
 **Excluded (D44).** `Host` and `User-Agent` are never features, directly or indirectly. The
 only header read is `Content-Type`. Character and syntax features are computed over the
@@ -448,7 +452,7 @@ Reproduce:
 ### Tests
 
 ```bash
-# request feature extraction and Hybrid Architecture contracts (39 tests; standard library only, runs in either environment)
+# request feature extraction and Hybrid Architecture contracts (44 tests; standard library only, runs in either environment)
 python3.12 -m unittest tests.test_request_features -v
 
 # data plane (36 tests, including shadow mode; no model, no running services)
