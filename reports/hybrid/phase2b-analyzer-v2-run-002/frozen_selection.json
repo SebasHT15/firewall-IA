@@ -1,0 +1,803 @@
+{
+  "frozen_utc": "2026-10-04T06:10:33Z",
+  "run": "run-002",
+  "internal_test_read_before_freeze": "not in this run; INTERNAL TEST was read once by run-001 (hybrid_analyzer_v1), before this run existed",
+  "winner_attack": "hist_gb",
+  "winner_category": "hist_gb",
+  "winner_rule": "mechanical",
+  "rationale": "pre-declared mechanical rule (selection_rules.winner_attack / winner_category); evidence in winner_rule_record",
+  "frozen_per_family": {
+    "logreg": {
+      "attack_config": "logreg:C=1.0,log1p=False",
+      "attack_calibration": "native",
+      "category_config": "logreg:C=10.0,class_weight=balanced,log1p=True",
+      "category_path_ablation_config": "logreg:C=10.0,class_weight=balanced,log1p=True"
+    },
+    "random_forest": {
+      "attack_config": "random_forest:n_estimators=300,min_samples_leaf=1",
+      "attack_calibration": "native",
+      "category_config": "random_forest:n_estimators=100,class_weight=balanced_subsample",
+      "category_path_ablation_config": "random_forest:n_estimators=300,class_weight=balanced_subsample"
+    },
+    "hist_gb": {
+      "attack_config": "hist_gb:max_iter=100,max_leaf_nodes=31",
+      "attack_calibration": "native",
+      "category_config": "hist_gb:max_iter=300,class_weight=balanced",
+      "category_path_ablation_config": "hist_gb:max_iter=100,class_weight=balanced"
+    }
+  },
+  "models": {
+    "logreg": {
+      "analyzer": {
+        "path": "model-output-hybrid-analyzer-v2/logreg.pkl",
+        "bytes": 7156,
+        "sha256": "07d22a62ea2e72741dc4fdd798ac74cdc53c9bac33927a0f39892cd0f3ed60e6"
+      },
+      "category_path_ablation": {
+        "path": "model-output-hybrid-analyzer-v2/logreg_category_path_ablation.pkl",
+        "bytes": 5341,
+        "sha256": "d26335d21d7a16e0b3c59560bd84541034d40a086cc3c23537d16e0803291601"
+      }
+    },
+    "random_forest": {
+      "analyzer": {
+        "path": "model-output-hybrid-analyzer-v2/random_forest.pkl",
+        "bytes": 93597029,
+        "sha256": "58584e71d6b25deca86e336d393843ed442b18f4f1a0e5252eb47a07d9777fd0"
+      },
+      "category_path_ablation": {
+        "path": "model-output-hybrid-analyzer-v2/random_forest_category_path_ablation.pkl",
+        "bytes": 172669172,
+        "sha256": "347b4ad7acb7856680ec77403081510199d91b3ccbeebb60d431d741110c6759"
+      }
+    },
+    "hist_gb": {
+      "analyzer": {
+        "path": "model-output-hybrid-analyzer-v2/hist_gb.pkl",
+        "bytes": 8850902,
+        "sha256": "bf0233ce4288d6d88db45b1b4e79738573d34a9362dc5b46c259c74f5a839371"
+      },
+      "category_path_ablation": {
+        "path": "model-output-hybrid-analyzer-v2/hist_gb_category_path_ablation.pkl",
+        "bytes": 2840435,
+        "sha256": "08255ead88babf835c2daa00175506b90c35a83d447139677ecdf6e37b6c22c7"
+      }
+    }
+  },
+  "recommended": {
+    "analyzer_version": "hybrid-analyzer-v2/attack=hist_gb,category=hist_gb",
+    "path": "model-output-hybrid-analyzer-v2/recommended.pkl",
+    "bytes": 8866799,
+    "sha256": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b"
+  },
+  "evidence_sha256": {
+    "experiment_config.json": "cb061dbed58718dcfa1ed8cf915405cd8103d75c77683b238c001fed210f3c4d",
+    "validation_results.json": "e4149774ef2ff04a4fc16e11151ec1dd50203f04dbd0f1cb34382f471ed6bf5b",
+    "latency_results.json": "44fe46a7560ef68d4d06085062fbc92e659c46630c665d2aa8aca98e66d2dd85",
+    "preprocessing.json": "6928eeddbe9c89bb3fc24ac636937821b285678ef7c342165faf55008df4b991"
+  },
+  "winner_rule_record": {
+    "attack": {
+      "calibrated_oof_brier": {
+        "logreg": 0.060572,
+        "random_forest": 0.04476,
+        "hist_gb": 0.019242
+      },
+      "best": "hist_gb",
+      "ci_vs_best": {
+        "logreg - hist_gb": [
+          0.031646,
+          0.053189
+        ],
+        "random_forest - hist_gb": [
+          0.000238,
+          0.070754
+        ]
+      },
+      "statistically_tied_with_best": [
+        "hist_gb"
+      ],
+      "attack_inference_p50_ms": {
+        "logreg": 0.0613,
+        "random_forest": 7.7822,
+        "hist_gb": 0.4656
+      },
+      "winner": "hist_gb"
+    },
+    "category": {
+      "macro_f1": {
+        "logreg": 0.453421,
+        "random_forest": 0.636012,
+        "hist_gb": 0.6828
+      },
+      "best": "hist_gb",
+      "ci_vs_best": {
+        "logreg - hist_gb": [
+          -0.262939,
+          -0.193438
+        ],
+        "random_forest - hist_gb": [
+          -0.07581,
+          -0.019324
+        ]
+      },
+      "statistically_tied_with_best": [
+        "hist_gb"
+      ],
+      "category_inference_p50_ms": {
+        "logreg": 0.0559,
+        "random_forest": 2.764,
+        "hist_gb": 8.1002
+      },
+      "winner": "hist_gb"
+    }
+  },
+  "dataset": {
+    "name": "hybrid_analyzer_v2",
+    "manifest": "datasets/manifest_hybrid_analyzer_v2.json",
+    "manifest_sha256": "40f958eaf538b36a4198bed4a459347a6f680a2d98229aeffa52fc7a7d2e6b83",
+    "artifact_sha256": "e8da8674435ed65057161bb4c74b41dc4aa1d8bf876b0327c53ecba7c0d99b75",
+    "grouping": "connected components over V4 train of 'same canonical request OR same feature vector OR same V4 generator group'; canonical request = parse_dataset_v4.canonical_key(f'{method} {path}?{query}\\n{content_type}\\n{body}'); feature vector = the 34 RequestFeatures v2 values; generator group = the generator's in-memory _gid, recovered by byte-identical regeneration (scripts/dataset/recover_v4_provenance.py); group key = smallest canonical request of the component",
+    "validation_split": {
+      "salt": "hybrid-analyzer-v2-validation",
+      "fraction": 0.2,
+      "rule": "per stratum (group target or 'mixed'), groups ordered by sha256(salt NUL group_key); a group joins VALIDATION when that brings the stratum's VALIDATION rows closer to fraction x rows"
+    },
+    "counts": {
+      "train_rows": 20175,
+      "validation_rows": 4959,
+      "train_fitted_rows": 20104,
+      "validation_fitted_rows": 4935,
+      "validation_share_of_v4_train": 0.1973,
+      "internal_test_full_rows": 6190,
+      "internal_test_feature_disjoint_rows": 5456,
+      "unsupported_jwt_eval_rows": 16,
+      "flag_feature_vector_in_train": 734,
+      "flag_canonical_request_in_train": 127,
+      "flag_generator_family_in_train": 0,
+      "train_validation_overlap": {
+        "canonical_request": 0,
+        "feature_vector": 0,
+        "generator_family": 0,
+        "d54_group": 0
+      }
+    }
+  },
+  "feature_order": [
+    "method",
+    "path_length",
+    "query_length",
+    "body_length",
+    "has_body",
+    "content_type",
+    "body_format",
+    "query_param_count",
+    "body_param_count",
+    "total_param_count",
+    "repeated_param_name_count",
+    "alnum_ratio",
+    "symbol_count",
+    "symbol_ratio",
+    "non_ascii_count",
+    "percent_encoded_count",
+    "percent_encoded_ratio",
+    "has_percent_encoding",
+    "longest_char_run",
+    "entropy_bits_per_char",
+    "path_depth",
+    "json_depth",
+    "single_quote_count",
+    "double_quote_count",
+    "parenthesis_count",
+    "semicolon_count",
+    "slash_count",
+    "backslash_count",
+    "angle_bracket_count",
+    "pipe_count",
+    "ampersand_count",
+    "equals_count",
+    "percent_count",
+    "brace_count"
+  ],
+  "preprocessing": {
+    "description": {
+      "linear (logreg)": "int counts -> log1p (grid-checked) -> standardize with TRAIN mean/std; float ratios -> standardize; booleans 0/1 (not scaled); method / content_type one-hot over TRAIN values + `__other__`; body_format one-hot over its closed enum",
+      "tree (random_forest, hist_gb)": "numerics raw; booleans 0/1; same one-hot; nothing else",
+      "fit": "TRAIN rows only (attack: all fitted TRAIN rows; category: TRAIN BLOCK rows)"
+    },
+    "attack_encoder": {
+      "mode": "tree",
+      "log1p": false,
+      "drop": [],
+      "fields": [
+        "method",
+        "path_length",
+        "query_length",
+        "body_length",
+        "has_body",
+        "content_type",
+        "body_format",
+        "query_param_count",
+        "body_param_count",
+        "total_param_count",
+        "repeated_param_name_count",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "non_ascii_count",
+        "percent_encoded_count",
+        "percent_encoded_ratio",
+        "has_percent_encoding",
+        "longest_char_run",
+        "entropy_bits_per_char",
+        "path_depth",
+        "json_depth",
+        "single_quote_count",
+        "double_quote_count",
+        "parenthesis_count",
+        "semicolon_count",
+        "slash_count",
+        "backslash_count",
+        "angle_bracket_count",
+        "pipe_count",
+        "ampersand_count",
+        "equals_count",
+        "percent_count",
+        "brace_count"
+      ],
+      "columns": [
+        "method=DELETE",
+        "method=GET",
+        "method=HEAD",
+        "method=PATCH",
+        "method=POST",
+        "method=PUT",
+        "method=__other__",
+        "path_length",
+        "query_length",
+        "body_length",
+        "has_body",
+        "content_type=",
+        "content_type=application/json",
+        "content_type=application/x-www-form-urlencoded",
+        "content_type=application/xml",
+        "content_type=text/xml",
+        "content_type=__other__",
+        "body_format=none",
+        "body_format=form",
+        "body_format=json",
+        "body_format=json_invalid",
+        "body_format=other",
+        "query_param_count",
+        "body_param_count",
+        "total_param_count",
+        "repeated_param_name_count",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "non_ascii_count",
+        "percent_encoded_count",
+        "percent_encoded_ratio",
+        "has_percent_encoding",
+        "longest_char_run",
+        "entropy_bits_per_char",
+        "path_depth",
+        "json_depth",
+        "single_quote_count",
+        "double_quote_count",
+        "parenthesis_count",
+        "semicolon_count",
+        "slash_count",
+        "backslash_count",
+        "angle_bracket_count",
+        "pipe_count",
+        "ampersand_count",
+        "equals_count",
+        "percent_count",
+        "brace_count"
+      ],
+      "levels": {
+        "method": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "PATCH",
+          "POST",
+          "PUT",
+          "__other__"
+        ],
+        "content_type": [
+          "",
+          "application/json",
+          "application/x-www-form-urlencoded",
+          "application/xml",
+          "text/xml",
+          "__other__"
+        ],
+        "body_format": [
+          "none",
+          "form",
+          "json",
+          "json_invalid",
+          "other"
+        ]
+      },
+      "mean": {},
+      "std": {}
+    },
+    "category_encoder": {
+      "mode": "tree",
+      "log1p": false,
+      "drop": [],
+      "fields": [
+        "method",
+        "path_length",
+        "query_length",
+        "body_length",
+        "has_body",
+        "content_type",
+        "body_format",
+        "query_param_count",
+        "body_param_count",
+        "total_param_count",
+        "repeated_param_name_count",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "non_ascii_count",
+        "percent_encoded_count",
+        "percent_encoded_ratio",
+        "has_percent_encoding",
+        "longest_char_run",
+        "entropy_bits_per_char",
+        "path_depth",
+        "json_depth",
+        "single_quote_count",
+        "double_quote_count",
+        "parenthesis_count",
+        "semicolon_count",
+        "slash_count",
+        "backslash_count",
+        "angle_bracket_count",
+        "pipe_count",
+        "ampersand_count",
+        "equals_count",
+        "percent_count",
+        "brace_count"
+      ],
+      "columns": [
+        "method=DELETE",
+        "method=GET",
+        "method=HEAD",
+        "method=PATCH",
+        "method=POST",
+        "method=PUT",
+        "method=__other__",
+        "path_length",
+        "query_length",
+        "body_length",
+        "has_body",
+        "content_type=",
+        "content_type=application/json",
+        "content_type=application/x-www-form-urlencoded",
+        "content_type=application/xml",
+        "content_type=text/xml",
+        "content_type=__other__",
+        "body_format=none",
+        "body_format=form",
+        "body_format=json",
+        "body_format=json_invalid",
+        "body_format=other",
+        "query_param_count",
+        "body_param_count",
+        "total_param_count",
+        "repeated_param_name_count",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "non_ascii_count",
+        "percent_encoded_count",
+        "percent_encoded_ratio",
+        "has_percent_encoding",
+        "longest_char_run",
+        "entropy_bits_per_char",
+        "path_depth",
+        "json_depth",
+        "single_quote_count",
+        "double_quote_count",
+        "parenthesis_count",
+        "semicolon_count",
+        "slash_count",
+        "backslash_count",
+        "angle_bracket_count",
+        "pipe_count",
+        "ampersand_count",
+        "equals_count",
+        "percent_count",
+        "brace_count"
+      ],
+      "levels": {
+        "method": [
+          "DELETE",
+          "GET",
+          "HEAD",
+          "PATCH",
+          "POST",
+          "PUT",
+          "__other__"
+        ],
+        "content_type": [
+          "",
+          "application/json",
+          "application/x-www-form-urlencoded",
+          "application/xml",
+          "text/xml",
+          "__other__"
+        ],
+        "body_format": [
+          "none",
+          "form",
+          "json",
+          "json_invalid",
+          "other"
+        ]
+      },
+      "mean": {},
+      "std": {}
+    }
+  },
+  "candidate_families": [
+    "logreg",
+    "random_forest",
+    "hist_gb"
+  ],
+  "attack_grid": {
+    "logreg": [
+      {
+        "C": 0.01,
+        "log1p": true
+      },
+      {
+        "C": 0.1,
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "log1p": true
+      },
+      {
+        "C": 10.0,
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "log1p": false
+      }
+    ],
+    "random_forest": [
+      {
+        "n_estimators": 100,
+        "min_samples_leaf": 1
+      },
+      {
+        "n_estimators": 300,
+        "min_samples_leaf": 1
+      },
+      {
+        "n_estimators": 100,
+        "min_samples_leaf": 5
+      },
+      {
+        "n_estimators": 300,
+        "min_samples_leaf": 5
+      }
+    ],
+    "hist_gb": [
+      {
+        "max_iter": 100,
+        "max_leaf_nodes": 15
+      },
+      {
+        "max_iter": 100,
+        "max_leaf_nodes": 31
+      },
+      {
+        "max_iter": 300,
+        "max_leaf_nodes": 15
+      },
+      {
+        "max_iter": 300,
+        "max_leaf_nodes": 31
+      }
+    ]
+  },
+  "category_grid": {
+    "logreg": [
+      {
+        "C": 0.1,
+        "class_weight": null,
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": null,
+        "log1p": true
+      },
+      {
+        "C": 10.0,
+        "class_weight": null,
+        "log1p": true
+      },
+      {
+        "C": 0.1,
+        "class_weight": "balanced",
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "log1p": true
+      },
+      {
+        "C": 10.0,
+        "class_weight": "balanced",
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": null,
+        "log1p": false
+      }
+    ],
+    "random_forest": [
+      {
+        "n_estimators": 100,
+        "class_weight": null
+      },
+      {
+        "n_estimators": 300,
+        "class_weight": null
+      },
+      {
+        "n_estimators": 100,
+        "class_weight": "balanced_subsample"
+      },
+      {
+        "n_estimators": 300,
+        "class_weight": "balanced_subsample"
+      }
+    ],
+    "hist_gb": [
+      {
+        "max_iter": 100,
+        "class_weight": null
+      },
+      {
+        "max_iter": 300,
+        "class_weight": null
+      },
+      {
+        "max_iter": 100,
+        "class_weight": "balanced"
+      },
+      {
+        "max_iter": 300,
+        "class_weight": "balanced"
+      }
+    ]
+  },
+  "selection_rules": {
+    "attack (per family)": "per family, highest VALIDATION ROC-AUC; ties (6 decimals) -> lowest Brier; then first in grid order",
+    "category (per family)": "per family, highest VALIDATION macro-F1; ties (6 decimals) -> lowest log loss; then first in grid order",
+    "calibration": "per family, out-of-fold predictions over 5 group folds of VALIDATION for native / sigmoid / isotonic, in that order of complexity; start from native and move to the next more complex method only if its paired group-bootstrap 95% interval of the OOF Brier difference (candidate - current) lies entirely below 0; the chosen calibrator is then refit on all of VALIDATION; AND the candidate's OOF log loss must not exceed the current method's (log-loss guard)",
+    "calibration_guard_origin": "added for run-002 at the owner's instruction to be careful with isotonic after run-001, where isotonic produced exact 0/1 probabilities (seen on VALIDATION before run-001's test) and tripled log loss on INTERNAL TEST (seen in run-001's test). It is therefore informed by the first INTERNAL TEST look; recorded as such (D54)",
+    "winner_attack": "mechanical: among the three families' selected + calibrated models, the lowest VALIDATION calibrated-OOF Brier is 'best'; every family whose paired group-bootstrap 95% interval of (Brier family - Brier best) includes 0 is statistically tied with it; among the tied, the lowest bench attack-inference P50 wins (then smaller artifact)",
+    "winner_category": "mechanical: highest VALIDATION macro-F1 is 'best'; families whose paired group-bootstrap 95% interval of (macro-F1 family - macro-F1 best) includes 0 are tied; among the tied, the lowest bench category-inference P50 wins (then smaller artifact)",
+    "diagnostics": "row-weighted metrics are the reported metrics; group-weighted (each D54 group weighs 1) and error concentration are reported next to them as a standing diagnostic, never as a selection criterion",
+    "threshold": "0.5 is a reporting-only threshold for confusion counts; it is not the firewall's operating point (decided later with the Small Decision Model)",
+    "grids": "unchanged from run-001 (same families, same configurations); no MLP",
+    "second_look": "INTERNAL TEST is read once, after `freeze`, and labelled: SECOND-LOOK INTERNAL EVALUATION AFTER METHODOLOGY CORRECTION — NOT AN UNTOUCHED TEST"
+  },
+  "exact_hyperparameters": {
+    "attack": {
+      "family": "hist_gb",
+      "config": {
+        "max_iter": 100,
+        "max_leaf_nodes": 31
+      },
+      "fixed": "learning_rate=0.1, early_stopping=False, other defaults"
+    },
+    "category": {
+      "family": "hist_gb",
+      "config": {
+        "max_iter": 300,
+        "class_weight": "balanced"
+      },
+      "fixed": "learning_rate=0.1, early_stopping=False, other defaults"
+    }
+  },
+  "calibration": {
+    "chosen": "native",
+    "selection_steps": [
+      {
+        "candidate": "sigmoid",
+        "versus": "native",
+        "oof_brier_diff (candidate - current)": {
+          "n_boot": 1000,
+          "n_groups": 3205,
+          "ci95": [
+            -4.2e-05,
+            0.000973
+          ],
+          "mean": 0.000361
+        },
+        "oof_log_loss (candidate, current)": [
+          0.071995,
+          0.0716
+        ],
+        "log_loss_guard": true,
+        "adopted": false
+      },
+      {
+        "candidate": "isotonic",
+        "versus": "native",
+        "oof_brier_diff (candidate - current)": {
+          "n_boot": 1000,
+          "n_groups": 3205,
+          "ci95": [
+            -8.9e-05,
+            0.001346
+          ],
+          "mean": 0.000571
+        },
+        "oof_log_loss (candidate, current)": [
+          0.089189,
+          0.0716
+        ],
+        "log_loss_guard": true,
+        "adopted": false
+      }
+    ],
+    "artifact": "inside the attack model of recommended.pkl (CalibratedClassifierCV over a FrozenEstimator) when not native"
+  },
+  "validation_metrics": {
+    "attack_calibrated_oof": {
+      "n": 4935,
+      "positives": 2485,
+      "negatives": 2450,
+      "prevalence": 0.503546,
+      "threshold": 0.5,
+      "tp": 2401,
+      "tn": 2419,
+      "fp": 31,
+      "fn": 84,
+      "accuracy": 0.976697,
+      "precision": 0.987253,
+      "recall": 0.966197,
+      "f1": 0.976612,
+      "fpr": 0.012653,
+      "fnr": 0.033803,
+      "roc_auc": 0.996126,
+      "pr_auc": 0.996705,
+      "brier": 0.019242,
+      "log_loss": 0.0716,
+      "ece": 0.008245
+    },
+    "attack_group_weighted (diagnostic)": {
+      "native": {
+        "n_groups": 3205,
+        "largest_group_rows": 395,
+        "tp": 1902.0,
+        "tn": 1197.166667,
+        "fp": 30.0,
+        "fn": 75.833333,
+        "accuracy": 0.966979,
+        "precision": 0.984472,
+        "recall": 0.961658,
+        "fpr": 0.024447,
+        "roc_auc": 0.992753,
+        "pr_auc": 0.996136,
+        "brier": 0.026318
+      },
+      "calibrated_oof": {
+        "n_groups": 3205,
+        "largest_group_rows": 395,
+        "tp": 1902.0,
+        "tn": 1197.166667,
+        "fp": 30.0,
+        "fn": 75.833333,
+        "accuracy": 0.966979,
+        "precision": 0.984472,
+        "recall": 0.961658,
+        "fpr": 0.024447,
+        "roc_auc": 0.992753,
+        "pr_auc": 0.996136,
+        "brier": 0.026318
+      }
+    },
+    "category": {
+      "macro_f1": 0.6828,
+      "micro_f1": 0.824547,
+      "per_class": {
+        "sql_injection": {
+          "precision": 0.850258,
+          "recall": 0.794212,
+          "f1": 0.82128,
+          "support": 622
+        },
+        "xss": {
+          "precision": 0.791139,
+          "recall": 0.853242,
+          "f1": 0.821018,
+          "support": 586
+        },
+        "path_file_access": {
+          "precision": 0.913146,
+          "recall": 0.944175,
+          "f1": 0.928401,
+          "support": 824
+        },
+        "command_injection": {
+          "precision": 0.532787,
+          "recall": 0.53719,
+          "f1": 0.534979,
+          "support": 121
+        },
+        "ssti": {
+          "precision": 0.75,
+          "recall": 0.64557,
+          "f1": 0.693878,
+          "support": 79
+        },
+        "open_redirect": {
+          "precision": 0.678571,
+          "recall": 0.452381,
+          "f1": 0.542857,
+          "support": 42
+        },
+        "ssrf": {
+          "precision": 0.444444,
+          "recall": 0.324324,
+          "f1": 0.375,
+          "support": 37
+        },
+        "other_attack": {
+          "precision": 0.742857,
+          "recall": 0.747126,
+          "f1": 0.744986,
+          "support": 174
+        }
+      }
+    }
+  },
+  "category_ablation_validation": {
+    "logreg": {
+      "delta_macro_f1": -0.002106,
+      "full": 0.453421,
+      "ablation": 0.451315
+    },
+    "random_forest": {
+      "delta_macro_f1": -0.037516,
+      "full": 0.636012,
+      "ablation": 0.598496
+    },
+    "hist_gb": {
+      "delta_macro_f1": -0.061373,
+      "full": 0.6828,
+      "ablation": 0.621427
+    }
+  },
+  "threshold_policy": "0.5 is reporting-only; not an operating point",
+  "code_sha256": {
+    "scripts/training/hybrid_analyzer.py": "1471193294574a96d2e7995d4f1c57838f6bab801a4c249a0d94caddfc25be9f",
+    "scripts/training/run_hybrid_analyzer_baselines.py": "4e4d64d7396cc7b93cf400d26cfcb5feac96486ff5d8abb0511e50018b2824c8",
+    "scripts/dataset/build_hybrid_analyzer_v1.py": "4574ef7c18de5b77e306d246899f55a4f400a22a2d6f8cd677655aa68ca3e1d6",
+    "scripts/dataset/build_hybrid_analyzer_v2.py": "c8208a0752ee8f282c6fc8a9f202f9fd69e47af7033af34bff4a68cce92ff7ea",
+    "scripts/dataset/recover_v4_provenance.py": "23f8c6b2e5ea1e843b94d3744b6ff9f117555a66f1c885beb437e09a0700ee8b",
+    "scripts/dataset/analyze_analyzer_targets.py": "be8c804abcaae07f04dcfc40191cb9481316c6af309af91fb004bf3ad3786caf",
+    "scripts/dataset/parse_dataset_v4.py": "df24ca59892fbc6f605be775c051ff9bc9548fb2d8332f4166d64d9dfe9b3c5b",
+    "data_plane/request_features.py": "de16da96c5da2cded632b5332db25edf696a816577cefcce0c354b05df4d3db5",
+    "data_plane/hybrid_contracts.py": "ddb98cc11e6d2e1f05b8d48f22ed7686c567e2cdf964497e4383598331aebc5d"
+  },
+  "second_look_label": "SECOND-LOOK INTERNAL EVALUATION AFTER METHODOLOGY CORRECTION — NOT AN UNTOUCHED TEST"
+}

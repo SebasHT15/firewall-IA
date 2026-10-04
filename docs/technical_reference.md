@@ -8,7 +8,7 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D53: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions D1–D55: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
@@ -461,6 +461,11 @@ python3.12 -m unittest tests.test_request_features -v
 # everything else (ML environment); modules that need mitmproxy or Flask are reported
 # as skipped and run in the data plane environment instead (see ../README.md#tests)
 python3.12 -m unittest discover -s tests -v
+
+# Lightweight Request Analyzer research code (Analyzer environment; see below)
+.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset -v
+# hybrid_analyzer_v2 rebuild and provenance (ML environment; needs csic_database.csv and PayloadsAllTheThings)
+python3.12 -m unittest tests.test_hybrid_analyzer_dataset_v2 -v
 ```
 
 ### Scope of this first version
@@ -482,6 +487,39 @@ implementation defects.
 - Heuristics, suspicious score, fast path: not implemented (Issues #35–#38)
 - Request feature extraction (Hybrid Architecture Phase 1): shadow mode only — logged,
   never used for a decision (see [Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1))
+
+---
+
+## Lightweight Request Analyzer — research pipeline (Hybrid Architecture Phase 2B, Issue #53)
+
+Offline research only: **nothing here runs in, or is imported by, the gateway**, and no
+decision is taken from it (D43, D52). **Frozen Analyzer:**
+`hybrid-analyzer-v2/attack=hist_gb,category=hist_gb` (run-002, D54 / D55):
+[`../reports/hybrid/phase2b-analyzer-v2-run-002/README.md`](../reports/hybrid/phase2b-analyzer-v2-run-002/README.md).
+Run-001 (`hybrid_analyzer_v1`, not adopted) is kept with its errata:
+[`../reports/hybrid/phase2b-analyzer-baselines/`](../reports/hybrid/phase2b-analyzer-baselines/).
+
+| Step | Code | Environment | Output |
+|---|---|---|---|
+| Dataset `hybrid_analyzer_v1` (D51) | `scripts/dataset/build_hybrid_analyzer_v1.py` | stdlib (`python3.12`) | `datasets/hybrid_analyzer_v1/*.jsonl` (local, gitignored) + `datasets/manifest_hybrid_analyzer_v1.json` |
+| V4 generator provenance (generator group of every V4-clean row, by byte-identical regeneration) | `scripts/dataset/recover_v4_provenance.py` | ML env (`python3.12`; the generator needs pandas) | in memory (CLI prints / writes to a given path) |
+| Dataset `hybrid_analyzer_v2` (D54) | `scripts/dataset/build_hybrid_analyzer_v2.py` | ML env (`python3.12`) | `datasets/hybrid_analyzer_v2/*.jsonl` (local, gitignored) + `datasets/manifest_hybrid_analyzer_v2.json` |
+| Preprocessing, models, metrics, `AnalyzerOutput` wrapper | `scripts/training/hybrid_analyzer.py` | `.venv-analyzer` | — |
+| `select` → `bench` → `freeze` → `test` (once per run; `--run run-001` default, `--run run-002`) | `scripts/training/run_hybrid_analyzer_baselines.py` | `.venv-analyzer` | `reports/hybrid/phase2b-analyzer-baselines/` (run-001), `reports/hybrid/phase2b-analyzer-v2-run-002/` (run-002); models in `model-output-hybrid-analyzer-v{1,2}/` (gitignored) |
+| Sibling diagnostic of the VALIDATION carve-out | `scripts/dataset/diagnose_hybrid_analyzer_v1_siblings.py` | stdlib | report folder |
+
+The Analyzer environment is separate from both the ML / control-plane environment and the
+data-plane environment (D52; D33 unchanged):
+
+```bash
+uv venv --python 3.12 --seed .venv-analyzer
+.venv-analyzer/bin/python -m pip install -r requirements-analyzer-research.txt
+```
+
+The model input is the 34 RequestFeatures v2 fields only; the dataset's `meta_*` fields are
+offline metadata used to slice the evaluation. `attack` and the category are separate models
+(D46); output is validated by `hybrid_contracts.AnalyzerOutput` (D50). External Test v1 is
+never read by this pipeline (D53).
 
 ---
 

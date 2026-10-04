@@ -1875,7 +1875,10 @@ were assigned to Directory Traversal by alphabetical order; both reasons share t
 - **Status:** APPROVED (the TRAIN ∪ VALIDATION reference set of the feature-disjoint view,
   which came out of the grouping check this decision required, was confirmed by the owner
   on 2026-10-01)
-- **Implementation:** NOT YET — the builder is Phase 2B
+- **Implementation:** DONE — `hybrid_analyzer_v1`, Phase 2B run-001 (Issue #53)
+- **Grouping and VALIDATION carve-out SUPERSEDED BY D54** (2026-10-03) for
+  `hybrid_analyzer_v2`; `hybrid_analyzer_v1` and run-001 keep this definition. The original
+  entry below is preserved unchanged.
 
 **Decision.**
 
@@ -1939,6 +1942,102 @@ External v1 be run, under D40. Its individual errors are never inspected to modi
 
 ---
 
+## D54 — Analyzer groups include the V4 generator group; `hybrid_analyzer_v2`; one second look at INTERNAL TEST
+
+- **Date:** 2026-10-03
+- **Status:** APPROVED (owner instruction of 2026-10-03, after the run-001 finding)
+- **Implementation:** DONE — Phase 2B run-002 (`reports/hybrid/phase2b-analyzer-v2-run-002/`):
+  `hybrid_analyzer_v2` (SHA-256 `e8da8674…`, leakage 0 under the three relations), freeze
+  2026-10-04 06:10:33 UTC, the one second look after it. Analyzer FROZEN as
+  `hybrid-analyzer-v2/attack=hist_gb,category=hist_gb`
+
+**Defect found (run-001).** D51 grouped V4-train rows by "same canonical request OR same
+feature vector". The V4 generator splits train / eval by its own **generator group** (D16):
+one canonical attack payload with its augmentation variant(s), one CSIC request shape
+(`csic_group_key`: digits collapsed, values decoded), one synthetic benign template value.
+Neither key D51 used captures that group (its rows differ in canonical request and in
+feature vector), so its rows could fall on both sides of TRAIN / VALIDATION. With the generator groups recovered exactly (below), **646 of 4,980 fitted
+VALIDATION rows (13.0%) had a sibling in TRAIN and 520 generator groups were split**, whereas
+0 generator groups span V4 train / eval. VALIDATION was therefore easier than INTERNAL TEST;
+it favoured memorizing models and a calibrator that did not transfer. It was found only after
+INTERNAL TEST had been read once (run-001).
+
+**Decision.**
+
+- **Generator group, recovered from provenance, not approximated.** The unmodified generator
+  (`parse_dataset_v4.py`, default arguments = the V4 manifest) is re-run into a temporary
+  directory and each written row's in-memory `_gid` is observed
+  (`scripts/dataset/recover_v4_provenance.py`). The observation is accepted only if both
+  regenerated files are byte-identical to V4-clean and to its manifest SHA-256. V4, V4-clean and
+  the generator are not modified.
+- **`hybrid_analyzer_v2`** (`scripts/dataset/build_hybrid_analyzer_v2.py`): same source,
+  targets, features and INTERNAL TEST views as v1 (D46–D51). Group = connected components over
+  V4 train of "same canonical request OR same feature vector OR same generator group"; a group
+  is never split.
+- **VALIDATION:** ≈ 20% of V4 train, stratified by group target (BENIGN, the 8 categories,
+  `unsupported_jwt`, or `mixed`). Inside a stratum, groups are visited in
+  `sha256("hybrid-analyzer-v2-validation" NUL group_key)` order and a group joins VALIDATION
+  when that brings the stratum's VALIDATION rows closer to 20%. Deterministic,
+  order-independent, independent of `PYTHONHASHSEED`.
+- **Leakage requirement:** TRAIN ↔ VALIDATION overlap must be 0 for canonical request,
+  feature vector and generator group (asserted by the builder, unit-tested).
+- **Accepted properties** (independent audit before any v2 model was fitted): VALIDATION
+  shares nothing with TRAIN under the three relations, whereas `internal_test_full` shares 127
+  canonical requests and 734 vectors with the development set. VALIDATION therefore mirrors
+  `internal_test_feature_disjoint` and is pessimistic relative to the full view; like-for-like
+  comparisons use the feature-disjoint view. The two large `mixed` CSIC components (benign +
+  `sql_injection` sharing vectors, 223 and 216 rows) always stay in TRAIN under the 20% rule
+  (`mixed` stratum 5% VALIDATION). Synthetic benign generator groups hold one row each, so the
+  generator relation adds links only for attack payloads and CSIC request shapes.
+- **INTERNAL TEST:** views unchanged (feature-disjoint against TRAIN ∪ VALIDATION); an added
+  flag marks eval rows whose generator group occurs in TRAIN ∪ VALIDATION (0 by the generator's
+  construction). Eval rows get group ids from the same relation inside V4 eval, used for
+  group-weighted metrics.
+- **INTERNAL TEST is no longer untouched.** It was read once by run-001. Exactly **one** second
+  look is authorized, after a complete, hashed run-002 freeze, and must be labelled
+  "SECOND-LOOK INTERNAL EVALUATION AFTER METHODOLOGY CORRECTION — NOT AN UNTOUCHED TEST". No
+  test → change → test loop; an implementation bug that invalidates it is documented and
+  brought to the owner, never repeated automatically.
+- **Run-002 selection** uses VALIDATION v2 only, the run-001 families and grids unchanged, and
+  pre-declared mechanical winner rules (recorded in the run's `experiment_config.json`).
+- **Run-001** (`reports/hybrid/phase2b-analyzer-baselines/`, `hybrid_analyzer_v1`) is kept intact
+  as historical evidence; its errata are documented beside it, not edited into frozen files.
+
+**Relationship to earlier entries.** Supersedes D51's grouping and VALIDATION rule for v2 only;
+D51's source, roles, targets and INTERNAL TEST views stand. Applies D16, D37 and D53. External
+Test v1 remains unused.
+
+---
+
+## D55 — Analyzer evaluation conventions (Phase 2B)
+
+- **Date:** 2026-10-03
+- **Status:** APPROVED (owner ratification of 2026-10-03 of the run-001 proposals)
+- **Implementation:** DONE in `scripts/training/run_hybrid_analyzer_baselines.py`
+
+**Decision.**
+
+- **Threshold 0.5 is reporting-only.** It fills confusion counts (TP / TN / FP / FN, precision,
+  recall, FPR, FNR) for comparison. It is not the firewall's operating point and nothing is
+  optimized around it; the operating policy (ALLOW / BLOCK / UNCERTAIN) is decided later with the
+  Small Decision Model.
+- **Group-weighted metrics are a standing diagnostic.** Every Analyzer report gives row-weighted
+  metrics (the reported metrics) and, beside them, group-weighted ones (each group weighs 1) plus
+  error concentration per group. Group-weighted metrics never replace row-weighted ones and are
+  not selection criteria.
+- **Calibration is adopted only on robust VALIDATION evidence.** Native → sigmoid → isotonic, in
+  that order; a more complex method is adopted only if the paired group-bootstrap 95% interval of
+  its out-of-fold Brier difference lies entirely below 0. From run-002 it must also not worsen
+  out-of-fold log loss (a guard added because isotonic produced exact 0 / 1 probabilities in
+  run-001; that motivation includes the run-001 INTERNAL TEST result and is recorded as such).
+  "Uncalibrated" is a valid outcome.
+- **No MLP** in this Analyzer iteration; the candidate families are logistic regression, random
+  forest and HistGradientBoosting.
+- **Model artifacts stay out of git** (`model-output-hybrid-analyzer-*/`, gitignored, like every
+  model output). Their SHA-256, sizes, configurations and metadata are versioned in the reports.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -1993,9 +2092,11 @@ External v1 be run, under D40. Its individual errors are never inspected to modi
 | D48 | JWT excluded from Analyzer fitting; `unsupported_jwt` evaluation slice | APPROVED | builder in 2B |
 | D49 | Directory Traversal + File Inclusion → `path_file_access` | APPROVED | as D47 |
 | D50 | `AnalyzerOutput` — calibrated `attack`, conditional category distribution, no global confidence | APPROVED | **DONE (`hybrid_contracts.py`)** |
-| D51 | `hybrid_analyzer_v1` — V4-clean only; grouped 80/20 VALIDATION from V4 train; INTERNAL TEST full + feature-disjoint | APPROVED | NOT YET (Phase 2B) |
+| D51 | `hybrid_analyzer_v1` — V4-clean only; grouped 80/20 VALIDATION from V4 train; INTERNAL TEST full + feature-disjoint | APPROVED (grouping **SUPERSEDED BY D54** for v2) | DONE (v1, run-001) |
 | D52 | Analyzer runtime decided after a winning model is measured; D33 intact | APPROVED | N/A |
 | D53 | External v1 unused before the Analyzer is frozen; then one aggregate evaluation under D40 | APPROVED | N/A (usage rule) |
+| D54 | Analyzer groups include the recovered V4 generator group; `hybrid_analyzer_v2`; one labelled second look at INTERNAL TEST | APPROVED | DONE (run-002; Analyzer frozen) |
+| D55 | Analyzer evaluation conventions: 0.5 reporting-only, group-weighted diagnostics, robust calibration rule, no MLP, artifacts gitignored with versioned hashes | APPROVED | DONE |
 
 ---
 

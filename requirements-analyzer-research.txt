@@ -1,0 +1,24 @@
+# firewall-IA — Analyzer research environment (Hybrid Architecture Phase 2B, Issue #53)
+#
+# Kept SEPARATE from requirements.txt (ML / control plane) and from
+# requirements-data-plane.txt on purpose (D52): the Lightweight Request Analyzer is still a
+# research artifact. Nothing here is installed in the data-plane environment, the data
+# plane does not import scikit-learn, and D33 is unchanged. Where the Analyzer will run is
+# decided only after a winning model is measured (D52).
+#
+#     uv venv --python 3.12 --seed .venv-analyzer
+#     .venv-analyzer/bin/python -m pip install -r requirements-analyzer-research.txt
+#
+# Versions installed and verified in that environment (Python 3.12.15). Direct
+# dependencies first; the rest are what scikit-learn pulled in, pinned so a pickled model
+# loads in the same library versions it was saved with.
+
+numpy==2.5.3
+scikit-learn==1.9.1
+
+# transitive (scikit-learn 1.9.1)
+scipy==1.18.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+narwhals==2.26.0
+cloudpickle==3.1.2

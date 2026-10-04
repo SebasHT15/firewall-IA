@@ -1,0 +1,45 @@
+{
+  "kind": "diagnostic (aggregate counts only; JWT excluded)",
+  "proxies": {
+    "csic": "parse_dataset_v4.csic_group_key (the generator's own CSIC group key)",
+    "payload": "longest canonical_key(parameter value or body), >= 4 chars; synthetic BLOCK rows only (approximation)"
+  },
+  "validation_vs_train (D51 carve-out)": {
+    "csic (ALLOW)": {
+      "rows_with_key": 1209,
+      "key_in_reference": 95,
+      "share": 0.0786
+    },
+    "csic (BLOCK)": {
+      "rows_with_key": 600,
+      "key_in_reference": 132,
+      "share": 0.22
+    },
+    "payload (BLOCK)": {
+      "rows_with_key": 1841,
+      "key_in_reference": 329,
+      "share": 0.1787
+    },
+    "all_fitted_rows_of_probe": 4980,
+    "rows_with_sibling_in_reference": 556
+  },
+  "v4_eval_vs_v4_train (generator split)": {
+    "csic (ALLOW)": {
+      "rows_with_key": 1363,
+      "key_in_reference": 0,
+      "share": 0.0
+    },
+    "csic (BLOCK)": {
+      "rows_with_key": 816,
+      "key_in_reference": 0,
+      "share": 0.0
+    },
+    "payload (BLOCK)": {
+      "rows_with_key": 2271,
+      "key_in_reference": 0,
+      "share": 0.0
+    },
+    "all_fitted_rows_of_probe": 6190,
+    "rows_with_sibling_in_reference": 0
+  }
+}

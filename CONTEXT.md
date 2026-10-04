@@ -152,6 +152,85 @@ modified, External v1 not read.** Report and evidence:
   research environment, selection on VALIDATION, the mandatory ablation, a latency and
   footprint benchmark, and INTERNAL TEST in both views.
 
+### Hybrid Architecture Phase 2B — Analyzer baselines executed, NOT frozen (2026-10-03, Issue #53)
+
+**State.** Executed on branch `feature/hybrid-phase2b-analyzer-baselines`, uncommitted at the
+time of writing. Report: `reports/hybrid/phase2b-analyzer-baselines/README.md`. Nothing
+integrated into the gateway; V4, V4-clean, RequestFeatures and the data plane unchanged;
+**External v1 not read** (D53). Research environment `.venv-analyzer`
+(`requirements-analyzer-research.txt`: numpy 2.5.3, scikit-learn 1.9.1; D52, D33 intact).
+
+- **`hybrid_analyzer_v1` built** (`scripts/dataset/build_hybrid_analyzer_v1.py`, manifest
+  `datasets/manifest_hybrid_analyzer_v1.json`, JSONL regenerated locally and gitignored):
+  every Phase 2A count reproduced and asserted — TRAIN 20,141 / VALIDATION 4,993 / INTERNAL
+  TEST full 6,190 / feature-disjoint 5,456 / `unsupported_jwt` 16; TRAIN ↔ VALIDATION overlap 0
+  (vectors, canonical requests); byte-identical across runs and hash seeds; SHA-256 `b370186b…`.
+- **Selection on VALIDATION only** (LR, RF, HGB; small fixed grids; no MLP); then a freeze
+  (`attack` = random forest + isotonic, category = HistGradientBoosting); then **one**
+  INTERNAL TEST run (run-001).
+- **Run-001, feature-disjoint view** (5,456 rows, 55.6% BLOCK):
+  - `attack` ROC-AUC: LR 0.963 · RF (frozen, isotonic) 0.975 (native 0.987) · HGB 0.992.
+  - FPR at the 0.5 reporting threshold: 0.140 / 0.075 / 0.065; recall 0.921 / 0.964 / 0.962.
+  - Category macro-F1: LR 0.476 · RF 0.648 · HGB 0.689 (`ssrf` F1 0.22).
+  - JWT: 0–1 of 16 detected.
+- **Mandatory ablation (D46):** without `path_length` / `path_depth` the tree category models lose
+  0.07–0.08 macro-F1, concentrated in `ssti`, `open_redirect`, `command_injection` and `ssrf`. The
+  category stays low-confidence context.
+- **Latency** (scikit-learn, one request, one thread): LR 0.50 ms; HGB 9.6 ms; RF 15.4 ms (203 MB,
+  +390 MiB RSS); recommended composite RF + HGB 17.1 ms P50 / 17.9 ms P95, 48.8 MB. Contract
+  violations 0.
+- **Post-test finding — methodological error in D51:** 556 / 4,980 VALIDATION rows (11.2%) have a
+  V4 *generator-group* sibling in TRAIN (`csic_group_key`, augmentation variants), against 0 for
+  V4 eval vs train. VALIDATION was optimistic, which favoured RF and isotonic calibration. On test,
+  RF's FPR rose from 0.018 to 0.075, isotonic tripled its log loss (exact 0/1 outputs), and HGB
+  outranked it — except HGB's confident attack scores (~0.97) on plain static CSIC GET requests.
+  Run-001 is a valid measurement of the frozen models; the selection is compromised.
+  **The Analyzer is not frozen.**
+- **Awaiting owner decision** (report §13): fix the D51 grouping as `hybrid_analyzer_v2`; status of
+  run-001 and whether a second INTERNAL TEST look is allowed; ratify the pre-test calibration-rule
+  amendment; 0.5 reporting threshold; group-weighted diagnostics; no MLP; model storage in
+  gitignored `model-output-hybrid-analyzer-v1/`. Nothing was added to DECISIONS.md.
+
+### Hybrid Architecture Phase 2B run-002 — Lightweight Analyzer FROZEN (2026-10-04, Issue #53, D54/D55)
+
+**State.** Supersedes the run-001 status above, which is kept as history. Branch
+`feature/hybrid-phase2b-analyzer-baselines`, uncommitted at the time of writing. Report:
+`reports/hybrid/phase2b-analyzer-v2-run-002/README.md`; run-001 errata:
+`reports/hybrid/phase2b-analyzer-baselines/ERRATA.md`. **External v1 not read; nothing in the
+gateway.**
+
+- **Generator groups recovered, not approximated.** `scripts/dataset/recover_v4_provenance.py`
+  re-runs the unmodified V4 generator and accepts the in-memory `_gid` of each row only if the
+  regenerated files are byte-identical to V4-clean. An independent audit re-rendered every row
+  from its gid. Exact run-001 leak: 646 / 4,980 VALIDATION rows (13.0%), 520 split groups.
+- **`hybrid_analyzer_v2`** (D54; `scripts/dataset/build_hybrid_analyzer_v2.py`; SHA-256 `e8da8674…`):
+  - grouping: canonical request OR vector OR generator group;
+  - stratified ≈ 20% VALIDATION, groups never split;
+  - TRAIN 20,175 / 20,104 fitted, VALIDATION 4,959 / 4,935 fitted;
+  - TRAIN ↔ VALIDATION overlap 0 under all three relations;
+  - INTERNAL TEST views unchanged (full 6,190, disjoint 5,456).
+- **Selection on VALIDATION v2 only** (same families and grids; no MLP). Pre-declared rules:
+  - calibration only on bootstrap-supported Brier gain without a log-loss loss — native won
+    everywhere;
+  - mechanical winner — lowest Brier / highest macro-F1, ties to the cheapest.
+- **Frozen:** `hybrid-analyzer-v2/attack=hist_gb,category=hist_gb`:
+  - attack: HGB 100 iterations / 31 leaves, native probabilities;
+  - category: HGB 300 iterations, balanced;
+  - artifact 8.9 MB (gitignored, `79eb7265…`).
+  - Freeze 06:10:33 UTC, before the one second look.
+- **Second look** (labelled "SECOND-LOOK INTERNAL EVALUATION AFTER METHODOLOGY CORRECTION —
+  NOT AN UNTOUCHED TEST"), feature-disjoint view:
+  - attack: ROC-AUC 0.9936, PR-AUC 0.9953, Brier 0.0335, log loss 0.106, ECE 0.024;
+    recall 0.959 and FPR 0.059 at 0.5;
+  - group-weighted FPR 0.030 (VALIDATION 0.024; run-001 went 0.034 → 0.100);
+  - 65% of the FPs come from one CSIC GET request shape labelled both benign and SQLi;
+  - category macro-F1 0.664 (`ssrf` 0.25); path ablation −0.063; JWT 1 / 16;
+  - 0 contract violations.
+- **Latency** (scikit-learn, one request, one thread): 8.92 / 9.22 ms P50 / P95, of which attack
+  is 0.49 ms and the category model 8.4 ms; +15 MiB RSS.
+- **Next:** one aggregate External v1 evaluation of this frozen Analyzer (D53 / D40), then the
+  runtime decision (D52), then the Small Decision Model.
+
 ### V4 internal baseline — unchanged
 
 `model-output-v4-clean` (checkpoint 2200) on `datasets/v4_clean/eval.jsonl`, 6,206 rows:
