@@ -1,0 +1,322 @@
+{
+  "stage": "bench",
+  "created_utc": "2026-10-03T23:24:41Z",
+  "data": "VALIDATION requests (fitted rows); D1 text from V4-clean train joined by row_id for the extraction column",
+  "mode": "one request per call, single thread, fresh process per model",
+  "percentiles": "nearest-rank",
+  "units": "milliseconds",
+  "environment": {
+    "python": "3.12.15",
+    "numpy": "2.5.3",
+    "scikit_learn": "1.9.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "logical_cpus": 32,
+    "interpreter": "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python"
+  },
+  "models": {
+    "logreg": {
+      "model": "model-output-hybrid-analyzer-v1/logreg.pkl",
+      "artifact_bytes": 8515,
+      "artifact_sha256": "def1037c189122a8ead084af2150e4afbd3ab3aecb095c3b220a5f8bf8816c22",
+      "analyzer_version": "hybrid-analyzer-v1/logreg",
+      "threads_env": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "import_seconds (numpy + sklearn + module)": 0.4548,
+      "load_seconds (pickle.load)": 0.0012,
+      "rss_kib": {
+        "process_start": 20776,
+        "after_imports": 142092,
+        "after_model_load": 142276,
+        "model_load_delta": 184,
+        "peak_maxrss": 280932
+      },
+      "first_call_ms": 1.7409,
+      "warmup_calls": 500,
+      "requests": 4980,
+      "passes": 2,
+      "latency_ms": {
+        "extraction": {
+          "n": 9960,
+          "min": 0.0271,
+          "mean": 0.0372,
+          "p50": 0.0355,
+          "p95": 0.0516,
+          "p99": 0.0581,
+          "max": 0.1532
+        },
+        "preprocessing": {
+          "n": 9960,
+          "min": 0.024,
+          "mean": 0.027,
+          "p50": 0.0269,
+          "p95": 0.029,
+          "p99": 0.0331,
+          "max": 0.0641
+        },
+        "attack_inference": {
+          "n": 9960,
+          "min": 0.3691,
+          "mean": 0.4078,
+          "p50": 0.4052,
+          "p95": 0.436,
+          "p99": 0.4608,
+          "max": 0.6134
+        },
+        "category_inference": {
+          "n": 9960,
+          "min": 0.0627,
+          "mean": 0.0702,
+          "p50": 0.0697,
+          "p95": 0.076,
+          "p99": 0.0867,
+          "max": 0.1267
+        },
+        "contract": {
+          "n": 9960,
+          "min": 0.0088,
+          "mean": 0.0099,
+          "p50": 0.0098,
+          "p95": 0.0105,
+          "p99": 0.0133,
+          "max": 0.0361
+        },
+        "analyzer_segmented_total": {
+          "n": 9960,
+          "min": 0.4696,
+          "mean": 0.5149,
+          "p50": 0.5118,
+          "p95": 0.5463,
+          "p99": 0.5785,
+          "max": 0.7225
+        },
+        "analyzer_call": {
+          "n": 9960,
+          "min": 0.4553,
+          "mean": 0.5028,
+          "p50": 0.5007,
+          "p95": 0.5286,
+          "p99": 0.5569,
+          "max": 0.7338
+        },
+        "extraction_plus_analyzer": {
+          "n": 9960,
+          "min": 0.5009,
+          "mean": 0.5521,
+          "p50": 0.5491,
+          "p95": 0.5891,
+          "p99": 0.6218,
+          "max": 0.7871
+        }
+      },
+      "throughput_rps_single_thread (tight analyze() loop)": 2004.5,
+      "contract_violations": 0
+    },
+    "random_forest": {
+      "model": "model-output-hybrid-analyzer-v1/random_forest.pkl",
+      "artifact_bytes": 203065623,
+      "artifact_sha256": "49a8063182d233165853c8724cf0fbad14eb61470f43f2adacb190439ed43781",
+      "analyzer_version": "hybrid-analyzer-v1/random_forest",
+      "threads_env": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "import_seconds (numpy + sklearn + module)": 0.4563,
+      "load_seconds (pickle.load)": 0.1322,
+      "rss_kib": {
+        "process_start": 20716,
+        "after_imports": 141944,
+        "after_model_load": 541412,
+        "model_load_delta": 399468,
+        "peak_maxrss": 628812
+      },
+      "first_call_ms": 17.1265,
+      "warmup_calls": 500,
+      "requests": 4980,
+      "passes": 2,
+      "latency_ms": {
+        "extraction": {
+          "n": 9960,
+          "min": 0.035,
+          "mean": 0.0545,
+          "p50": 0.0526,
+          "p95": 0.0728,
+          "p99": 0.0849,
+          "max": 0.1686
+        },
+        "preprocessing": {
+          "n": 9960,
+          "min": 0.0119,
+          "mean": 0.0165,
+          "p50": 0.0159,
+          "p95": 0.0206,
+          "p99": 0.0239,
+          "max": 0.0758
+        },
+        "attack_inference": {
+          "n": 9960,
+          "min": 7.4009,
+          "mean": 8.0056,
+          "p50": 7.9347,
+          "p95": 8.6,
+          "p99": 8.9707,
+          "max": 16.7186
+        },
+        "category_inference": {
+          "n": 9960,
+          "min": 6.9564,
+          "mean": 7.5423,
+          "p50": 7.4863,
+          "p95": 8.0391,
+          "p99": 8.3836,
+          "max": 13.3031
+        },
+        "contract": {
+          "n": 9960,
+          "min": 0.0121,
+          "mean": 0.0182,
+          "p50": 0.0176,
+          "p95": 0.0234,
+          "p99": 0.0277,
+          "max": 0.0523
+        },
+        "analyzer_segmented_total": {
+          "n": 9960,
+          "min": 14.4207,
+          "mean": 15.5825,
+          "p50": 15.4516,
+          "p95": 16.6698,
+          "p99": 17.2943,
+          "max": 30.0782
+        },
+        "analyzer_call": {
+          "n": 9960,
+          "min": 14.4881,
+          "mean": 15.5435,
+          "p50": 15.4055,
+          "p95": 16.6239,
+          "p99": 17.2615,
+          "max": 30.6432
+        },
+        "extraction_plus_analyzer": {
+          "n": 9960,
+          "min": 14.4736,
+          "mean": 15.637,
+          "p50": 15.5038,
+          "p95": 16.7358,
+          "p99": 17.3625,
+          "max": 30.1852
+        }
+      },
+      "throughput_rps_single_thread (tight analyze() loop)": 62.5,
+      "contract_violations": 0
+    },
+    "hist_gb": {
+      "model": "model-output-hybrid-analyzer-v1/hist_gb.pkl",
+      "artifact_bytes": 9556862,
+      "artifact_sha256": "aa3eea25aaa23ffe652e67306a3de8cf42aec30f207c94e21f22ad6b49a86543",
+      "analyzer_version": "hybrid-analyzer-v1/hist_gb",
+      "threads_env": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "import_seconds (numpy + sklearn + module)": 0.4594,
+      "load_seconds (pickle.load)": 0.0434,
+      "rss_kib": {
+        "process_start": 20784,
+        "after_imports": 142268,
+        "after_model_load": 159060,
+        "model_load_delta": 16792,
+        "peak_maxrss": 294408
+      },
+      "first_call_ms": 10.3105,
+      "warmup_calls": 500,
+      "requests": 4980,
+      "passes": 2,
+      "latency_ms": {
+        "extraction": {
+          "n": 9960,
+          "min": 0.0432,
+          "mean": 0.0683,
+          "p50": 0.0666,
+          "p95": 0.09,
+          "p99": 0.0995,
+          "max": 0.1771
+        },
+        "preprocessing": {
+          "n": 9960,
+          "min": 0.0109,
+          "mean": 0.0181,
+          "p50": 0.0181,
+          "p95": 0.0218,
+          "p99": 0.0245,
+          "max": 0.1102
+        },
+        "attack_inference": {
+          "n": 9960,
+          "min": 1.0451,
+          "mean": 1.1976,
+          "p50": 1.1978,
+          "p95": 1.2867,
+          "p99": 1.3445,
+          "max": 2.6282
+        },
+        "category_inference": {
+          "n": 9960,
+          "min": 7.5316,
+          "mean": 8.3365,
+          "p50": 8.3393,
+          "p95": 8.7417,
+          "p99": 8.9679,
+          "max": 21.1209
+        },
+        "contract": {
+          "n": 9960,
+          "min": 0.0134,
+          "mean": 0.0227,
+          "p50": 0.0226,
+          "p95": 0.0293,
+          "p99": 0.0334,
+          "max": 0.0575
+        },
+        "analyzer_segmented_total": {
+          "n": 9960,
+          "min": 8.6275,
+          "mean": 9.5748,
+          "p50": 9.5807,
+          "p95": 10.0645,
+          "p99": 10.3471,
+          "max": 23.6959
+        },
+        "analyzer_call": {
+          "n": 9960,
+          "min": 8.7919,
+          "mean": 9.559,
+          "p50": 9.5691,
+          "p95": 10.0382,
+          "p99": 10.32,
+          "max": 23.5622
+        },
+        "extraction_plus_analyzer": {
+          "n": 9960,
+          "min": 8.6747,
+          "mean": 9.6432,
+          "p50": 9.6493,
+          "p95": 10.1372,
+          "p99": 10.4214,
+          "max": 23.7845
+        }
+      },
+      "throughput_rps_single_thread (tight analyze() loop)": 104.2,
+      "contract_violations": 0
+    }
+  }
+}

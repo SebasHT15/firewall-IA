@@ -1,0 +1,77 @@
+{
+  "frozen_utc": "2026-10-03T23:36:58Z",
+  "internal_test_read_before_freeze": false,
+  "winner_attack": "random_forest",
+  "winner_category": "hist_gb",
+  "rationale": "Attack (priority): random_forest. VALIDATION: highest row-level ROC-AUC 0.9956 / PR-AUC 0.9963 and lowest Brier; calibrated OOF FP 51 / FN 73 vs hist_gb 325 / 69 and logreg 285 / 255; robust on the two CSIC benign clusters where hist_gb is confidently wrong (GET /miembros/imagenes/ogono.jpg x153 scored 0.967 by hist_gb, 0.017 by random_forest); group-weighted ROC-AUC within 0.0015 of hist_gb; isotonic calibration supported by the group-bootstrap rule; seed-stable (ROC-AUC 0.9956-0.9961). logreg is ~30x faster and 8.5 KB but FPR 0.11 vs 0.02: not a marginal difference. Cost and main deployment risk: 7.9 ms P50 attack inference (single-thread scikit-learn), ~100+ MB artifact, ~390 MB RSS for the full forest Analyzer; deferred to the runtime decision (D52). Category (auxiliary): hist_gb. VALIDATION macro-F1 0.731 vs random_forest 0.691 and logreg 0.463 (paired group bootstrap vs logreg CI [0.235, 0.300]); best per-class F1 on 6 of 8 classes. The D46 path ablation costs both tree families ~0.07 macro-F1, so the category stays low-confidence context. No MLP (see experiment_config).",
+  "frozen_per_family": {
+    "logreg": {
+      "attack_config": "logreg:C=1.0,log1p=True",
+      "attack_calibration": "isotonic",
+      "category_config": "logreg:C=10.0,class_weight=balanced,log1p=True",
+      "category_path_ablation_config": "logreg:C=10.0,class_weight=balanced,log1p=True"
+    },
+    "random_forest": {
+      "attack_config": "random_forest:n_estimators=300,min_samples_leaf=1",
+      "attack_calibration": "isotonic",
+      "category_config": "random_forest:n_estimators=300,class_weight=balanced_subsample",
+      "category_path_ablation_config": "random_forest:n_estimators=100,class_weight=None"
+    },
+    "hist_gb": {
+      "attack_config": "hist_gb:max_iter=300,max_leaf_nodes=31",
+      "attack_calibration": "native",
+      "category_config": "hist_gb:max_iter=300,class_weight=balanced",
+      "category_path_ablation_config": "hist_gb:max_iter=100,class_weight=balanced"
+    }
+  },
+  "models": {
+    "logreg": {
+      "analyzer": {
+        "path": "model-output-hybrid-analyzer-v1/logreg.pkl",
+        "bytes": 8515,
+        "sha256": "def1037c189122a8ead084af2150e4afbd3ab3aecb095c3b220a5f8bf8816c22"
+      },
+      "category_path_ablation": {
+        "path": "model-output-hybrid-analyzer-v1/logreg_category_path_ablation.pkl",
+        "bytes": 5341,
+        "sha256": "540ab16b1eda91a12b02510c61bd920fc5feeae483395ee6e11d7291a3c363a8"
+      }
+    },
+    "random_forest": {
+      "analyzer": {
+        "path": "model-output-hybrid-analyzer-v1/random_forest.pkl",
+        "bytes": 203065623,
+        "sha256": "49a8063182d233165853c8724cf0fbad14eb61470f43f2adacb190439ed43781"
+      },
+      "category_path_ablation": {
+        "path": "model-output-hybrid-analyzer-v1/random_forest_category_path_ablation.pkl",
+        "bytes": 51496135,
+        "sha256": "b0cceeb5d05c1685eb785ef34d338cf5c8671a5f1d7b2f214c8e09c1cb5d49cd"
+      }
+    },
+    "hist_gb": {
+      "analyzer": {
+        "path": "model-output-hybrid-analyzer-v1/hist_gb.pkl",
+        "bytes": 9556862,
+        "sha256": "aa3eea25aaa23ffe652e67306a3de8cf42aec30f207c94e21f22ad6b49a86543"
+      },
+      "category_path_ablation": {
+        "path": "model-output-hybrid-analyzer-v1/hist_gb_category_path_ablation.pkl",
+        "bytes": 2840315,
+        "sha256": "0bb78a9b9ae74103625ce74292bd6d5c58c5fb869c559805336dd239a98b8120"
+      }
+    }
+  },
+  "recommended": {
+    "analyzer_version": "hybrid-analyzer-v1/attack=random_forest,category=hist_gb",
+    "path": "model-output-hybrid-analyzer-v1/recommended.pkl",
+    "bytes": 48779141,
+    "sha256": "03426d38f1369b8ba6450c4a48ee5c512b4a083d636647448f08a18a3c47c22d"
+  },
+  "evidence_sha256": {
+    "experiment_config.json": "1ad3dc13e009e9f912dca90d2ed3f59e149ea43b376168e44eb62db78a433e17",
+    "validation_results.json": "eb955bc73e5345de1803bf0f25a6320193ec471ade184c0a75e807e2ec5a4eaa",
+    "latency_results.json": "cbad71c24e3c255d49401f81e1679d2d8e5190cfc48bc0016223b6fb1936acb6",
+    "preprocessing.json": "71f5eb47006849acc5dc743c595eef69e2d94c02d8a58a49957244b9af75d52c"
+  }
+}

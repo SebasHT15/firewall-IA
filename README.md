@@ -124,7 +124,8 @@ operational failure limit that triggers fail-closed, not a latency target (D35).
 - V5 — addressing the external false positives found by External Test v1
 - Hybrid Architecture beyond feature extraction: lightweight request analyzer, small
   decision model, V4 as fallback (only the shadow-mode extractor and the stage contracts
-  exist)
+  exist in the gateway; the Lightweight Analyzer is frozen as an offline research model, not
+  integrated)
 - Concurrency / load validation; adversarial / evasion suite (E6)
 
 Nothing in this list works today.
@@ -363,8 +364,19 @@ Hybrid Architecture: **Phase 1** (Issue #49) — request feature extraction in s
 done as described above. **Phase 2A** (Issue #51) — the Lightweight Request Analyzer's
 targets, dataset and evaluation designed and frozen (D46–D53), with an external dataset
 survey; nothing trained
-([report](reports/hybrid/phase2a-analyzer-design/)). **Phase 2B** (training the Analyzer
-baselines) has not started.
+([report](reports/hybrid/phase2a-analyzer-design/)). **Phase 2B** (Issue #53) — Analyzer
+dataset and baselines built and evaluated in a separate research environment (logistic
+regression, random forest, HistGradientBoosting; feature-disjoint `attack` ROC-AUC
+0.963–0.992); **not frozen**: a methodological error in the VALIDATION carve-out was found
+after the single INTERNAL TEST run and awaits an owner decision
+([report](reports/hybrid/phase2b-analyzer-baselines/)). **Phase 2B run-002** (D54, D55) — the
+VALIDATION grouping was corrected with the V4 generator groups recovered by byte-identical
+regeneration (`hybrid_analyzer_v2`), the selection repeated on VALIDATION only, and INTERNAL
+TEST read a second time after a hashed freeze (labelled as a second look). **Lightweight
+Request Analyzer FROZEN:** HistGradientBoosting for `attack` and category — feature-disjoint
+`attack` ROC-AUC 0.994, FPR 0.059 at the 0.5 reporting threshold, category macro-F1 0.664,
+8.9 ms per request, 8.9 MB ([report](reports/hybrid/phase2b-analyzer-v2-run-002/)). Nothing is
+integrated into the gateway.
 
 After this release, and not started yet:
 
@@ -410,13 +422,13 @@ control_plane/       classifier_api.py, inference_core.py          FastAPI + the
 data_plane/          data_plane.py                                 mitmproxy inline gateway
                      request_features.py, hybrid_contracts.py      Hybrid Architecture Phase 1: shadow feature extraction, stage contracts
 scripts/dataset/     V4 dataset generation and the E0 integrity gate
-scripts/training/    finetune.py
+scripts/training/    finetune.py; hybrid_analyzer.py, run_hybrid_analyzer_baselines.py (Analyzer research, own env)
 scripts/evaluation/  test_model.py (frozen E5 scorer)
 scripts/benchmarks/  inference benchmark and comparison tools
 scripts/external/    External Test v1 capture, labelling, gate, freeze and run tooling
 tests/               unit tests
 docs/                methodology, External v1 protocol, technical reference
-datasets/            manifest_v4_clean.json (V4 JSONL regenerated locally); external_v1/ (frozen)
+datasets/            manifest_v4_clean.json, manifest_hybrid_analyzer_v{1,2}.json (JSONL regenerated locally); external_v1/ (frozen)
 reports/             experiment records: benchmarks/, diagnostics/, lab/, external/, E0–E5
 compose.yaml         Docker Lab stack
 docker/              per-service images, config override, smoke_test.sh, demo.sh
@@ -429,7 +441,7 @@ Run everything from the repository root.
 | Path | Contents |
 |---|---|
 | [`CONTEXT.md`](CONTEXT.md) | Authoritative current technical state and plan, full latency evidence, standards mapping |
-| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D53) |
+| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D55) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |
 | [`docs/external_test_v1_protocol.md`](docs/external_test_v1_protocol.md) | External Test v1 methodology, pre-registered before the data |
@@ -439,7 +451,7 @@ Run everything from the repository root.
 | [`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/) | Docker Lab closure report and raw smoke logs |
 | [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) | Real-HTTP diagnostic: cases, raw records, process logs |
 | [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark; `baseline-local-v1` is the frozen reference |
-| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture Phase 1: shadow-mode live run (off vs on) and extractor overhead; `phase1-feature-extraction-v2` is current, `-v1` the superseded pre-review run |
+| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen) |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | V4 dataset identity: hashes, seed, source commit |
 | [`docs/data_sources.md`](docs/data_sources.md) | Data not distributed by v0.1.0 (CSIC CSV, historical corpora): sizes, SHA-256, regeneration inputs, retained excerpts |
 | [`LICENSE`](LICENSE) | MIT License for this repository's original code and documentation (third-party material excluded — see [License](#license)) |
@@ -454,11 +466,22 @@ python3.12 -m unittest discover -s tests
 .venv-dataplane/bin/python -m unittest tests.test_data_plane tests.test_external_capture tests.test_lab_app tests.test_latency_observations tests.test_request_features
 ```
 
-After Hybrid Architecture Phase 2A (2026-10-01): **ML environment — 286 tests discovered,
-283 passed, 3 expected skips** (the three mitmproxy/Flask modules); **data-plane environment — 117/117
-passed** (those three modules, `tests.test_latency_observations` and
-`tests.test_request_features`, which needs only the standard library and runs in both).
-After Phase 1 they were 281 / 278 / 3 and 112 / 112; at stage close 242 / 239 / 3 and 61 / 61. The first command runs in the ML
+```bash
+.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset tests.test_hybrid_analyzer_dataset_v2 tests.test_request_features
+```
+
+After Hybrid Architecture Phase 2B run-002 (2026-10-04): **ML environment — 333 tests
+discovered, 309 passed, 24 expected skips** (the three mitmproxy/Flask modules and the 21
+Analyzer model tests, which need scikit-learn); **data-plane environment — 117/117 passed**
+(those three modules, `tests.test_latency_observations` and `tests.test_request_features`,
+which needs only the standard library and runs in both); **Analyzer research environment — 91
+tests, 83 passed, 8 expected skips** (the `hybrid_analyzer_v2` rebuild tests, which need the V4
+generator's pandas and run in the ML environment; setup in
+[the run-002 report](reports/hybrid/phase2b-analyzer-v2-run-002/README.md#12-reproduce--files-and-hashes)).
+The dataset tests need the locally regenerated V4-clean (and, for v2, `csic_database.csv` and
+PayloadsAllTheThings). After run-001 they were 316 / 297 / 19, 117 / 117 and 74 / 74; after
+Phase 2A 286 / 283 / 3 and 117 / 117; after Phase 1 281 / 278 / 3 and 112 / 112; at stage close 242 / 239 / 3 and
+61 / 61. The first command runs in the ML
 environment; the second runs the skipped modules in the data-plane environment (setup:
 [technical reference](docs/technical_reference.md#setup-once)). Use `python3.12`
 explicitly — on the development machine `python3` is 3.14 without the ML stack.
