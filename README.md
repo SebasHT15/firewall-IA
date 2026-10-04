@@ -13,6 +13,11 @@ fail-closed.**
 
 This is a pre-thesis research project. It is **not production-ready**.
 
+**Research direction (since 2026-10):** a **Hybrid Architecture** — deterministic request
+features → a small learned **Lightweight Request Analyzer** (Model 1, **frozen**) → a **Small
+Decision Model** (Model 2, not built) → TinyLlama V4 only as the fallback for uncertain cases.
+Today V4 still makes every decision; see [§2](#hybrid-architecture--target-under-construction).
+
 ---
 
 ## 1. Purpose
@@ -39,6 +44,8 @@ BLOCK | <reason>
 ---
 
 ## 2. Architecture
+
+### Deployed today
 
 ```
 client
@@ -68,16 +75,15 @@ protected destination  (reached only on ALLOW)
 - **inference_core** — the only owner of prompt, model loading, generation and parsing,
   imported by both the control plane and the evaluation harness so runtime and evaluation
   cannot drift apart.
-- **Request feature extraction (Hybrid Architecture Phase 1, shadow mode)** — the data
-  plane also describes each request as a fixed set of features
-  (`data_plane/request_features.py`) and only logs them. Nothing reads them: V4 still makes
-  every decision, and enforcement and fail-closed are unchanged. `Host` and `User-Agent`
-  are never features (D43, D44;
+- **Request feature extraction (Hybrid Architecture Phase 1, shadow mode)** — when the
+  `data_plane.shadow_feature_extraction` switch is on, the data plane also describes each
+  request as 34 deterministic features (`data_plane/request_features.py`, RequestFeatures v2)
+  and only logs them. Nothing reads them: V4 still makes every decision, and enforcement and
+  fail-closed are unchanged. `Host` and `User-Agent` are never features (D43, D44;
   [technical reference](docs/technical_reference.md#shadow-feature-extraction-hybrid-architecture-phase-1)).
-  *Terminology (D45):* **V5** is the next model revision (D37, D40); the **Hybrid
-  Architecture** is the proposed multi-stage design — feature extraction → lightweight
-  request analyzer → small decision model → V4 as fallback — of which only this first
-  stage exists.
+  The data plane does **not** compute a heuristic suspicious score.
+  *Terminology (D45):* **V4** is the current TinyLlama model; **V5** is a future TinyLlama
+  revision (D37, D40), never the new architecture.
 - **Two processes, two Python environments** (D33): mitmproxy's pins conflict with the ML
   stack, and the HTTP boundary between the planes is deliberate.
 
@@ -92,6 +98,36 @@ protected destination  (reached only on ALLOW)
 
 Nothing except a valid ALLOW reaches the destination. The classifier timeout (3 s) is an
 operational failure limit that triggers fail-closed, not a latency target (D35).
+
+### Hybrid Architecture — target, under construction
+
+```
+HTTP request → data plane (mitmproxy) → render_request() → RequestFeatures v2
+  → control plane (FastAPI)* → Model 1: Lightweight Request Analyzer
+  → Model 2: Small Decision Model → ALLOW / BLOCK / UNCERTAIN
+        UNCERTAIN → TinyLlama V4 fallback → decision
+  → data plane enforcement (fail-closed)
+```
+\*Where Models 1–2 will run is decided after measurement (D52).
+
+| Component | Status |
+|---|---|
+| Request Feature Extraction (RequestFeatures v2) | **DONE** — shadow mode |
+| Model 1 — Lightweight Request Analyzer | **FROZEN** — offline research artifact, not in the gateway |
+| Model 2 — Small Decision Model | not implemented |
+| Cascade orchestrator · UNCERTAIN routing · TinyLlama selective fallback | not implemented |
+| Hybrid shadow integration · Hybrid enforcement | not implemented |
+| External validation of the Hybrid system | pending |
+| Embedded deployment | future |
+
+**Model 1** (`hybrid-analyzer-v2/attack=hist_gb,category=hist_gb`) outputs
+`attack = P̂(BLOCK | features)` (HistGradientBoosting, native probabilities) and an auxiliary
+distribution over 8 attack categories given attack (context, not a decision). On the
+feature-disjoint INTERNAL TEST view — a **second look**, not an untouched test — ROC-AUC
+0.994, recall 0.959 and FPR 0.059 at the 0.5 reporting threshold; ≈ 8.9 ms per request. Its
+limitations (encoding / path shortcuts, weak `ssrf` category, JWT blind spot) and the full
+methodology: [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/).
+"Analyzer frozen" does not mean the Hybrid Architecture is finished.
 
 ---
 
@@ -112,20 +148,22 @@ operational failure limit that triggers fail-closed, not a latency target (D35).
 | **External Test v1** — frozen 400-case set, executed through the complete gateway | [§5](#5-external-test-v1), [`reports/external/external-v1-run-001/`](reports/external/external-v1-run-001/) |
 | **Docker demo / smoke path** — `docker/demo.sh`, `docker/smoke_test.sh` | [§6](#6-demo); demo runtime-verified from a clean lab |
 | **Request feature extraction, shadow mode** (Hybrid Architecture Phase 1, Issue #49) — describes requests, decides nothing | unit + gateway integration tests; live run with V4, shadow off vs on identical: [`reports/hybrid/phase1-feature-extraction-v2/`](reports/hybrid/phase1-feature-extraction-v2/) |
+| **Lightweight Request Analyzer (Model 1), frozen offline** (Issues #51, #53; D46–D55) — not integrated into the gateway | [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/); dataset `hybrid_analyzer_v2`, unit tests |
 
 ### Future — not implemented
 
-- Fast path and heuristic suspicious score (Issues #35, #36, #38 — designed, not built)
-- Asynchronous model validation of fast-path traffic (Issue #37)
+- Fast path and heuristic suspicious score (D29 / D30, Issues #35–#38) — **deferred and
+  optional**: not part of the current architecture, whose role is taken by RequestFeatures →
+  learned Analyzer; may be evaluated later as a Model 2 feature if it adds value
 - GGUF / Q4_K_M export and a llama.cpp runtime (M2)
 - Embedded Linux deployment (M4)
 - Formal end-to-end latency benchmark (Issue #18)
 - HTTPS / TLS, HTTP/2 and WebSocket validation
-- V5 — addressing the external false positives found by External Test v1
-- Hybrid Architecture beyond feature extraction: lightweight request analyzer, small
-  decision model, V4 as fallback (only the shadow-mode extractor and the stage contracts
-  exist in the gateway; the Lightweight Analyzer is frozen as an offline research model, not
-  integrated)
+- V5 — a possible TinyLlama revision for the external false positives found by External
+  Test v1, to be decided after the V4 ↔ Analyzer disagreement analysis (External v2 required
+  for any V5 claim, D40)
+- Hybrid Architecture beyond Model 1: Small Decision Model, cascade orchestrator,
+  UNCERTAIN → V4 fallback, gateway integration (see the status table in §2)
 - Concurrency / load validation; adversarial / evasion suite (E6)
 
 Nothing in this list works today.
@@ -346,7 +384,10 @@ remains `./docker/smoke_test.sh`.
 - Formal end-to-end latency benchmark (Issue #18) pending
 - HTTPS / TLS, HTTP/2 and WebSockets not validated; plain HTTP/1.1 through an explicit proxy only
 - GGUF / llama.cpp not integrated; runtime is HF/PEFT on CUDA
-- Fast path not implemented
+- Fast path not implemented (deferred)
+- Hybrid Architecture: only feature extraction (shadow) and an offline, frozen Model 1 exist;
+  Model 1's FPR (≈ 0.06 on the internal second look) is far above V4's internal one, and it has
+  not been evaluated externally
 - Concurrency untested — one GPU serializes inference; no evasion / adversarial suite
 - **Not production-ready**
 
@@ -360,33 +401,28 @@ Every metric with its source and status:
 
 ## Next steps
 
-Hybrid Architecture: **Phase 1** (Issue #49) — request feature extraction in shadow mode,
-done as described above. **Phase 2A** (Issue #51) — the Lightweight Request Analyzer's
-targets, dataset and evaluation designed and frozen (D46–D53), with an external dataset
-survey; nothing trained
-([report](reports/hybrid/phase2a-analyzer-design/)). **Phase 2B** (Issue #53) — Analyzer
-dataset and baselines built and evaluated in a separate research environment (logistic
-regression, random forest, HistGradientBoosting; feature-disjoint `attack` ROC-AUC
-0.963–0.992); **not frozen**: a methodological error in the VALIDATION carve-out was found
-after the single INTERNAL TEST run and awaits an owner decision
-([report](reports/hybrid/phase2b-analyzer-baselines/)). **Phase 2B run-002** (D54, D55) — the
-VALIDATION grouping was corrected with the V4 generator groups recovered by byte-identical
-regeneration (`hybrid_analyzer_v2`), the selection repeated on VALIDATION only, and INTERNAL
-TEST read a second time after a hashed freeze (labelled as a second look). **Lightweight
-Request Analyzer FROZEN:** HistGradientBoosting for `attack` and category — feature-disjoint
-`attack` ROC-AUC 0.994, FPR 0.059 at the 0.5 reporting threshold, category macro-F1 0.664,
-8.9 ms per request, 8.9 MB ([report](reports/hybrid/phase2b-analyzer-v2-run-002/)). Nothing is
-integrated into the gateway.
+Done so far on the Hybrid Architecture (merged into `develop`):
+**Phase 1** (Issue #49) request feature extraction ·
+**Phase 2A** (Issue #51) Analyzer design frozen, D46–D53 ([report](reports/hybrid/phase2a-analyzer-design/)) ·
+**Phase 2B** (Issue #53) Model 1 frozen ([run-002](reports/hybrid/phase2b-analyzer-v2-run-002/)).
+Run-001 ([report](reports/hybrid/phase2b-analyzer-baselines/), [errata](reports/hybrid/phase2b-analyzer-baselines/ERRATA.md))
+is kept as history: a TRAIN / VALIDATION generator-family leak found after its first INTERNAL
+TEST look was corrected by D54, and INTERNAL TEST has since been read a second time.
 
-After this release, and not started yet:
+Next, in order (detail and constraints: [`CONTEXT.md` §0.9](CONTEXT.md#09-next-steps-start-here-do-not-reopen-phase-2b-except-for-an-objective-bug)):
 
-1. **V5 error analysis** of the External Test v1 false positives and the 92 internal false
-   negatives. Using External v1 errors this way makes External v1 V5 development data, so
-   **External v2 is required** before any V5 claim (D37, D40), and it must restore the
-   proxy-to-`/classify` byte capture and the CSIC-ancestry check that External v1 did not run.
-2. **Issue #18** — formal end-to-end latency benchmark of the gateway.
-3. **M2** — GGUF / Q4_K_M, llama.cpp, quantized security regression.
-4. Fast path and asynchronous validation (Issues #35–#38), then embedded deployment.
+1. **One aggregate post-freeze evaluation of Model 1 on External Test v1** (D53 / D40) — never
+   used to re-tune Model 1.
+2. **Disagreement analysis, TinyLlama V4 vs Model 1** — especially V4 BLOCK with low Analyzer
+   `attack` (candidate V4 false positives): how many V4 false positives the Analyzer could
+   rescue without adding false negatives. Case-level use of External v1 would make it
+   development data (D40).
+3. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision (External v2
+   required for any V5 claim, D40).
+4. **Model 2 — Small Decision Model**, then ALLOW / BLOCK / UNCERTAIN policy, cascade
+   orchestrator, Hybrid shadow mode, Hybrid enforcement, end-to-end evaluation, a new
+   independent external set.
+5. Also open: Issue #18 (end-to-end latency), M2 (GGUF / llama.cpp), then embedded deployment (M4).
 
 ## Security and engineering references
 
@@ -429,7 +465,7 @@ scripts/external/    External Test v1 capture, labelling, gate, freeze and run t
 tests/               unit tests
 docs/                methodology, External v1 protocol, technical reference
 datasets/            manifest_v4_clean.json, manifest_hybrid_analyzer_v{1,2}.json (JSONL regenerated locally); external_v1/ (frozen)
-reports/             experiment records: benchmarks/, diagnostics/, lab/, external/, E0–E5
+reports/             experiment records: benchmarks/, diagnostics/, lab/, external/, hybrid/, E0–E5
 compose.yaml         Docker Lab stack
 docker/              per-service images, config override, smoke_test.sh, demo.sh
 ```
@@ -440,7 +476,7 @@ Run everything from the repository root.
 
 | Path | Contents |
 |---|---|
-| [`CONTEXT.md`](CONTEXT.md) | Authoritative current technical state and plan, full latency evidence, standards mapping |
+| [`CONTEXT.md`](CONTEXT.md) | **§0: current state and handoff (read first)**; then the audit trail, full latency evidence, standards mapping |
 | [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D55) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |

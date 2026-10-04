@@ -1,17 +1,173 @@
 # firewall-IA — Session Context for Claude Code
 
+## 0. HANDOFF — current state (2026-10-04) · READ THIS FIRST
+
+This section is the current state. Everything after it is a chronological audit trail;
+where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D55).
+
+### 0.1 What the project is
+
+An authorized, inline, application-layer (HTTP L7) security gateway: a mitmproxy **data
+plane** renders each request (`render_request()`, D1), asks a FastAPI **control plane**
+for a decision, and enforces it **fail-closed** (D4, D34). The decision today comes from
+**TinyLlama V4** (QLoRA, `model-output-v4-clean/` checkpoint 2200), the current and only
+deployed model. WAF-like, stateless per request; not a network firewall; not production-ready.
+
+**Terminology (D45).** *V4* = the current TinyLlama model. *V5* = a future TinyLlama
+revision (D37, D40) — never the new architecture. *Hybrid Architecture* = the multi-stage
+design below.
+
+### 0.2 Architecture — deployed today vs Hybrid target
+
+Deployed (unchanged since the v0.1.0 stage close): `client → data plane → POST /classify →
+V4 → ALLOW / BLOCK → enforcement`. Optionally, the data plane also extracts RequestFeatures
+**in shadow mode** after the classifier call (switch `data_plane.shadow_feature_extraction`,
+on in the root `config.yaml`, off in Docker): logged, never read (D43).
+
+Hybrid Architecture — **target, under construction**:
+
+```
+HTTP request → data plane (mitmproxy) → render_request() → RequestFeatures v2 (extractor)
+  → control plane (FastAPI)* → Model 1: Lightweight Request Analyzer
+  → Model 2: Small Decision Model → ALLOW / BLOCK / UNCERTAIN
+        UNCERTAIN → TinyLlama fallback (V4) → decision
+  → data plane enforcement (fail-closed)
+```
+\*Where Models 1–2 run is formally open (D52); the control plane is the intended host.
+
+| Component | Status |
+|---|---|
+| Request Feature Extraction (RequestFeatures v2, Phase 1) | **DONE** — shadow mode only |
+| Model 1 — Lightweight Request Analyzer | **FROZEN** (offline research artifact, not in the gateway) |
+| Model 2 — Small Decision Model | NOT IMPLEMENTED (contract `DecisionOutput` only) |
+| Cascade Orchestrator (routing, UNCERTAIN) | NOT IMPLEMENTED |
+| TinyLlama selective fallback | NOT IMPLEMENTED (V4 is still the sole decision) |
+| Hybrid shadow integration (Models 1–2 in the gateway, logging only) | NOT IMPLEMENTED |
+| Hybrid enforcement | NOT IMPLEMENTED |
+| External final validation of the Hybrid system | PENDING |
+| Embedded deployment (M4) | FUTURE |
+
+"Analyzer frozen" does **not** mean "Hybrid Architecture finished". The old heuristic
+**suspicious score / fast path** (D29, D30; Issues #35–#38, open) is **not implemented and
+not part of the current architecture**: its intended role is now covered by RequestFeatures
+→ learned Analyzer. It is deferred and optional — it may be evaluated later as a feature or
+ablation for Model 2 if it shows incremental value. D29 itself is still recorded as
+APPROVED / NOT YET; changing that formally needs a new decision (not taken).
+
+### 0.3 V4 baseline (the reference every Hybrid result is compared with)
+
+- Internal (V4-clean eval, 6,206 rows; the split also selected the checkpoint, D24): TP 3,011 ·
+  FN 92 · FP 2 · TN 3,101 · recall 97.04% · FPR ≈ 0.06%.
+- **External Test v1** (`external-v1-run-001`, 400 frozen cases through the full gateway):
+  recall 199/200, **FPR 68/200 = 34%** on this 50/50 test — the main known problem is benign
+  generalization (`api-json` 52.5%, `unseen-structure` 60%). L2 enforcement 1,200/1,200.
+- Inference-pipeline P95 269.58 ms (`baseline-local-v1`); D36 objective ≤ 200 ms not met.
+
+### 0.4 Phase 1 — Request Feature Extraction: DONE (Issue #49, D43–D45)
+
+`data_plane/request_features.py`: deterministic, standard-library, **34 features**, schema
+`request-features/v2`; `Host` and `User-Agent` never read (D44; only `Content-Type`); makes no
+decision. Runs on the same D1 text V4 receives; an extractor failure never changes
+enforcement; `(classifier N ms)` keeps its historical meaning. Evidence:
+`reports/hybrid/phase1-feature-extraction-v2/`.
+
+### 0.5 Model 1 — Lightweight Request Analyzer: FROZEN (Issues #51, #53; D46–D55)
+
+- **Artifact:** `hybrid-analyzer-v2/attack=hist_gb,category=hist_gb`,
+  `model-output-hybrid-analyzer-v2/recommended.pkl` (gitignored; 8,866,799 B; SHA-256
+  `79eb7265…`; scikit-learn 1.9.1, `.venv-analyzer`). Input: the 34 RequestFeatures only.
+- **Two levels (D46; not multilabel):** `attack = P̂(BLOCK | features)` — HistGradientBoosting,
+  100 iterations, 31 leaves, **native probabilities, no post-hoc calibration**; plus auxiliary
+  `P̂(category | attack, features)` — HistGradientBoosting, 300 iterations, balanced, over
+  `sql_injection, xss, path_file_access, command_injection, ssti, open_redirect, ssrf,
+  other_attack` (D47, D49). Category is **context, not a security decision**. JWT is never
+  fitted (`unsupported_jwt`, D48). Output contract: `hybrid_contracts.AnalyzerOutput` (D50).
+- **Dataset `hybrid_analyzer_v2` (D54)** — why it exists: run-001 (`hybrid_analyzer_v1`, D51)
+  was found, **after** its freeze and first INTERNAL TEST look, to have **646 / 4,980 VALIDATION
+  rows (13.0%) with a V4 generator-family sibling in TRAIN** (520 families split). v2 groups by
+  canonical request OR feature vector OR **original generator family**, recovered by re-running
+  the unmodified V4 generator and accepted only on byte-identical reproduction of V4-clean.
+  TRAIN 20,175 (20,104 fitted) · VALIDATION 4,959 (4,935) · JWT 71 / 24 / 16 (train / val /
+  test) · 16,791 groups, largest 417 · TRAIN↔VALIDATION overlap **0** for canonical request,
+  vector and generator family · deterministic (SHA-256 `e8da8674…`).
+- **VALIDATION (selection set):** attack ROC-AUC 0.996 · Brier 0.019 · FPR@0.5 0.013 ·
+  group-weighted FPR 0.024 · ECE ≈ 0.008; no calibrator passed the rule; category macro-F1
+  0.683; without `path_length` / `path_depth` category drops ≈ 0.061.
+- **INTERNAL TEST — SECOND LOOK, not untouched, not external evidence.** Feature-disjoint:
+  ROC-AUC 0.9936 · PR-AUC 0.9953 · Brier 0.0335 · log loss 0.106 · ECE 0.024 · recall 0.959 ·
+  FPR@0.5 0.059 · group-weighted FPR 0.030. Full: ROC-AUC 0.9928 · Brier 0.0362 · recall 0.955
+  · FPR 0.062 · group-weighted FPR 0.026. Category macro-F1 0.664. JWT 1/16.
+- **Performance** (scikit-learn, one request, one thread): P50 ≈ 8.9 ms · P95 ≈ 9.2 ms ·
+  ≈ 111 req/s · +15 MiB RSS. Attack ≈ 0.49 ms; the category model ≈ 8.4 ms (≈ 94%) — a future
+  runtime-optimization opportunity (D52), not a reason to change the frozen model.
+- **Limitations (documented, not removed post hoc):** attack leans on percent-encoding,
+  symbol counts and related signals, partly a trace of how the generator rendered payloads;
+  category leans on `path_length` (endpoint artifact); `ssrf` category F1 ≈ 0.25 and other
+  low-support classes are weak; JWT is invisible to the features; some CSIC request shapes are
+  labelled both benign and SQLi — **65% of the second-look FPs come from one such GET shape**
+  (row FPR ≈ 0.022 without it); FPR ≈ 0.06 vs V4's 0.0006 internally. Model 1 is not a firewall
+  by itself.
+- Reports: `reports/hybrid/phase2b-analyzer-v2-run-002/` (frozen, adopted);
+  `reports/hybrid/phase2b-analyzer-baselines/` = run-001 (historical, not adopted; `ERRATA.md`).
+  Code: `scripts/dataset/{recover_v4_provenance,build_hybrid_analyzer_v2}.py`,
+  `scripts/training/{hybrid_analyzer,run_hybrid_analyzer_baselines}.py`.
+
+### 0.6 Data that is consumed — do not reinterpret
+
+| Set | Status |
+|---|---|
+| V4-clean train / eval | immutable; eval selected V4's checkpoint (D24) |
+| INTERNAL TEST (= V4 eval, as used by the Analyzer) | **read twice**: run-001 (first look) and run-002 (labelled second look, D54). Never "untouched" again; no further tuning on it |
+| `hybrid_analyzer_v1` / run-001 | historical evidence only; superseded by v2 for development |
+| External Test v1 | executed once for V4 (aggregate + per-cell). **Not used in any way by Model 1** (no selection, tuning, inference). Individual cases not yet inspected; doing so triggers D40 (it becomes development data; External v2 required for V5 claims). For the Analyzer, one aggregate post-freeze evaluation is allowed (D53) |
+| `real-http-fp-v1` (149 constructed requests) | diagnostic / development data, open for error analysis |
+
+### 0.7 Methodological rules in force
+
+0.5 is a **reporting-only** threshold, not an operating point (D55) · row-weighted metrics
+plus group-weighted diagnostics, always both (D55) · calibration only on bootstrap-supported
+improvement (D55) · Analyzer research env `.venv-analyzer`, never the data-plane env (D52,
+D33) · model artifacts gitignored, hashes versioned (D55) · never overwrite a report; run-001
+and run-002 folders are frozen (their `README.md` / `ERRATA.md` excepted) · a Hybrid stage
+that BLOCKs without V4 is **not decided** (D29 tension; to settle with Model 2 / UNCERTAIN).
+
+### 0.8 Repository state
+
+Phases 1, 2A and 2B are merged into `develop` (PRs #50, #52, #54; Phase 2B commit `6bf19ab`,
+whose files match every code hash in the v2 freeze). `main` is still at `5daa978` (tag
+`v0.1.0`). Issues #49, #51, #53 are closed; #18, #35–#38 and M2 / M4 / M5 issues are open.
+
+### 0.9 Next steps (start here; do not reopen Phase 2B except for an objective bug)
+
+1. (Optional) Promote `develop` → `main` with Phases 1–2B.
+2. **One aggregate post-freeze evaluation of the frozen Analyzer on External Test v1**
+   (D53 / D40): run once; never use it to re-tune Model 1; not training data.
+3. **FP / disagreement analysis, TinyLlama V4 vs Analyzer** — especially V4 = BLOCK with low
+   Analyzer `attack` (candidate V4 false positives). **Decide the data first:** case-level
+   inspection of External v1 makes it development data (D40; D53 forbids changing the
+   Analyzer from it); `real-http-fp-v1` is already open for this.
+4. Estimate how much the Analyzer can rescue V4 false positives without adding false negatives.
+5. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision.
+6. Design and train **Model 2 — Small Decision Model** (only after 3–4, unless a formal
+   decision changes this order).
+7. Define ALLOW / BLOCK / UNCERTAIN experimentally → 8. Cascade Orchestrator → 9. Hybrid
+   shadow mode → 10. Hybrid enforcement → 11. end-to-end evaluation → 12. a new independent
+   external set → 13. embedded deployment.
+
+---
+
 ## 1. Project Overview
 
 **Project identity: an inline AI-powered application-layer security gateway for HTTP traffic.**
 
 The system is conceptually comparable to an application firewall / WAF-like security mechanism. It is **NOT** a replacement for a conventional stateful network firewall, and must not be described as one. The classifier is **stateless at the application-request level** — each HTTP request is classified independently, with no session context carried across requests. Being inline does not make it stateful.
 
-firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP request string, it outputs `ALLOW | <reason>` or `BLOCK | <reason>`, terminating on the model's native EOS (the `###END###` suffix was removed in E4 — see D5 in `DECISIONS.md`). The model is trained via LoRA (4-bit quantized) using supervised fine-tuning on a labeled dataset of generator-rendered HTTP requests: synthetic requests plus requests derived from CSIC 2010 (see §3, "Dataset used"). The end goal is a GGUF-exported model embedded behind an inline HTTP proxy for real-time application-layer classification.
+firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP request string, it outputs `ALLOW | <reason>` or `BLOCK | <reason>`, terminating on the model's native EOS (the `###END###` suffix was removed in E4 — see D5 in `DECISIONS.md`). The model is trained via LoRA (4-bit quantized) using supervised fine-tuning on a labeled dataset of generator-rendered HTTP requests: synthetic requests plus requests derived from CSIC 2010 (see §3, "Dataset used"). The end goal is a GGUF-exported model embedded behind an inline HTTP proxy for real-time application-layer classification. *(Updated 2026-10-04: the target design is now the Hybrid Architecture of §0.2 — features → Lightweight Analyzer → Small Decision Model, with TinyLlama V4 as the fallback for uncertain cases; V4 remains the deployed decision today.)*
 
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D53). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D55). Read it before proposing architectural changes.
 > - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
 > - `docs/external_test_v1_protocol.md` — External Test v1 methodology (pre-registered; status note at the top).
 > - `docs/technical_reference.md` — component detail moved out of the README at stage close.
@@ -19,11 +175,11 @@ The device is an **authorized inline supervisor (a legitimate security gateway),
 
 ---
 
-## Current checkpoint — first functional gateway stage closed (2026-09-21)
+## Stage-close checkpoint — first functional gateway stage closed (2026-09-21) — historical
 
-**Read this first.** This is the authoritative snapshot of where the project is. Every
-section below it is the audit trail of how it got here; where an older section disagrees
-with this one, this one is current.
+*(Updated 2026-10-04: this checkpoint is no longer the "read first" snapshot — §0 is. It and
+the sections after it are kept as the audit trail of how the project got here.)* It was the
+authoritative snapshot at the v0.1.0 stage close.
 **Every metric with its source** — dataset, internal evaluation, runtime, all latency
 experiments, `real-http-fp-v1`, External v1 construction / fidelity / execution / L1–L3,
 Docker, thresholds and what is not yet measured — is in "Quantitative snapshot — v0.1.0"
@@ -73,6 +229,8 @@ Application-layer only; not a stateful network firewall; authorized inline inter
 
 ### Since the stage close — Hybrid Architecture Phase 1: shadow feature extraction (2026-10-01, Issue #49)
 
+*(Historical as of 2026-10-01; superseded by §0 — Phase 1 is merged (PR #50) and Model 1 has since been frozen.)*
+
 **Terminology (D45).** **V4** = the current TinyLlama model. **V5** = the next model
 revision, exactly as in D37 / D40 (and in "Next work" below). **Hybrid Architecture** = the
 proposed multi-stage design: request feature extraction → lightweight request analyzer →
@@ -115,6 +273,8 @@ first stage exists**.
 
 ### Hybrid Architecture Phase 2A — Analyzer design frozen (2026-10-01, Issue #51)
 
+*(Historical; the design stands, Phase 2B has since been completed — §0.5. D51's grouping was superseded for v2 by D54.)*
+
 **State.** Design and data analysis only, on branch `feature/hybrid-phase2-analyzer-design`,
 not yet committed at the time of writing: **no model trained, no dataset created or
 modified, External v1 not read.** Report and evidence:
@@ -153,6 +313,8 @@ modified, External v1 not read.** Report and evidence:
   footprint benchmark, and INTERNAL TEST in both views.
 
 ### Hybrid Architecture Phase 2B — Analyzer baselines executed, NOT frozen (2026-10-03, Issue #53)
+
+*(Historical: run-001, not adopted. Its RF + isotonic freeze is NOT the Analyzer; the frozen Model 1 is run-002's HGB + HGB — next section and §0.5.)*
 
 **State.** Executed on branch `feature/hybrid-phase2b-analyzer-baselines`, uncommitted at the
 time of writing. Report: `reports/hybrid/phase2b-analyzer-baselines/README.md`. Nothing
@@ -194,7 +356,8 @@ integrated into the gateway; V4, V4-clean, RequestFeatures and the data plane un
 ### Hybrid Architecture Phase 2B run-002 — Lightweight Analyzer FROZEN (2026-10-04, Issue #53, D54/D55)
 
 **State.** Supersedes the run-001 status above, which is kept as history. Branch
-`feature/hybrid-phase2b-analyzer-baselines`, uncommitted at the time of writing. Report:
+`feature/hybrid-phase2b-analyzer-baselines`, uncommitted at the time of writing *(since
+committed as `6bf19ab` and merged into `develop`, PR #54)*. Report:
 `reports/hybrid/phase2b-analyzer-v2-run-002/README.md`; run-001 errata:
 `reports/hybrid/phase2b-analyzer-baselines/ERRATA.md`. **External v1 not read; nothing in the
 gateway.**
@@ -456,6 +619,9 @@ implemented, and the controls that remain future work: see the section
 checkpoint.
 
 ### Next work — after the release, not started
+
+*(Superseded 2026-10-04 by the roadmap in §0.9; kept as recorded at the stage close. The
+fast path / suspicious score of item 5 is now deferred and optional, §0.2.)*
 
 Proposed order, to be confirmed by the owner before starting:
 
@@ -2130,7 +2296,8 @@ The finalized dataset is 31,340 rows, down from 53,756 uncapped and 99,132 histo
 
 ## 13. Current ordered plan
 
-Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`.
+*(Updated 2026-10-04: this table records the plan up to the v0.1.0 stage close; the current
+plan is §0.9.)* Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`.
 
 | Step | Experiment | Status |
 |------|-----------|--------|
@@ -2157,7 +2324,8 @@ Supersedes the v4 plan in §7. Decisions D1–D18 are recorded in `DECISIONS.md`
 | — | **External v2** | NOT STARTED — required before any V5 claim (D40) |
 | **#18** | End-to-end latency | NOT STARTED — after the release |
 | — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |
-| **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED |
+| #49, #51, #53 | **Hybrid Architecture** Phase 1 (feature extraction), 2A (Analyzer design), 2B (Analyzer) | **DONE 2026-10-01 → 10-04** — Model 1 frozen, see §0.5 |
+| **#35–#38** | Suspicious scoring, fast path, async validation, calibration (D29/D30) | NOT STARTED — *(2026-10-04)* deferred and optional, not part of the Hybrid Architecture (§0.2) |
 | — | Decision gate: targeted V4.1 only if evidence requires it (D21) | Pending the failure analysis (#9 is done) |
 | — | ~~Per-category rebalancing~~ | **SUPERSEDED by D17** — the logical-group cap (2,500) and rendered-row cap (4,000) now control category contribution. Scarce categories are reported, never inflated (D14/D18). |
 | **E6** | Held-out evasion evaluation | NOT STARTED |

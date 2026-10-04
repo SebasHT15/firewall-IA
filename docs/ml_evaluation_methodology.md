@@ -45,6 +45,16 @@ Rules:
   before the next version is claimed.
 - **A comparison needs a set neither version trained on.** If V5 regenerates the dataset,
   V4 eval groups must stay out of V5 train, or the V4 eval can no longer compare the two.
+- *(Added 2026-10-04.)* **Hybrid Architecture — Lightweight Analyzer (Model 1).** Its sets follow
+  these roles exactly: TRAIN and VALIDATION are carved from V4 train by group
+  (`hybrid_analyzer_v2`, D54: canonical request OR feature vector OR the original V4 generator
+  family, so no family straddles them); INTERNAL TEST is V4 eval, reported in a full and a
+  feature-disjoint view (vector not in TRAIN ∪ VALIDATION). That INTERNAL TEST has been **read
+  twice** — run-001 and a labelled *second look* after the corrected freeze — so it is no longer
+  untouched and must not drive further Analyzer changes. External Test v1 was not used by Model
+  1; one aggregate post-freeze evaluation is allowed (D53). Reporting conventions — 0.5 as a
+  reporting-only threshold, row- plus group-weighted metrics, the calibration acceptance rule —
+  are D55. Details: [`../reports/hybrid/phase2b-analyzer-v2-run-002/`](../reports/hybrid/phase2b-analyzer-v2-run-002/).
 
 ## 2. Generalization
 

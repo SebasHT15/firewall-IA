@@ -15,6 +15,8 @@ page. Statements that later evidence made stale were corrected in place and are 
 Contents: [Control Plane](#control-plane-issue-15) ·
 [Data Plane](#data-plane-issues-16-17--first-version) ·
 [Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1) ·
+[Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces) ·
+[Analyzer research pipeline](#lightweight-request-analyzer--research-pipeline-hybrid-architecture-phase-2b-issue-53) ·
 [Inference Benchmark](#inference-benchmark-issue-9) ·
 [External v1 latency observations](#external-test-v1--latency-observations-derived) ·
 [External v1 secondary breakdowns](#external-test-v1--secondary-breakdowns-pre-registered) ·
@@ -326,12 +328,13 @@ runs in the Docker Lab on the validated smoke fixtures — see
 
 ### Shadow feature extraction (Hybrid Architecture Phase 1)
 
-*(Added 2026-10-01, Issue #49, decisions D43, D44 and D45.)* The first stage of the proposed
+*(Added 2026-10-01, Issue #49, decisions D43, D44 and D45.)* The first stage of the
 **Hybrid Architecture** — feature extraction → lightweight request analyzer → small decision
 model → V4 as fallback for uncertain cases → enforcement. "Hybrid Architecture" is not
-"V5": V5 is the next model revision of D37 / D40 (D45). **Only the first stage exists**,
-and it runs in **shadow mode**: it describes every request and nothing acts on the
-description.
+"V5": V5 is the next model revision of D37 / D40 (D45). This stage runs in **shadow mode**:
+it describes every request and nothing acts on the description. *(Updated 2026-10-04: it is
+still the only Hybrid stage inside the gateway; Model 1 now exists as a frozen offline
+artifact — see [Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces).)*
 
 ```
 request ─► render_request() ─► D1 text ─► POST /classify ─► V4 verdict ─┬─► extract_features(same text) ─► "FEATURE EXTRACTION (shadow)" log line   (nothing reads it)
@@ -352,7 +355,9 @@ dataset change. `data_plane/hybrid_contracts.py` defines `AnalyzerOutput` (froze
 1 — ids in `ANALYZER_CATEGORIES`, D47; no global confidence; `analyzer_version`),
 `DecisionInput` (`features`, `analysis`) and `DecisionOutput` (`decision` ∈ ALLOW / BLOCK /
 UNCERTAIN, rejected otherwise, never coerced; `confidence` in [0, 1]; `reason`). They are
-contracts only: nothing produces or consumes them. The Analyzer's design (targets, dataset,
+contracts only: nothing in the gateway produces or consumes them. *(Updated 2026-10-04: the
+frozen Model 1 produces `AnalyzerOutput` offline, in research code; `DecisionInput` /
+`DecisionOutput` still have no producer.)* The Analyzer's design (targets, dataset,
 splits, metrics) is in
 [`../reports/hybrid/phase2a-analyzer-design/`](../reports/hybrid/phase2a-analyzer-design/).
 
@@ -484,9 +489,103 @@ implementation defects.
 - Model behaviour on real HTTP traffic: diagnosed in `real-http-fp-v1` (see above) and
   evaluated independently in External Test v1 *(updated at stage close;* see
   [`../README.md`](../README.md#5-external-test-v1)*)*
-- Heuristics, suspicious score, fast path: not implemented (Issues #35–#38)
+- Heuristics, suspicious score, fast path: not implemented (Issues #35–#38); *(2026-10-04)*
+  deferred and optional — not part of the Hybrid Architecture (see below)
 - Request feature extraction (Hybrid Architecture Phase 1): shadow mode only — logged,
   never used for a decision (see [Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1))
+
+---
+
+## Hybrid Architecture — target design, status and interfaces
+
+*(Added 2026-10-04.)* The target architecture the project is building. **Only feature
+extraction (shadow mode) runs in the gateway; V4 makes every decision today.**
+
+```
+HTTP request → data plane (mitmproxy) → render_request() → D1 text
+  → extract_features() → RequestFeatures v2
+  → control plane (FastAPI)* → Model 1: Lightweight Request Analyzer → AnalyzerOutput
+  → Model 2: Small Decision Model → DecisionOutput: ALLOW / BLOCK / UNCERTAIN
+        UNCERTAIN → TinyLlama V4 (/classify, as today) → ALLOW / BLOCK
+  → data plane enforcement (fail-closed)
+```
+\*Runtime location of Models 1–2 is decided after measurement (D52); the control plane is the
+intended host because the data-plane environment must stay free of the ML stack (D33).
+
+| Component | Status | Where |
+|---|---|---|
+| Request Feature Extraction | **DONE** (shadow) | `data_plane/request_features.py` |
+| Model 1 — Lightweight Request Analyzer | **FROZEN**, offline | `scripts/training/hybrid_analyzer.py`, artifact gitignored |
+| Model 2 — Small Decision Model | not implemented | contract `DecisionOutput` only |
+| Cascade orchestrator / UNCERTAIN routing / TinyLlama selective fallback | not implemented | — |
+| Hybrid shadow integration, Hybrid enforcement | not implemented | — |
+| External validation of the Hybrid system | pending | — |
+
+The heuristic **suspicious score / fast path** of D29 / D30 (Issues #35–#38) is **not part of
+this architecture** and not implemented: RequestFeatures → learned Analyzer takes its intended
+role. It is deferred and optional (a possible Model 2 feature, if it shows incremental value);
+D29 remains recorded as APPROVED / NOT YET until a decision says otherwise.
+
+### Interfaces (`data_plane/hybrid_contracts.py`)
+
+- **`RequestFeatures`** (schema `request-features/v2`): 34 fields — 25 integer counts (lengths,
+  parameter counts, `percent_encoded_count`, `path_depth`, `json_depth`, 12 syntax-character
+  counts …), 4 ratios (`alnum_ratio`, `symbol_ratio`, `percent_encoded_ratio`,
+  `entropy_bits_per_char`), 2 booleans (`has_body`, `has_percent_encoding`), 3 categoricals
+  (`method`, `content_type`, `body_format`). Computed over path + query + body, undecoded; only
+  the `Content-Type` header is read (D44). Field definitions: [above](#shadow-feature-extraction-hybrid-architecture-phase-1).
+- **`AnalyzerOutput`** (D50): `signals["attack"]` = P̂(BLOCK | features), required; optionally
+  all eight `category:<id>` = P̂(category | attack, features), summing to 1 (ids
+  `ANALYZER_CATEGORIES`, D47). **Two levels, not multilabel** (D46): `attack` is the security
+  signal; the category is auxiliary context. No global confidence; uncertainty is derived from
+  the probabilities. `attack` is learned on V4-clean's 50 / 50 prior — not an operational
+  attack prevalence (D42). Unknown signals, values outside [0, 1] or a partial / non-summing
+  category set are rejected.
+- **`DecisionInput`** (`features`, `analysis`) → **`DecisionOutput`** (`decision` ∈ ALLOW / BLOCK
+  / UNCERTAIN, `confidence`, `reason`): UNCERTAIN means "defer to V4". No producer yet.
+
+### Model 1 as frozen (run-002, D54 / D55)
+
+| | |
+|---|---|
+| Version | `hybrid-analyzer-v2/attack=hist_gb,category=hist_gb` |
+| Attack model | `HistGradientBoostingClassifier(max_iter=100, max_leaf_nodes=31, learning_rate=0.1, early_stopping=False)`, **native probabilities** (no calibrator passed the D55 rule) |
+| Category model | `HistGradientBoostingClassifier(max_iter=300, class_weight="balanced", learning_rate=0.1, early_stopping=False)`, BLOCK rows only, JWT never fitted (D48) |
+| Preprocessing | `FeatureEncoder("tree")`, fit on v2 TRAIN: numerics raw, booleans 0/1, `method` / `content_type` one-hot over TRAIN values + `__other__`, `body_format` one-hot over its closed enum (unknown → error); exact encoders in `frozen_selection.json` |
+| Call | `AnalyzerModel.analyze(RequestFeatures) -> AnalyzerOutput` (pickled `hybrid_analyzer.AnalyzerModel`) |
+| Artifact | `model-output-hybrid-analyzer-v2/recommended.pkl`, 8,866,799 B, SHA-256 `79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b` |
+| Cost (scikit-learn, 1 request, 1 thread) | P50 8.92 · P95 9.22 ms; attack 0.49 ms, category 8.39 ms; ≈ 111 req/s; +15 MiB RSS |
+
+Training data: **`hybrid_analyzer_v2`** (D54) — V4 train split into TRAIN (20,175 rows, 20,104
+fitted) and VALIDATION (4,959 / 4,935) by connected components of "same canonical request OR
+same feature vector OR same original V4 generator family"; the family is recovered by
+re-running the unmodified V4 generator (`scripts/dataset/recover_v4_provenance.py`) and is
+accepted only if V4-clean is reproduced byte for byte. TRAIN ↔ VALIDATION overlap is 0 under
+all three relations. INTERNAL TEST = V4 eval (full 6,190; feature-disjoint 5,456 vs TRAIN ∪
+VALIDATION; `unsupported_jwt` 16) — **read twice** (run-001, then a labelled second look after
+the v2 freeze). Results, limitations and the run-001 history:
+[`../reports/hybrid/phase2b-analyzer-v2-run-002/README.md`](../reports/hybrid/phase2b-analyzer-v2-run-002/README.md).
+
+### Runtime boundaries and fail-closed semantics
+
+- **Environments (D33, D52):** the data plane runs in `.venv-dataplane` (mitmproxy; no ML stack),
+  the control plane and V4 in the ML environment, Model 1 research in `.venv-analyzer` (numpy,
+  scikit-learn 1.9.1). The data plane must never import scikit-learn.
+- **Today:** fail-closed is exactly D4 / D34 — anything but a valid V4 ALLOW is 403 / 503. An
+  extractor failure is not a classifier failure (D43): logged, verdict enforced unchanged.
+- **Hybrid (not designed yet):** how an Analyzer / Decision Model failure is handled, whether a
+  Hybrid stage may ever BLOCK without V4 (excluded for D29's heuristic score), and the
+  UNCERTAIN policy are open decisions for the Model 2 / orchestrator phase. Until then nothing
+  Hybrid can alter a decision.
+
+### Model artifact handling (D55)
+
+Model outputs are gitignored (`model-output*/`, including `model-output-hybrid-analyzer-v1/`
+and `-v2/`); their SHA-256, sizes, configs and metrics are versioned in each run's report
+(`frozen_selection.json`, `SHA256SUMS`). Pickles are tied to the library versions in
+`requirements-analyzer-research.txt`. Datasets `hybrid_analyzer_v{1,2}` are regenerated locally
+(manifests versioned) and never overwritten; any change is a new version. Frozen run folders
+are never rewritten; corrections go in `ERRATA.md`.
 
 ---
 
@@ -811,6 +910,12 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
   end-to-end benchmark exists yet (Issue #18).
 - **No quantized comparison exists yet** — GGUF/Q4_K_M is unbuilt.
 - **No physical embedded validation exists yet.**
+- **The Hybrid Architecture is incomplete** *(added 2026-10-04)*. Only shadow feature extraction
+  runs in the gateway. Model 1 is frozen offline; its internal results are a second look at
+  INTERNAL TEST (not untouched), it has not been evaluated on External v1, its FPR (≈ 0.06) is far
+  above V4's internal one, it leans on percent-encoding / length / `path_length` shortcuts, its
+  `ssrf` category is weak (F1 ≈ 0.25) and it cannot see JWT attacks. See
+  [Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces).
 - **CSIC BLOCK labels come from a keyword heuristic**, so the CSIC-derived portion of
   per-category results inherits that circularity.
 - **The data plane is a first version, validated locally with plain HTTP/1.1 only.**
@@ -867,9 +972,13 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
 - External Test v1 — frozen at `36df2ee`, executed as `external-v1-run-001`
 - Docker demo (`docker/demo.sh`), runtime verified from a clean state
 
-The current ordered plan after the first-stage release is kept in one place:
-[`../CONTEXT.md`](../CONTEXT.md) ("Current checkpoint") and
+The current ordered plan is kept in one place: [`../CONTEXT.md`](../CONTEXT.md) §0.9
+*(updated 2026-10-04; it was "Current checkpoint" at the stage close)* and
 [`../README.md`](../README.md#next-steps).
+
+**Hybrid Architecture** *(added 2026-10-04)*: Phase 1 feature extraction (#49), Phase 2A
+Analyzer design (#51) and Phase 2B Model 1 (#53) are done and merged into `develop`; Model 2,
+the orchestrator and gateway integration are not started.
 
 **M3 — partially started ahead of M2 (D26)**
 
@@ -883,7 +992,9 @@ The current ordered plan after the first-stage release is kept in one place:
   [`external_test_v1_protocol.md`](external_test_v1_protocol.md))
 - Issue #18 — end-to-end gateway latency (no-fast-path baseline): not started
 
-Latency-reduction layer — **designed, not built** (D29, D30):
+Latency-reduction layer — **designed, not built** (D29, D30); *(2026-10-04)* **deferred and
+optional**, not part of the Hybrid Architecture (see
+[Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces)):
 
 - Issue #35 — heuristic suspicious scoring: not started
 - Issue #36 — benign fast-path ALLOW: not started
