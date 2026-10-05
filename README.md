@@ -423,11 +423,14 @@ Next, in order (detail and constraints: [`CONTEXT.md` §0.9](CONTEXT.md#09-next-
    ([`analyzer-external-v1-run-001`](reports/hybrid/analyzer-external-v1-run-001/)); it shows
    aggregate behaviour only and does **not** show that a V4 + Analyzer cascade would help (no
    joint count; different operating points). Model 1 stays frozen.
-2. **Disagreement analysis, TinyLlama V4 vs Model 1** — especially V4 BLOCK with low Analyzer
-   `attack` (candidate V4 false positives): how many V4 false positives the Analyzer could
-   rescue without adding false negatives. **Start on development / diagnostic data**
-   (`real-http-fp-v1`, internal views); External v1 cases are not inspected by default —
-   case-level use would make it development data (D40 / D45) and require External v2.
+2. **Disagreement analysis, TinyLlama V4 vs Model 1** — first diagnostic done on development data
+   (issue #57, [`v4-analyzer-disagreement-v1`](reports/hybrid/v4-analyzer-disagreement-v1/)). A low
+   Analyzer score is not shown to be a safe override of a V4 BLOCK: on texts it never saw, it scores
+   10 attacks V4 blocks below 0.1. V4's header-flip false positives are invisible to it by design
+   (D44). **The false-negative risk of a cascade cannot be estimated with the data we may use.**
+   Recommendation (pending owner review): **C**, i.e. build a development diagnostic set with
+   attacks, then test B (new features), V5 and a V4-reason-aware Model 2. External v1 cases stay
+   unused.
 3. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision (External v2
    required for any V5 claim, D40).
 4. **Model 2 — Small Decision Model**, then ALLOW / BLOCK / UNCERTAIN policy, cascade
@@ -498,7 +501,7 @@ Run everything from the repository root.
 | [`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/) | Docker Lab closure report and raw smoke logs |
 | [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) | Real-HTTP diagnostic: cases, raw records, process logs |
 | [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark; `baseline-local-v1` is the frozen reference |
-| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen); the one aggregate External v1 evaluation of the frozen Analyzer (`analyzer-external-v1-run-001`) |
+| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen); the one aggregate External v1 evaluation of the frozen Analyzer (`analyzer-external-v1-run-001`); the V4 ↔ Analyzer disagreement diagnostic on development data (`v4-analyzer-disagreement-v1`, issue #57) |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | V4 dataset identity: hashes, seed, source commit |
 | [`docs/data_sources.md`](docs/data_sources.md) | Data not distributed by v0.1.0 (CSIC CSV, historical corpora): sizes, SHA-256, regeneration inputs, retained excerpts |
 | [`LICENSE`](LICENSE) | MIT License for this repository's original code and documentation (third-party material excluded — see [License](#license)) |
@@ -514,11 +517,12 @@ python3.12 -m unittest discover -s tests
 ```
 
 ```bash
-.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset tests.test_hybrid_analyzer_dataset_v2 tests.test_request_features tests.test_analyzer_external_v1
+.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset tests.test_hybrid_analyzer_dataset_v2 tests.test_request_features tests.test_analyzer_external_v1 tests.test_v4_analyzer_disagreement
 ```
 
-`tests.test_analyzer_external_v1` (48 tests) is synthetic only: it never opens External Test v1
-(guarded) and needs `.venv-analyzer`; elsewhere 47 of its tests skip.
+`tests.test_v4_analyzer_disagreement` (12 tests) and `tests.test_analyzer_external_v1` (48 tests)
+are synthetic only and guarded against opening External Test v1; both need `.venv-analyzer`
+(elsewhere 10 and 47 of their tests skip).
 
 After Hybrid Architecture Phase 2B run-002 (2026-10-04): **ML environment — 333 tests
 discovered, 309 passed, 24 expected skips** (the three mitmproxy/Flask modules and the 21
