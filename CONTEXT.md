@@ -131,7 +131,8 @@ enforcement; `(classifier N ms)` keeps its historical meaning. Evidence:
 | INTERNAL TEST (= V4 eval, as used by the Analyzer) | **read twice**: run-001 (first look) and run-002 (labelled second look, D54). Never "untouched" again; no further tuning on it |
 | `hybrid_analyzer_v1` / run-001 | historical evidence only; superseded by v2 for development |
 | External Test v1 | executed once for V4 (aggregate + per-cell) and **once for the frozen Model 1** (aggregate + per-cell, `analyzer-external-v1-run-001`, D53 — its single allowed use; never used for selection or tuning). Individual cases not inspected; doing so triggers D40 / D45 (it becomes development data; External v2 required for V5 or Hybrid-component claims) |
-| `real-http-fp-v1` (149 constructed requests) | diagnostic / development data, open for error analysis |
+| `real-http-fp-v1` (149 constructed requests) | diagnostic / development data; used in the V4 ↔ Analyzer diagnostic (issue #57), so it is Hybrid error-analysis data (D37), never independent evidence for a cascade |
+| Legacy 135-case manual suite (`test_model.py`) | diagnostic; V4 re-run once and scored by the Analyzer in issue #57 → Hybrid error-analysis data (D37) |
 
 ### 0.7 Methodological rules in force
 
@@ -154,13 +155,22 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
 2. ~~One aggregate post-freeze evaluation of the frozen Analyzer on External Test v1~~ —
    **DONE 2026-10-05** (`reports/hybrid/analyzer-external-v1-run-001/`; §0.5). Do not repeat it;
    do not tune anything from it.
-3. **FP / disagreement analysis, TinyLlama V4 vs Analyzer** — especially V4 = BLOCK with low
-   Analyzer `attack` (candidate V4 false positives). **Start on development / diagnostic data**
-   (`real-http-fp-v1`, V4-clean eval as INTERNAL TEST views with the D54 caveats), **not on
-   External v1 cases**: case-level inspection of External v1 makes it development data (D40 /
-   D45; D53 forbids changing the Analyzer from it) and would need a recorded transition plus
-   External v2 for any later independent claim. No joint V4 × Analyzer count on External v1.
-4. Estimate how much the Analyzer can rescue V4 false positives without adding false negatives.
+3. ~~FP / disagreement analysis, TinyLlama V4 vs Analyzer~~ — **first diagnostic DONE 2026-10-05**
+   (issue #57, `reports/hybrid/v4-analyzer-disagreement-v1/`, uncommitted at writing). Development
+   data only: `real-http-fp-v1` (119 texts, EVALSWAP excluded under D54) and the legacy 135-case
+   manual suite (V4 re-run once, reproducing the stored counts). INTERNAL TEST and External v1 were
+   **not** used. Findings (diagnostic counts, not rates):
+   - S1's 119 benign texts collapse to 8 Analyzer feature vectors; all score < 0.5, but a V4-blocked
+     text and its V4-allowed header twin always score the same (D44);
+   - in S2, 10 attacks V4 blocks score < 0.1 (4 of them surface attacks, not header-borne);
+   - the Analyzer scores benign and attack JSON alike (8/9 vs 7/9 ≥ 0.5);
+   - category top-1 is 49/104.
+   **The false-negative risk of a cascade cannot be estimated with the data we may use.**
+   Recommendation **C**: build a pre-registered development diagnostic set with attacks first.
+   B (new features), V5 and a V4-reason-aware Model 2 are hypotheses that set must test.
+   S1 / S2 are now Hybrid error-analysis data (D37). Owner decision pending.
+4. Estimate how much the Analyzer can rescue V4 false positives without adding false negatives —
+   **blocked on the development set of step 3 (route C)**; no current data can measure it.
 5. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision.
 6. Design and train **Model 2 — Small Decision Model** (only after 3–4, unless a formal
    decision changes this order).
