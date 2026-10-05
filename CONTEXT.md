@@ -1,6 +1,6 @@
 # firewall-IA — Session Context for Claude Code
 
-## 0. HANDOFF — current state (2026-10-04) · READ THIS FIRST
+## 0. HANDOFF — current state (2026-10-05) · READ THIS FIRST
 
 This section is the current state. Everything after it is a chronological audit trail;
 where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D55).
@@ -107,6 +107,17 @@ enforcement; `(classifier N ms)` keeps its historical meaning. Evidence:
   labelled both benign and SQLi — **65% of the second-look FPs come from one such GET shape**
   (row FPR ≈ 0.022 without it); FPR ≈ 0.06 vs V4's 0.0006 internally. Model 1 is not a firewall
   by itself.
+- **External Test v1 — the one aggregate post-freeze evaluation (D53), done 2026-10-05**
+  (`reports/hybrid/analyzer-external-v1-run-001/`, offline, aggregate only, 1 run, no retry):
+  ROC-AUC 0.943 (CI 0.92–0.96) · PR-AUC 0.946 · Brier 0.127 · log loss 0.471 · **ECE 0.126**
+  (over-confident top bins) · at the reporting-only 0.5: recall 188/200, **FPR 50/200** —
+  `api-json` 29/40, `api-query` 13/40, `unseen-structure` 0/40; `cmdi` recall 32/40; 0/5
+  header / cookie payloads (invisible by D44). Category head does not transfer (top-1 74/200).
+  Gap vs the internal second look (ROC-AUC 0.994, ECE 0.024) is large. **Model 1 stays frozen and
+  unchanged (D53)**; External v1 is not consumed (no case inspected). It does **not** show that
+  a cascade would help: no joint V4 × Analyzer count exists; V4 (gateway, real decision) and the
+  Analyzer (offline, 0.5 reporting-only) are not comparable operating points. Pre-registration
+  was not committed (owner's no-commit instruction; disclosed in the report).
 - Reports: `reports/hybrid/phase2b-analyzer-v2-run-002/` (frozen, adopted);
   `reports/hybrid/phase2b-analyzer-baselines/` = run-001 (historical, not adopted; `ERRATA.md`).
   Code: `scripts/dataset/{recover_v4_provenance,build_hybrid_analyzer_v2}.py`,
@@ -119,7 +130,7 @@ enforcement; `(classifier N ms)` keeps its historical meaning. Evidence:
 | V4-clean train / eval | immutable; eval selected V4's checkpoint (D24) |
 | INTERNAL TEST (= V4 eval, as used by the Analyzer) | **read twice**: run-001 (first look) and run-002 (labelled second look, D54). Never "untouched" again; no further tuning on it |
 | `hybrid_analyzer_v1` / run-001 | historical evidence only; superseded by v2 for development |
-| External Test v1 | executed once for V4 (aggregate + per-cell). **Not used in any way by Model 1** (no selection, tuning, inference). Individual cases not yet inspected; doing so triggers D40 (it becomes development data; External v2 required for V5 claims). For the Analyzer, one aggregate post-freeze evaluation is allowed (D53) |
+| External Test v1 | executed once for V4 (aggregate + per-cell) and **once for the frozen Model 1** (aggregate + per-cell, `analyzer-external-v1-run-001`, D53 — its single allowed use; never used for selection or tuning). Individual cases not inspected; doing so triggers D40 / D45 (it becomes development data; External v2 required for V5 or Hybrid-component claims) |
 | `real-http-fp-v1` (149 constructed requests) | diagnostic / development data, open for error analysis |
 
 ### 0.7 Methodological rules in force
@@ -140,12 +151,15 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
 ### 0.9 Next steps (start here; do not reopen Phase 2B except for an objective bug)
 
 1. (Optional) Promote `develop` → `main` with Phases 1–2B.
-2. **One aggregate post-freeze evaluation of the frozen Analyzer on External Test v1**
-   (D53 / D40): run once; never use it to re-tune Model 1; not training data.
+2. ~~One aggregate post-freeze evaluation of the frozen Analyzer on External Test v1~~ —
+   **DONE 2026-10-05** (`reports/hybrid/analyzer-external-v1-run-001/`; §0.5). Do not repeat it;
+   do not tune anything from it.
 3. **FP / disagreement analysis, TinyLlama V4 vs Analyzer** — especially V4 = BLOCK with low
-   Analyzer `attack` (candidate V4 false positives). **Decide the data first:** case-level
-   inspection of External v1 makes it development data (D40; D53 forbids changing the
-   Analyzer from it); `real-http-fp-v1` is already open for this.
+   Analyzer `attack` (candidate V4 false positives). **Start on development / diagnostic data**
+   (`real-http-fp-v1`, V4-clean eval as INTERNAL TEST views with the D54 caveats), **not on
+   External v1 cases**: case-level inspection of External v1 makes it development data (D40 /
+   D45; D53 forbids changing the Analyzer from it) and would need a recorded transition plus
+   External v2 for any later independent claim. No joint V4 × Analyzer count on External v1.
 4. Estimate how much the Analyzer can rescue V4 false positives without adding false negatives.
 5. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision.
 6. Design and train **Model 2 — Small Decision Model** (only after 3–4, unless a formal
@@ -392,7 +406,32 @@ gateway.**
 - **Latency** (scikit-learn, one request, one thread): 8.92 / 9.22 ms P50 / P95, of which attack
   is 0.49 ms and the category model 8.4 ms; +15 MiB RSS.
 - **Next:** one aggregate External v1 evaluation of this frozen Analyzer (D53 / D40), then the
-  runtime decision (D52), then the Small Decision Model.
+  runtime decision (D52), then the Small Decision Model. *(The External v1 evaluation was done
+  on 2026-10-05 — next section.)*
+
+### Model 1 × External Test v1 — the one aggregate post-freeze evaluation (2026-10-05, D53)
+
+**State.** Branch `research/hybrid-analyzer-external-v1-aggregate` at `6641cc6`, uncommitted at
+the time of writing (owner: no commit). Report and evidence:
+`reports/hybrid/analyzer-external-v1-run-001/` (`README.md`, `PROTOCOL.md`,
+`aggregate_results.json`, `SHA256SUMS`). Evaluator `scripts/evaluation/analyzer_external_v1.py`,
+synthetic tests `tests/test_analyzer_external_v1.py` (48, guarded against opening External v1).
+
+- **Procedure:** protocol written before exposure, revised twice before exposure after two
+  independent read-only audits (methodology; code — which found three differencing leaks, closed by
+  a k ≥ 10 rule over input-determined parts); hashes frozen in `PREREGISTRATION.json` and posted
+  in the transcript; preflight (integrity, environment, frozen code, artifact contract, no
+  inference) passed; **one run**, 2026-10-05T05:13:20Z, no failure, no retry.
+- **Results** (n 400, 200 / 200 by construction): ROC-AUC 0.943 · PR-AUC 0.946 · Brier 0.127 ·
+  log loss 0.471 · ECE 0.126; at the reporting-only 0.5: TP 188 · TN 150 · FP 50 · FN 12. Per
+  benign slice FP: browser-navigation 4, browser-forms-session 4, api-json 29, api-query 13,
+  unseen-structure 0 (of 40). Per attack cell recall: sqli 39, cmdi 32, xss 38,
+  path-traversal 40, ssrf 39 (of 40). Header / cookie payloads 0/5 (D44 blind spot).
+  Category top-1 74/200, 37/200 predicted into unsampled categories.
+- **Suppressed by the k-rule (pre-registered):** feature-disjoint view (only 2 / 400 cases have
+  a vector in development), group-weighted diagnostic, 11 middle reliability bins.
+- **Must not be claimed:** a cascade benefit; Analyzer better / worse than V4 as a firewall;
+  operational rates (D42); causes of errors. **Model 1 unchanged; no new decision.**
 
 ### V4 internal baseline — unchanged
 

@@ -127,6 +127,12 @@ feature-disjoint INTERNAL TEST view — a **second look**, not an untouched test
 0.994, recall 0.959 and FPR 0.059 at the 0.5 reporting threshold; ≈ 8.9 ms per request. Its
 limitations (encoding / path shortcuts, weak `ssrf` category, JWT blind spot) and the full
 methodology: [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/).
+**External Test v1, its one aggregate post-freeze evaluation** (offline, D53):
+ROC-AUC 0.943, Brier 0.127, ECE 0.126 (over-confident), and at the reporting-only 0.5 recall
+188/200 and FPR 50/200 on this 50/50 test (`api-json` 29/40); the category head does not transfer
+(top-1 74/200) —
+[`reports/hybrid/analyzer-external-v1-run-001/`](reports/hybrid/analyzer-external-v1-run-001/).
+Model 1 stays frozen; this is not a gateway or cascade result.
 "Analyzer frozen" does not mean the Hybrid Architecture is finished.
 
 ---
@@ -148,7 +154,7 @@ methodology: [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phas
 | **External Test v1** — frozen 400-case set, executed through the complete gateway | [§5](#5-external-test-v1), [`reports/external/external-v1-run-001/`](reports/external/external-v1-run-001/) |
 | **Docker demo / smoke path** — `docker/demo.sh`, `docker/smoke_test.sh` | [§6](#6-demo); demo runtime-verified from a clean lab |
 | **Request feature extraction, shadow mode** (Hybrid Architecture Phase 1, Issue #49) — describes requests, decides nothing | unit + gateway integration tests; live run with V4, shadow off vs on identical: [`reports/hybrid/phase1-feature-extraction-v2/`](reports/hybrid/phase1-feature-extraction-v2/) |
-| **Lightweight Request Analyzer (Model 1), frozen offline** (Issues #51, #53; D46–D55) — not integrated into the gateway | [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/); dataset `hybrid_analyzer_v2`, unit tests |
+| **Lightweight Request Analyzer (Model 1), frozen offline** (Issues #51, #53; D46–D55) — not integrated into the gateway | [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/); dataset `hybrid_analyzer_v2`, unit tests; External v1 aggregate evaluation [`reports/hybrid/analyzer-external-v1-run-001/`](reports/hybrid/analyzer-external-v1-run-001/) |
 
 ### Future — not implemented
 
@@ -386,8 +392,10 @@ remains `./docker/smoke_test.sh`.
 - GGUF / llama.cpp not integrated; runtime is HF/PEFT on CUDA
 - Fast path not implemented (deferred)
 - Hybrid Architecture: only feature extraction (shadow) and an offline, frozen Model 1 exist;
-  Model 1's FPR (≈ 0.06 on the internal second look) is far above V4's internal one, and it has
-  not been evaluated externally
+  Model 1's FPR (≈ 0.06 on the internal second look) is far above V4's internal one; on External
+  Test v1 (offline, aggregate) its ROC-AUC drops to 0.943, its probabilities are over-confident
+  (ECE 0.126), FPR at the reporting-only 0.5 is 50/200 (`api-json` 29/40), header / cookie
+  payloads are invisible to it (0/5) and its category head does not transfer
 - Concurrency untested — one GPU serializes inference; no evasion / adversarial suite
 - **Not production-ready**
 
@@ -411,12 +419,15 @@ TEST look was corrected by D54, and INTERNAL TEST has since been read a second t
 
 Next, in order (detail and constraints: [`CONTEXT.md` §0.9](CONTEXT.md#09-next-steps-start-here-do-not-reopen-phase-2b-except-for-an-objective-bug)):
 
-1. **One aggregate post-freeze evaluation of Model 1 on External Test v1** (D53 / D40) — never
-   used to re-tune Model 1.
+1. ~~One aggregate post-freeze evaluation of Model 1 on External Test v1~~ — **done**
+   ([`analyzer-external-v1-run-001`](reports/hybrid/analyzer-external-v1-run-001/)); it shows
+   aggregate behaviour only and does **not** show that a V4 + Analyzer cascade would help (no
+   joint count; different operating points). Model 1 stays frozen.
 2. **Disagreement analysis, TinyLlama V4 vs Model 1** — especially V4 BLOCK with low Analyzer
    `attack` (candidate V4 false positives): how many V4 false positives the Analyzer could
-   rescue without adding false negatives. Case-level use of External v1 would make it
-   development data (D40).
+   rescue without adding false negatives. **Start on development / diagnostic data**
+   (`real-http-fp-v1`, internal views); External v1 cases are not inspected by default —
+   case-level use would make it development data (D40 / D45) and require External v2.
 3. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision (External v2
    required for any V5 claim, D40).
 4. **Model 2 — Small Decision Model**, then ALLOW / BLOCK / UNCERTAIN policy, cascade
@@ -487,7 +498,7 @@ Run everything from the repository root.
 | [`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/) | Docker Lab closure report and raw smoke logs |
 | [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) | Real-HTTP diagnostic: cases, raw records, process logs |
 | [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark; `baseline-local-v1` is the frozen reference |
-| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen) |
+| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen); the one aggregate External v1 evaluation of the frozen Analyzer (`analyzer-external-v1-run-001`) |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | V4 dataset identity: hashes, seed, source commit |
 | [`docs/data_sources.md`](docs/data_sources.md) | Data not distributed by v0.1.0 (CSIC CSV, historical corpora): sizes, SHA-256, regeneration inputs, retained excerpts |
 | [`LICENSE`](LICENSE) | MIT License for this repository's original code and documentation (third-party material excluded — see [License](#license)) |
@@ -503,8 +514,11 @@ python3.12 -m unittest discover -s tests
 ```
 
 ```bash
-.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset tests.test_hybrid_analyzer_dataset_v2 tests.test_request_features
+.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset tests.test_hybrid_analyzer_dataset_v2 tests.test_request_features tests.test_analyzer_external_v1
 ```
+
+`tests.test_analyzer_external_v1` (48 tests) is synthetic only: it never opens External Test v1
+(guarded) and needs `.venv-analyzer`; elsewhere 47 of its tests skip.
 
 After Hybrid Architecture Phase 2B run-002 (2026-10-04): **ML environment — 333 tests
 discovered, 309 passed, 24 expected skips** (the three mitmproxy/Flask modules and the 21
