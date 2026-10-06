@@ -1,0 +1,1053 @@
+{
+  "run": "v4-analyzer-paired-dev-v1",
+  "type": "DIAGNOSTIC on DEVELOPMENT data (issue #59); not an evaluation or external test",
+  "created_utc": "2026-10-06T04:08:21Z",
+  "git_head": "dd042bbc81f29980d450f6fb04b2fc23af3f8fa5",
+  "analyzer_version": "hybrid-analyzer-v2/attack=hist_gb,category=hist_gb",
+  "model_sha256_before": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b",
+  "model_sha256_after": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b",
+  "model_sha256_expected": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b",
+  "model_unchanged_and_matches_expected": true,
+  "v4_adapter_sha256_expected": "7bf168758a428fa7775dff0328de3d07d3063ddf99b961dc8b8406a0dce93de1",
+  "canonical_relation_check": {
+    "rows_checked": 25134,
+    "rows_equal": 25134
+  },
+  "bands (descriptive, fixed)": [
+    "[0,0.1)",
+    "[0.1,0.5)",
+    "[0.5,0.9)",
+    "[0.9,1]"
+  ],
+  "evaluator_sha256": "35e916fc5221f1f0d3282a2e33fb4eda40784d48e9bea53e8c1dd8998eed4eb6",
+  "generator_sha256": "8ff5b4f3055dbf43f0c7b91395d5f1902930bed8993608cd45921d6738061bea",
+  "capture_sha256": "8303d4029c16b85979499359475ebce9cce07185ae5ec5ed2278c50e8a3943b7",
+  "cases_sha256": "879c7ddb31c29406f5abe51ffe2fbe5a8e677213d4d7ab543648aa1aca97958d",
+  "protocol_sha256": "459f5f913a7b29c5a80e66cd4646bc65d2a50bdb6ae45c799e5db1c68bd87109",
+  "capture_meta": {
+    "run": "v4-analyzer-paired-dev-v1 capture",
+    "finished_utc": "2026-10-06T03:52:56.827693+00:00",
+    "n_cases": 434,
+    "capture_ok": 434,
+    "gateway_errors": 0,
+    "classify_errors": 0,
+    "gateway_inconsistent": 0,
+    "capture_file": "/logs/capture/paired-dev.jsonl",
+    "capture_file_start_lines": 2,
+    "control_url": "http://control-plane:8000/classify",
+    "capture_proxy": "capture-proxy:8081",
+    "gateway_proxy": "data-plane:8080",
+    "records_sha256": "7966f70664836830fe0358915dd3460440b50b425ce1874643e1ee8b8a821002"
+  },
+  "problems": [],
+  "honest_units": {
+    "note": "independent unit = distinct canonical attack payload (one placement each); placement variants and reused benign texts are NEVER independent observations",
+    "scored_records": 434,
+    "unique_feature_vectors_scored": 337,
+    "attack_records": 213,
+    "independent_attack_records (per-family distinct canonical payload)": 201,
+    "distinct_family_canonical_pairs (the independence unit)": 201,
+    "distinct_canonical_payload_strings": 200,
+    "cross_family_shared_canonical_strings": 1,
+    "placement_sensitivity_variant_records (DEPENDENT)": 12,
+    "conclusion_family_sink_coverage (independent attacks)": {
+      "sql_injection": {
+        "natural_sink": 23,
+        "generic_carrier": 10
+      },
+      "xss": {
+        "natural_sink": 14,
+        "generic_carrier": 18
+      },
+      "command_injection": {
+        "natural_sink": 0,
+        "generic_carrier": 32
+      },
+      "path_file_access": {
+        "natural_sink": 6,
+        "generic_carrier": 26
+      },
+      "ssrf": {
+        "natural_sink": 24,
+        "generic_carrier": 8
+      }
+    },
+    "benign_twin_records": 201,
+    "benign_twin_unique_vectors": 121,
+    "benign_probe_records": 20,
+    "v4_invalid_outputs_total": 0
+  },
+  "capture_fidelity_claim": "What pass 1 establishes: the D1 text the SAME production render_request() produces from the wire bytes (the capture proxy imports data_plane.render_request; object identity is asserted by tests/test_external_capture). It is NOT a byte-capture of the live data-plane -> control-plane channel. The data plane is shown to behave consistently with this text by pass 2 (enforcement) vs pass 3 (/classify) agreement, reported in gateway_consistency. The text scored by both models is this captured text (identical to the designed text when capture_ok).",
+  "gateway_consistency": {
+    "scored": 434,
+    "enforcement_agrees_with_classify": 434,
+    "disagree": 0,
+    "not_comparable": 0,
+    "note": "pass-2 data-plane enforcement (403/503/forward) vs pass-3 /classify decision on the same text; agreement is the empirical bridge between the two paths"
+  },
+  "counts": {
+    "total_cases": 434,
+    "scored": 434,
+    "excluded": 0,
+    "exclude_reasons": {}
+  },
+  "label_x_v4_x_band (texts; descriptive bins, 0.5 is D55 reporting-only)": [
+    {
+      "label": "ALLOW",
+      "v4_decision": "ALLOW",
+      "band": "[0,0.1)",
+      "n": 11
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "ALLOW",
+      "band": "[0.1,0.5)",
+      "n": 20
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "ALLOW",
+      "band": "[0.5,0.9)",
+      "n": 22
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "ALLOW",
+      "band": "[0.9,1]",
+      "n": 100
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "BLOCK",
+      "band": "[0,0.1)",
+      "n": 2
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "BLOCK",
+      "band": "[0.1,0.5)",
+      "n": 2
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "BLOCK",
+      "band": "[0.5,0.9)",
+      "n": 10
+    },
+    {
+      "label": "ALLOW",
+      "v4_decision": "BLOCK",
+      "band": "[0.9,1]",
+      "n": 54
+    },
+    {
+      "label": "BLOCK",
+      "v4_decision": "ALLOW",
+      "band": "[0,0.1)",
+      "n": 5
+    },
+    {
+      "label": "BLOCK",
+      "v4_decision": "ALLOW",
+      "band": "[0.1,0.5)",
+      "n": 2
+    },
+    {
+      "label": "BLOCK",
+      "v4_decision": "BLOCK",
+      "band": "[0,0.1)",
+      "n": 1
+    },
+    {
+      "label": "BLOCK",
+      "v4_decision": "BLOCK",
+      "band": "[0.1,0.5)",
+      "n": 2
+    },
+    {
+      "label": "BLOCK",
+      "v4_decision": "BLOCK",
+      "band": "[0.5,0.9)",
+      "n": 2
+    },
+    {
+      "label": "BLOCK",
+      "v4_decision": "BLOCK",
+      "band": "[0.9,1]",
+      "n": 201
+    }
+  ],
+  "at_reporting_threshold_0_5 (D55, not an operating point)": {
+    "ALLOW | ALLOW | attack<0.5": 31,
+    "ALLOW | ALLOW | attack>=0.5": 122,
+    "ALLOW | BLOCK | attack<0.5": 4,
+    "ALLOW | BLOCK | attack>=0.5": 64,
+    "BLOCK | ALLOW | attack<0.5": 7,
+    "BLOCK | BLOCK | attack<0.5": 3,
+    "BLOCK | BLOCK | attack>=0.5": 203
+  },
+  "vector_level (primary Analyzer unit; one row per distinct feature vector)": {
+    "distinct_vectors": 337,
+    "cross_label_mix_v4_mix_band (vectors)": [
+      {
+        "labels": "ALLOW",
+        "v4": "ALLOW",
+        "band": "[0,0.1)",
+        "vectors": 4
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "ALLOW",
+        "band": "[0.1,0.5)",
+        "vectors": 11
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "ALLOW",
+        "band": "[0.5,0.9)",
+        "vectors": 16
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "ALLOW",
+        "band": "[0.9,1]",
+        "vectors": 56
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "BLOCK",
+        "band": "[0,0.1)",
+        "vectors": 2
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "BLOCK",
+        "band": "[0.1,0.5)",
+        "vectors": 1
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "BLOCK",
+        "band": "[0.5,0.9)",
+        "vectors": 8
+      },
+      {
+        "labels": "ALLOW",
+        "v4": "BLOCK",
+        "band": "[0.9,1]",
+        "vectors": 34
+      },
+      {
+        "labels": "ALLOW/BLOCK",
+        "v4": "ALLOW/BLOCK",
+        "band": "[0,0.1)",
+        "vectors": 1
+      },
+      {
+        "labels": "ALLOW/BLOCK",
+        "v4": "ALLOW/BLOCK",
+        "band": "[0.1,0.5)",
+        "vectors": 1
+      },
+      {
+        "labels": "BLOCK",
+        "v4": "BLOCK",
+        "band": "[0.5,0.9)",
+        "vectors": 2
+      },
+      {
+        "labels": "BLOCK",
+        "v4": "BLOCK",
+        "band": "[0.9,1]",
+        "vectors": 201
+      }
+    ],
+    "vectors": null
+  },
+  "per_family": {
+    "sql_injection": {
+      "cases": 36,
+      "logical_groups": 36,
+      "distinct_techniques": 33,
+      "role": "attack",
+      "v4_block": 36,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 36
+      },
+      "attack_prob_all": {
+        "n": 36,
+        "min": 0.993,
+        "median": 0.9999,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 36,
+        "min": 0.993,
+        "median": 0.9999,
+        "max": 1.0
+      }
+    },
+    "benign_twin": {
+      "cases": 201,
+      "logical_groups": 201,
+      "distinct_techniques": 201,
+      "role": "benign",
+      "v4_block": 59,
+      "v4_allow": 142,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 141,
+        "[0.1,0.5)": 19,
+        "[0,0.1)": 12,
+        "[0.5,0.9)": 29
+      },
+      "attack_prob_all": {
+        "n": 201,
+        "min": 0.024,
+        "median": 0.9501,
+        "max": 0.9995
+      },
+      "attack_prob_when_v4_block": {
+        "n": 59,
+        "min": 0.0247,
+        "median": 0.9636,
+        "max": 0.9994
+      }
+    },
+    "xss": {
+      "cases": 34,
+      "logical_groups": 34,
+      "distinct_techniques": 32,
+      "role": "attack",
+      "v4_block": 34,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 34
+      },
+      "attack_prob_all": {
+        "n": 34,
+        "min": 0.984,
+        "median": 0.9983,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 34,
+        "min": 0.984,
+        "median": 0.9983,
+        "max": 1.0
+      }
+    },
+    "command_injection": {
+      "cases": 34,
+      "logical_groups": 34,
+      "distinct_techniques": 32,
+      "role": "attack",
+      "v4_block": 34,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 34
+      },
+      "attack_prob_all": {
+        "n": 34,
+        "min": 0.9208,
+        "median": 0.9968,
+        "max": 0.9999
+      },
+      "attack_prob_when_v4_block": {
+        "n": 34,
+        "min": 0.9208,
+        "median": 0.9968,
+        "max": 0.9999
+      }
+    },
+    "path_file_access": {
+      "cases": 35,
+      "logical_groups": 35,
+      "distinct_techniques": 32,
+      "role": "attack",
+      "v4_block": 35,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 34,
+        "[0.5,0.9)": 1
+      },
+      "attack_prob_all": {
+        "n": 35,
+        "min": 0.679,
+        "median": 0.9984,
+        "max": 0.9999
+      },
+      "attack_prob_when_v4_block": {
+        "n": 35,
+        "min": 0.679,
+        "median": 0.9984,
+        "max": 0.9999
+      }
+    },
+    "ssrf": {
+      "cases": 34,
+      "logical_groups": 34,
+      "distinct_techniques": 32,
+      "role": "attack",
+      "v4_block": 34,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 34
+      },
+      "attack_prob_all": {
+        "n": 34,
+        "min": 0.97,
+        "median": 0.9969,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 34,
+        "min": 0.97,
+        "median": 0.9969,
+        "max": 1.0
+      }
+    },
+    "ssti": {
+      "cases": 10,
+      "logical_groups": 10,
+      "distinct_techniques": 10,
+      "role": "attack",
+      "v4_block": 10,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 10
+      },
+      "attack_prob_all": {
+        "n": 10,
+        "min": 0.9716,
+        "median": 0.9976,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 10,
+        "min": 0.9716,
+        "median": 0.9976,
+        "max": 1.0
+      }
+    },
+    "open_redirect": {
+      "cases": 8,
+      "logical_groups": 8,
+      "distinct_techniques": 8,
+      "role": "attack",
+      "v4_block": 8,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 7,
+        "[0.5,0.9)": 1
+      },
+      "attack_prob_all": {
+        "n": 8,
+        "min": 0.8966,
+        "median": 0.9991,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 8,
+        "min": 0.8966,
+        "median": 0.9991,
+        "max": 1.0
+      }
+    },
+    "other_attack": {
+      "cases": 12,
+      "logical_groups": 12,
+      "distinct_techniques": 12,
+      "role": "attack",
+      "v4_block": 12,
+      "v4_allow": 0,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 12
+      },
+      "attack_prob_all": {
+        "n": 12,
+        "min": 0.9847,
+        "median": 0.9988,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 12,
+        "min": 0.9847,
+        "median": 0.9988,
+        "max": 1.0
+      }
+    },
+    "jwt": {
+      "cases": 6,
+      "logical_groups": 6,
+      "distinct_techniques": 6,
+      "role": "attack",
+      "v4_block": 1,
+      "v4_allow": 5,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0,0.1)": 6
+      },
+      "attack_prob_all": {
+        "n": 6,
+        "min": 0.024,
+        "median": 0.024,
+        "max": 0.024
+      },
+      "attack_prob_when_v4_block": {
+        "n": 1,
+        "min": 0.024,
+        "median": 0.024,
+        "max": 0.024
+      }
+    },
+    "csrf": {
+      "cases": 4,
+      "logical_groups": 4,
+      "distinct_techniques": 4,
+      "role": "attack",
+      "v4_block": 2,
+      "v4_allow": 2,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.1,0.5)": 4
+      },
+      "attack_prob_all": {
+        "n": 4,
+        "min": 0.1136,
+        "median": 0.1136,
+        "max": 0.1136
+      },
+      "attack_prob_when_v4_block": {
+        "n": 2,
+        "min": 0.1136,
+        "median": 0.1136,
+        "max": 0.1136
+      }
+    },
+    "benign_probe": {
+      "cases": 20,
+      "logical_groups": 20,
+      "distinct_techniques": 20,
+      "role": "benign",
+      "v4_block": 9,
+      "v4_allow": 11,
+      "v4_invalid": 0,
+      "analyzer_bands": {
+        "[0.9,1]": 13,
+        "[0.5,0.9)": 3,
+        "[0.1,0.5)": 3,
+        "[0,0.1)": 1
+      },
+      "attack_prob_all": {
+        "n": 20,
+        "min": 0.024,
+        "median": 0.959,
+        "max": 1.0
+      },
+      "attack_prob_when_v4_block": {
+        "n": 9,
+        "min": 0.3472,
+        "median": 0.9928,
+        "max": 1.0
+      }
+    }
+  },
+  "conclusion_families (category-level; only where >=30 groups, D18)": {
+    "sql_injection": {
+      "support_status": "OK",
+      "distinct_independent_payloads": 33,
+      "independent_attack_cases": 33,
+      "natural_sink_note": "field-role is a plausible injection point for this family; a V4 ALLOW here is the closest to a detection concern",
+      "all_independent": {
+        "cases": 33,
+        "distinct_independent_payloads": 33,
+        "v4_block": 33,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 33,
+          "min": 0.993,
+          "median": 0.9999,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "natural_sink_only": {
+        "cases": 23,
+        "distinct_independent_payloads": 23,
+        "v4_block": 23,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 23,
+          "min": 0.9965,
+          "median": 0.9999,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "generic_carrier_only (delivery/classification context, NOT detection)": {
+        "cases": 10,
+        "distinct_independent_payloads": 10,
+        "v4_block": 10,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 10,
+          "min": 0.993,
+          "median": 0.998,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      }
+    },
+    "xss": {
+      "support_status": "OK",
+      "distinct_independent_payloads": 32,
+      "independent_attack_cases": 32,
+      "natural_sink_note": "field-role is a plausible injection point for this family; a V4 ALLOW here is the closest to a detection concern",
+      "all_independent": {
+        "cases": 32,
+        "distinct_independent_payloads": 32,
+        "v4_block": 32,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 32,
+          "min": 0.984,
+          "median": 0.9983,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "natural_sink_only": {
+        "cases": 14,
+        "distinct_independent_payloads": 14,
+        "v4_block": 14,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 14,
+          "min": 0.9965,
+          "median": 0.9997,
+          "max": 0.9999
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "generic_carrier_only (delivery/classification context, NOT detection)": {
+        "cases": 18,
+        "distinct_independent_payloads": 18,
+        "v4_block": 18,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 18,
+          "min": 0.984,
+          "median": 0.9961,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      }
+    },
+    "command_injection": {
+      "support_status": "OK",
+      "distinct_independent_payloads": 32,
+      "independent_attack_cases": 32,
+      "natural_sink_note": "field-role is a plausible injection point for this family; a V4 ALLOW here is the closest to a detection concern",
+      "all_independent": {
+        "cases": 32,
+        "distinct_independent_payloads": 32,
+        "v4_block": 32,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 32,
+          "min": 0.9208,
+          "median": 0.9974,
+          "max": 0.9999
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "natural_sink_only": {
+        "cases": 0,
+        "distinct_independent_payloads": 0,
+        "v4_block": 0,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "generic_carrier_only (delivery/classification context, NOT detection)": {
+        "cases": 32,
+        "distinct_independent_payloads": 32,
+        "v4_block": 32,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 32,
+          "min": 0.9208,
+          "median": 0.9974,
+          "max": 0.9999
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      }
+    },
+    "path_file_access": {
+      "support_status": "OK",
+      "distinct_independent_payloads": 32,
+      "independent_attack_cases": 32,
+      "natural_sink_note": "field-role is a plausible injection point for this family; a V4 ALLOW here is the closest to a detection concern",
+      "all_independent": {
+        "cases": 32,
+        "distinct_independent_payloads": 32,
+        "v4_block": 32,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 32,
+          "min": 0.679,
+          "median": 0.9984,
+          "max": 0.9999
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "natural_sink_only": {
+        "cases": 6,
+        "distinct_independent_payloads": 6,
+        "v4_block": 6,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 6,
+          "min": 0.679,
+          "median": 0.9972,
+          "max": 0.9998
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "generic_carrier_only (delivery/classification context, NOT detection)": {
+        "cases": 26,
+        "distinct_independent_payloads": 26,
+        "v4_block": 26,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 26,
+          "min": 0.9729,
+          "median": 0.9985,
+          "max": 0.9999
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      }
+    },
+    "ssrf": {
+      "support_status": "OK",
+      "distinct_independent_payloads": 32,
+      "independent_attack_cases": 32,
+      "natural_sink_note": "field-role is a plausible injection point for this family; a V4 ALLOW here is the closest to a detection concern",
+      "all_independent": {
+        "cases": 32,
+        "distinct_independent_payloads": 32,
+        "v4_block": 32,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 32,
+          "min": 0.97,
+          "median": 0.9969,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "natural_sink_only": {
+        "cases": 24,
+        "distinct_independent_payloads": 24,
+        "v4_block": 24,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 24,
+          "min": 0.97,
+          "median": 0.9958,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      },
+      "generic_carrier_only (delivery/classification context, NOT detection)": {
+        "cases": 8,
+        "distinct_independent_payloads": 8,
+        "v4_block": 8,
+        "v4_allow (delivered attack, not blocked)": 0,
+        "v4_invalid (NOT a false negative)": 0,
+        "attack_prob": {
+          "n": 8,
+          "min": 0.9967,
+          "median": 0.9989,
+          "max": 1.0
+        },
+        "v4_block_with_analyzer_below_0_1": 0,
+        "v4_block_with_analyzer_below_0_5": 0,
+        "v4_allow_with_analyzer_at_or_above_0_5": 0
+      }
+    }
+  },
+  "paired_separation": {
+    "complete_pairs": 201,
+    "v4_separates (attack BLOCK & benign ALLOW)": 135,
+    "analyzer_attack_prob_higher_on_attack": 176,
+    "both_separate": 126,
+    "neither_separates": 16,
+    "analyzer_prob_gap_attack_minus_benign": {
+      "n": 201,
+      "min": -0.2324,
+      "median": 0.042,
+      "max": 0.9722
+    }
+  },
+  "q1_v4_false_positives": {
+    "n_benign_v4_block": 68,
+    "analyzer_below_0_1": 2,
+    "analyzer_0_1_to_0_5": 2,
+    "analyzer_at_or_above_0_5": 64,
+    "by_band": {
+      "[0.9,1]": 54,
+      "[0.5,0.9)": 10,
+      "[0.1,0.5)": 2,
+      "[0,0.1)": 2
+    },
+    "by_placement": {
+      "login_form": 11,
+      "checkout_form": 25,
+      "order_json": 7,
+      "search_q": 3,
+      "static_path": 7,
+      "api_products_url": 4,
+      "products_url": 3,
+      "order_json_webhook": 8
+    },
+    "v4_reasons": {
+      "SQL injection payload detected": 22,
+      "Cardholder data manipulation attack detected": 8,
+      "Card fraud detected": 4,
+      "Card details are leaked in the request": 6,
+      "Card details are maliciously manipulated": 4,
+      "HTTP parameter pollution detected": 6,
+      "File inclusion attack detected": 6,
+      "Cross-site scripting payload detected": 5,
+      "Server-side request forgery attack detected": 5,
+      "NoSQL injection payload detected": 2
+    }
+  },
+  "q3a_attacks_v4_blocks_low_analyzer": {
+    "n_independent_attacks_v4_block": 194,
+    "analyzer_below_0_1": 1,
+    "analyzer_below_0_1_surface": 0,
+    "analyzer_below_0_1_surface_distinct_payloads": 0,
+    "analyzer_below_0_1_surface_by_family": {},
+    "analyzer_below_0_5": 3
+  },
+  "q3b_attacks_v4_misses_high_analyzer": {
+    "n_independent_attacks": 201,
+    "v4_allow_total (delivered attacks not blocked)": 7,
+    "v4_allow_natural_sink (closest to a detection concern)": 0,
+    "v4_allow_generic_carrier (delivery/classification context, not detection)": 0,
+    "v4_invalid_outputs (NOT false negatives)": 0,
+    "allow_natural_sink_analyzer_at_or_above_0_5": 0,
+    "allow_total_analyzer_at_or_above_0_5": 0,
+    "allow_total_analyzer_at_or_above_0_9": 0,
+    "allow_by_family": {
+      "jwt": 5,
+      "csrf": 2
+    },
+    "allow_natural_sink_by_family": {},
+    "invalid_by_family": {}
+  },
+  "q_benign_high_probes": {
+    "n_probes": 20,
+    "analyzer_at_or_above_0_5": 16,
+    "by_band": {
+      "[0.9,1]": 13,
+      "[0.5,0.9)": 3,
+      "[0.1,0.5)": 3,
+      "[0,0.1)": 1
+    },
+    "v4_block": 9
+  },
+  "signal_location": {
+    "surface": {
+      "cases": 412,
+      "attack_cases": 203,
+      "attack_v4_block": 203,
+      "attack_analyzer_below_0_1": 0,
+      "attack_analyzer": {
+        "n": 203,
+        "min": 0.679,
+        "median": 0.9983,
+        "max": 1.0
+      }
+    },
+    "header-only": {
+      "cases": 13,
+      "attack_cases": 6,
+      "attack_v4_block": 1,
+      "attack_analyzer_below_0_1": 6,
+      "attack_analyzer": {
+        "n": 6,
+        "min": 0.024,
+        "median": 0.024,
+        "max": 0.024
+      }
+    },
+    "header-dependent": {
+      "cases": 9,
+      "attack_cases": 4,
+      "attack_v4_block": 2,
+      "attack_analyzer_below_0_1": 0,
+      "attack_analyzer": {
+        "n": 4,
+        "min": 0.1136,
+        "median": 0.1136,
+        "max": 0.1136
+      }
+    }
+  },
+  "category_head (context only, D46)": {
+    "attack_cases_with_mapping": 207,
+    "top1_agrees": 56,
+    "by_expected": {
+      "command_injection": {
+        "xss": 7,
+        "open_redirect": 7,
+        "command_injection": 6,
+        "other_attack": 7,
+        "sql_injection": 7
+      },
+      "open_redirect": {
+        "ssti": 2,
+        "other_attack": 1,
+        "path_file_access": 2,
+        "open_redirect": 2,
+        "xss": 1
+      },
+      "other_attack": {
+        "path_file_access": 1,
+        "sql_injection": 5,
+        "other_attack": 6,
+        "xss": 3,
+        "open_redirect": 1
+      },
+      "path_file_access": {
+        "sql_injection": 6,
+        "path_file_access": 11,
+        "ssrf": 3,
+        "xss": 3,
+        "other_attack": 4,
+        "open_redirect": 7,
+        "command_injection": 1
+      },
+      "sql_injection": {
+        "path_file_access": 2,
+        "sql_injection": 9,
+        "command_injection": 1,
+        "xss": 11,
+        "other_attack": 4,
+        "open_redirect": 5,
+        "ssti": 2,
+        "ssrf": 2
+      },
+      "ssrf": {
+        "open_redirect": 4,
+        "ssti": 6,
+        "ssrf": 3,
+        "other_attack": 9,
+        "path_file_access": 2,
+        "sql_injection": 7,
+        "command_injection": 1,
+        "xss": 2
+      },
+      "ssti": {
+        "sql_injection": 1,
+        "other_attack": 2,
+        "open_redirect": 2,
+        "path_file_access": 3,
+        "xss": 2
+      },
+      "xss": {
+        "ssti": 1,
+        "ssrf": 1,
+        "xss": 19,
+        "open_redirect": 5,
+        "sql_injection": 7,
+        "other_attack": 1
+      }
+    }
+  },
+  "extremes (attack < 0.01 or >= 0.99)": {
+    "ALLOW | ALLOW | high": 19,
+    "ALLOW | BLOCK | high": 23,
+    "BLOCK | BLOCK | high": 182
+  },
+  "data_role_overlap (membership only)": {
+    "seen_train_validation": {
+      "allow": 0,
+      "block": 0
+    },
+    "seen_train_validation_jwt": {
+      "allow": 0,
+      "block": 0
+    },
+    "in_internal_test_relation": {
+      "allow": 0,
+      "block": 0
+    },
+    "exact_text_in_v4_train": {
+      "allow": 0,
+      "block": 0
+    },
+    "exact_text_in_v4_eval": {
+      "allow": 0,
+      "block": 0
+    }
+  },
+  "external_v1_overlap": "UNKNOWN — never opened (D53); this set is development data and is not an independent test of the Hybrid system"
+}

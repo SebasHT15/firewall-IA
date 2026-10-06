@@ -431,8 +431,20 @@ Next, in order (detail and constraints: [`CONTEXT.md` §0.9](CONTEXT.md#09-next-
    Recommendation (pending owner review): **C**, i.e. build a development diagnostic set with
    attacks, then test B (new features), V5 and a V4-reason-aware Model 2. External v1 cases stay
    unused.
+   - **Option C built and run** — the paired development diagnostic (issue #59,
+     [`v4-analyzer-paired-dev-v1`](reports/hybrid/v4-analyzer-paired-dev-v1/)): 201 independent
+     attack payloads (5 families ≥ 30) with benign near-neighbours on the same lab endpoints,
+     captured through the gateway (434/434 byte-faithful; enforcement agreed with `/classify`
+     434/434), scored by frozen Model 1 read-only; the set is generator-disjoint from V4-clean /
+     `hybrid_analyzer_v2` (overlap 0), External v1 overlap UNKNOWN. **Findings (diagnostic counts,
+     not rates):** V4 blocks every surface attack here; its only misses are header-borne (JWT/CSRF),
+     where Model 1 is blind by construction (D44/D48) and also scores low — so Model 1 cannot rescue
+     V4's misses; and on V4's 68 benign false positives Model 1 agrees (≥ 0.5) on 64, so a low-score
+     override is unsupported. A cascade on RequestFeatures v2 inherits both blind spots.
 3. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision (External v2
-   required for any V5 claim, D40).
+   required for any V5 claim, D40). The #59 diagnostic recommends this V5 hard-negative branch next
+   (V4's benign false positives are concrete defects), and raises for the owner whether D44 should
+   be revised for header-borne families — the only region where a cascade could add FN coverage.
 4. **Model 2 — Small Decision Model**, then ALLOW / BLOCK / UNCERTAIN policy, cascade
    orchestrator, Hybrid shadow mode, Hybrid enforcement, end-to-end evaluation, a new
    independent external set.
@@ -501,7 +513,7 @@ Run everything from the repository root.
 | [`reports/lab/docker-lab-v1/`](reports/lab/docker-lab-v1/) | Docker Lab closure report and raw smoke logs |
 | [`reports/diagnostics/real-http-fp-v1/`](reports/diagnostics/real-http-fp-v1/) | Real-HTTP diagnostic: cases, raw records, process logs |
 | [`reports/benchmarks/`](reports/benchmarks/) | Inference benchmark; `baseline-local-v1` is the frozen reference |
-| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen); the one aggregate External v1 evaluation of the frozen Analyzer (`analyzer-external-v1-run-001`); the V4 ↔ Analyzer disagreement diagnostic on development data (`v4-analyzer-disagreement-v1`, issue #57) |
+| [`reports/hybrid/`](reports/hybrid/) | Hybrid Architecture: Phase 1 shadow-mode live run and extractor overhead (`phase1-feature-extraction-v2` current, `-v1` superseded); Phase 2A Analyzer design; Phase 2B run-001 (`phase2b-analyzer-baselines`, not adopted; see its ERRATA) and run-002 (`phase2b-analyzer-v2-run-002`, Analyzer frozen); the one aggregate External v1 evaluation of the frozen Analyzer (`analyzer-external-v1-run-001`); the V4 ↔ Analyzer disagreement diagnostic on development data (`v4-analyzer-disagreement-v1`, issue #57) and the paired V4 ↔ Analyzer development diagnostic (`v4-analyzer-paired-dev-v1`, issue #59) |
 | [`datasets/manifest_v4_clean.json`](datasets/manifest_v4_clean.json) | V4 dataset identity: hashes, seed, source commit |
 | [`docs/data_sources.md`](docs/data_sources.md) | Data not distributed by v0.1.0 (CSIC CSV, historical corpora): sizes, SHA-256, regeneration inputs, retained excerpts |
 | [`LICENSE`](LICENSE) | MIT License for this repository's original code and documentation (third-party material excluded — see [License](#license)) |

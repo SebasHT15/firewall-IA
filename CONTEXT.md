@@ -133,6 +133,7 @@ enforcement; `(classifier N ms)` keeps its historical meaning. Evidence:
 | External Test v1 | executed once for V4 (aggregate + per-cell) and **once for the frozen Model 1** (aggregate + per-cell, `analyzer-external-v1-run-001`, D53 — its single allowed use; never used for selection or tuning). Individual cases not inspected; doing so triggers D40 / D45 (it becomes development data; External v2 required for V5 or Hybrid-component claims) |
 | `real-http-fp-v1` (149 constructed requests) | diagnostic / development data; used in the V4 ↔ Analyzer diagnostic (issue #57), so it is Hybrid error-analysis data (D37), never independent evidence for a cascade |
 | Legacy 135-case manual suite (`test_model.py`) | diagnostic; V4 re-run once and scored by the Analyzer in issue #57 → Hybrid error-analysis data (D37) |
+| `v4-analyzer-paired-dev-v1` (434 records: 201 independent attack payloads + benign near-neighbours) | paired development diagnostic (issue #59), captured through the lab gateway and scored by V4 + frozen Model 1; generator-disjoint from V4-clean / `hybrid_analyzer_v2` (overlap 0), External v1 UNKNOWN → Hybrid error-analysis data (D37), never independent evidence for a cascade |
 
 ### 0.7 Methodological rules in force
 
@@ -169,9 +170,27 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
    Recommendation **C**: build a pre-registered development diagnostic set with attacks first.
    B (new features), V5 and a V4-reason-aware Model 2 are hypotheses that set must test.
    S1 / S2 are now Hybrid error-analysis data (D37). Owner decision pending.
+   - **Route C DONE 2026-10-06** (issue #59, `reports/hybrid/v4-analyzer-paired-dev-v1/`,
+     uncommitted at writing). Paired benign/attack dev set on the lab endpoints: 201 independent
+     attack payloads (per-family distinct canonical; 5 families ≥ 30; 200 distinct strings) + benign
+     near-neighbours, captured through the gateway (434/434 byte-faithful; gateway enforcement ==
+     `/classify` 434/434), scored by frozen Model 1 read-only (hash checked before+after).
+     Generator-disjoint from V4-clean / `hybrid_analyzer_v2` (overlap 0 on vector & canonical);
+     INTERNAL TEST membership-only (D54); External v1 UNKNOWN (never opened, D53). Findings
+     (diagnostic counts, not rates): V4 blocks all 203 surface attacks here; the Analyzer scores
+     them all ≥ 0.5 (0 < 0.1), contrasting #57; the only V4 misses are 7 header-borne (JWT/CSRF),
+     all scored < 0.5 by the blind-by-construction Analyzer; V4 has 68 benign false positives and
+     the Analyzer agrees (≥ 0.5) on 64 and over-flags benign structure (122/153 benign). So **a
+     low Analyzer score is not a safe V4-BLOCK override, and the Analyzer cannot rescue V4's
+     header-borne misses**; a cascade on RequestFeatures v2 inherits both blind spots. These cases
+     are now Hybrid error-analysis data (D37).
 4. Estimate how much the Analyzer can rescue V4 false positives without adding false negatives —
-   **blocked on the development set of step 3 (route C)**; no current data can measure it.
-5. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision.
+   route C (#59) shows, on this unseen dev set, the Analyzer does **not** rescue V4's false
+   positives (agrees on 64/68) and cannot cover the header-borne false-negative region (D44/D48);
+   a real-traffic rate still needs an independent external set (not this dev set).
+5. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision — #59 recommends this
+   as the next branch (V4's 68 benign false positives are concrete hard negatives) and raises the
+   D44-revision question for header-borne families for the owner.
 6. Design and train **Model 2 — Small Decision Model** (only after 3–4, unless a formal
    decision changes this order).
 7. Define ALLOW / BLOCK / UNCERTAIN experimentally → 8. Cascade Orchestrator → 9. Hybrid
