@@ -1,0 +1,3816 @@
+{
+  "analysis_version": "v5-minimal-pairs-v1/analysis-2",
+  "data_role": "DEVELOPMENT DIAGNOSTIC (minimal-pair probe). Never V5 training, validation or checkpoint-selection data; never copied into a V5 generator.",
+  "pre_registered": {
+    "alpha": 0.05,
+    "test": "exact McNemar, two-sided",
+    "multiplicity": "Holm within the ENVELOPE family and within the CONTENT family; controls outside (raw p)",
+    "strong": {
+      "dominant_rate": 0.2,
+      "consistency": 0.8,
+      "holm_reject": true,
+      "flip_rate_above": "matched control's Clopper-Pearson 95% upper bound"
+    },
+    "moderate": {
+      "dominant_rate": 0.1,
+      "min_dominant": 6,
+      "consistency": 0.8,
+      "flip_rate_above": "matched control's Clopper-Pearson 95% upper bound"
+    },
+    "matched_controls": {
+      "ENVELOPE and F-CTB": "CONTROL-ENV:absent->present",
+      "CONTENT": "CONTROL-COV:user_a->user_b"
+    },
+    "hypothesis_support": "STRONG comparisons only",
+    "no_observed_effect": "0 discordant pairs",
+    "low_sensitivity_min": 20
+  },
+  "instability": {
+    "control": "CONTROL-COV:user_a->user_b",
+    "flip_rate": 0.125,
+    "flip_rate_ci95": [
+      0.04185962613861666,
+      0.2680329173617205
+    ],
+    "material": false,
+    "rule": "material iff CP lower bound >= 0.05"
+  },
+  "reference_decisions_by_host": {
+    "203.0.113.10": {
+      "ALLOW": 54,
+      "BLOCK": 6
+    },
+    "branches.example.org": {
+      "ALLOW": 240,
+      "BLOCK": 52
+    },
+    "catalog.example.org": {
+      "ALLOW": 143,
+      "BLOCK": 37
+    },
+    "events.example.net": {
+      "ALLOW": 194,
+      "BLOCK": 32
+    },
+    "library.example.net": {
+      "ALLOW": 240,
+      "BLOCK": 23
+    },
+    "portal.example.net": {
+      "ALLOW": 201,
+      "BLOCK": 22
+    },
+    "reading.example.net": {
+      "ALLOW": 222,
+      "BLOCK": 34
+    }
+  },
+  "determinism": {
+    "repeat_texts": 212,
+    "divergent_raw": 0,
+    "divergent_decision": 0,
+    "divergent_reason": 0,
+    "deterministic": true
+  },
+  "global": {
+    "n_unique_texts_scored": 2120,
+    "status": {
+      "ok": 2120
+    },
+    "decisions": {
+      "ALLOW": 1765,
+      "BLOCK": 355
+    },
+    "distinct_block_reasons": 17,
+    "block_reasons": {
+      "SQL injection payload detected": 128,
+      "Cross-site scripting payload detected": 69,
+      "Command injection payload detected": 44,
+      "Server-side request forgery attack detected": 27,
+      "HTTP parameter pollution detected": 27,
+      "Password reset request detected": 26,
+      "NoSQL injection payload detected": 15,
+      "Open redirect payload detected": 4,
+      "HotEL request with no-hotel-rqst in the note field": 3,
+      "LDAP injection payload detected": 3,
+      "HotEL request with no-hotel-rqst in the note body": 2,
+      "Alphabet soup abounds in this request": 2,
+      "Share injection payload detected": 1,
+      "Security violation detected": 1,
+      "Security violation detected: INJECTED_CODE_HERE": 1,
+      "Alphabetical order attack detected": 1,
+      "Privilege escalation attack detected": 1
+    }
+  },
+  "comparisons": [
+    {
+      "comparison_id": "F-CL:absent->present",
+      "factor": "F-CL",
+      "block": "ENVELOPE",
+      "reference": "absent",
+      "level": "present",
+      "n_bases": 40,
+      "tests": "M-envelope",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 40,
+      "ALLOW_to_ALLOW": 32,
+      "A_to_B": 1,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 7,
+      "flip_rate": 0.025,
+      "flip_rate_ci95": [
+        0.0006327449320494005,
+        0.13158585848276577
+      ],
+      "net_direction": 0.025,
+      "baseline_allow_rate": 0.825,
+      "paired_allow_rate": 0.8,
+      "conditional_A_to_B": 0.030303030303030304,
+      "conditional_A_to_B_ci95": [
+        0.0007669120750481428,
+        0.15759397227249677
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.4096163972250034
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 19,
+          "max": 19,
+          "mean": 19.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 8,
+          "max": 8,
+          "mean": 8.0
+        }
+      },
+      "strata": {
+        "form1": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 8,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 2
+        },
+        "form2": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 6,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 4
+        },
+        "json1": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 9,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "json3": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 9,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-CL:absent->te_chunked",
+      "factor": "F-CL",
+      "block": "ENVELOPE",
+      "reference": "absent",
+      "level": "te_chunked",
+      "n_bases": 40,
+      "tests": "M-envelope",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 40,
+      "ALLOW_to_ALLOW": 15,
+      "A_to_B": 18,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 7,
+      "flip_rate": 0.45,
+      "flip_rate_ci95": [
+        0.2925883500398817,
+        0.6150932054659866
+      ],
+      "net_direction": 0.45,
+      "baseline_allow_rate": 0.825,
+      "paired_allow_rate": 0.375,
+      "conditional_A_to_B": 0.5454545454545454,
+      "conditional_A_to_B_ci95": [
+        0.3635065310148463,
+        0.7189338057061838
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.4096163972250034
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 7.62939453125e-06,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 2,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 8,
+        "NoSQL injection payload detected": 5,
+        "HTTP parameter pollution detected": 2,
+        "SQL injection payload detected": 2,
+        "Command injection payload detected": 1
+      },
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 27,
+          "max": 27,
+          "mean": 27.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 8,
+          "max": 8,
+          "mean": 8.0
+        }
+      },
+      "strata": {
+        "form1": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 4,
+          "A_to_B": 4,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 2
+        },
+        "form2": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 6,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 4
+        },
+        "json1": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 10,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "json3": {
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 5,
+          "A_to_B": 4,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 8.392333984375e-05,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT"
+    },
+    {
+      "comparison_id": "F-PORT:none->port_8080",
+      "factor": "F-PORT",
+      "block": "ENVELOPE",
+      "reference": "none",
+      "level": "port_8080",
+      "n_bases": 30,
+      "tests": "M-envelope",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 1,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 0.9666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11944486906950275
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.9749999999999999
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 5,
+          "max": 5,
+          "mean": 5.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 5,
+          "max": 5,
+          "mean": 5.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-PORT:none->port_8443",
+      "factor": "F-PORT",
+      "block": "ENVELOPE",
+      "reference": "none",
+      "level": "port_8443",
+      "n_bases": 30,
+      "tests": "M-envelope",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 1,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 0.9666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11944486906950275
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.9749999999999999
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 5,
+          "max": 5,
+          "mean": 5.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 5,
+          "max": 5,
+          "mean": 5.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-PORT:none->port_30000",
+      "factor": "F-PORT",
+      "block": "ENVELOPE",
+      "reference": "none",
+      "level": "port_30000",
+      "n_bases": 30,
+      "tests": "M-envelope",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 1,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 0.9666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11944486906950275
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.9749999999999999
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 6,
+          "max": 6,
+          "mean": 6.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 6,
+          "max": 6,
+          "mean": 6.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-HOSTIP:dns->ip_127.0.0.1",
+      "factor": "F-HOSTIP",
+      "block": "ENVELOPE",
+      "reference": "dns",
+      "level": "ip_127.0.0.1",
+      "n_bases": 30,
+      "tests": "M-token / M-envelope (portless IP Host)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 3,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12770286761543231
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.7075982261787133
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -11,
+          "max": -9,
+          "mean": -9.73
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 5,
+          "max": 5,
+          "mean": 5.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-HOSTIP:dns->ip_10.0.0.5",
+      "factor": "F-HOSTIP",
+      "block": "ENVELOPE",
+      "reference": "dns",
+      "level": "ip_10.0.0.5",
+      "n_bases": 30,
+      "tests": "M-token / M-envelope (portless IP Host)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 3,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12770286761543231
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.7075982261787133
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -12,
+          "max": -10,
+          "mean": -10.73
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 4,
+          "max": 4,
+          "mean": 4.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-HOSTIP:dns->ip_203.0.113.10",
+      "factor": "F-HOSTIP",
+      "block": "ENVELOPE",
+      "reference": "dns",
+      "level": "ip_203.0.113.10",
+      "n_bases": 30,
+      "tests": "M-token / M-envelope (portless IP Host)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 3,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12770286761543231
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.7075982261787133
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -8,
+          "max": -6,
+          "mean": -6.73
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 8,
+          "max": 8,
+          "mean": 8.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-HOSTIP:ip_203.0.113.10->ip_127.0.0.1",
+      "factor": "F-HOSTIP",
+      "block": "ENVELOPE",
+      "reference": "ip_203.0.113.10",
+      "level": "ip_127.0.0.1",
+      "n_bases": 30,
+      "tests": "M-token / M-envelope (portless IP Host)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 3,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12770286761543231
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.7075982261787133
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -3,
+          "max": -3,
+          "mean": -3.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -3,
+          "max": -3,
+          "mean": -3.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-HOSTIP:ip_203.0.113.10->ip_10.0.0.5",
+      "factor": "F-HOSTIP",
+      "block": "ENVELOPE",
+      "reference": "ip_203.0.113.10",
+      "level": "ip_10.0.0.5",
+      "n_bases": 30,
+      "tests": "M-token / M-envelope (portless IP Host)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 3,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12770286761543231
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.7075982261787133
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -4,
+          "max": -4,
+          "mean": -4.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -4,
+          "max": -4,
+          "mean": -4.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-PXY:absent->present",
+      "factor": "F-PXY",
+      "block": "ENVELOPE",
+      "reference": "absent",
+      "level": "present",
+      "n_bases": 30,
+      "tests": "M-envelope",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 26,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 4,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.8666666666666667,
+      "paired_allow_rate": 0.8666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.13227460449775413
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.6023646356164745
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 29,
+          "max": 29,
+          "mean": 29.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 9,
+          "max": 9,
+          "mean": 9.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 4
+        }
+      },
+      "holm_family": "ENVELOPE",
+      "holm_family_size": 11,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-NQUERY:n1->n2",
+      "factor": "F-NQUERY",
+      "block": "CONTENT",
+      "reference": "n1",
+      "level": "n2",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 7,
+          "max": 12,
+          "mean": 9.67
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 4,
+          "max": 7,
+          "mean": 4.77
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-NQUERY:n1->n4",
+      "factor": "F-NQUERY",
+      "block": "CONTENT",
+      "reference": "n1",
+      "level": "n4",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 24,
+          "max": 32,
+          "mean": 28.17
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 12,
+          "max": 16,
+          "mean": 13.77
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-NFIELDS:n1->n2",
+      "factor": "F-NFIELDS",
+      "block": "CONTENT",
+      "reference": "n1",
+      "level": "n2",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 21,
+      "A_to_B": 0,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 8,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.7,
+      "paired_allow_rate": 0.7333333333333333,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.16109761521907956
+      ],
+      "conditional_B_to_A": 0.1111111111111111,
+      "conditional_B_to_A_ci95": [
+        0.0028091367465991612,
+        0.4824965149173369
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 2,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 12,
+          "max": 18,
+          "mean": 14.6
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 4,
+          "max": 8,
+          "mean": 4.87
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 21,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 8
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-NFIELDS:n1->n3",
+      "factor": "F-NFIELDS",
+      "block": "CONTENT",
+      "reference": "n1",
+      "level": "n3",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 21,
+      "A_to_B": 0,
+      "B_to_A": 2,
+      "BLOCK_to_BLOCK": 7,
+      "flip_rate": 0.06666666666666667,
+      "flip_rate_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "net_direction": -0.06666666666666667,
+      "baseline_allow_rate": 0.7,
+      "paired_allow_rate": 0.7666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.16109761521907956
+      ],
+      "conditional_B_to_A": 0.2222222222222222,
+      "conditional_B_to_A_ci95": [
+        0.028144973477898294,
+        0.600093573716312
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.5,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 3,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 25,
+          "max": 36,
+          "mean": 30.33
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 8,
+          "max": 14,
+          "mean": 10.3
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 21,
+          "A_to_B": 0,
+          "B_to_A": 2,
+          "BLOCK_to_BLOCK": 7
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-NFIELDS:n1->n5",
+      "factor": "F-NFIELDS",
+      "block": "CONTENT",
+      "reference": "n1",
+      "level": "n5",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 21,
+      "A_to_B": 0,
+      "B_to_A": 2,
+      "BLOCK_to_BLOCK": 7,
+      "flip_rate": 0.06666666666666667,
+      "flip_rate_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "net_direction": -0.06666666666666667,
+      "baseline_allow_rate": 0.7,
+      "paired_allow_rate": 0.7666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.16109761521907956
+      ],
+      "conditional_B_to_A": 0.2222222222222222,
+      "conditional_B_to_A_ci95": [
+        0.028144973477898294,
+        0.600093573716312
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.5,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 2,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 55,
+          "max": 66,
+          "mean": 60.17
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 17,
+          "max": 23,
+          "mean": 20.57
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 21,
+          "A_to_B": 0,
+          "B_to_A": 2,
+          "BLOCK_to_BLOCK": 7
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-NFIELDS:n1_cl->n2_cl",
+      "factor": "F-NFIELDS",
+      "block": "CONTENT",
+      "reference": "n1_cl",
+      "level": "n2_cl",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 21,
+      "A_to_B": 0,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 8,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.7,
+      "paired_allow_rate": 0.7333333333333333,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.16109761521907956
+      ],
+      "conditional_B_to_A": 0.1111111111111111,
+      "conditional_B_to_A_ci95": [
+        0.0028091367465991612,
+        0.4824965149173369
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 12,
+          "max": 18,
+          "mean": 14.6
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 4,
+          "max": 8,
+          "mean": 4.87
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 21,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 8
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-PWD:alnum->bang",
+      "factor": "F-PWD",
+      "block": "CONTENT",
+      "reference": "alnum",
+      "level": "bang",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 1,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": 0.03333333333333333,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.9666666666666667,
+      "conditional_A_to_B": 0.03333333333333333,
+      "conditional_A_to_B_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Password reset request detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 2,
+          "max": 3,
+          "mean": 2.33
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 29,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-PWD:alnum->hash",
+      "factor": "F-PWD",
+      "block": "CONTENT",
+      "reference": "alnum",
+      "level": "hash",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 11,
+      "A_to_B": 19,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.6333333333333333,
+      "flip_rate_ci95": [
+        0.4385598490119563,
+        0.8007013749879655
+      ],
+      "net_direction": 0.6333333333333333,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.36666666666666664,
+      "conditional_A_to_B": 0.6333333333333333,
+      "conditional_A_to_B_ci95": [
+        0.4385598490119563,
+        0.8007013749879655
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 3.814697265625e-06,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Password reset request detected": 18,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 2,
+          "max": 3,
+          "mean": 2.33
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 19,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 0.00012969970703125,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT"
+    },
+    {
+      "comparison_id": "F-PWD:alnum->dash",
+      "factor": "F-PWD",
+      "block": "CONTENT",
+      "reference": "alnum",
+      "level": "dash",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 1,
+          "mean": 0.33
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-PWD:alnum->at",
+      "factor": "F-PWD",
+      "block": "CONTENT",
+      "reference": "alnum",
+      "level": "at",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 3,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.1,
+      "flip_rate_ci95": [
+        0.021117137029722233,
+        0.265288450474208
+      ],
+      "net_direction": 0.1,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.1,
+      "conditional_A_to_B_ci95": [
+        0.021117137029722233,
+        0.265288450474208
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.25,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Password reset request detected": 2,
+        "Command injection payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 2,
+          "max": 3,
+          "mean": 2.33
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 27,
+          "A_to_B": 3,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-APOS:plain->apostrophe",
+      "factor": "F-APOS",
+      "block": "CONTENT",
+      "reference": "plain",
+      "level": "apostrophe",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 0,
+      "A_to_B": 30,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 1.0,
+      "flip_rate_ci95": [
+        0.884296691777972,
+        1.0
+      ],
+      "net_direction": 1.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.0,
+      "conditional_A_to_B": 1.0,
+      "conditional_A_to_B_ci95": [
+        0.884296691777972,
+        1.0
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.862645149230957e-09,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 19,
+        "Command injection payload detected": 6,
+        "Password reset request detected": 2,
+        "LDAP injection payload detected": 2,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 3,
+          "max": 4,
+          "mean": 3.77
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 15,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 15,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 6.51925802230835e-08,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT"
+    },
+    {
+      "comparison_id": "F-ADDR:plain->comma",
+      "factor": "F-ADDR",
+      "block": "CONTENT",
+      "reference": "plain",
+      "level": "comma",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 4,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 26,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.13333333333333333,
+      "paired_allow_rate": 0.13333333333333333,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.6023646356164745
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.13227460449775413
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_A_TO_B (few reference-ALLOW bases)"
+      ],
+      "same_decision_reason_changed": 3,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 2,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 13
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 2,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 13
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-ADDR:plain->hash",
+      "factor": "F-ADDR",
+      "block": "CONTENT",
+      "reference": "plain",
+      "level": "hash",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 0,
+      "A_to_B": 4,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 26,
+      "flip_rate": 0.13333333333333333,
+      "flip_rate_ci95": [
+        0.037553496338363856,
+        0.30721835027612665
+      ],
+      "net_direction": 0.13333333333333333,
+      "baseline_allow_rate": 0.13333333333333333,
+      "paired_allow_rate": 0.0,
+      "conditional_A_to_B": 1.0,
+      "conditional_A_to_B_ci95": [
+        0.3976353643835252,
+        1.0
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.13227460449775413
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.125,
+      "flags": [
+        "LOW_SENSITIVITY_A_TO_B (few reference-ALLOW bases)"
+      ],
+      "same_decision_reason_changed": 5,
+      "block_reasons_in_flips": {
+        "Command injection payload detected": 3,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 13
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 13
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-ADDR:comma->hash",
+      "factor": "F-ADDR",
+      "block": "CONTENT",
+      "reference": "comma",
+      "level": "hash",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 0,
+      "A_to_B": 4,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 26,
+      "flip_rate": 0.13333333333333333,
+      "flip_rate_ci95": [
+        0.037553496338363856,
+        0.30721835027612665
+      ],
+      "net_direction": 0.13333333333333333,
+      "baseline_allow_rate": 0.13333333333333333,
+      "paired_allow_rate": 0.0,
+      "conditional_A_to_B": 1.0,
+      "conditional_A_to_B_ci95": [
+        0.3976353643835252,
+        1.0
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.13227460449775413
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.125,
+      "flags": [
+        "LOW_SENSITIVITY_A_TO_B (few reference-ALLOW bases)"
+      ],
+      "same_decision_reason_changed": 3,
+      "block_reasons_in_flips": {
+        "Command injection payload detected": 3,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 13
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 13
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-PUNCT:comma_period->semicolon",
+      "factor": "F-PUNCT",
+      "block": "CONTENT",
+      "reference": "comma_period",
+      "level": "semicolon",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 23,
+      "A_to_B": 1,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 5,
+      "flip_rate": 0.06666666666666667,
+      "flip_rate_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.8,
+      "paired_allow_rate": 0.8,
+      "conditional_A_to_B": 0.041666666666666664,
+      "conditional_A_to_B_ci95": [
+        0.0010543524454697528,
+        0.21120168345697304
+      ],
+      "conditional_B_to_A": 0.16666666666666666,
+      "conditional_B_to_A_ci95": [
+        0.004210744514489495,
+        0.6412345789976748
+      ],
+      "direction_consistency": 0.5,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 2
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 1,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 2
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-PUNCT:comma_period->ampersand",
+      "factor": "F-PUNCT",
+      "block": "CONTENT",
+      "reference": "comma_period",
+      "level": "ampersand",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 24,
+      "A_to_B": 0,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 5,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.8,
+      "paired_allow_rate": 0.8333333333333334,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.1424735977225256
+      ],
+      "conditional_B_to_A": 0.16666666666666666,
+      "conditional_B_to_A_ci95": [
+        0.004210744514489495,
+        0.6412345789976748
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 2
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-PUNCT:comma_period->exclamation",
+      "factor": "F-PUNCT",
+      "block": "CONTENT",
+      "reference": "comma_period",
+      "level": "exclamation",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 22,
+      "A_to_B": 2,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 6,
+      "flip_rate": 0.06666666666666667,
+      "flip_rate_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "net_direction": 0.06666666666666667,
+      "baseline_allow_rate": 0.8,
+      "paired_allow_rate": 0.7333333333333333,
+      "conditional_A_to_B": 0.08333333333333333,
+      "conditional_A_to_B_ci95": [
+        0.010256341281250136,
+        0.2699728015576036
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.4592581264399004
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.5,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 1,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-PUNCT:comma_period->question",
+      "factor": "F-PUNCT",
+      "block": "CONTENT",
+      "reference": "comma_period",
+      "level": "question",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 20,
+      "A_to_B": 4,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 6,
+      "flip_rate": 0.13333333333333333,
+      "flip_rate_ci95": [
+        0.037553496338363856,
+        0.30721835027612665
+      ],
+      "net_direction": 0.13333333333333333,
+      "baseline_allow_rate": 0.8,
+      "paired_allow_rate": 0.6666666666666666,
+      "conditional_A_to_B": 0.16666666666666666,
+      "conditional_A_to_B_ci95": [
+        0.047353626607257115,
+        0.3738417134886828
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.4592581264399004
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.125,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 3,
+        "SQL injection payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 9,
+          "A_to_B": 3,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-WORD:neutral->homonym",
+      "factor": "F-WORD",
+      "block": "CONTENT",
+      "reference": "neutral",
+      "level": "homonym",
+      "n_bases": 60,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 60,
+      "ALLOW_to_ALLOW": 56,
+      "A_to_B": 0,
+      "B_to_A": 2,
+      "BLOCK_to_BLOCK": 2,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.004062624642093338,
+        0.11528104441925174
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.9333333333333333,
+      "paired_allow_rate": 0.9666666666666667,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.06375009666236214
+      ],
+      "conditional_B_to_A": 0.5,
+      "conditional_B_to_A_ci95": [
+        0.06758598648854292,
+        0.9324140135114569
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.5,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 2
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -6,
+          "max": 4,
+          "mean": -0.17
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -1,
+          "max": 0,
+          "mean": -0.25
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 36,
+          "ALLOW_to_ALLOW": 34,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 1
+        },
+        "body": {
+          "n_valid_pairs": 24,
+          "ALLOW_to_ALLOW": 22,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 1
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-FREETEXT:keyword->sentence",
+      "factor": "F-FREETEXT",
+      "block": "CONTENT",
+      "reference": "keyword",
+      "level": "sentence",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 26,
+      "A_to_B": 4,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.13333333333333333,
+      "flip_rate_ci95": [
+        0.037553496338363856,
+        0.30721835027612665
+      ],
+      "net_direction": 0.13333333333333333,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.8666666666666667,
+      "conditional_A_to_B": 0.13333333333333333,
+      "conditional_A_to_B_ci95": [
+        0.037553496338363856,
+        0.30721835027612665
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.125,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 3,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 42,
+          "max": 55,
+          "mean": 46.6
+        },
+        "percent_triplets": {
+          "min": 6,
+          "max": 7,
+          "mean": 6.2
+        },
+        "prompt_tokens": {
+          "min": 25,
+          "max": 30,
+          "mean": 26.4
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 3,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-JSON:k1_string->k4_strings",
+      "factor": "F-JSON",
+      "block": "CONTENT",
+      "reference": "k1_string",
+      "level": "k4_strings",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 25,
+      "A_to_B": 0,
+      "B_to_A": 5,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.16666666666666666,
+      "flip_rate_ci95": [
+        0.05642169646807166,
+        0.3472116988341437
+      ],
+      "net_direction": -0.16666666666666666,
+      "baseline_allow_rate": 0.8333333333333334,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.13718517153071247
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.4781762498950183,
+        1.0
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.0625,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "NoSQL injection payload detected": 2,
+        "SQL injection payload detected": 1,
+        "HTTP parameter pollution detected": 1,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 54,
+          "max": 56,
+          "mean": 55.33
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 19,
+          "max": 21,
+          "mean": 20.37
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 25,
+          "A_to_B": 0,
+          "B_to_A": 5,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-JSON:k4_strings->k4_number",
+      "factor": "F-JSON",
+      "block": "CONTENT",
+      "reference": "k4_strings",
+      "level": "k4_number",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -2,
+          "max": -2,
+          "mean": -2.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-JSON:k4_strings->k4_boolean",
+      "factor": "F-JSON",
+      "block": "CONTENT",
+      "reference": "k4_strings",
+      "level": "k4_boolean",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -2,
+          "max": -2,
+          "mean": -2.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -1,
+          "max": -1,
+          "mean": -1.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-JSON:k4_strings->k4_nested",
+      "factor": "F-JSON",
+      "block": "CONTENT",
+      "reference": "k4_strings",
+      "level": "k4_nested",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 28,
+      "A_to_B": 2,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.06666666666666667,
+      "flip_rate_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "net_direction": 0.06666666666666667,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.9333333333333333,
+      "conditional_A_to_B": 0.06666666666666667,
+      "conditional_A_to_B_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.5,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "HTTP parameter pollution detected": 2
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 10,
+          "max": 10,
+          "mean": 10.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 3,
+          "max": 3,
+          "mean": 3.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 28,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-JSON:k4_strings->k4_array",
+      "factor": "F-JSON",
+      "block": "CONTENT",
+      "reference": "k4_strings",
+      "level": "k4_array",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-JSON:k1_cl->k4_cl",
+      "factor": "F-JSON",
+      "block": "CONTENT",
+      "reference": "k1_cl",
+      "level": "k4_cl",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 23,
+      "A_to_B": 0,
+      "B_to_A": 7,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.23333333333333334,
+      "flip_rate_ci95": [
+        0.09933786495801972,
+        0.4228365229782195
+      ],
+      "net_direction": -0.23333333333333334,
+      "baseline_allow_rate": 0.7666666666666667,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.14818512891522434
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.5903836027749965,
+        1.0
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.015625,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "NoSQL injection payload detected": 3,
+        "SQL injection payload detected": 2,
+        "Cross-site scripting payload detected": 2
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 54,
+          "max": 56,
+          "mean": 55.33
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 19,
+          "max": 21,
+          "mean": 20.37
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 23,
+          "A_to_B": 0,
+          "B_to_A": 7,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 0.5,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-CTB:form_type->json_type",
+      "factor": "F-CTB",
+      "block": "CONTENT",
+      "reference": "form_type",
+      "level": "json_type",
+      "n_bases": 30,
+      "tests": "M-content (reverse shortcut)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 22,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 8,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.7333333333333333,
+      "paired_allow_rate": 0.7333333333333333,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.15437251281557457
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.3694166475528192
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-ENV:absent->present",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -17,
+          "max": -17,
+          "mean": -17.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -7,
+          "max": -7,
+          "mean": -7.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 22,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 8
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-ENC:pct20->plus",
+      "factor": "F-ENC",
+      "block": "CONTENT",
+      "reference": "pct20",
+      "level": "plus",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -4,
+          "max": -4,
+          "mean": -4.0
+        },
+        "percent_triplets": {
+          "min": -2,
+          "max": -2,
+          "mean": -2.0
+        },
+        "prompt_tokens": {
+          "min": -4,
+          "max": -4,
+          "mean": -4.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-PATH:depth3->depth5",
+      "factor": "F-PATH",
+      "block": "CONTENT",
+      "reference": "depth3",
+      "level": "depth5",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 13,
+          "max": 13,
+          "mean": 13.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 7,
+          "max": 7,
+          "mean": 7.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-PATH:depth3->encoded_slash",
+      "factor": "F-PATH",
+      "block": "CONTENT",
+      "reference": "depth3",
+      "level": "encoded_slash",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 30,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 2,
+          "max": 2,
+          "mean": 2.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 30,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    },
+    {
+      "comparison_id": "F-URL:https_same_host->https_external",
+      "factor": "F-URL",
+      "block": "CONTENT",
+      "reference": "https_same_host",
+      "level": "https_external",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 0,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11944486906950275
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.024999999999999967,
+        1.0
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -4,
+          "max": 2,
+          "mean": -0.7
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -1,
+          "max": 1,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 29,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-URL:https_external->http_external",
+      "factor": "F-URL",
+      "block": "CONTENT",
+      "reference": "https_external",
+      "level": "http_external",
+      "n_bases": 30,
+      "tests": "M-content",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 12,
+      "A_to_B": 18,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.6,
+      "flip_rate_ci95": [
+        0.40603493005181857,
+        0.7734423511714064
+      ],
+      "net_direction": 0.6,
+      "baseline_allow_rate": 1.0,
+      "paired_allow_rate": 0.4,
+      "conditional_A_to_B": 0.6,
+      "conditional_A_to_B_ci95": [
+        0.40603493005181857,
+        0.7734423511714064
+      ],
+      "conditional_B_to_A": null,
+      "conditional_B_to_A_ci95": null,
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 7.62939453125e-06,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "HTTP parameter pollution detected": 5,
+        "Open redirect payload detected": 4,
+        "Command injection payload detected": 4,
+        "Cross-site scripting payload detected": 3,
+        "SQL injection payload detected": 1,
+        "Share injection payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -1,
+          "max": -1,
+          "mean": -1.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 30,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 18,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 0.00025177001953125,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT"
+    },
+    {
+      "comparison_id": "F-NAME:note->template",
+      "factor": "F-NAME",
+      "block": "CONTENT",
+      "reference": "note",
+      "level": "template",
+      "n_bases": 30,
+      "tests": "M-content (name semantics)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 0,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11944486906950275
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.024999999999999967,
+        1.0
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 4,
+          "max": 4,
+          "mean": 4.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-NAME:note->callback",
+      "factor": "F-NAME",
+      "block": "CONTENT",
+      "reference": "note",
+      "level": "callback",
+      "n_bases": 30,
+      "tests": "M-content (name semantics)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 28,
+      "A_to_B": 1,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 1,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": 0.03333333333333333,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 0.9333333333333333,
+      "conditional_A_to_B": 0.034482758620689655,
+      "conditional_A_to_B_ci95": [
+        0.0008726468835799639,
+        0.1776442954887229
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.9749999999999999
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 4,
+          "max": 4,
+          "mean": 4.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 13,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "F-NAME:note->file",
+      "factor": "F-NAME",
+      "block": "CONTENT",
+      "reference": "note",
+      "level": "file",
+      "n_bases": 30,
+      "tests": "M-content (name semantics)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 29,
+      "A_to_B": 0,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.03333333333333333,
+      "flip_rate_ci95": [
+        0.0008435709266305103,
+        0.17216945563341263
+      ],
+      "net_direction": -0.03333333333333333,
+      "baseline_allow_rate": 0.9666666666666667,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.11944486906950275
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.024999999999999967,
+        1.0
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV:user_a->user_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 35,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "CONTROL-COV:user_a->user_b",
+      "factor": "CONTROL-COV",
+      "block": "CONTROL",
+      "reference": "user_a",
+      "level": "user_b",
+      "n_bases": 40,
+      "tests": "M-instability (content)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 40,
+      "ALLOW_to_ALLOW": 35,
+      "A_to_B": 4,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.125,
+      "flip_rate_ci95": [
+        0.04185962613861666,
+        0.2680329173617205
+      ],
+      "net_direction": 0.075,
+      "baseline_allow_rate": 0.975,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.10256410256410256,
+      "conditional_A_to_B_ci95": [
+        0.028660105126096458,
+        0.24220972695061777
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.024999999999999967,
+        1.0
+      ],
+      "direction_consistency": 0.8,
+      "mcnemar_exact_p_two_sided": 0.375,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 3,
+        "LDAP injection payload detected": 1,
+        "NoSQL injection payload detected": 1
+      },
+      "matched_control": null,
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -7,
+          "max": 4,
+          "mean": -0.23
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": -3,
+          "max": 3,
+          "mean": -0.12
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 20,
+          "ALLOW_to_ALLOW": 17,
+          "A_to_B": 2,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 20,
+          "ALLOW_to_ALLOW": 18,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        }
+      },
+      "holm_family": null,
+      "holm_family_size": null,
+      "holm_adjusted_p": null,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE"
+    },
+    {
+      "comparison_id": "CONTROL-ENV:absent->present",
+      "factor": "CONTROL-ENV",
+      "block": "CONTROL",
+      "reference": "absent",
+      "level": "present",
+      "n_bases": 30,
+      "tests": "M-instability (envelope)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 27,
+      "A_to_B": 0,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 3,
+      "flip_rate": 0.0,
+      "flip_rate_ci95": [
+        0.0,
+        0.11570330822202773
+      ],
+      "net_direction": 0.0,
+      "baseline_allow_rate": 0.9,
+      "paired_allow_rate": 0.9,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12770286761543231
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.7075982261787133
+      ],
+      "direction_consistency": null,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "flags": [
+        "LOW_SENSITIVITY_B_TO_A (few reference-BLOCK bases)"
+      ],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {},
+      "matched_control": null,
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 32,
+          "max": 32,
+          "mean": 32.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 16,
+          "max": 16,
+          "mean": 16.0
+        }
+      },
+      "strata": {
+        "GET": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0
+        },
+        "body": {
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 12,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3
+        }
+      },
+      "holm_family": null,
+      "holm_family_size": null,
+      "holm_adjusted_p": null,
+      "holm_reject": false,
+      "effect_class": "NO OBSERVED EFFECT"
+    }
+  ],
+  "anchors_verified": {
+    "PROTOCOL.md": "7db97be70000f8866a903c2984b4389228b0423b56dc315758a1604c1191741b",
+    "manifest.json": "742b382fac9964dadbb644fc807aaed16511624e79c677334b53b8605ea4a7f9",
+    "cases.jsonl": "9d9bc2d55fcd2bb36ec90687ad99b6e569826d060045464e7817b21736ea07fb",
+    "minimal_pair_probe_cases.py": "6edd1f0e0321d56e840ed8ca7cd9a2571db3b79376acd1f7427c6a5b5e4ceca3",
+    "run_v4_minimal_pair_probe.py": "dd55dfdce702597272f2af1cb8ffe43caeda43177a72fd928a072ce0e9372c8b"
+  },
+  "records_sha256": "f34a6ef5fcdd6c539be11342153aac4b79f7ee5a1f8816d2d0cd23da9bf025f2"
+}
