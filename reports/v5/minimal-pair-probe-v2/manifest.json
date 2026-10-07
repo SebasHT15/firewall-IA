@@ -1,0 +1,243 @@
+{
+  "probe": "v5-minimal-pairs-v2",
+  "generator_version": "v5-minimal-pairs-v2/generator-2",
+  "seed": 20261007,
+  "data_role": "DEVELOPMENT DIAGNOSTIC (minimal-pair probe v2). Never V5 training, validation or checkpoint-selection data; never copied into a V5 generator.",
+  "label_of_every_case": "benign (by construction)",
+  "cases_file": "cases.jsonl",
+  "cases_sha256": "bb05e64000d15aae1a9abf0855420d367df6653b950f9516b820e795962ce6d0",
+  "n_cases": 590,
+  "n_unique_texts": 590,
+  "factors": {
+    "F2-ADDR": {
+      "block": "CONTENT",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    "F2-HASH": {
+      "block": "CONTENT",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)"
+    },
+    "F2-APOS": {
+      "block": "CONTENT",
+      "n_bases": 75,
+      "tests": "M-content (apostrophe across classes; surname stratum = in-run positive control)"
+    },
+    "CONTROL-COV2": {
+      "block": "CONTROL",
+      "n_bases": 40,
+      "tests": "M-instability (content), stratified over test domains"
+    }
+  },
+  "strata": {
+    "F2-ADDR": [
+      "body",
+      "query"
+    ],
+    "F2-HASH": [
+      "generic",
+      "identifier",
+      "json_text",
+      "passlike"
+    ],
+    "F2-APOS": [
+      "contraction",
+      "place_json",
+      "possessive",
+      "surname",
+      "title"
+    ],
+    "CONTROL-COV2": [
+      "handle",
+      "json",
+      "prose",
+      "token"
+    ]
+  },
+  "comparisons": [
+    {
+      "comparison_id": "F2-ADDR:n_prose->n_street",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "n_street",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    {
+      "comparison_id": "F2-ADDR:n_prose->n_numfmt",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "n_numfmt",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    {
+      "comparison_id": "F2-ADDR:n_numfmt->n_street",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_numfmt",
+      "level": "n_street",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    {
+      "comparison_id": "F2-ADDR:n_prose->a_prose",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "a_prose",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    {
+      "comparison_id": "F2-ADDR:n_street->a_street",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_street",
+      "level": "a_street",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    {
+      "comparison_id": "F2-ADDR:n_prose->n2_prose",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "n2_prose",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)"
+    },
+    {
+      "comparison_id": "F2-HASH:base->hash",
+      "factor": "F2-HASH",
+      "block": "CONTENT",
+      "reference": "base",
+      "level": "hash",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)"
+    },
+    {
+      "comparison_id": "F2-HASH:base->punct",
+      "factor": "F2-HASH",
+      "block": "CONTENT",
+      "reference": "base",
+      "level": "punct",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)"
+    },
+    {
+      "comparison_id": "F2-HASH:punct->hash",
+      "factor": "F2-HASH",
+      "block": "CONTENT",
+      "reference": "punct",
+      "level": "hash",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)"
+    },
+    {
+      "comparison_id": "F2-APOS:plain->apostrophe",
+      "factor": "F2-APOS",
+      "block": "CONTENT",
+      "reference": "plain",
+      "level": "apostrophe",
+      "n_bases": 75,
+      "tests": "M-content (apostrophe across classes; surname stratum = in-run positive control)"
+    },
+    {
+      "comparison_id": "CONTROL-COV2:val_a->val_b",
+      "factor": "CONTROL-COV2",
+      "block": "CONTROL",
+      "reference": "val_a",
+      "level": "val_b",
+      "n_bases": 40,
+      "tests": "M-instability (content), stratified over test domains"
+    }
+  ],
+  "repeat_control": {
+    "fraction": 0.1,
+    "runs": 3,
+    "text_sha256": [
+      "03294b45d77399b80bd84da2433bf05ca03a600d6c60c82dd426c86ef10bd7a4",
+      "05acb3332a3bf28da8a1649e4b6f25b0ff23adea2ad92289f8710abf4f2bfa3b",
+      "06e462a2dcda46efe8548a78817e793776ae64279609f634d349a07fefbf05a2",
+      "18533c78d38fb6617f72cd746c729b87a5f72ee6fe88804831b7a9c0f30dd9e2",
+      "1fba8665d0d23aa575075d1d35117c1543fd7426f08ebbf0fdf7ee01e21f9f38",
+      "20c7d4c518bf069ab83e276518487181ca0c80e78a5350838b30202510bef91e",
+      "2bf7c5154e6df0ac90d444be09a9aa2f4799a74f1db92746e534d2afa650fbdc",
+      "2ed94eb801d7bde9cef5521056cc9fae9c8ce6113b7df60adee5cd76f6c96330",
+      "2f1e25f8915252f7177dc645fb30fc740d20c0180d24fd2e92bdafb9e7f46bc7",
+      "31fd741131b8fafbe0b2ef4812f33828903ebc8e484c5f0f58490317136e8331",
+      "3446af611d991ede5ddcfd44d8d67a1ffe8752503d0fc7c7db626c7a1046e924",
+      "373240227a95c4d3dcad9d74586e8f1aa6145eb7c7221d3cd5bf3964d2669c35",
+      "38de352ac2f5b636bd1ebdee58210defcdd8e20b0357f23923a95454b15f9259",
+      "39bee7bab12b6e3c84f733cf7b034e31b4e29d28aff8505d62ddbef0faef004d",
+      "3bbd99a82cb25246918add5fe47d1a09cc636b6d84fd388e5e976d8d009be96f",
+      "3d95736c537324d435328b79dfc3645316828796f9511310db9ea6105c675b3c",
+      "3ea0beef6fc6a3c521d041004af5a4ba18af9ad2ca2cf5055d7a92edc52e1284",
+      "5332867f111976a012e9ddcb0791991df7a478e899f8497c766d9b26ff10c574",
+      "58d800a1ea5836e47fc210e959b772df0a22dea2ac360f62aa066264db7a949a",
+      "5bb1da14dbdf5055e497544b40ea7057d2b9cd423cdcfea9a90622e198b1e4f9",
+      "5d482520e7628ed9cdf76e725420e910984308bde2b4294afeec17b3f47e8ca3",
+      "618940d69852c8e3d07d3235e19287e91249345ba603d40e583219645619bf00",
+      "6b5db8ef43abdbf722465e3cb129b291bdee3ca08049228ff3a65ea20cec6819",
+      "79f60ef80387cc0fc32451a5713d4951ee5209a86512ec448d6052010872790c",
+      "7c26ddb269a66b1a9b44980f75b76dfe91450f1b1fb315fe3e9d8bd4d11d528d",
+      "7e4322afde75fad4aeb2261e80bee1d9626f3710bf76e68876adb217eaf10ba8",
+      "7e7b936725aa57f3093d334928b58f46ebb155ae25adc76251f603a66ac6b63a",
+      "8172a363b2a4d6c85738c67a383bd8f62be14ed2554c12caf683fe195e826de2",
+      "877bb0299021350056d4758026be34efb29fb6fdc6a9c38fa7d19205b29fd281",
+      "885f80e26a372700504be83ad05816939b389adb7f3ae78a51554b2987cd9516",
+      "88bd03ea7ebb777775dfc10b2304b064bc7c7b918580dfdf42b895af241708b9",
+      "89b7db6661661e1374ce3d72688ead776dc6fcf8736f1cfe2586ba96805a39e1",
+      "911e8748d9ad70ac215764eac770ae982ac8402e7cafd869837289954f266bbd",
+      "98deee3fca604b5d4ca8248c12fd53676d63d0a05196df64ef38faabdc6df630",
+      "9b2b897ea66637807b8c96d20d46795eaf2498bc227bf9eba6b5af7b1202e449",
+      "9fd461de70c03aeddb6c61840dd67c8150d01e3608432ae543619404d5442b49",
+      "a02164fcb270ed0fe0a3aa22405b1cb1b40a7e25fb73e44cf2ceef68186c44b5",
+      "a21dbe71a3b5053896547fc61b699983287665bd849c344a60b64c952b9ba015",
+      "a2f6be8b1d2433b4efe60be2ac7dcc3bfd3ebebccc81a15451f5a2c02c43cc9a",
+      "a3d4f9e26f97ff6007ee4de1778d0e47ab3176608475c26909439c084ddfc5e2",
+      "a72d53a39360623dac1dc5c84c19d8cce5dbc7d4de02d3adf5988c3d275d2df2",
+      "a9bbcc11cdb113aa9e2df7cfed45b3445841cb52c8b21cbad257ff539bbaea5e",
+      "ab0caca8cbf441dc836a6849ccb9d8694fed4e8db6543c24bf553a825694b0fb",
+      "b5dea5c151874cc93812ff2d97fa08c1dd88fe915dd2058e83df45b78e669827",
+      "c18be2b0ec7e2f523c8f847b033efebbb99675b6d42ab051e1890d31e7299008",
+      "c27bccd15f92746d2c061fad323bfb648b58ff32bd9f13bda7061a44191c6acc",
+      "c546ae10552a35673e41c06bb94cb4b261edb50685ef9f8f7109bf7cad1cb05e",
+      "ca7b822e72fc652292ae9720bd1a9985baa88f5516103effe863eb40e9248422",
+      "db5a398a33f687f34b6bf47cedba74e3000b766842bb021cbd868ce8cce8a06e",
+      "df1ba9391126baea5aef2aaeefde1736b774c1d52c06fd945cf0a3b5aed2eb69",
+      "df2bb6e849bf519c6248ab018492fc0955e22fa5cef1df35631ae74022512eb5",
+      "e137ee93e3f9aacd885e315f9027c85679c1d67a0446ac912c34ca99c3712cb9",
+      "e1a569bf9b39c3a4fc450f468dab64f235d7a86ab3209a257c0f0defa3d579b2",
+      "e27e372b348ed156aa81669a981a4155ce01c6970e93875c6f05102b38c66408",
+      "ecf752c00788d1357348af94322e052879f9a7ebd3ab41a4a66717b6df6e4f6e",
+      "ed0201d59175843998a18e427e45a016917da235951413a7dc4ea716a4572d6c",
+      "f54791e45e187b857955d732c6e6a6f16e7674aa9c5427c0bc0ff6844c747cb0",
+      "f6cfdab959c9ddb44e0474fba6cfc25c9d8165ac02e318ed2a114049d2957aa6",
+      "fafb78f3579c03d39d0944ee814fac96f4d7d9963f1a7308c368a42131a95268"
+    ]
+  },
+  "pools_sha256": {
+    "accepts": "49279be9a45d622df9f974898f9896e428327deddc82d6630c9daf1eeb63a533",
+    "addr_prose": "f713d2260133fd853d3678fd1028a98f0953e0bdd3f0c6891e733ddd7ca66969",
+    "apos_contraction": "7d182b0dc5bc0161dd854e111428fc241f5610bce8839d403f5d557feeb37e1a",
+    "apos_place": "6275529a1cf442f978d6032eed1f0784e506b7d437f783a4a7903b270955de3f",
+    "apos_possessive": "bd79b09ba4c6103192cd548c349954cdbf2b95440777951fcf686d66ba581e4c",
+    "apos_surname": "d264ed99ef3e3f4c7c492805ac56a3648e5ed5ae0c4e7175a210b1eeedaf96bd",
+    "apos_title": "5f6bc00ea7dd594176b70ae10971ff43d2458c75402dccb4d68e8f35c99a7c3d",
+    "cov_firsts": "14cab146fe31a1fd621c2bb517a0263dfee4c5f60307732d9ed85caae9d45785",
+    "cov_lasts": "1e054a74d2a3fa04632057030344fb0a399cd7ad037c1915861121e7024f750c",
+    "hosts": "8e30c28dda6890475966bf8b4d496c3f30208604750e1db5308b7895ceded0da",
+    "numfmt_labels": "d4b0d3035874cbee243df6aa2da3ee006c33cd479b814d601ffa05c56916082f",
+    "pass_alphabet": "6216a68ef4b9ee320c10cba91f295cb43db44ef1655ab3a58f958b94c70f2213",
+    "paths_body": "fcaa8dc7038f52adc617e2272f0ab4bdc45f0f24d27bc28035dc89e7bc144040",
+    "paths_query": "1f32592ffbe6eff9862b378916b484aae08b430db63213afdc7cb1d126d92bb0",
+    "slot_nouns": "754d6c1a4e9d763e102201ec5f55570451681245921156c5553a6b0ced3bc8db",
+    "streets": "3ca912d9a7258821c5faad997433807c0a8da9780a2b93428e65a1e6bb0d046d",
+    "user_agents": "ff3783d69ee2c7a3b5eb4844040798ad60b62e5930b614b4da2669337aea7f78"
+  }
+}

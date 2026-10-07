@@ -1,0 +1,2082 @@
+{
+  "analysis_version": "v5-minimal-pairs-v2/analysis-2",
+  "data_role": "DEVELOPMENT DIAGNOSTIC (minimal-pair probe v2). Never V5 training, validation or checkpoint-selection data; never copied into a V5 generator.",
+  "pre_registered": {
+    "alpha": 0.05,
+    "test": "exact McNemar, two-sided",
+    "multiplicity": "Holm within the CONTENT family; control outside (raw p)",
+    "strong": {
+      "dominant_rate": 0.2,
+      "consistency": 0.8,
+      "holm_reject": true,
+      "flip_rate_above": "CONTROL-COV2 Clopper-Pearson 95% upper bound"
+    },
+    "moderate": {
+      "dominant_rate": 0.1,
+      "min_dominant": 6,
+      "consistency": 0.8,
+      "raw_mcnemar_p_below": 0.05,
+      "flip_rate_above": "CONTROL-COV2 Clopper-Pearson 95% upper bound"
+    },
+    "matched_control": "CONTROL-COV2:val_a->val_b",
+    "direction": "A->B hypothesised; B->A labelled as reverse and non-supporting",
+    "no_observed_effect": "0 discordant pairs AND A->B testable (reference-ALLOW >= ceil(2n/3)); otherwise NO OBSERVED (UNTESTABLE), which cannot falsify",
+    "testable_fraction": 0.6666666666666666,
+    "stratum_rule": {
+      "effect": "A->B >= 6/15, consistency >= 0.80, flip_rate > C_hi",
+      "no_effect_testable": "A->B <= 2 and reference-ALLOW >= 10",
+      "heterogeneous": "at least one 'effect' stratum and one 'no effect (testable)' stratum"
+    }
+  },
+  "instability": {
+    "control": "CONTROL-COV2:val_a->val_b",
+    "flip_rate": 0.175,
+    "flip_rate_ci95": [
+      0.07338272935208517,
+      0.3277901333615859
+    ],
+    "C_hi": 0.3277901333615859,
+    "per_stratum_flip_rate": {
+      "handle": 0.0,
+      "json": 0.7,
+      "prose": 0.0,
+      "token": 0.0
+    },
+    "material": true,
+    "rule": "material iff CP lower bound >= 0.05; C_hi = CONTROL-COV2 flip-rate CP95 upper bound used as the effect bar"
+  },
+  "reference_decisions_by_host": {
+    "centre.example.org": {
+      "ALLOW": 49,
+      "BLOCK": 21
+    },
+    "classes.example.net": {
+      "BLOCK": 29,
+      "ALLOW": 42
+    },
+    "desk.example.org": {
+      "ALLOW": 47,
+      "BLOCK": 20
+    },
+    "hub.example.com": {
+      "ALLOW": 62,
+      "BLOCK": 20
+    },
+    "members.example.com": {
+      "ALLOW": 70,
+      "BLOCK": 22
+    },
+    "signup.example.net": {
+      "ALLOW": 70,
+      "BLOCK": 23
+    }
+  },
+  "determinism": {
+    "repeat_texts": 59,
+    "divergent_raw": 0,
+    "divergent_decision": 0,
+    "divergent_reason": 0,
+    "deterministic": true
+  },
+  "global": {
+    "n_unique_texts_scored": 590,
+    "status": {
+      "ok": 590
+    },
+    "decisions": {
+      "ALLOW": 351,
+      "BLOCK": 239
+    },
+    "distinct_block_reasons": 13,
+    "block_reasons": {
+      "SQL injection payload detected": 119,
+      "NoSQL injection payload detected": 37,
+      "Cross-site scripting payload detected": 28,
+      "Command injection payload detected": 23,
+      "HTTP parameter pollution detected": 12,
+      "LDAP injection payload detected": 6,
+      "CSRF attack pattern detected": 4,
+      "Open redirect payload detected": 4,
+      "Insecure deserialization payload detected": 2,
+      "RCE attack detected": 1,
+      "Profile picture manipulation attack detected": 1,
+      "Password reset request detected": 1,
+      "Invalid HTTP request payload detected": 1
+    }
+  },
+  "comparisons": [
+    {
+      "comparison_id": "F2-ADDR:n_prose->n_street",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "n_street",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 6,
+      "A_to_B": 22,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 2,
+      "flip_rate": 0.7333333333333333,
+      "flip_rate_ci95": [
+        0.5411063486052488,
+        0.8772051901276452
+      ],
+      "net_direction": 0.7333333333333333,
+      "baseline_allow_rate": 0.9333333333333333,
+      "paired_allow_rate": 0.2,
+      "conditional_A_to_B": 0.7857142857142857,
+      "conditional_A_to_B_ci95": [
+        0.5904689734941717,
+        0.9170393876123615
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.841886116991581
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 4.76837158203125e-07,
+      "reference_allow": 28,
+      "reference_block": 2,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 11,
+        "Command injection payload detected": 3,
+        "Cross-site scripting payload detected": 2,
+        "HTTP parameter pollution detected": 2,
+        "NoSQL injection payload detected": 2,
+        "LDAP injection payload detected": 1,
+        "Open redirect payload detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -15,
+          "max": -4,
+          "mean": -9.27
+        },
+        "percent_triplets": {
+          "min": -2,
+          "max": 1,
+          "mean": -0.47
+        },
+        "prompt_tokens": {
+          "min": -6,
+          "max": 4,
+          "mean": 0.83
+        }
+      },
+      "strata": {
+        "body": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 5,
+          "A_to_B": 10,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.6666666666666666,
+          "flip_rate_ci95": [
+            0.38380373254115463,
+            0.8817588966331191
+          ],
+          "net_direction": 0.6666666666666666,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 0.3333333333333333,
+          "conditional_A_to_B": 0.6666666666666666,
+          "conditional_A_to_B_ci95": [
+            0.38380373254115463,
+            0.8817588966331191
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.001953125,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "query": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 1,
+          "A_to_B": 12,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 2,
+          "flip_rate": 0.8,
+          "flip_rate_ci95": [
+            0.5191088661931469,
+            0.9566879948941633
+          ],
+          "net_direction": 0.8,
+          "baseline_allow_rate": 0.8666666666666667,
+          "paired_allow_rate": 0.06666666666666667,
+          "conditional_A_to_B": 0.9230769230769231,
+          "conditional_A_to_B_ci95": [
+            0.6397025647321224,
+            0.9980543715026533
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.841886116991581
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.00048828125,
+          "reference_allow": 13,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 3.337860107421875e-06,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT (A→B)",
+      "stratum_verdicts": {
+        "body": "effect (A→B)",
+        "query": "effect (A→B)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-ADDR:n_prose->n_numfmt",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "n_numfmt",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 23,
+      "A_to_B": 5,
+      "B_to_A": 2,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.23333333333333334,
+      "flip_rate_ci95": [
+        0.09933786495801972,
+        0.4228365229782195
+      ],
+      "net_direction": 0.1,
+      "baseline_allow_rate": 0.9333333333333333,
+      "paired_allow_rate": 0.8333333333333334,
+      "conditional_A_to_B": 0.17857142857142858,
+      "conditional_A_to_B_ci95": [
+        0.06064290881920781,
+        0.36893334941920364
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.15811388300841894,
+        1.0
+      ],
+      "direction_consistency": 0.7142857142857143,
+      "mcnemar_exact_p_two_sided": 0.453125,
+      "reference_allow": 28,
+      "reference_block": 2,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 3,
+        "NoSQL injection payload detected": 2,
+        "RCE attack detected": 1,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -23,
+          "max": -14,
+          "mean": -17.83
+        },
+        "percent_triplets": {
+          "min": -3,
+          "max": 0,
+          "mean": -1.47
+        },
+        "prompt_tokens": {
+          "min": -11,
+          "max": -2,
+          "mean": -5.57
+        }
+      },
+      "strata": {
+        "body": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 13,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.13333333333333333,
+          "flip_rate_ci95": [
+            0.016575913440083412,
+            0.4046026966033721
+          ],
+          "net_direction": 0.13333333333333333,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 0.8666666666666667,
+          "conditional_A_to_B": 0.13333333333333333,
+          "conditional_A_to_B_ci95": [
+            0.016575913440083412,
+            0.4046026966033721
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.5,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "query": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 10,
+          "A_to_B": 3,
+          "B_to_A": 2,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.3333333333333333,
+          "flip_rate_ci95": [
+            0.11824110336688082,
+            0.6161962674588459
+          ],
+          "net_direction": 0.06666666666666667,
+          "baseline_allow_rate": 0.8666666666666667,
+          "paired_allow_rate": 0.8,
+          "conditional_A_to_B": 0.23076923076923078,
+          "conditional_A_to_B_ci95": [
+            0.05038107349115167,
+            0.5381315392340409
+          ],
+          "conditional_B_to_A": 1.0,
+          "conditional_B_to_A_ci95": [
+            0.15811388300841894,
+            1.0
+          ],
+          "direction_consistency": 0.6,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 13,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE",
+      "stratum_verdicts": {
+        "body": "no effect (testable)",
+        "query": "indeterminate"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-ADDR:n_numfmt->n_street",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_numfmt",
+      "level": "n_street",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 5,
+      "A_to_B": 20,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 4,
+      "flip_rate": 0.7,
+      "flip_rate_ci95": [
+        0.5060409585374461,
+        0.8526548152452988
+      ],
+      "net_direction": 0.6333333333333333,
+      "baseline_allow_rate": 0.8333333333333334,
+      "paired_allow_rate": 0.2,
+      "conditional_A_to_B": 0.8,
+      "conditional_A_to_B_ci95": [
+        0.5929625677213226,
+        0.931688535987516
+      ],
+      "conditional_B_to_A": 0.2,
+      "conditional_B_to_A_ci95": [
+        0.005050763379468026,
+        0.7164179361180893
+      ],
+      "direction_consistency": 0.9523809523809523,
+      "mcnemar_exact_p_two_sided": 2.09808349609375e-05,
+      "reference_allow": 25,
+      "reference_block": 5,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 3,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 11,
+        "Command injection payload detected": 3,
+        "NoSQL injection payload detected": 2,
+        "Cross-site scripting payload detected": 2,
+        "HTTP parameter pollution detected": 2,
+        "LDAP injection payload detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 6,
+          "max": 12,
+          "mean": 8.57
+        },
+        "percent_triplets": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "prompt_tokens": {
+          "min": 4,
+          "max": 8,
+          "mean": 6.4
+        }
+      },
+      "strata": {
+        "body": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 4,
+          "A_to_B": 9,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 1,
+          "flip_rate": 0.6666666666666666,
+          "flip_rate_ci95": [
+            0.38380373254115463,
+            0.8817588966331191
+          ],
+          "net_direction": 0.5333333333333333,
+          "baseline_allow_rate": 0.8666666666666667,
+          "paired_allow_rate": 0.3333333333333333,
+          "conditional_A_to_B": 0.6923076923076923,
+          "conditional_A_to_B_ci95": [
+            0.3857383382492948,
+            0.9090796054279033
+          ],
+          "conditional_B_to_A": 0.5,
+          "conditional_B_to_A_ci95": [
+            0.012579117093425018,
+            0.9874208829065749
+          ],
+          "direction_consistency": 0.9,
+          "mcnemar_exact_p_two_sided": 0.021484375,
+          "reference_allow": 13,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "query": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 1,
+          "A_to_B": 11,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 3,
+          "flip_rate": 0.7333333333333333,
+          "flip_rate_ci95": [
+            0.44899675896302804,
+            0.9221284537089565
+          ],
+          "net_direction": 0.7333333333333333,
+          "baseline_allow_rate": 0.8,
+          "paired_allow_rate": 0.06666666666666667,
+          "conditional_A_to_B": 0.9166666666666666,
+          "conditional_A_to_B_ci95": [
+            0.6152038348490558,
+            0.9978924067681398
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.7075982261787133
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0009765625,
+          "reference_allow": 12,
+          "reference_block": 3,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 0.000125885009765625,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT (A→B)",
+      "stratum_verdicts": {
+        "body": "effect (A→B)",
+        "query": "effect (A→B)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-ADDR:n_prose->a_prose",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "a_prose",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 25,
+      "A_to_B": 3,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 2,
+      "flip_rate": 0.1,
+      "flip_rate_ci95": [
+        0.021117137029722233,
+        0.265288450474208
+      ],
+      "net_direction": 0.1,
+      "baseline_allow_rate": 0.9333333333333333,
+      "paired_allow_rate": 0.8333333333333334,
+      "conditional_A_to_B": 0.10714285714285714,
+      "conditional_A_to_B_ci95": [
+        0.022665090639058916,
+        0.28226439571532447
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.841886116991581
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.25,
+      "reference_allow": 28,
+      "reference_block": 2,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 2,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 14,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.06666666666666667,
+          "flip_rate_ci95": [
+            0.0016864302413526766,
+            0.3194845665783034
+          ],
+          "net_direction": 0.06666666666666667,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 0.9333333333333333,
+          "conditional_A_to_B": 0.06666666666666667,
+          "conditional_A_to_B_ci95": [
+            0.0016864302413526766,
+            0.3194845665783034
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "query": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 11,
+          "A_to_B": 2,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 2,
+          "flip_rate": 0.13333333333333333,
+          "flip_rate_ci95": [
+            0.016575913440083412,
+            0.4046026966033721
+          ],
+          "net_direction": 0.13333333333333333,
+          "baseline_allow_rate": 0.8666666666666667,
+          "paired_allow_rate": 0.7333333333333333,
+          "conditional_A_to_B": 0.15384615384615385,
+          "conditional_A_to_B_ci95": [
+            0.0192066719825284,
+            0.45447105567655777
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.841886116991581
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.5,
+          "reference_allow": 13,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE",
+      "stratum_verdicts": {
+        "body": "no effect (testable)",
+        "query": "no effect (testable)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-ADDR:n_street->a_street",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_street",
+      "level": "a_street",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 2,
+      "A_to_B": 4,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 24,
+      "flip_rate": 0.13333333333333333,
+      "flip_rate_ci95": [
+        0.037553496338363856,
+        0.30721835027612665
+      ],
+      "net_direction": 0.13333333333333333,
+      "baseline_allow_rate": 0.2,
+      "paired_allow_rate": 0.06666666666666667,
+      "conditional_A_to_B": 0.6666666666666666,
+      "conditional_A_to_B_ci95": [
+        0.2227780955035124,
+        0.9567281317072582
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.1424735977225256
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.125,
+      "reference_allow": 6,
+      "reference_block": 24,
+      "testable_A_to_B": false,
+      "testable_B_to_A": true,
+      "flags": [
+        "UNTESTABLE_A_TO_B (reference-ALLOW 6 < 20 = ceil(2n/3))"
+      ],
+      "same_decision_reason_changed": 5,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 3,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 1,
+          "max": 1,
+          "mean": 1.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 2,
+          "A_to_B": 3,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 10,
+          "flip_rate": 0.2,
+          "flip_rate_ci95": [
+            0.043312005105836826,
+            0.480891133806853
+          ],
+          "net_direction": 0.2,
+          "baseline_allow_rate": 0.3333333333333333,
+          "paired_allow_rate": 0.13333333333333333,
+          "conditional_A_to_B": 0.6,
+          "conditional_A_to_B_ci95": [
+            0.14663279963467307,
+            0.9472550494736831
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.25,
+          "reference_allow": 5,
+          "reference_block": 10,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 5 < 10 = ceil(2n/3))"
+          ]
+        },
+        "query": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 1,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 14,
+          "flip_rate": 0.06666666666666667,
+          "flip_rate_ci95": [
+            0.0016864302413526766,
+            0.3194845665783034
+          ],
+          "net_direction": 0.06666666666666667,
+          "baseline_allow_rate": 0.06666666666666667,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": 1.0,
+          "conditional_A_to_B_ci95": [
+            0.024999999999999967,
+            1.0
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.2316357616501165
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 1,
+          "reference_block": 14,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 1 < 10 = ceil(2n/3))"
+          ]
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 0.625,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE",
+      "stratum_verdicts": {
+        "body": "indeterminate",
+        "query": "indeterminate"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-ADDR:n_prose->n2_prose",
+      "factor": "F2-ADDR",
+      "block": "CONTENT",
+      "reference": "n_prose",
+      "level": "n2_prose",
+      "n_bases": 30,
+      "tests": "M-content (address name/value/format isolation; n2_prose = rename control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 30,
+      "ALLOW_to_ALLOW": 28,
+      "A_to_B": 0,
+      "B_to_A": 2,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.06666666666666667,
+      "flip_rate_ci95": [
+        0.008178134460656128,
+        0.22073540152296184
+      ],
+      "net_direction": -0.06666666666666667,
+      "baseline_allow_rate": 0.9333333333333333,
+      "paired_allow_rate": 1.0,
+      "conditional_A_to_B": 0.0,
+      "conditional_A_to_B_ci95": [
+        0.0,
+        0.12343611850026387
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.15811388300841894,
+        1.0
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 0.5,
+      "reference_allow": 28,
+      "reference_block": 2,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "NoSQL injection payload detected": 2
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "body": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 1.0,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "query": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 13,
+          "A_to_B": 0,
+          "B_to_A": 2,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.13333333333333333,
+          "flip_rate_ci95": [
+            0.016575913440083412,
+            0.4046026966033721
+          ],
+          "net_direction": -0.13333333333333333,
+          "baseline_allow_rate": 0.8666666666666667,
+          "paired_allow_rate": 1.0,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.2470526380004709
+          ],
+          "conditional_B_to_A": 1.0,
+          "conditional_B_to_A_ci95": [
+            0.15811388300841894,
+            1.0
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.5,
+          "reference_allow": 13,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE",
+      "stratum_verdicts": {
+        "body": "no effect (testable)",
+        "query": "no effect (testable)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-HASH:base->hash",
+      "factor": "F2-HASH",
+      "block": "CONTENT",
+      "reference": "base",
+      "level": "hash",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 60,
+      "ALLOW_to_ALLOW": 8,
+      "A_to_B": 32,
+      "B_to_A": 1,
+      "BLOCK_to_BLOCK": 19,
+      "flip_rate": 0.55,
+      "flip_rate_ci95": [
+        0.41611914563321395,
+        0.6787784765366434
+      ],
+      "net_direction": 0.5166666666666667,
+      "baseline_allow_rate": 0.6666666666666666,
+      "paired_allow_rate": 0.15,
+      "conditional_A_to_B": 0.8,
+      "conditional_A_to_B_ci95": [
+        0.6435219813207651,
+        0.9094775906000092
+      ],
+      "conditional_B_to_A": 0.05,
+      "conditional_B_to_A_ci95": [
+        0.001265089497949845,
+        0.24873276277202777
+      ],
+      "direction_consistency": 0.9696969696969697,
+      "mcnemar_exact_p_two_sided": 7.916241884231567e-09,
+      "reference_allow": 40,
+      "reference_block": 20,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 5,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 15,
+        "Cross-site scripting payload detected": 8,
+        "Command injection payload detected": 5,
+        "CSRF attack pattern detected": 1,
+        "NoSQL injection payload detected": 1,
+        "Invalid HTTP request payload detected": 1,
+        "HTTP parameter pollution detected": 1,
+        "Password reset request detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 1,
+          "max": 3,
+          "mean": 2.5
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 1,
+          "mean": 0.75
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 4,
+          "mean": 2.28
+        }
+      },
+      "strata": {
+        "generic": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 14,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1,
+          "flip_rate": 0.9333333333333333,
+          "flip_rate_ci95": [
+            0.6805154334216965,
+            0.9983135697586474
+          ],
+          "net_direction": 0.9333333333333333,
+          "baseline_allow_rate": 0.9333333333333333,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": 1.0,
+          "conditional_A_to_B_ci95": [
+            0.7683642383498834,
+            1.0
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.9749999999999999
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0001220703125,
+          "reference_allow": 14,
+          "reference_block": 1,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "identifier": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 4,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 11,
+          "flip_rate": 0.26666666666666666,
+          "flip_rate_ci95": [
+            0.07787154629104359,
+            0.551003241036971
+          ],
+          "net_direction": 0.26666666666666666,
+          "baseline_allow_rate": 0.26666666666666666,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": 1.0,
+          "conditional_A_to_B_ci95": [
+            0.3976353643835252,
+            1.0
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.28491415291815436
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.125,
+          "reference_allow": 4,
+          "reference_block": 11,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 4 < 10 = ceil(2n/3))"
+          ]
+        },
+        "json_text": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 7,
+          "A_to_B": 0,
+          "B_to_A": 1,
+          "BLOCK_to_BLOCK": 7,
+          "flip_rate": 0.06666666666666667,
+          "flip_rate_ci95": [
+            0.0016864302413526766,
+            0.3194845665783034
+          ],
+          "net_direction": -0.06666666666666667,
+          "baseline_allow_rate": 0.4666666666666667,
+          "paired_allow_rate": 0.5333333333333333,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.4096163972250034
+          ],
+          "conditional_B_to_A": 0.125,
+          "conditional_B_to_A_ci95": [
+            0.003159723531251879,
+            0.5265096708752064
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 7,
+          "reference_block": 8,
+          "testable_A_to_B": false,
+          "testable_B_to_A": false,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 7 < 10 = ceil(2n/3))"
+          ]
+        },
+        "passlike": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 1,
+          "A_to_B": 14,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.9333333333333333,
+          "flip_rate_ci95": [
+            0.6805154334216965,
+            0.9983135697586474
+          ],
+          "net_direction": 0.9333333333333333,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 0.06666666666666667,
+          "conditional_A_to_B": 0.9333333333333333,
+          "conditional_A_to_B_ci95": [
+            0.6805154334216965,
+            0.9983135697586474
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0001220703125,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 6.332993507385254e-08,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT (A→B)",
+      "stratum_verdicts": {
+        "generic": "effect (A→B)",
+        "identifier": "indeterminate",
+        "json_text": "indeterminate",
+        "passlike": "effect (A→B)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-HASH:base->punct",
+      "factor": "F2-HASH",
+      "block": "CONTENT",
+      "reference": "base",
+      "level": "punct",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 60,
+      "ALLOW_to_ALLOW": 8,
+      "A_to_B": 32,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 20,
+      "flip_rate": 0.5333333333333333,
+      "flip_rate_ci95": [
+        0.3999649025843025,
+        0.6633008637495477
+      ],
+      "net_direction": 0.5333333333333333,
+      "baseline_allow_rate": 0.6666666666666666,
+      "paired_allow_rate": 0.13333333333333333,
+      "conditional_A_to_B": 0.8,
+      "conditional_A_to_B_ci95": [
+        0.6435219813207651,
+        0.9094775906000092
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.1684334709830853
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 4.656612873077393e-10,
+      "reference_allow": 40,
+      "reference_block": 20,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 8,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 11,
+        "HTTP parameter pollution detected": 5,
+        "Command injection payload detected": 4,
+        "NoSQL injection payload detected": 4,
+        "Cross-site scripting payload detected": 4,
+        "CSRF attack pattern detected": 3,
+        "Profile picture manipulation attack detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 1,
+          "max": 3,
+          "mean": 2.5
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 1,
+          "mean": 0.75
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 4,
+          "mean": 2.28
+        }
+      },
+      "strata": {
+        "generic": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 14,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1,
+          "flip_rate": 0.9333333333333333,
+          "flip_rate_ci95": [
+            0.6805154334216965,
+            0.9983135697586474
+          ],
+          "net_direction": 0.9333333333333333,
+          "baseline_allow_rate": 0.9333333333333333,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": 1.0,
+          "conditional_A_to_B_ci95": [
+            0.7683642383498834,
+            1.0
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.9749999999999999
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0001220703125,
+          "reference_allow": 14,
+          "reference_block": 1,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "identifier": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 4,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 11,
+          "flip_rate": 0.26666666666666666,
+          "flip_rate_ci95": [
+            0.07787154629104359,
+            0.551003241036971
+          ],
+          "net_direction": 0.26666666666666666,
+          "baseline_allow_rate": 0.26666666666666666,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": 1.0,
+          "conditional_A_to_B_ci95": [
+            0.3976353643835252,
+            1.0
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.28491415291815436
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.125,
+          "reference_allow": 4,
+          "reference_block": 11,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 4 < 10 = ceil(2n/3))"
+          ]
+        },
+        "json_text": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 7,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 8,
+          "flip_rate": 0.4666666666666667,
+          "flip_rate_ci95": [
+            0.21266672951930793,
+            0.7341386527226033
+          ],
+          "net_direction": 0.4666666666666667,
+          "baseline_allow_rate": 0.4666666666666667,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": 1.0,
+          "conditional_A_to_B_ci95": [
+            0.5903836027749965,
+            1.0
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.3694166475528192
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.015625,
+          "reference_allow": 7,
+          "reference_block": 8,
+          "testable_A_to_B": false,
+          "testable_B_to_A": false,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 7 < 10 = ceil(2n/3))"
+          ]
+        },
+        "passlike": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 8,
+          "A_to_B": 7,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.4666666666666667,
+          "flip_rate_ci95": [
+            0.21266672951930793,
+            0.7341386527226033
+          ],
+          "net_direction": 0.4666666666666667,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 0.5333333333333333,
+          "conditional_A_to_B": 0.4666666666666667,
+          "conditional_A_to_B_ci95": [
+            0.21266672951930793,
+            0.7341386527226033
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.015625,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 4.190951585769653e-09,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT (A→B)",
+      "stratum_verdicts": {
+        "generic": "effect (A→B)",
+        "identifier": "indeterminate",
+        "json_text": "effect (A→B)",
+        "passlike": "effect (A→B)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-HASH:punct->hash",
+      "factor": "F2-HASH",
+      "block": "CONTENT",
+      "reference": "punct",
+      "level": "hash",
+      "n_bases": 60,
+      "tests": "M-content (# across contexts; punct = covered-char control; punct->hash = #-specificity)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 60,
+      "ALLOW_to_ALLOW": 1,
+      "A_to_B": 7,
+      "B_to_A": 8,
+      "BLOCK_to_BLOCK": 44,
+      "flip_rate": 0.25,
+      "flip_rate_ci95": [
+        0.14718607379900356,
+        0.3785963554795443
+      ],
+      "net_direction": -0.016666666666666666,
+      "baseline_allow_rate": 0.13333333333333333,
+      "paired_allow_rate": 0.15,
+      "conditional_A_to_B": 0.875,
+      "conditional_A_to_B_ci95": [
+        0.4734903291247935,
+        0.9968402764687481
+      ],
+      "conditional_B_to_A": 0.15384615384615385,
+      "conditional_B_to_A_ci95": [
+        0.06883923437830924,
+        0.28081108406329147
+      ],
+      "direction_consistency": 0.5333333333333333,
+      "mcnemar_exact_p_two_sided": 1.0,
+      "reference_allow": 8,
+      "reference_block": 52,
+      "testable_A_to_B": false,
+      "testable_B_to_A": true,
+      "flags": [
+        "UNTESTABLE_A_TO_B (reference-ALLOW 8 < 40 = ceil(2n/3))"
+      ],
+      "same_decision_reason_changed": 21,
+      "block_reasons_in_flips": {
+        "Command injection payload detected": 5,
+        "NoSQL injection payload detected": 4,
+        "SQL injection payload detected": 2,
+        "CSRF attack pattern detected": 1,
+        "HTTP parameter pollution detected": 1,
+        "Password reset request detected": 1,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 0,
+          "mean": 0.0
+        }
+      },
+      "strata": {
+        "generic": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 15,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 0.0,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": null,
+          "conditional_A_to_B_ci95": null,
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 0,
+          "reference_block": 15,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 0 < 10 = ceil(2n/3))"
+          ]
+        },
+        "identifier": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 15,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 0.0,
+          "paired_allow_rate": 0.0,
+          "conditional_A_to_B": null,
+          "conditional_A_to_B_ci95": null,
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 0,
+          "reference_block": 15,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 0 < 10 = ceil(2n/3))"
+          ]
+        },
+        "json_text": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 0,
+          "A_to_B": 0,
+          "B_to_A": 8,
+          "BLOCK_to_BLOCK": 7,
+          "flip_rate": 0.5333333333333333,
+          "flip_rate_ci95": [
+            0.26586134727739663,
+            0.7873332704806921
+          ],
+          "net_direction": -0.5333333333333333,
+          "baseline_allow_rate": 0.0,
+          "paired_allow_rate": 0.5333333333333333,
+          "conditional_A_to_B": null,
+          "conditional_A_to_B_ci95": null,
+          "conditional_B_to_A": 0.5333333333333333,
+          "conditional_B_to_A_ci95": [
+            0.26586134727739663,
+            0.7873332704806921
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0078125,
+          "reference_allow": 0,
+          "reference_block": 15,
+          "testable_A_to_B": false,
+          "testable_B_to_A": true,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 0 < 10 = ceil(2n/3))"
+          ]
+        },
+        "passlike": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 1,
+          "A_to_B": 7,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 7,
+          "flip_rate": 0.4666666666666667,
+          "flip_rate_ci95": [
+            0.21266672951930793,
+            0.7341386527226033
+          ],
+          "net_direction": 0.4666666666666667,
+          "baseline_allow_rate": 0.5333333333333333,
+          "paired_allow_rate": 0.06666666666666667,
+          "conditional_A_to_B": 0.875,
+          "conditional_A_to_B_ci95": [
+            0.4734903291247935,
+            0.9968402764687481
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.4096163972250034
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.015625,
+          "reference_allow": 8,
+          "reference_block": 7,
+          "testable_A_to_B": false,
+          "testable_B_to_A": false,
+          "flags": [
+            "UNTESTABLE_A_TO_B (reference-ALLOW 8 < 10 = ceil(2n/3))"
+          ]
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 1.0,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE",
+      "stratum_verdicts": {
+        "generic": "indeterminate",
+        "identifier": "indeterminate",
+        "json_text": "indeterminate",
+        "passlike": "effect (A→B)"
+      },
+      "heterogeneous": false
+    },
+    {
+      "comparison_id": "F2-APOS:plain->apostrophe",
+      "factor": "F2-APOS",
+      "block": "CONTENT",
+      "reference": "plain",
+      "level": "apostrophe",
+      "n_bases": 75,
+      "tests": "M-content (apostrophe across classes; surname stratum = in-run positive control)",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 75,
+      "ALLOW_to_ALLOW": 34,
+      "A_to_B": 37,
+      "B_to_A": 0,
+      "BLOCK_to_BLOCK": 4,
+      "flip_rate": 0.49333333333333335,
+      "flip_rate_ci95": [
+        0.3758481638287009,
+        0.6113610214084806
+      ],
+      "net_direction": 0.49333333333333335,
+      "baseline_allow_rate": 0.9466666666666667,
+      "paired_allow_rate": 0.4533333333333333,
+      "conditional_A_to_B": 0.5211267605633803,
+      "conditional_A_to_B_ci95": [
+        0.399215167761129,
+        0.6412208135344315
+      ],
+      "conditional_B_to_A": 0.0,
+      "conditional_B_to_A_ci95": [
+        0.0,
+        0.6023646356164745
+      ],
+      "direction_consistency": 1.0,
+      "mcnemar_exact_p_two_sided": 1.4551915228366852e-11,
+      "reference_allow": 71,
+      "reference_block": 4,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 1,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 26,
+        "Command injection payload detected": 6,
+        "NoSQL injection payload detected": 2,
+        "Cross-site scripting payload detected": 2,
+        "HTTP parameter pollution detected": 1
+      },
+      "matched_control": "CONTROL-COV2:val_a->val_b",
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": 1,
+          "max": 3,
+          "mean": 2.6
+        },
+        "percent_triplets": {
+          "min": 0,
+          "max": 1,
+          "mean": 0.8
+        },
+        "prompt_tokens": {
+          "min": 0,
+          "max": 5,
+          "mean": 3.09
+        }
+      },
+      "strata": {
+        "contraction": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 5,
+          "A_to_B": 9,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1,
+          "flip_rate": 0.6,
+          "flip_rate_ci95": [
+            0.3228697662062815,
+            0.8366356761404865
+          ],
+          "net_direction": 0.6,
+          "baseline_allow_rate": 0.9333333333333333,
+          "paired_allow_rate": 0.3333333333333333,
+          "conditional_A_to_B": 0.6428571428571429,
+          "conditional_A_to_B_ci95": [
+            0.3513801106159914,
+            0.8724015701408407
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.9749999999999999
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.00390625,
+          "reference_allow": 14,
+          "reference_block": 1,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "place_json": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 15,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 1.0,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.21801936091053403
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "possessive": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 7,
+          "A_to_B": 6,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 2,
+          "flip_rate": 0.4,
+          "flip_rate_ci95": [
+            0.16336432385951333,
+            0.6771302337937184
+          ],
+          "net_direction": 0.4,
+          "baseline_allow_rate": 0.8666666666666667,
+          "paired_allow_rate": 0.4666666666666667,
+          "conditional_A_to_B": 0.46153846153846156,
+          "conditional_A_to_B_ci95": [
+            0.1922324418012879,
+            0.7486545177296964
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.841886116991581
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.03125,
+          "reference_allow": 13,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "surname": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 1,
+          "A_to_B": 14,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.9333333333333333,
+          "flip_rate_ci95": [
+            0.6805154334216965,
+            0.9983135697586474
+          ],
+          "net_direction": 0.9333333333333333,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 0.06666666666666667,
+          "conditional_A_to_B": 0.9333333333333333,
+          "conditional_A_to_B_ci95": [
+            0.6805154334216965,
+            0.9983135697586474
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0001220703125,
+          "reference_allow": 15,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "title": {
+          "n_bases": 15,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 15,
+          "ALLOW_to_ALLOW": 6,
+          "A_to_B": 8,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 1,
+          "flip_rate": 0.5333333333333333,
+          "flip_rate_ci95": [
+            0.26586134727739663,
+            0.7873332704806921
+          ],
+          "net_direction": 0.5333333333333333,
+          "baseline_allow_rate": 0.9333333333333333,
+          "paired_allow_rate": 0.4,
+          "conditional_A_to_B": 0.5714285714285714,
+          "conditional_A_to_B_ci95": [
+            0.2886094000383074,
+            0.8233889100178822
+          ],
+          "conditional_B_to_A": 0.0,
+          "conditional_B_to_A_ci95": [
+            0.0,
+            0.9749999999999999
+          ],
+          "direction_consistency": 1.0,
+          "mcnemar_exact_p_two_sided": 0.0078125,
+          "reference_allow": 14,
+          "reference_block": 1,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": "CONTENT",
+      "holm_family_size": 10,
+      "holm_adjusted_p": 1.4551915228366852e-10,
+      "holm_reject": true,
+      "effect_class": "STRONG EFFECT (A→B)",
+      "stratum_verdicts": {
+        "contraction": "effect (A→B)",
+        "place_json": "no effect (testable)",
+        "possessive": "effect (A→B)",
+        "surname": "effect (A→B)",
+        "title": "effect (A→B)"
+      },
+      "heterogeneous": true
+    },
+    {
+      "comparison_id": "CONTROL-COV2:val_a->val_b",
+      "factor": "CONTROL-COV2",
+      "block": "CONTROL",
+      "reference": "val_a",
+      "level": "val_b",
+      "n_bases": 40,
+      "tests": "M-instability (content), stratified over test domains",
+      "n_invalid_pairs": 0,
+      "n_valid_pairs": 40,
+      "ALLOW_to_ALLOW": 33,
+      "A_to_B": 5,
+      "B_to_A": 2,
+      "BLOCK_to_BLOCK": 0,
+      "flip_rate": 0.175,
+      "flip_rate_ci95": [
+        0.07338272935208517,
+        0.3277901333615859
+      ],
+      "net_direction": 0.075,
+      "baseline_allow_rate": 0.95,
+      "paired_allow_rate": 0.875,
+      "conditional_A_to_B": 0.13157894736842105,
+      "conditional_A_to_B_ci95": [
+        0.044137440057915145,
+        0.28086384588375324
+      ],
+      "conditional_B_to_A": 1.0,
+      "conditional_B_to_A_ci95": [
+        0.15811388300841894,
+        1.0
+      ],
+      "direction_consistency": 0.7142857142857143,
+      "mcnemar_exact_p_two_sided": 0.453125,
+      "reference_allow": 38,
+      "reference_block": 2,
+      "testable_A_to_B": true,
+      "testable_B_to_A": false,
+      "flags": [],
+      "same_decision_reason_changed": 0,
+      "block_reasons_in_flips": {
+        "SQL injection payload detected": 4,
+        "NoSQL injection payload detected": 2,
+        "Cross-site scripting payload detected": 1
+      },
+      "matched_control": null,
+      "side_effects_level_minus_reference": {
+        "chars": {
+          "min": -7,
+          "max": 5,
+          "mean": -0.65
+        },
+        "percent_triplets": {
+          "min": -2,
+          "max": 1,
+          "mean": -0.05
+        },
+        "prompt_tokens": {
+          "min": -6,
+          "max": 4,
+          "mean": 0.03
+        }
+      },
+      "strata": {
+        "handle": {
+          "n_bases": 10,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 10,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 1.0,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 10,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "json": {
+          "n_bases": 10,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 3,
+          "A_to_B": 5,
+          "B_to_A": 2,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.7,
+          "flip_rate_ci95": [
+            0.3475471499400026,
+            0.9332604888222655
+          ],
+          "net_direction": 0.3,
+          "baseline_allow_rate": 0.8,
+          "paired_allow_rate": 0.5,
+          "conditional_A_to_B": 0.625,
+          "conditional_A_to_B_ci95": [
+            0.24486321636655167,
+            0.9147665858627465
+          ],
+          "conditional_B_to_A": 1.0,
+          "conditional_B_to_A_ci95": [
+            0.15811388300841894,
+            1.0
+          ],
+          "direction_consistency": 0.7142857142857143,
+          "mcnemar_exact_p_two_sided": 0.453125,
+          "reference_allow": 8,
+          "reference_block": 2,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "prose": {
+          "n_bases": 10,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 10,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 1.0,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 10,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        },
+        "token": {
+          "n_bases": 10,
+          "n_invalid_pairs": 0,
+          "n_valid_pairs": 10,
+          "ALLOW_to_ALLOW": 10,
+          "A_to_B": 0,
+          "B_to_A": 0,
+          "BLOCK_to_BLOCK": 0,
+          "flip_rate": 0.0,
+          "flip_rate_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "net_direction": 0.0,
+          "baseline_allow_rate": 1.0,
+          "paired_allow_rate": 1.0,
+          "conditional_A_to_B": 0.0,
+          "conditional_A_to_B_ci95": [
+            0.0,
+            0.3084971078187607
+          ],
+          "conditional_B_to_A": null,
+          "conditional_B_to_A_ci95": null,
+          "direction_consistency": null,
+          "mcnemar_exact_p_two_sided": 1.0,
+          "reference_allow": 10,
+          "reference_block": 0,
+          "testable_A_to_B": true,
+          "testable_B_to_A": false,
+          "flags": []
+        }
+      },
+      "holm_family": null,
+      "holm_family_size": null,
+      "holm_adjusted_p": null,
+      "holm_reject": false,
+      "effect_class": "WEAK/INCONCLUSIVE",
+      "stratum_verdicts": {},
+      "heterogeneous": null
+    }
+  ],
+  "anchors_verified": {
+    "PROTOCOL.md": "77ab7e8627eb41993dcfaf0a9c93a156f782436eb622d21bb4ca7430247f5d57",
+    "manifest.json": "6975f4808b7a65400e5a16554a44523edf3d0a9cdff1ecc6b89919daf4c1f6c3",
+    "cases.jsonl": "bb05e64000d15aae1a9abf0855420d367df6653b950f9516b820e795962ce6d0",
+    "minimal_pair_probe_v2_cases.py": "d7ba290e84561723023581c68e3ee7cc55c1b6454a2ec9da8cd804db1342b65e",
+    "run_v4_minimal_pair_probe_v2.py": "18cea1c8ce7f44470048708403805fac8a1e7f8408366950112e3c40db61956a"
+  },
+  "records_sha256": "4547738957213d3c9562d42ae9fa218c97c5afca30e41f567341af4b39fb6e45"
+}
