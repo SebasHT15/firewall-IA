@@ -208,8 +208,14 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
      - Specification: `reports/v5/v5-data-spec-draft/README.md` **`V5-DATA-SPEC-r3`, FROZEN 2026-10-13 (D62)**, a scoped freeze: the values in its §11.2 register stay PROPOSED / PENDING (superseding the earlier "DRAFT r3, not frozen"). The
        owner authorized the freeze on 2026-10-13. The spec freeze is not a dataset freeze (r3 §11.3).
      - Evidence: `reports/v5/freeze-prep/`.
-     - Nothing is implemented beyond independent checkers and tests. The generator, the
-       `canonicalize()` function and every deterministic control are **not** built.
+     - **Stage 1 (2026-10-13, issue #67, D63):**
+       - `canonicalize()` (`data_plane/canonical_request.py`) and the §5.4 tokenization helper
+         (`control_plane/v5_tokenization.py`) exist as independent, tested libraries.
+       - They are **not integrated**: the gateway still sends V4's D1 text.
+       - R1 is UNVERIFIED. P4 and P9 are conditioned.
+       - The V5 template is a PROPOSED candidate (candidate B = 415, not final).
+       - Report: `reports/v5/canonical-request-v1/`.
+     - The generator (stages 2–6) and every deterministic control are **not** built.
      - V4 and its runtime are unchanged.
      - Open security item: #65 (template special tokens in the V4 prompt). It is a representation
        finding; no decision effect has been measured. For V5, D56 prevents content from producing special-token
