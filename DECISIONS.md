@@ -2527,6 +2527,155 @@ denominator, never as operational rates).
 
 ---
 
+## D63 — V5 stage 1: `canonical-request/v1` implementation rulings (interpretations, P5 correction, dependencies, resource bounds)
+
+- **Date:** 2026-10-13
+- **Status:** APPROVED for the ratified interpretations, the P5 correction, the P12 list and the I7
+  clarification (owner ratification of 2026-10-13, issue #67). **CONDITIONED:** P4, P9. **PROPOSED, not
+  approved:** the V5 candidate template, the candidate output vocabulary, the strict output parser and
+  the decoder pins.
+- **Implementation:** DONE in the stage-1 working tree (`data_plane/canonical_request.py` and its tests,
+  issue #67), **not integrated**: the gateway still renders V4's D1 text (D56). Report:
+  `reports/v5/canonical-request-v1/README.md`.
+
+**Context.** Stage 1 implemented the frozen contract of `V5-DATA-SPEC-r3` §5.2–§5.6 (D62) as an
+independent library. Where the frozen text is silent, the implementation had to choose. The stage report
+lists twelve such interpretations, P1–P12. This entry records the owner's ruling on each. It changes no
+frozen requirement, so no r4 is needed.
+
+**Decision.**
+
+- **Ratified interpretations:**
+  - **P1 — Reject precedence.** The checks run in the fixed order R6 → R5 → R4 → R7 → R1 (residual) → R2
+    → [CONNECT] → R3 / R8 cap → R8 budget. The first failing check gives the reject and its reason.
+  - **P2 — CONNECT.** The outcome is `UNSUPPORTED` with signal `S-CONNECT`. No model text is produced.
+    Clarification of I7: "text or reject" governs requests inside the contract's domain, and §5.2 places
+    CONNECT outside it. `UNSUPPORTED` is neither a reject nor a text. **It never implies ALLOW.** Its
+    enforcement policy is decided at integration.
+  - **P3** — `\xNN` escapes use lowercase hex.
+  - **P6** — A `Content-Encoding` on an empty body: an unknown coding is still R3; nothing is decoded.
+  - **P7** — `x-gzip` is an alias of `gzip` (RFC 9110 §8.4.1.3).
+  - **P8** — `deflate` is tried zlib-wrapped first, then as raw deflate (RFC 9110 §8.4.1.2).
+  - **P10 — Residual R1.** `canonicalize` checks only the framing facts that survive parsing. **R1 stays
+    UNVERIFIED** until the wire-level tests at integration. The checks are:
+    - Transfer-Encoding together with Content-Length;
+    - more than one Transfer-Encoding field;
+    - Transfer-Encoding on HTTP/1.0;
+    - an empty Transfer-Encoding;
+    - `chunked` that is not final, or that is repeated;
+    - more than one Content-Length field;
+    - a non-numeric Content-Length;
+    - a Content-Length that differs from the body length.
+  - **P11 — Encoding signals are diagnostic only.** `S-ENC-*` and `S-UTF8-OVERLONG` are computed over the
+    raw target and the decoded body. They never trigger a block by themselves (D57). If a future POLICY
+    consumes them, it must define them per value.
+  - **P12 — Coding names in the audit record.** Only known coding names reach the audit record. Anything
+    else is recorded as `<other>`, never as the client's string. The transfer-coding list is corrected
+    to: `chunked`, `compress`, `deflate`, `gzip`, `x-compress`, `x-gzip` (RFC 9112 §7, §7.2).
+- **P5 — corrected behaviour.** The earlier rule treated every body-less request as in scope. The rule
+  now follows the literal text of §5.2:
+  - A declared `Content-Type` outside the §2.2 list, or a malformed one, is **out of scope even when the
+    body is empty**. Such a request gets `S-MEDIA-UNSUPPORTED`, and an oversize text gives `S-OVERSIZE`
+    rather than R8.
+  - Without `Content-Type`, only a body-less request is in scope.
+  - Whether the training data may contain a body-less request carrying an in-scope `Content-Type` is a
+    stage-2 generator question. It is not decided here.
+- **Conditioned interpretations. Neither validation is complete.**
+  - **P4 — Targets outside the RFC 9112 §3.2 forms.** They are rendered byte-preserved and recorded as
+    `target_form: other`. This is accepted only on condition that **integration demonstrates** these
+    targets never reach the model unnoticed, for example because the parser rejects them first. That
+    demonstration does not exist yet.
+  - **P9 — NUL padding in gzip.** The module follows CPython `gzip.decompress`: NUL padding between or
+    after members is allowed, and any other trailing data is R3. A bounded local differential check
+    compared seven components (`p9_gzip_padding_differential.json`):
+    - All components accept NUL padding after the last member.
+    - **They diverge on a member that follows NUL padding.** This module and CPython decode it. GNU gzip
+      (with a warning), pigz, busybox, Node `zlib` and mitmproxy's `encoding.decode` stop at the first
+      member.
+    - mitmproxy's decoder also ignores **any** second member and any trailing data.
+    - In the cases measured, this module sees a superset of what those components execute, or rejects.
+    - **No equivalence with any backend is assumed.** P9 stays conditioned until the owner chooses:
+      keep the superset behaviour, or treat data after NUL padding as R3.
+    - **Integration consequence:** the gateway adapter must pass mitmproxy's `raw_content` (de-chunked,
+      still coded) to `canonicalize`, never mitmproxy's decoded content.
+- **Clarification of "stdlib-only" (dated 2026-10-13; the frozen text is not edited).**
+  - The phrase appears only in §5.1, which is outside the detail D62 ratified. D56 requires only a
+    "pure, deterministic function".
+  - §5.2 (frozen) requires `br` and `zstd` decoding. Python 3.12 has no standard-library decoder for
+    either.
+  - Interpretation: `canonical_request.py` imports and runs on the standard library alone. The `br` and
+    `zstd` decoders come from the third-party `brotli` and `zstandard` packages, imported lazily. A
+    missing decoder is an explicit R3 `content-coding-decoder-unavailable:<c>`.
+  - No frozen requirement changes, so no r4 is needed.
+- **Dependencies (PROPOSED).**
+  - `requirements-v5-canonical.txt` pins `Brotli==1.2.0` and `zstandard==0.25.0`. These are the versions
+    already installed in `.venv-dataplane` through `mitmproxy==12.2.3`. Nothing was installed.
+  - Verified on CPython 3.12.15, linux x86_64: `canonicalize` decodes gzip, br and zstd with only these
+    two packages on `sys.path`, with mitmproxy, transformers and torch absent. The generator can
+    therefore run without mitmproxy.
+  - Still the owner's to decide: pinning them in `requirements-data-plane.txt`, wheel hashes, and other
+    interpreters or platforms.
+- **Resource bounds of the decoders (implemented and tested; `MAX_DECODED_BODY` still PENDING).**
+  - Output bound per coding, enforced by the code and measured:
+    - gzip and deflate: at most cap + 1 bytes;
+    - br: at most cap + 32,752 bytes. This relies on Brotli 1.2.0's per-step block, and a test pins it;
+    - zstd: at most cap + 17 × 128 KiB.
+  - Time is linear in the size of the body. Two quadratic cases were found and fixed: bodies made of
+    many gzip members or zstd frames, and draining a large Brotli body (found by the independent
+    decoder review).
+  - Peak RSS growth measured while rejecting a 64 MiB bomb with a 1 MiB cap: about 1.8 MiB for
+    gzip/deflate, about 4.9 MiB for br/zstd, and about 17 MiB for a br stream with the maximum 16 MiB
+    window.
+  - A zstd frame that declares a 128 MiB window is not rejected. Its measured cost stays bounded by the
+    cap. RFC 9659's 8 MB window limit for HTTP is noted as an option for integration, not adopted.
+  - The guarantee is evidence from the code and the tests, not a formal proof. It depends on the pinned
+    library versions.
+- **V5 template — PROPOSED, not frozen.**
+  - **Structure:** TinyLlama-Chat's own chat template, verified on the base snapshot `fe8a4ea` and the V4
+    copy: `<|system|>\n{instruction}</s>\n<|user|>\n{canonical text}</s>\n<|assistant|>\n{output}</s>`.
+    The role markers are ordinary text; only `<unk>`, `<s>` and `</s>` are special. BOS and EOS are placed
+    as ids, and content is encoded with special-token parsing disabled (§5.4).
+  - **Instruction:** the owner's candidate text of 2026-10-13.
+  - **Output vocabulary:**
+    - ALLOW uses the existing V4 contract string, "Normal HTTP request with no attack patterns detected."
+      (`parse_dataset_v4.py`). Reusing it for V5 is PROPOSED.
+    - BLOCK uses the V4/D47 reason strings of the categories planned in §2.3, whose tiering is PROPOSED.
+  - **Candidate measurements, not final V5 values,** taken with the base TinyLlama tokenizer:
+    `template_overhead` 76, `label_budget` 13 (also 13 over all 20 V4 strings), `B` = 512 − 76 − 13 − 8 =
+    **415**. Additivity holds and no special ids appear in content (343 texts). The same texts each have
+    exactly one structural assistant turn: role markers injected into content never become structural.
+    The residual textual risk of #65 is unchanged.
+  - **Strict output parser (PROPOSED for integration).** After stripping the generated text at the first
+    EOS, the output is valid only if it equals one string of the ratified vocabulary exactly. Anything
+    else is `status: invalid` (D25), which the data plane enforces fail-closed (D4, D34). V4's search
+    regex is not reused.
+  - The final `template_overhead`, `label_budget` and `B` are fixed only after the template and the
+    vocabulary are ratified, and they are recorded in the preregistration.
+- **Deferred to integration.** None of these is implemented, and none may be described as done:
+  - the mitmproxy adapter, which passes `raw_content`;
+  - the wire-level R1 tests;
+  - HTTP/2 compatibility;
+  - the value of `MAX_DECODED_BODY` (≥ 48·B);
+  - client-visible reject statuses (D34);
+  - the policies for `UNSUPPORTED`, `S-MEDIA-UNSUPPORTED`, `S-OVERSIZE` and the escape signals;
+  - the P4 demonstration and the P9 choice;
+  - the deferred signals `S-JWT-*` and `S-ORIGIN-CROSS`;
+  - I1 and end-to-end I2.
+
+**Rationale.** The ratification review of 2026-10-13 accepted the twelve interpretations with the
+corrections and conditions above. The first independent review (Agent B) found three defects. The
+decompression-limit review found two more, and the independent decoder review found a third. All six
+were fixed and tested. The evidence is in
+`reports/v5/canonical-request-v1/`.
+
+**Relationship to earlier entries.**
+- Implements D56 and D57 under D62.
+- **D56–D62 and the frozen file are unchanged** (SHA-256 `f1580634…` verified). No r4.
+- The I7 and "stdlib-only" clarifications interpret the frozen text. They do not amend it.
+- Nothing is superseded.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -2593,6 +2742,7 @@ denominator, never as operational rates).
 | D60 | V5 split: constructive, `struct_cluster_id` / `payload_family_id`, 70/10/20, groups never fragmented, evaluability from real counts (D18), ~8% E6 reserve, protected evaluations | APPROVED | NOT YET |
 | D61 | Documented V4 limitations: double encoding, `%25XX` class shortcut, D15 incidental forms, 89 label-truncated rows, third-party PATT files (addendum to D15, D20) | APPROVED | DONE (documentation) |
 | D62 | V5 Data Specification r3 FROZEN (`V5-DATA-SPEC-r3`, SHA-256 `f1580634…`): §4.6, §5.2–§5.6 and §4.3 classes/precedence ratified; thresholds, constants, category distribution and open lists excluded (r3 §11.2) | APPROVED | DONE (freeze record; spec not implemented) |
+| D63 | V5 stage 1 `canonical-request/v1` rulings: P1–P3, P5 (corrected), P6–P8, P10–P12 ratified; P4, P9 conditioned; I7/CONNECT and "stdlib-only" clarified; decoder bounds; V5 candidate template PROPOSED (candidate B = 415, not final) | APPROVED (P4, P9 conditioned; template PROPOSED) | DONE (stage 1, not integrated, #67) |
 
 ---
 
