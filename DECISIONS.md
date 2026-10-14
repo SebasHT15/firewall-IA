@@ -29,6 +29,7 @@ level. Not a conventional stateful network firewall.
   shape matching in `parse_dataset_v4.py`; the verification below is met on `datasets/v4_clean/`:
   E0 reports no deterministic label reveal, warnings for category scarcity only —
   `reports/e0_dataset_integrity_v4_clean.txt`). *Status field updated 2026-10-01.*
+- *Scope note (2026-10-11): for the **V5** model text only, D56 replaces the `Content-Length`/`Transfer-Encoding` clause and D57 the header policy. D1 is unchanged for V4.*
 
 **Decision.** Keep the HTTP envelope, but neutralize dataset shortcuts across classes.
 
@@ -425,6 +426,7 @@ Evidence: `reports/e1_training_pipeline_smoke.txt` §9.
 - **Date:** 2026-08-17
 - **Status:** APPROVED
 - **Implementation:** DONE — `parse_dataset_v4.py`, 2026-08-17
+- *Scope note (2026-10-11): D58 is the V5 successor of this decision; D13 remains the record for V4.*
 
 **Decision.** For the current clean baseline use CSIC Normal traffic plus **improved** synthetic
 benign traffic. Do **not** add a new external benign dataset in this phase.
@@ -480,6 +482,7 @@ Evidence: `reports/e2_e3_clean_dataset.txt` §7.
 - **Date:** 2026-08-17
 - **Status:** APPROVED
 - **Implementation:** DONE (separation established) — adversarial suite NOT built
+- *Addendum pointer (2026-10-11): see D61 — no held-out transform was applied, but the separation's purpose is compromised at the rendered-text level for double-encoding forms in V4 data; this text is unchanged.*
 
 **Decision.** Obfuscation must no longer serve as both training augmentation and adversarial
 evidence using the same transform families. Reserve some families for training augmentation
@@ -763,6 +766,7 @@ model. Evidence: `reports/e5_evaluation_methodology.txt`.
 - **Date:** 2026-08-18
 - **Status:** APPROVED
 - **Implementation:** N/A — an interpretation policy
+- *Addendum pointer (2026-10-11): see D61 — the "no shortcut" finding covers envelope features only; a payload-level encoding cue exists in V4 data.*
 
 **Decision.** The first full V4-clean training run (Issue #7) is accepted as the project's
 **first scientifically interpretable baseline** under the frozen E5 methodology (D19).
@@ -1686,6 +1690,7 @@ Test v1 data, so the D40 tripwire is not triggered.
 - **Status:** APPROVED
 - **Implementation:** DONE (Phase 1) — `data_plane/request_features.py`, tests in
   `tests/test_request_features.py`
+- *Scope note (2026-10-11): D57 extends this exclusion to the V5 model text and every V5 input; the sentence that a future V5 model stays under D1 is superseded for V5 by D56/D57.*
 
 **Decision.**
 
@@ -2038,11 +2043,495 @@ Test v1 remains unused.
 
 ---
 
+## D56 — V5 model input: `canonical-request/v1` (modifies D1's scope for V5 only)
+
+- **Date:** 2026-10-11
+- **Status:** APPROVED (owner approval of P1 with adjustments, 2026-10-11, issue #64)
+- **Implementation:** NOT YET. The contract is specified in the V5 Data Specification
+  (`reports/v5/v5-data-spec-draft/README.md`, DRAFT r3 §5). No `canonicalize()` exists yet.
+  Gateway integration is deferred to a later phase.
+
+*Numbering note: research note `reports/v5/research-notes-v2/E_verdict_only.md` used the label
+"Draft D56" for verdict-prefix early stopping. That draft was never recorded. This D56 is
+unrelated to it.*
+
+**Decision.**
+
+- **One contract for training and inference.** The V5 model scores a canonical text produced by a
+  single, pure, deterministic function. The V5 dataset generator and the gateway call the same
+  function. Its form is option C minimal of the freeze-prep review:
+  - request line `METHOD TARGET HTTP/1.1`;
+  - `Content-Type` as the only header (D57);
+  - a blank line and the body only when the body is non-empty.
+- **Framing and unequivocal protocol anomalies are validated deterministically, never by the
+  model.**
+  - Framing headers (`Content-Length`, `Transfer-Encoding`) and hop-by-hop headers are not part
+    of the text.
+  - Framing information goes to a structured audit record.
+- **Byte, encoding, binary and compressed content are handled exactly as DRAFT r3 §5.2 defines.**
+  In summary:
+  - target and body bytes are preserved, with no percent-decoding or re-encoding;
+  - the body is de-chunked and content-decoded (`gzip`, `deflate`, `br`, `zstd`);
+  - a body that is not valid UTF-8 is rendered with `\xNN` escapes and flagged;
+  - media types outside the V5 training scope (multipart, binary types) are flagged, not
+    rendered differently;
+  - their enforcement policy is decided at integration time, explicitly.
+- **Rejects require a verifiable technical justification and compatibility tests.**
+  - Every reject rule cites the RFC clause or the documented parser-disagreement risk that
+    justifies it.
+  - Every reject rule ships with a valid counterpart that must *not* be rejected.
+  - Non-UTF-8 or non-ASCII octets in header field values are **not** treated as invalid
+    (RFC 9110 §5.5 permits `obs-text`). Only CR, LF and NUL in a field value are rejected.
+  - Anomalies that do not justify rejection (multi-layer percent-encoding, `%u`, `%00`,
+    overlong UTF-8, charset other than UTF-8, body not matching its declared type) are
+    recorded as **signals**.
+  - A signal never blocks by itself (D57).
+- **No universal backend-equivalence claim.** The contract guarantees train/serve identity and
+  the removal of framing from the model text. It does not guarantee that every backend
+  interprets the request as the model saw it: percent-decoding and charset handling are
+  application-specific.
+- **Template integrity.** Request content can never produce the model template's special tokens.
+  - Template segments and content are tokenized separately.
+  - Template special-token ids are placed explicitly.
+  - Content is encoded with special-token parsing disabled.
+  - The same tokenization is used in training and inference.
+  - Evidence: `reports/v5/freeze-prep/F_tokenizer_input_bounds.md` (0 of 28,453 normal rows,
+    25,134 V4 TRAIN plus 3,319 development rows, change ids under this method). The V4 finding is issue #65.
+- **Size.**
+  - `max_length = 512` and a margin of 8 tokens are accepted provisionally. They must be
+    re-verified with the final V5 template.
+  - Token budget = `max_length` − template overhead − label budget − margin, measured with the
+    V5 template and tokenizer.
+  - The control plane checks the exact token count. The data plane, whose environment carries no
+    tokenizer dependency (separate environments, D33), uses byte bounds derived from the measured worst-case bytes-per-token ratio.
+  - Oversize requests are **rejected, never truncated**.
+  - Generated training rows over the budget are excluded and counted **per category and class**.
+    No row is ever truncated, because V4's tail truncation removed the label of 89 TRAIN rows
+    (D61).
+
+**Rationale.**
+- Workstream A audit: train/serve skews X1–X19. In V4 TRAIN, `Transfer-Encoding` appears on only
+  5 rows, all BLOCK smuggling rows. `Content-Length` appears on only 9 rows: 6 BLOCK, plus the 3
+  ALLOW benign framing counterparts (`reports/v5/freeze-prep/README.md` §S4). At serving, every
+  chunked client shows `Transfer-Encoding`.
+- Minimal-pair probe v1: `Transfer-Encoding: chunked` flipped V4 in 18 of the 33 pairs that were
+  ALLOW at baseline (18 of 40 overall). A correct `Content-Length` flipped it in 1 of 33.
+- `real-http-fp-v1`: `Host`, port and user-agent sensitivity (development data).
+- Framing research notes F, G and H: smuggling is a parser-disagreement problem.
+- Workstream F: the special-token representation finding (#65).
+
+**Relationship to earlier entries.**
+- **Modifies the scope of D1 for V5 only.** For the V5 model text, D1's clause "preserve
+  `Content-Length`/`Transfer-Encoding`" is replaced by deterministic framing validation. D1's
+  header-preservation clause is replaced by D57's header policy.
+- D1 remains in force, unchanged, for **V4**: its dataset, its renderer
+  (`data_plane.render_request`) and its runtime are not modified.
+- D1's intent (do not blind detection to causal framing) is preserved by moving framing to
+  deterministic validation.
+- Supersedes, for V5 only, D44's sentence that a future V5 model "D1 continues to govern" (see
+  D57).
+- D43 is unchanged: the Phase 1 shadow extractor still reads the V4/D1 text.
+- Applies D33 (separate environments) and D34 (a contract reject is distinct from the
+  fail-closed 503; the client-visible status is decided at integration).
+
+---
+
+## D57 — V5 headers, control layers and coverage terminology (extends D44)
+
+- **Date:** 2026-10-11
+- **Status:** APPROVED (owner approval of P2 with adjustments, 2026-10-11, issue #64)
+- **Implementation:** NOT YET for every control named below. **No deterministic control listed
+  here is implemented by the project today**, and none may be described as protecting a
+  category until it is implemented and tested.
+
+**Decision.**
+
+- **Only `Content-Type` enters the V5 model text.**
+  - `Host`, `User-Agent`, `Authorization`, `Cookie` and every other header are excluded, as are
+    any values derived from them (hash, length, flag, relation, or similar).
+  - `Authorization` may be parsed deterministically (scheme, structural JWT checks). Its value,
+    or a hash of it, never reaches a model, the model text or logs.
+- **Three outcomes in the deterministic layer:**
+  - **REJECT:** contract violation only (D56).
+  - **SIGNAL:** recorded; **no enforcement effect**.
+  - **POLICY:** blocks only under an explicit, documented and enabled policy.
+  - A risk signal never implies BLOCK by itself.
+  - A policy that depends on application context (trusted origins, redirect or egress
+    allowlists, expected media types) must state that context explicitly.
+  - This decision enables no policy.
+- **Coverage terminology.** Every category is described along five separate dimensions, never by
+  a single count:
+  1. **ML-trained**: the category is in the V5 training data;
+  2. **Evaluated**: sufficient independent evidence under D18/D60;
+  3. **Deterministic control implemented and tested**;
+  4. **Protection proposed only**;
+  5. **Not supported**.
+  - The per-category assignment for V5 is in DRAFT r3 §2.3.
+  - Categories without sufficient evidence are reported `NOT EVALUABLE`. D18's combined marker
+    is "INSUFFICIENT DATA / NOT EVALUABLE"; for V5 one label covers both D19 cases (see D60).
+    Categories without any control are reported `NOT SUPPORTED`.
+  - JWT, CSRF, HPP and request smuggling are not V5 ML tasks; their treatment is deterministic
+    or policy-based and is **proposed**, not implemented.
+  - Request smuggling: mitmproxy's default `validate_inbound_headers=true` rejects many
+    conflicting-framing forms before the addon (research note G). That is third-party
+    behaviour the project neither pins nor tests, so it does not count as a project control
+    until it is pinned and tested.
+- **All 19 categories remain the long-term project target (D18).** D57 assigns a control layer
+  per category for V5. It does not lower D18's reporting standard.
+
+**Rationale.** Second critical review (issue #64), all counts over V4 TRAIN
+(recorded and reproducible in `reports/v5/freeze-prep/README.md` §S4):
+- 94 of 95 JWT rows are not tokens, and every benign token shares one constant HS256 header.
+- All 38 CSRF rows are lexically separable ("evil"/"attacker" or `Origin: null`).
+- `Referer` co-occurs with `Origin` in 66 of 66 rows.
+- `Cookie` is label-neutral (6,952 BLOCK / 6,931 ALLOW).
+- Putting `Origin`, `Referer` or `Authorization` in the text would teach shortcuts and expose
+  credentials, with no V5 training rows to exercise them.
+
+**Relationship to earlier entries.**
+- **Extends D44:**
+  - D44's prohibition on `Host`/`User-Agent` and their derivations, previously limited to
+    request features and Hybrid Architecture model inputs, now also covers the **V5 model text
+    and every V5 input**.
+  - No model input may contain a value derived from `Host`.
+  - A deterministic rule may compare `Origin` with the request's destination authority, because
+    that is not a model input. The result is only a deterministic SIGNAL or POLICY input. It is
+    never a `RequestFeatures` field, an Analyzer or Decision Model input, or part of the V5 text.
+  - D44's statement that a future V5 model stays under D1 is superseded for V5 (D56).
+  - D44 is otherwise unchanged.
+- Consistent with D18 (19-category target; NOT EVALUABLE reporting), D48 (JWT excluded from
+  Analyzer fitting) and D34 (fail-closed unchanged).
+
+---
+
+## D58 — V5 dataset composition and sources (V5 successor of D13)
+
+- **Date:** 2026-10-11
+- **Status:** APPROVED (owner approval of P3 with adjustments, 2026-10-11, issue #64)
+- **Implementation:** NOT YET. The generator is not written.
+
+**Decision.**
+
+- **A new minimal generator builds the V5 dataset.**
+  - Hand-written request templates.
+  - V4 helpers imported, never edited.
+  - No automated OpenAPI extraction in the first version. OpenAPI specs are a structural
+    reference only, used when needed.
+  - V4-clean rows are not reused verbatim.
+- **Attack pool.** PayloadsAllTheThings at the pinned commit
+  `e961fef231d8327bae83b563fab50aec2e6b77c0`, through the existing extraction, with these
+  controls:
+  - **Third-party file exclusion.** A PATT file whose name or header identifies a third-party
+    origin is excluded unless its licence is verified as compatible with the approved use and
+    its attribution is recorded. Examples: `FUZZDB_*.txt`; `Generic_TimeBased.txt` (header "# from
+    wapiti", which references a GPL-2.0 project; applicability to the file unverified); `dotdotpwn.txt`; `JHADDIX_*`; `xss_alert*.txt`; `MarioXSSVectors.txt`.
+    The deny-list is versioned and hashed in the manifest.
+  - **Justified negative structural filters** from the attack-pool audit: prose, tool output,
+    placeholders, markdown residue, setup commands, and similar. Never positive keyword
+    signatures.
+  - **A cap on any single source file's share of a category.**
+- **One shared encoder for both classes.** Each value is encoded once (D61 controls).
+- **Length, structure and carrier are controlled between ALLOW and BLOCK.**
+  - Paired twins.
+  - Length-matched draws.
+  - Generator-shortcut audits.
+- **CSIC 2010 is excluded from TRAIN.**
+  - It may be used only as optional, local, report-only evaluation slices.
+  - It is never redistributed.
+  - It is never presented as an independent evaluation, because V4 trained on it.
+  - It publishes no licence, and its page states that the personal data in it derives from
+    real databases.
+- **Benign value sources:**
+  - **Names:** Wikidata CC0, given-name and family-name items only, recombined. No living
+    person's full name is taken.
+  - **Prose:** the CC0 export of Tatoeba (`sentences_CC0`), pinned by SHA-256.
+  - **Streets:** a synthetic street lexicon authored and documented in this repository, diverse,
+    with no real personal addresses.
+- **Label audit.**
+  - The initial attack-pool audit (`reports/v5/freeze-prep/E_attack_pool_audit/`) is accepted
+    as **exploratory evidence, not independent ground truth**.
+  - The second annotation uses a model different from the first annotator, and discrepancies
+    are reviewed.
+  - A stratified sample is prepared for independent **human** review.
+  - Agreement between two LLMs is never presented as human validation.
+- **Mandatory dataset acceptance condition** (not a spec-freeze condition): after the filters,
+  each ML-primary category must pass the post-filter audit defined in DRAFT r3 §7.
+- **Provenance per D6.**
+  - Every source is pinned by commit or SHA-256 and recorded in the manifest with its licence
+    and attribution.
+  - A third-party notices policy is applied.
+  - The V5 dataset directory is gitignored explicitly.
+
+**Rationale.**
+- Workstream D (`D_sources_provenance.md`): licences verified against official sources;
+  third-party files embedded in PATT; CSIC terms absent.
+- Workstream E (`E_attack_pool_audit/`):
+  - markdown-sourced items are 52% INCORRECT vs 7% for wordlist files (LLM-assisted audit);
+  - `dotdotpwn.txt` is 98% of the traversal pool and mostly UNCERTAIN.
+- Workstream B (`B_dataset_engineering_audit.md`): V4 generator defects that must not be
+  carried over.
+
+**Relationship to earlier entries.**
+- **V5 successor of D13**, which stays as the record of V4's benign strategy and is not
+  superseded for V4.
+- D17's caps stay the record for V4; V5 balance is by pairs and computed evaluability (D60).
+- Applies D6, D14, D21 (no growth for row count alone) and D15 (training transforms only, as
+  recorded variants).
+
+---
+
+## D59 — V5 labeling policy and label metadata
+
+- **Date:** 2026-10-11
+- **Status:** APPROVED (owner approval of P4 with adjustments, 2026-10-11, issue #64)
+- **Implementation:** NOT YET. The policy table and the invariants are in DRAFT r3 §4.3–§4.5.
+
+**Decision.**
+
+- **The model output stays `ALLOW | reason` / `BLOCK | reason`.** D25 and D4 are unchanged.
+- **A training label is a function of provenance, of the value's structure and of explicit
+  policies:**
+  - never of the parameter name alone;
+  - never inferred from a model;
+  - never inferred from keywords.
+  - The slot role may decide only whether a row is included.
+- **Three kinds of example are distinguished:**
+  - **unequivocal**: `VERIFIED`;
+  - **policy-dependent**: `POLICY_DEFINED`. Each carries a `policy_id` whose entry in the
+    versioned policy table states the rule **and the application context it assumes**;
+  - **insufficiently contextualized or ambiguous**: `EXCLUDED`.
+- **Specific rules:**
+  - An internal or loopback address is **never** labelled malicious automatically. Plain
+    loopback, private and internal destinations are excluded as `INSUFFICIENT_CONTEXT`.
+  - An external callback URL is **not** assumed always legitimate. Public external URLs are
+    labelled ALLOW only as `POLICY_DEFINED`, under an explicit context: the application
+    authorizes public destinations, and destination control belongs to the application or an
+    egress policy.
+  - BLOCK labels for metadata destinations, disallowed schemes, obfuscated host forms or
+    redirect parser-differential forms are `POLICY_DEFINED`, each with its explicit context.
+  - Benign text is never labelled malicious because it contains code or attack syntax.
+  - Text containing a complete attack-pool payload is excluded as `AMBIGUOUS`. BLOCK labels
+    come only from inserted attack-pool payloads.
+  - Legitimate technical prose, code and markup are deferred from the initial TRAIN while
+    their labels are not verifiable. This deferral is recorded as a coverage limitation and as
+    a candidate for future evaluation.
+- **Metadata schema (approved):**
+  - `label_status ∈ {VERIFIED, POLICY_DEFINED, EXCLUDED}`.
+  - `exclusion_reason ∈ {AMBIGUOUS, INSUFFICIENT_CONTEXT, ORACLE_REJECT, AUDIT_REJECT,
+    OUT_OF_SCOPE, OVER_LIMIT}`, present if and only if the row is `EXCLUDED`.
+  - `policy_id`, present if and only if the row is `POLICY_DEFINED`.
+  - Invariants and validations are in DRAFT r3 §4.5. Among them: TRAIN holds no `EXCLUDED` row,
+    and headline metrics are reported for `VERIFIED` and `POLICY_DEFINED` rows separately as
+    well as combined.
+
+**Rationale.**
+- Second critical review and coordinator analysis
+  (`reports/v5/freeze-prep/G_labeling_and_split_proposal.md` §1).
+- V4 labelled SSRF purely by source folder: of 186 rows, 47 metadata, 50 loopback, 8 private,
+  6 non-HTTP scheme, 75 other.
+- V4 used envelope hosts as benign URL values.
+- A text-only classifier has no application context.
+
+**Relationship to earlier entries.** Applies D38's principle that ambiguous cases are excluded and
+logged, not guessed (extended here from external-test construction to V5 data). Applies D25 and D4
+(binary output, fail-closed) and D42 (diagnostic counts are reported with numerator and
+denominator, never as operational rates).
+
+---
+
+## D60 — V5 split, protected evaluations and the E6 reserve
+
+- **Date:** 2026-10-11
+- **Status:** APPROVED (owner approval of P5 with adjustments, 2026-10-11, issue #64)
+- **Implementation:** NOT YET. The algorithm and its invariants are in DRAFT r3 §4.6.
+
+**Decision.**
+
+- **Constructive generation.** Split identities are assigned before rendering (D16). Each row is
+  generated only from its split's partitions, so no row is dropped for split membership.
+- **Identities:**
+  - **`template_id`**: structural skeleton, field names excluded.
+  - **`struct_cluster_id`**: declared by the template author; near-duplicate templates are
+    merged in the declarations, never split.
+  - **`payload_family_id`**: D16 `canonical_key` plus collapse of digits, hosts and repeats;
+    variants and encodings share their family.
+  - **`value_entry_id`**: elements of the HIGH-concept leaf pools.
+  - **`pair_id`**: a benign row and its twins, generated inside one split.
+- **Shares.**
+  - Initial shares are TRAIN 70% / VALIDATION 10% / INTERNAL TEST 20%.
+  - Assignment is by hash rank, stratified, independent of input order and `PYTHONHASHSEED`.
+- **No related group is ever fragmented to reach a percentage.**
+  - The 2% cluster-share figure is a diagnostic and control criterion. It never authorizes
+    breaking a group identity.
+  - If a cluster exceeds it, quotas are rebalanced while the cluster stays whole.
+  - If assignment cannot be done correctly, the build reports the problem and **stops**.
+- **Category evaluability is computed from real counts, after the reserve and partitioning.**
+  No fixed family count is taken as a statistical guarantee.
+  - A category is reported per category only if it has ≥ 100 independent payload families in
+    the dataset and ≥ 30 in INTERNAL TEST. These are the D18/D19 thresholds, applied at the
+    `payload_family_id` level.
+  - Otherwise it is `NOT EVALUABLE`, and it is not forced into INTERNAL TEST.
+  - **V5 redefinition, stated explicitly:** D19 distinguished INSUFFICIENT DATA (< 100 logical
+    groups or eval support < 30) from NOT EVALUABLE (zero eval rows). For V5 the unit becomes
+    `payload_family_id`, and the single label `NOT EVALUABLE` covers both cases. The thresholds
+    are D19's. D18's rule that no per-category performance claim is made for such categories
+    applies unchanged.
+- **E6 reserve.** About 8% of logical payload families are reserved for the held-out evasion
+  evaluation (issue #29). They are independent of TRAIN, VALIDATION and INTERNAL TEST.
+  - It applies only where the category stays evaluable after the reserve and the reserve itself
+    reaches ≥ 30 families.
+  - Categories where an independent reserve is not statistically defensible are documented.
+  - Reserve families and all their variants are absent from every split, and no training
+    transform is applied to them.
+- **Protected evaluations:**
+  - `STAB-HELD` is a separate, sealed stability set.
+  - External Test v1 stays under D40: no individual inspection. In addition, by analogy with
+    D53, **this decision limits V5 to at most one preregistered aggregate run** on External v1.
+    D40 itself sets no run limit.
+  - **External v2** is the later independent evaluation required for any V5 external claim.
+  - The earlier probes and diagnostics are development data.
+  - INTERNAL TEST is read once, behind a single-run guard.
+
+**Rationale.**
+- Second critical review (issue #64):
+  - similarity union-find over V4 benign value-masked templates (an analogy, not V5 data) produced a
+    component holding 33% of those rows at Jaccard 0.6;
+  - a "drop unless all identities agree" rule would leave about 0.34% of rows in VALIDATION at
+    15%;
+  - TEST support favours 20%.
+- Coordinator split analysis (`G_labeling_and_split_proposal.md` §2).
+
+**Relationship to earlier entries.**
+- Applies and extends D16 (identities before rendering) and D37 (four roles).
+- Applies D18/D19 (evaluability thresholds), D15 (held-out base identities via the E6 reserve),
+  D40 and D45.
+- Nothing is superseded.
+
+---
+
+## D61 — Documented V4 limitations found during the V5 freeze preparation (dated addendum to D15, D20)
+
+- **Date:** 2026-10-11
+- **Status:** APPROVED (owner authorization of 2026-10-11 to document verified findings)
+- **Implementation:** DONE (documentation only). No V4 dataset, model, metric or report is
+  changed.
+
+**Recorded findings (FACT, recomputed over `datasets/v4_clean/`; evidence in
+`reports/v5/freeze-prep/`).**
+
+1. **Double encoding in the rendered text.**
+   - `%25XX` occurs in 3,473 BLOCK and 0 ALLOW TRAIN rows, and in 881 BLOCK and 0 ALLOW eval
+     rows.
+   - Sources of the 3,473:
+     - 697 are CSIC-native;
+     - 2,057 come from the renderer's `quote(..., safe="")` re-encoding PATT payloads that were
+       already percent-encoded;
+     - 719 are `url_encode` training-transform variants re-encoded by the renderer.
+2. **Encoding shortcut between classes.**
+   - The rule "`%25XX` ⇒ BLOCK" alone reaches 63.8% accuracy on TRAIN and 64.2% on eval, with
+     0 false BLOCKs.
+   - E0 (`check_dataset.py`) audits only non-payload features, so D20's "no shortcut" statement
+     (best feature 51.16%) holds for the **envelope only**.
+3. **Reserved transforms vs incidental representations.**
+   - D15's `HELD_OUT_TRANSFORMS` are descriptions with no code, and none was ever applied.
+     **D15 was not literally violated.**
+   - Its purpose (training forms disjoint from held-out evasion evidence) is compromised for
+     double-encoding forms, which occur incidentally through the renderer and the source data.
+   - The 137 lowercase-hex BLOCK rows are native PATT bytes, not `mixed_case_percent` output.
+4. **Truncation.**
+   - 94 TRAIN sequences (0.37%, all BLOCK) exceed `max_length = 512`.
+   - In 89 of them no label token survives TRL's tail truncation.
+5. **Third-party dependencies in the attack pool.**
+   - The extraction reads PATT files of third-party origin, for example `FUZZDB_*.txt`,
+     `Generic_TimeBased.txt` ("# from wapiti") and `dotdotpwn.txt`.
+   - Their headers or names point to other projects: FuzzDB (New BSD + CC BY) and a GPL-2.0
+     project for wapiti. Whether PATT's MIT licence covers them is an unverified inference, and
+     their licences are not all verified (`reports/v5/freeze-prep/D_sources_provenance.md`).
+
+**Consequences.**
+- V4's historical metrics stand as reported and are not recomputed.
+- No robustness test was executed. Evasion robustness remains **unmeasured**. D15 states this
+  explicitly; D20 states the baseline is not proof of robustness.
+- A future held-out evasion evaluation of V4 (#29) must report double-encoding forms as
+  in-distribution.
+- These are disclosed limitations for the V4 record (#25).
+- The corresponding controls for V5 are D56, D58 and D60, plus the encoding controls in DRAFT r3
+  §6.
+
+**Relationship to earlier entries.**
+- Dated addendum to **D15** and **D20**. Their original text is preserved unchanged.
+- Nothing is superseded.
+
+---
+
+## D62 — V5 Data Specification r3 FROZEN (scoped freeze)
+
+- **Date:** 2026-10-13
+- **Status:** APPROVED (owner authorization of the freeze, 2026-10-13, issue #64)
+- **Implementation:** DONE for the freeze record. The specification is frozen; **nothing it specifies
+  is implemented**: no generator, no `canonicalize()`, no deterministic control.
+
+**Decision.**
+
+- **Frozen artifact.** `reports/v5/v5-data-spec-draft/README.md`, specification id
+  **`V5-DATA-SPEC-r3`**. Its SHA-256 at freeze is
+  `f1580634d35d2baf10b99d7985f9bfb1e56ebc956326a58a61b665fc5958d9cb`, recorded in `SHA256SUMS` beside
+  it. The folder keeps its historical name (`v5-data-spec-draft`).
+- **Ratified as binding** (owner scope):
+  - **§4.6:** identities, the deterministic split procedure, the E6 reserve, grouping rules and
+    invariants SPL-1…SPL-9.
+  - **§5.2–§5.6:** the canonical HTTP contract, representation rules, rejects R1–R8 and signals,
+    template-safe tokenization, the size procedure and invariants I1–I10.
+  - **§4.3:** label and policy classes with their assumed contexts, the separation of
+    responsibilities, and the precedence order.
+  - The principles already approved in D56–D61.
+- **Explicitly excluded from the freeze**: these stay PROPOSED or PENDING, with when and how each is
+  resolved recorded in the register of §11.2. Every resolution is recorded in the owner-ratified
+  dataset preregistration or in a later owner decision.
+  - the cluster-share thresholds (2% / 5%);
+  - the 1% over-limit stop value;
+  - the fuzz-corpus size;
+  - the final V5 template constants and `B`;
+  - the bytes-per-token bounds and the derived byte limits;
+  - `MAX_DECODED_BODY`;
+  - all §7 acceptance thresholds;
+  - the final category distribution of §2.3;
+  - the concrete lists and lexicons of §4.3;
+  - `L`, the placement shares, the per-file cap and the final deny-list.
+- **Stated limitation.** An invalid octet rendered as `\xNN` is textually identical to literal
+  `\xNN` content. The audit signal distinguishes the two cases only for deterministic layers, never
+  for the model.
+- **Immutability.** The frozen text is not edited in place. Any change to frozen content needs a new
+  revision (r4) and an owner decision (D39 spirit). Resolving a §11.2 value does not edit the frozen
+  text: it is recorded in the preregistration.
+- **The spec freeze is not a dataset freeze.** Mandatory before the dataset freeze (§11.3):
+  - the owner's human review of the 95-item sample;
+  - the post-filter audit of every ML-trained category;
+  - all BLOCKING checks;
+  - the preregistration;
+  - a sealed `STAB-HELD`;
+  - the dataset freeze report.
+
+**Rationale.**
+- The owner's ratification review of 2026-10-13.
+- The session-5 consistency audits (`reports/v5/freeze-prep/README.md` §S5).
+- Pre-freeze corrections (r3 §12): the §4.6 ambiguity resolved; the §4.3 scope delimited; the
+  escape-ambiguity limitation stated.
+
+**Relationship to earlier entries.**
+- Freezes the specification that implements D56–D61.
+- D56's reference to "the byte rules exactly as DRAFT r3 §5.2 defines" now points to ratified,
+  frozen text.
+- Applies the immutability principle of D39 to a specification.
+- Nothing is superseded.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
 |----|-------|--------|----------------|
-| D1 | HTTP request representation — neutralize envelope shortcuts | APPROVED | **DONE (E2)** |
+| D1 | HTTP request representation — neutralize envelope shortcuts (V5 text scope: D56/D57) | APPROVED | **DONE (E2)** |
 | D2 | CSIC excluded anomalies — keep out of baseline | APPROVED FOR FUTURE WORK | N/A |
 | D3 | Latency target — P95 ≤ 200 ms end-to-end added | **SUPERSEDED BY D36** | N/A |
 | D4 | Failure behavior — FAIL-CLOSED | APPROVED | **DONE (first version, D34)** |
@@ -2054,14 +2543,14 @@ Test v1 remains unused.
 | D10 | Embedded deployment — platform TBD | CORE REQUIREMENT | NOT YET |
 | D11 | Training precision — BF16 (compatibility, not quality) | APPROVED | DONE |
 | D12 | Checkpoint retention — `save_total_limit=2` | APPROVED | DONE |
-| D13 | Benign traffic — CSIC + parametrized synthetic, no external set | APPROVED | DONE |
+| D13 | Benign traffic — CSIC + parametrized synthetic, no external set (V5 successor: D58) | APPROVED | DONE |
 | D14 | Weak categories — report INSUFFICIENT DATA, never inflate | APPROVED | DONE |
-| D15 | Obfuscation — train pool vs held-out pool | APPROVED | DONE (suite not built) |
+| D15 | Obfuscation — train pool vs held-out pool (addendum: D61) | APPROVED | DONE (suite not built) |
 | D16 | Grouped split before rendering | APPROVED | DONE |
 | D17 | Category contribution control — policy B, group cap 2,500, row cap 4,000 | **APPROVED FINAL** | DONE |
 | D18 | INSUFFICIENT DATA / NOT EVALUABLE policy | APPROVED | DONE |
 | D19 | Frozen V4 evaluation methodology | APPROVED | DONE (E5) |
-| D20 | V4-clean baseline interpretation | APPROVED | N/A |
+| D20 | V4-clean baseline interpretation (addendum: D61) | APPROVED | N/A |
 | D21 | Evidence-driven dataset expansion | APPROVED | N/A |
 | D22 | Real HTTP laboratory validation gate | APPROVED | **DONE for V4 (External v1)** |
 | D23 | Current HF inference path is not the deployment target | APPROVED | N/A |
@@ -2085,7 +2574,7 @@ Test v1 remains unused.
 | D41 | Gateway evaluations report L1 model / L2 enforcement / L3 end-to-end separately | APPROVED | **DONE (`external-v1-run-001`)** |
 | D42 | External-test and diagnostic rates are test-specific, never operational | APPROVED | N/A (reporting rule) |
 | D43 | Hybrid Architecture Phase 1 — request feature extraction in shadow mode on the D1 text, after the classifier call; V4 stays the only decision; extractor failure ignored, never a BLOCK | APPROVED | **DONE (Phase 1, #49)** |
-| D44 | `Host` and `User-Agent` are never request features; Phase 1 reads no header except `Content-Type` | APPROVED | **DONE (Phase 1, #49)** |
+| D44 | `Host` and `User-Agent` are never request features; Phase 1 reads no header except `Content-Type` (V5 extension: D57, NOT YET implemented) | APPROVED | **DONE (Phase 1, #49)** |
 | D45 | Terminology — "V5" is the next model version (D37/D40); the multi-stage design is the "Hybrid Architecture"; test-set rules apply to both | APPROVED | **DONE** |
 | D46 | Analyzer formulation — `attack` + auxiliary category given attack; mandatory category ablation in Phase 2B | APPROVED | design frozen (#51) |
 | D47 | Analyzer category vocabulary (7 categories + residual `other_attack`) and the V4 reason mapping | APPROVED | **DONE (contract)**; builder in 2B |
@@ -2097,6 +2586,13 @@ Test v1 remains unused.
 | D53 | External v1 unused before the Analyzer is frozen; then one aggregate evaluation under D40 | APPROVED | N/A (usage rule) |
 | D54 | Analyzer groups include the recovered V4 generator group; `hybrid_analyzer_v2`; one labelled second look at INTERNAL TEST | APPROVED | DONE (run-002; Analyzer frozen) |
 | D55 | Analyzer evaluation conventions: 0.5 reporting-only, group-weighted diagnostics, robust calibration rule, no MLP, artifacts gitignored with versioned hashes | APPROVED | DONE |
+| D56 | V5 model input `canonical-request/v1`: one contract for training and inference, deterministic framing validation, justified rejects, signals never block, template-token integrity, reject-not-truncate; modifies D1's scope for V5 only | APPROVED | NOT YET |
+| D57 | V5 text carries only `Content-Type`; REJECT / SIGNAL / POLICY layers; five-dimension coverage terminology; extends D44 to V5 | APPROVED | NOT YET (no deterministic control implemented) |
+| D58 | V5 dataset composition: new minimal generator, controlled PATT reuse with third-party file exclusion, one encoder, CSIC out of TRAIN, Wikidata/Tatoeba CC0 + in-repo street lexicon; V5 successor of D13 | APPROVED | NOT YET |
+| D59 | V5 labeling policy: provenance + value structure + explicit policies; `label_status` VERIFIED / POLICY_DEFINED / EXCLUDED with `exclusion_reason` | APPROVED | NOT YET |
+| D60 | V5 split: constructive, `struct_cluster_id` / `payload_family_id`, 70/10/20, groups never fragmented, evaluability from real counts (D18), ~8% E6 reserve, protected evaluations | APPROVED | NOT YET |
+| D61 | Documented V4 limitations: double encoding, `%25XX` class shortcut, D15 incidental forms, 89 label-truncated rows, third-party PATT files (addendum to D15, D20) | APPROVED | DONE (documentation) |
+| D62 | V5 Data Specification r3 FROZEN (`V5-DATA-SPEC-r3`, SHA-256 `f1580634…`): §4.6, §5.2–§5.6 and §4.3 classes/precedence ratified; thresholds, constants, category distribution and open lists excluded (r3 §11.2) | APPROVED | DONE (freeze record; spec not implemented) |
 
 ---
 
