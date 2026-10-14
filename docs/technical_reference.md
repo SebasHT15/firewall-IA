@@ -8,7 +8,7 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D55: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions D1–D62: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
@@ -114,6 +114,12 @@ neither to be silently discarded nor pooled into steady-state statistics without
 `data_plane.py` is a mitmproxy addon: an **authorized inline interception** point, not a
 man-in-the-middle attack. Every HTTP request that reaches the proxy is classified by the
 control plane before anything is forwarded.
+
+*(Note 2026-10-12.)* The gateway renders the **V4** text below (`render_request()`, D1), and
+that is unchanged. A future V5 model will use a different input contract, `canonical-request/v1`
+(D56/D57: `Content-Type` as the only header, deterministic framing validation, template-safe
+tokenization). That contract is approved but **not implemented**, and its gateway integration is
+a later phase.
 
 ```
 HTTP client --(HTTP proxy 127.0.0.1:8080)--> mitmdump -s data_plane/data_plane.py

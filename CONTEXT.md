@@ -1,9 +1,9 @@
 # firewall-IA — Session Context for Claude Code
 
-## 0. HANDOFF — current state (2026-10-05) · READ THIS FIRST
+## 0. HANDOFF — current state (2026-10-05; V5 dataset decisions added 2026-10-12, §0.9 item 5) · READ THIS FIRST
 
 This section is the current state. Everything after it is a chronological audit trail;
-where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D55).
+where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D62).
 
 ### 0.1 What the project is
 
@@ -188,9 +188,33 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
    route C (#59) shows, on this unseen dev set, the Analyzer does **not** rescue V4's false
    positives (agrees on 64/68) and cannot cover the header-borne false-negative region (D44/D48);
    a real-traffic rate still needs an independent external set (not this dev set).
-5. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision — #59 recommends this
+5. *(Decided for the dataset 2026-10-11: D56–D61; see the V5 bullet below.)* Decide with evidence whether TinyLlama needs a V5 / hard-negative revision — #59 recommends this
    as the next branch (V4's 68 benign false positives are concrete hard negatives) and raises the
    D44-revision question for header-borne families for the owner.
+   - **V5 data specification (2026-10-06 → 10-12; issues #62, #64).**
+     - The V4 false-positive diagnostics are closed: coverage audit, minimal-pair probes v1/v2,
+       evidence matrix (`reports/v5/`).
+     - The V5 dataset decisions are **APPROVED as D56–D61**:
+       - D56: canonical model input `canonical-request/v1`, which modifies D1 for V5 only;
+       - D57: `Content-Type`-only text, control layers, five-dimension coverage, D44 extended to
+         V5;
+       - D58: new minimal generator, controlled PATT reuse with third-party exclusion, CSIC out of
+         TRAIN, Wikidata/Tatoeba CC0 sources plus an in-repo street lexicon;
+       - D59: labeling policy and `label_status` metadata;
+       - D60: constructive split 70/10/20, groups never fragmented, computed evaluability, E6
+         reserve;
+       - D61: documented V4 limitations (double-encoding shortcut, truncated labels, third-party
+         PATT files).
+     - Specification: `reports/v5/v5-data-spec-draft/README.md` **`V5-DATA-SPEC-r3`, FROZEN 2026-10-13 (D62)**, a scoped freeze: the values in its §11.2 register stay PROPOSED / PENDING (superseding the earlier "DRAFT r3, not frozen"). The
+       owner authorized the freeze on 2026-10-13. The spec freeze is not a dataset freeze (r3 §11.3).
+     - Evidence: `reports/v5/freeze-prep/`.
+     - Nothing is implemented beyond independent checkers and tests. The generator, the
+       `canonicalize()` function and every deterministic control are **not** built.
+     - V4 and its runtime are unchanged.
+     - Open security item: #65 (template special tokens in the V4 prompt). It is a representation
+       finding; no decision effect has been measured. For V5, D56 prevents content from producing special-token
+       ids. Textual role markers (e.g. `<|assistant|>` as plain text) remain a residual,
+       unmeasured risk (r3 §5.4).
 6. Design and train **Model 2 — Small Decision Model** (only after 3–4, unless a formal
    decision changes this order).
 7. Define ALLOW / BLOCK / UNCERTAIN experimentally → 8. Cascade Orchestrator → 9. Hybrid
@@ -210,7 +234,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D55). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D62). Read it before proposing architectural changes.
 > - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
 > - `docs/external_test_v1_protocol.md` — External Test v1 methodology (pre-registered; status note at the top).
 > - `docs/technical_reference.md` — component detail moved out of the README at stage close.
@@ -695,6 +719,9 @@ Proposed order, to be confirmed by the owner before starting:
 
 1. **V5 error analysis** — External v1 false positives (API / unseen-structure) and the 92
    internal false negatives (D21). Record the D40 transition when it starts.
+   *(Note 2026-10-12: V5 development has instead proceeded from **development diagnostics**,
+   without inspecting External v1 cases. External v1 stays unconsumed, with at most one
+   preregistered aggregate V5 run (D60). See §0.9 item 5.)*
 2. **External v2** — built under D38 before V5 is exposed to it; required for any V5 claim.
    Must restore the proxy-to-`/classify` byte capture and comparison for every gateway
    execution, with the capture tooling verified in the execution environment before any
@@ -2388,7 +2415,7 @@ plan is §0.9.)* Supersedes the v4 plan in §7. Decisions D1–D18 are recorded 
 | — | **Full external evaluation through the complete gateway** (D22) | **DONE 2026-09-21** — `external-v1-run-001`, L1/L2/L3 (D41) |
 | — | **Professor demo** — ALLOW / BLOCK / fail-closed / recovery | **PREPARED 2026-09-21** — `docker/demo.sh`, runtime verified (§5d) |
 | — | **README / results** | **DONE at stage close**; standards alignment and future-work write-up remain |
-| — | **V5 error analysis** of External v1 false positives (D40) | NOT STARTED — after the release; consumes External v1 for V5 |
+| — | **V5 error analysis** of External v1 false positives (D40) | NOT STARTED — after the release; consumes External v1 for V5. *(2026-10-12: superseded in practice. V5 is designed from development diagnostics, D56–D61, and External v1 stays unconsumed per D60.)* |
 | — | **External v2** | NOT STARTED — required before any V5 claim (D40) |
 | **#18** | End-to-end latency | NOT STARTED — after the release |
 | — | Security / error analysis of the 92 false negatives (D21) | Outstanding — no dedicated issue |

@@ -1,0 +1,455 @@
+[
+  {
+    "id": "v4_clean_train",
+    "path_globs": ["datasets/v4_clean/train.jsonl"],
+    "rows": 25134,
+    "sha256": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+    "role_now": "V4 TRAIN (also Analyzer TRAIN + VALIDATION source via hybrid_analyzer_v2)",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: reports/v5/benign-coverage-audit-v1/README.md section 1 audits its benign side; reports/v5/evidence-matrix/README.md rows 6, 10, 11, 12 and reports/v5/v5-data-spec-draft/README.md section 2 derive family priorities from its coverage gaps. Distribution-level use only; no V5 row is copied from it.",
+    "text_field": "input",
+    "text_field_verified_by": "keys of line 1: instruction, input, output (python json.loads on one line, 2026-10-11)",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Concept-level coverage statistics already used. Reusing V4-clean TRAIN rows as a V5 TRAIN source is NOT decided (default assumption: no reuse). If reused, its D54 generator-group ids must stay in TRAIN and V4 eval groups must stay out of every V5 split (docs/ml_evaluation_methodology.md section 1, last rule of the roles table).",
+    "collision_policy": {
+      "v5_train": "REPORT_COUNT",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "payload_level_check": "attack payload canonical strings of V5 VALIDATION/INTERNAL TEST vs V4 train payloads: REPORT_COUNT and publish a payload-novel view (precedent: D51 feature-disjoint view)",
+    "tracked_in_git": false,
+    "pinned_by": "datasets/manifest_v4_clean.json artifact_sha256.train",
+    "evidence": ["datasets/manifest_v4_clean.json", "DECISIONS.md D16, D19, D24, D37", "docs/data_sources.md"]
+  },
+  {
+    "id": "v4_clean_eval",
+    "path_globs": ["datasets/v4_clean/eval.jsonl"],
+    "rows": 6206,
+    "sha256": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859",
+    "role_now": "V4 VALIDATION and internal evaluation (D24; not independent); Analyzer INTERNAL TEST, read twice (D54: run-001 first look + run-002 labelled second look). Unavailable as a V5 test set.",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: reports/v5/benign-coverage-audit-v1/README.md (Never opened: eval.jsonl), reports/v5/minimal-pair-probe-v1/README.md line 21 (Never opened: V4 eval / INTERNAL TEST). Its 92 V4 false negatives were never analysed (CONTEXT.md, Known primary limitation; D21). Caveat: 10 of its ALLOW rows are reused verbatim as the EVALSWAP family of real-http-fp-v1 (reports/diagnostics/real-http-fp-v1/manifest.json dataset.used_for), so 10 rows were seen in a development diagnostic.",
+    "text_field": "input",
+    "text_field_verified_by": "keys of line 1: instruction, input, output",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Its generator groups (D54 meta_generator_group_id) must not enter V5 TRAIN or VALIDATION. It may be re-run by V5 only as a V4-favoured, report-only regression check (V4 was selected on it).",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "payload_level_check": "attack payload canonical strings vs V5 TRAIN: REPORT_COUNT (V4 eval is not a V5 training source)",
+    "tracked_in_git": false,
+    "pinned_by": "datasets/manifest_v4_clean.json artifact_sha256.eval",
+    "evidence": ["DECISIONS.md D24, D37, D54", "docs/ml_evaluation_methodology.md section 1", "reports/hybrid/phase2b-analyzer-baselines/ERRATA.md"]
+  },
+  {
+    "id": "hybrid_analyzer_v1",
+    "path_globs": ["datasets/hybrid_analyzer_v1/hybrid_analyzer_v1.jsonl"],
+    "rows": 31340,
+    "sha256": "b370186b8d3c461e4efa462bf36c29e2e9b018df9b077f23660aa7025754cd87",
+    "role_now": "Analyzer TRAIN / VALIDATION / INTERNAL TEST views derived from V4-clean (historical, superseded by v2 for development; run-001 not adopted)",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: derived 1:1 from V4-clean (D51); contains features and hashes only, no request text. No V5 document cites its rows.",
+    "text_field": null,
+    "text_field_verified_by": "keys of line 1 (no text key): row_id, role, slice, features, target_*, meta_v4_*, meta_group_id, meta_canonical_request_sha256, meta_feature_vector_sha256",
+    "hash_keys": ["meta_canonical_request_sha256", "meta_feature_vector_sha256"],
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Redundant with v4_clean_* for text-level checks; useful only as a hash-level cross-check.",
+    "collision_policy": {
+      "v5_train": "N/A (mirror v4_clean_train/eval policy)",
+      "v5_validation": "N/A (mirror)",
+      "v5_internal_test": "N/A (mirror)",
+      "v5_stability_heldout": "N/A (mirror)",
+      "external_v2_candidates": "N/A (mirror)"
+    },
+    "tracked_in_git": false,
+    "pinned_by": "datasets/manifest_hybrid_analyzer_v1.json",
+    "evidence": ["DECISIONS.md D51, D54", "reports/hybrid/phase2b-analyzer-baselines/ERRATA.md"]
+  },
+  {
+    "id": "hybrid_analyzer_v2",
+    "path_globs": ["datasets/hybrid_analyzer_v2/hybrid_analyzer_v2.jsonl"],
+    "rows": 31340,
+    "sha256": "e8da8674435ed65057161bb4c74b41dc4aa1d8bf876b0327c53ecba7c0d99b75",
+    "role_now": "Analyzer TRAIN / VALIDATION / INTERNAL TEST (INTERNAL TEST read twice, D54); FROZEN Analyzer HGB+HGB. Its V4-train group ids were read by the V5 benign coverage audit.",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: reports/v5/benign-coverage-audit-v1/README.md section 1 uses only the group ids of V4-train rows from this file; rows of V4 eval are skipped before parsing. INTERNAL TEST rows were not opened by this workstream (only line 1, key names and value lengths, which is a train-role row).",
+    "text_field": null,
+    "text_field_verified_by": "keys of line 1 (no text key): adds meta_generator_group_id, meta_generator_source, meta_generator_family_in_train",
+    "hash_keys": ["meta_canonical_request_sha256", "meta_feature_vector_sha256", "meta_generator_group_id"],
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Source of the recovered V4 generator group ids (D54), needed if any V4-clean row is ever reused. Do not open INTERNAL TEST rows.",
+    "collision_policy": {
+      "v5_train": "N/A (mirror v4_clean_train/eval policy)",
+      "v5_validation": "N/A (mirror)",
+      "v5_internal_test": "N/A (mirror)",
+      "v5_stability_heldout": "N/A (mirror)",
+      "external_v2_candidates": "N/A (mirror)"
+    },
+    "tracked_in_git": false,
+    "pinned_by": "datasets/manifest_hybrid_analyzer_v2.json",
+    "evidence": ["DECISIONS.md D54, D55", "reports/hybrid/phase2b-analyzer-v2-run-002/README.md", "reports/hybrid/analyzer-external-v1-run-001/README.md"]
+  },
+  {
+    "id": "external_v1_frozen",
+    "path_globs": ["datasets/external_v1/cases.jsonl"],
+    "rows": 400,
+    "sha256": "721dfdaa6425463ae0ce26520f6d47986fdc7388468b55d7b1a5bffed822d342",
+    "integrity_hash": "ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b",
+    "role_now": "EXTERNAL TEST (V4 record): FROZEN at 36df2ee (2026-09-21), executed once for V4 (external-v1-run-001) and once, aggregate only, for the frozen Analyzer (analyzer-external-v1-run-001, D53). Remains an unconsumed external test for V5 ONLY while the D40 tripwire stays untriggered.",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: no document in the repository records an inspection of an individual External v1 case or error for V5. reports/hybrid/v4-analyzer-disagreement-v1/README.md section 1 (Never opened), reports/v5/benign-coverage-audit-v1/README.md (Never opened), reports/v5/minimal-pair-probe-v1/README.md line 21 (Never opened), reports/hybrid/v4-analyzer-paired-dev-v1/README.md line 72 (overlap UNKNOWN, never opened), CONTEXT.md section 0.6 and Known primary limitation (no individual FP inspected). Aggregate figures (68/200 benign BLOCK; Analyzer 50/200) are cited as context, which D40 permits. No transition record exists beside the manifest. Absence of inspection is taken from these self-statements and cannot be proven independently.",
+    "text_field": "request_text",
+    "text_field_verified_by": "NOT verified by reading data (D40). Taken from docs/external_test_v1_protocol.md lines 19 and 58, datasets/external_v1/README.md line 41, DECISIONS.md D40, and code scripts/external/freeze_external_v1.py lines 62 and 121, scripts/external/external_v1_run.py line 99.",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Never TRAIN, VALIDATION, INTERNAL TEST, checkpoint or threshold selection, or generator design input (D53 rule, extended by D40/D45). Optionally one aggregate-only V5 evaluation (see protocol sections 2 and 6.5-6.6). The collision gate must run in counts-only mode (see protocol section 4.2, check L7a): it must not print matched case ids or texts, because surfacing them would be inspection.",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY (D40)"
+    },
+    "guard": "counts_only_no_case_ids",
+    "payload_level_check": "attack payload canonical strings of V5 splits vs External v1 BLOCK payloads: REPORT_COUNT in counts-only mode; any hit removes the V5 candidate without looking at the v1 case",
+    "tracked_in_git": true,
+    "pinned_by": "datasets/external_v1/manifest.json (status FROZEN), datasets/external_v1/SHA256SUMS",
+    "evidence": ["datasets/external_v1/manifest.json (d37_tripwire, immutability)", "DECISIONS.md D37, D38, D39, D40, D45, D53", "docs/external_test_v1_protocol.md"]
+  },
+  {
+    "id": "external_v1_prefreeze_pool",
+    "path_globs": [
+      "datasets/external_v1/candidates/*.jsonl",
+      "datasets/external_v1/candidates_supplement/*.jsonl"
+    ],
+    "rows": null,
+    "rows_note": "cases_draft.jsonl has 489 lines (wc -l); per-cell files are subsets; contains the 84 eligible-but-unselected reserves (datasets/external_v1/freeze/reserve_case_ids.json, D39: evidence, not substitutes)",
+    "role_now": "External Test v1 candidate pool (pre-freeze evidence, retained by D39). Same exposure status as external_v1_frozen.",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: same self-statements as external_v1_frozen. Not opened by this workstream.",
+    "text_field": "request_text",
+    "text_field_verified_by": "NOT verified by reading data. scripts/external/label_candidates.py line 93 copies rec['request_text'] into candidates.",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Same counts-only guard. Candidates that never entered the frozen set still define the v1 distribution and must not leak into V5 or External v2.",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY (D40)"
+    },
+    "guard": "counts_only_no_case_ids",
+    "tracked_in_git": true,
+    "pinned_by": "datasets/external_v1/freeze/selection_keys.jsonl, datasets/external_v1/manifest.json (provenance)",
+    "evidence": ["datasets/external_v1/manifest.json provenance and reserves_unselected", "DECISIONS.md D39"]
+  },
+  {
+    "id": "external_v1_execution_and_capture_artifacts",
+    "path_globs": [
+      "reports/external/external-v1-run-001/results.jsonl",
+      "reports/external/external-v1-run-001/raw/*",
+      "docker/.lab-logs/capture/*.jsonl"
+    ],
+    "rows": null,
+    "rows_note": "results.jsonl has 1500 lines (1200 gateway + 300 direct executions); capture logs are raw pre-gate captures including extv1-draft.jsonl and extv1-browser-forms-supplement.jsonl",
+    "role_now": "Per-case execution records and raw capture logs of External v1 (V4 record). Per-case V4 decisions live here: opening them to find errors IS the D40 tripwire.",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: not opened for V5 (same self-statements). Only aggregates in reports/external/external-v1-run-001/summary.json and summary.md are cited.",
+    "text_field": "request_text (capture logs: scripts/external/capture_addon.py line 89); results.jsonl text/hash keys NOT verified (not opened)",
+    "text_field_verified_by": "code only (capture_addon.py:89); results.jsonl schema documented in docs/external_test_v1_protocol.md 'Result schema' (sent_sha256 is a client-side hash)",
+    "allowed_use_for_v5": "none",
+    "allowed_use_note": "Not needed for collision gating (the frozen cases and candidate pool already cover the texts). Do not open. docker/.lab-logs/ is gitignored (local only, not reproducible from the repo).",
+    "collision_policy": {
+      "v5_train": "N/A (covered by external_v1_frozen / prefreeze_pool)",
+      "v5_validation": "N/A",
+      "v5_internal_test": "N/A",
+      "v5_stability_heldout": "N/A",
+      "external_v2_candidates": "N/A"
+    },
+    "tracked_in_git": "results.jsonl: true; docker/.lab-logs/capture/*.jsonl: false (gitignored)",
+    "evidence": ["DECISIONS.md D39, D40", "reports/external/external-v1-run-001/run_manifest.json"]
+  },
+  {
+    "id": "external_v1_aggregate_reports",
+    "path_globs": [
+      "reports/external/external-v1-run-001/summary.json",
+      "reports/external/external-v1-run-001/summary.md",
+      "reports/external/external-v1-secondary-breakdowns/secondary_breakdowns.json",
+      "reports/external/external-v1-secondary-breakdowns/secondary_breakdowns.md",
+      "reports/hybrid/analyzer-external-v1-run-001/aggregate_results.json",
+      "reports/hybrid/analyzer-external-v1-run-001/README.md"
+    ],
+    "rows": null,
+    "role_now": "Aggregate and per-cell results for V4 (L1 TP 199 / TN 132 / FP 68 / FN 1, 400 cases) and for the frozen Analyzer (one run). Aggregates do not consume External v1 (D40).",
+    "influenced_v5_design": true,
+    "influence_evidence": "INFERENCE: V5 priorities (benign JSON stability; API and unseen-structure benign traffic) are consistent with the published aggregate FP concentration (api-json, unseen-structure), and reports/v5/research-notes-v2/C2_analyzer_v3_spec.md cites the Analyzer's External v1 ECE. This is aggregate-level context, permitted by D40, but it must be disclosed in the V5 report as aggregate-level influence.",
+    "text_field": null,
+    "text_field_verified_by": "aggregate files carry no request text (analyzer evaluator output scanner rejects case ids and texts)",
+    "allowed_use_for_v5": "concept-level only",
+    "collision_policy": {
+      "v5_train": "N/A (no texts)",
+      "v5_validation": "N/A",
+      "v5_internal_test": "N/A",
+      "v5_stability_heldout": "N/A",
+      "external_v2_candidates": "N/A"
+    },
+    "tracked_in_git": true,
+    "evidence": ["DECISIONS.md D40, D42, D53", "reports/external/external-v1-run-001/summary.md"]
+  },
+  {
+    "id": "real_http_fp_v1",
+    "path_globs": ["reports/diagnostics/real-http-fp-v1/cases.jsonl"],
+    "rows": 175,
+    "unique_texts": 149,
+    "sha256": "b60bafba44c3d22c123897662546133fd0329b7a9a53f26abdde86f38f122690",
+    "role_now": "development / error-analysis diagnostic (constructed benign cases; 37/149 BLOCK is a diagnostic count, not a rate, D42). Reused in issue #57.",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: its 119 non-EVALSWAP texts are source S1 of reports/hybrid/v4-analyzer-disagreement-v1/records.jsonl, which feeds the V5 audit and matrix (reports/v5/benign-coverage-audit-v1/README.md section 1). Envelope families (HOST, PORT, PATH, HDR, UA) motivated minimal-pair v1 F-PORT, F-HOSTIP, F-PXY, F-CL (INFERENCE from design lineage).",
+    "text_field": "text",
+    "text_field_verified_by": "keys of line 1: case_id, family, group, variable, value, is_reference, pair_with, expected_label, source, text, text_sha256, proxy, excluded, notes",
+    "allowed_use_for_v5": "collision-gate only",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "tracked_in_git": true,
+    "pinned_by": "reports/diagnostics/real-http-fp-v1/manifest.json design.cases_file_sha256",
+    "evidence": ["docs/ml_evaluation_methodology.md sections 4 and 7", "reports/diagnostics/real-http-fp-v1/manifest.json", "DECISIONS.md D22, D42"]
+  },
+  {
+    "id": "v4_analyzer_disagreement_v1",
+    "path_globs": ["reports/hybrid/v4-analyzer-disagreement-v1/records.jsonl"],
+    "rows": 254,
+    "sha256": "2c297fb186769b4a227ca4d749115bec781cc578763036ed4188b50ed873f549",
+    "role_now": "development / error-analysis diagnostic (issue #57): S1 = 119 texts of real-http-fp-v1 (EVALSWAP excluded), S2 = 135 legacy manual suite texts, scored by V4 and the frozen Analyzer",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: consumed by reports/v5/benign-coverage-audit-v1 (dev contrast) and listed as development data in CONTEXT.md section 0.6.",
+    "text_field": "text",
+    "text_field_verified_by": "keys of line 1: source, unit_id, text_sha256, text, label, ... v4_decision, attack, ...",
+    "allowed_use_for_v5": "collision-gate only",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "tracked_in_git": true,
+    "evidence": ["reports/hybrid/v4-analyzer-disagreement-v1/README.md section 1", "DECISIONS.md D37, D45"]
+  },
+  {
+    "id": "legacy_manual_suite_135",
+    "path_globs": ["scripts/evaluation/test_model.py", "reports/v4_clean_manual_diagnostic.json"],
+    "rows": 135,
+    "role_now": "legacy manual diagnostic / regression suite (109 BLOCK / 26 ALLOW), not a headline metric (D19). Texts are embedded in Python source; the rendered texts also appear as source S2 of v4_analyzer_disagreement_v1.",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: scored in issue #57 (reports/hybrid/v4-analyzer-disagreement-v1/README.md section 1) and listed as Hybrid error-analysis data in CONTEXT.md section 0.6.",
+    "text_field": "embedded in test_model.py (Python list); use v4_analyzer_disagreement_v1 records with source == 'S2' and key 'text' for hashing",
+    "text_field_verified_by": "reports/hybrid/v4-analyzer-disagreement-v1/README.md section 1 (S2 = 135 hand-authored texts, 109 BLOCK / 26 ALLOW)",
+    "allowed_use_for_v5": "collision-gate only",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "tracked_in_git": true,
+    "evidence": ["DECISIONS.md D19", "scripts/evaluation/test_model.py line 647"]
+  },
+  {
+    "id": "paired_dev_v1",
+    "path_globs": [
+      "reports/hybrid/v4-analyzer-paired-dev-v1/cases.jsonl",
+      "reports/hybrid/v4-analyzer-paired-dev-v1/records.jsonl"
+    ],
+    "rows": 434,
+    "unique_texts": 355,
+    "sha256": {
+      "cases.jsonl": "879c7ddb31c29406f5abe51ffe2fbe5a8e677213d4d7ab543648aa1aca97958d",
+      "records.jsonl": "c268a313b11087290b5fea9b37cd15855b6ab1434c1c5e29c6c4234a506743f2"
+    },
+    "role_now": "paired development / error-analysis set (issue #59, PR #60): 201 independent attack payloads plus benign twins, captured through the lab gateway; generator-disjoint from V4-clean and hybrid_analyzer_v2 (membership overlap 0); External v1 overlap UNKNOWN (never checked)",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: manifest role 'DEVELOPMENT / ERROR-ANALYSIS (D37, D45)'; crossed with the audit in reports/v5/benign-coverage-audit-v1/README.md section 1 ('consumed development / error-analysis data'; its templates are not proposed as V5 data, section 7).",
+    "text_field": "request_text (cases.jsonl); text (records.jsonl)",
+    "text_field_verified_by": "keys of line 1 of each file",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Also a precedent for pair-level grouping (group_id, pair_id keys). Its attack payloads and benign twin texts must not appear in any V5 split.",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "payload_level_check": "attack payload canonical strings (payload_canonical) vs V5 splits: BLOCK_ANY in VALIDATION/INTERNAL TEST, REPORT_COUNT in TRAIN",
+    "tracked_in_git": true,
+    "evidence": ["reports/hybrid/v4-analyzer-paired-dev-v1/manifest.json (role)", "reports/hybrid/v4-analyzer-paired-dev-v1/README.md lines 69-72", "scripts/evaluation/paired_dev_set.py"]
+  },
+  {
+    "id": "benign_coverage_audit_v1",
+    "path_globs": ["reports/v5/benign-coverage-audit-v1/results.json"],
+    "rows": null,
+    "sha256": "3829c03d5980591959120dbb963bffdd3fc107595a23b3c27c738ca665bddb6d",
+    "role_now": "data audit of V4-clean TRAIN plus diagnostic contrast (counts only); no request text",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: first of the three sources of reports/v5/evidence-matrix/README.md and reports/v5/v5-data-spec-draft/README.md.",
+    "text_field": null,
+    "text_field_verified_by": "results.json holds counts and markers, no request texts (README: 'Evidence: results.json (every count below)')",
+    "allowed_use_for_v5": "concept-level only",
+    "collision_policy": {
+      "v5_train": "N/A (no texts)",
+      "v5_validation": "N/A",
+      "v5_internal_test": "N/A",
+      "v5_stability_heldout": "N/A",
+      "external_v2_candidates": "N/A"
+    },
+    "tracked_in_git": true,
+    "evidence": ["reports/v5/benign-coverage-audit-v1/README.md"]
+  },
+  {
+    "id": "minimal_pair_probe_v1",
+    "path_globs": ["reports/v5/minimal-pair-probe-v1/cases.jsonl"],
+    "rows": 2120,
+    "sha256": "9d9bc2d55fcd2bb36ec90687ad99b6e569826d060045464e7817b21736ea07fb",
+    "pools_sha256_source": "reports/v5/minimal-pair-probe-v1/manifest.json -> pools_sha256 (18 pools: accepts, branches, clauses, collections, external_hosts, extra_fields, extra_query, files, first_names, homonyms, hosts, streets, surnames_apostrophe, surnames_plain, titles, topics, url_paths, user_agents)",
+    "role_now": "DEVELOPMENT DIAGNOSTIC (all benign by construction; manifest data_role: never V5 training, validation or checkpoint-selection data; never copied into a V5 generator)",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: evidence-matrix rows 4-9, 12-14 and v5-data-spec-draft section 2 cite it as causal evidence.",
+    "text_field": "text",
+    "text_field_verified_by": "keys of line 1: case_id, factor, block, base, level, text, text_sha256",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Two checks: (1) text-level exact/canonical collision; (2) value-pool disjointness: every V5 value pool element-set must be disjoint from the probe pools. pools_sha256 is only a fingerprint (equality test), so element-level disjointness needs the pool contents, which live as constants in scripts/evaluation/minimal_pair_probe_cases.py (read-only import).",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "pool_disjointness": "BLOCK_ANY element in common (all five V5 targets)",
+    "tracked_in_git": true,
+    "evidence": ["reports/v5/minimal-pair-probe-v1/manifest.json (data_role, pools_sha256)", "reports/v5/evidence-matrix/README.md"]
+  },
+  {
+    "id": "minimal_pair_probe_v2",
+    "path_globs": ["reports/v5/minimal-pair-probe-v2/cases.jsonl"],
+    "rows": 590,
+    "sha256": "bb05e64000d15aae1a9abf0855420d367df6653b950f9516b820e795962ce6d0",
+    "pools_sha256_source": "reports/v5/minimal-pair-probe-v2/manifest.json -> pools_sha256 (17 pools: accepts, addr_prose, apos_contraction, apos_place, apos_possessive, apos_surname, apos_title, cov_firsts, cov_lasts, hosts, numfmt_labels, pass_alphabet, paths_body, paths_query, slot_nouns, streets, user_agents)",
+    "role_now": "DEVELOPMENT DIAGNOSTIC (same data_role as v1)",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: evidence-matrix rows 1-6, 9, 14 and v5-data-spec-draft sections 2 and 6 cite it (CONTROL-COV2 flip rate 0.175, JSON stratum 0.70).",
+    "text_field": "text",
+    "text_field_verified_by": "keys of line 1: case_id, factor, block, base, level, stratum, text, text_sha256",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "As v1. Pool constants live in scripts/evaluation/minimal_pair_probe_v2_cases.py. The held-out stability set must be disjoint from both probes' pools at element level.",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "pool_disjointness": "BLOCK_ANY element in common (all five V5 targets)",
+    "tracked_in_git": true,
+    "evidence": ["reports/v5/minimal-pair-probe-v2/manifest.json (data_role, pools_sha256)", "reports/v5/minimal-pair-probe-v2/PROTOCOL.md lines 8-10, 34-38"]
+  },
+  {
+    "id": "v5_design_documents",
+    "path_globs": [
+      "reports/v5/v5-data-spec-draft/README.md",
+      "reports/v5/evidence-matrix/README.md",
+      "reports/v5/research-notes-v1/README.md",
+      "reports/v5/research-notes-v2/*.md"
+    ],
+    "rows": null,
+    "role_now": "design documents (V5 Data Specification DRAFT, evidence matrix, research notes); no request text",
+    "influenced_v5_design": true,
+    "influence_evidence": "FACT: they are the V5 design.",
+    "text_field": null,
+    "text_field_verified_by": "markdown documents",
+    "allowed_use_for_v5": "concept-level only",
+    "collision_policy": {
+      "v5_train": "N/A",
+      "v5_validation": "N/A",
+      "v5_internal_test": "N/A",
+      "v5_stability_heldout": "N/A",
+      "external_v2_candidates": "N/A"
+    },
+    "tracked_in_git": true,
+    "evidence": ["reports/v5/v5-data-spec-draft/README.md"]
+  },
+  {
+    "id": "docker_smoke_fixtures",
+    "path_globs": ["docker/client/smoke_test.py"],
+    "rows": 2,
+    "role_now": "infrastructure smoke fixtures (one ALLOW, one BLOCK); excluded from External v1 by gate check 5",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: not referenced by V5 documents.",
+    "text_field": "embedded in source; the two texts are also hard-coded in scripts/external/phase_d_gate.py load_smoke() (lines 136-144)",
+    "text_field_verified_by": "scripts/external/phase_d_gate.py lines 136-144",
+    "allowed_use_for_v5": "collision-gate only",
+    "collision_policy": {
+      "v5_train": "BLOCK_ANY",
+      "v5_validation": "BLOCK_ANY",
+      "v5_internal_test": "BLOCK_ANY",
+      "v5_stability_heldout": "BLOCK_ANY",
+      "external_v2_candidates": "BLOCK_ANY"
+    },
+    "tracked_in_git": true,
+    "evidence": ["docs/external_test_v1_protocol.md section 7 check 5"]
+  },
+  {
+    "id": "historical_root_corpus",
+    "path_globs": ["train.jsonl", "eval.jsonl"],
+    "rows": 99132,
+    "rows_note": "train.jsonl 79,305 + eval.jsonl 19,827 (wc -l); SHA-256 94fc5e3a... and 2d01fd02... match docs/data_sources.md",
+    "role_now": "superseded pre-V4 corpus rejected by E0 (26.65% train-to-eval leakage, Host-only shortcut 93.72%). Local copies only; docs/data_sources.md says v0.1.0 does not distribute them.",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: not used by any V5 document except as history.",
+    "text_field": "input",
+    "text_field_verified_by": "keys of line 1 of train.jsonl: instruction, input, output",
+    "allowed_use_for_v5": "collision-gate only",
+    "allowed_use_note": "Contains CSIC- and PayloadsAllTheThings-derived rows, so overlaps with V5 payload sources are expected. REPORT_COUNT only, never a reason to import rows.",
+    "collision_policy": {
+      "v5_train": "REPORT_COUNT",
+      "v5_validation": "REPORT_COUNT",
+      "v5_internal_test": "REPORT_COUNT",
+      "v5_stability_heldout": "REPORT_COUNT",
+      "external_v2_candidates": "REPORT_COUNT"
+    },
+    "tracked_in_git": "unverified across branches; docs/data_sources.md states removed from tracking at v0.1.0",
+    "evidence": ["docs/data_sources.md", "reports/e0_dataset_integrity_current.txt"]
+  },
+  {
+    "id": "csic_database_csv",
+    "path_globs": ["csic_database.csv"],
+    "rows": 61065,
+    "sha256": "c420f0bc0464376de75b6c419a0ac226fe69fe12c8ac4908843273721e44e637",
+    "role_now": "source input of the V4 generator (CSIC 2010 derived); the reference for the CSIC-ancestry check that D40 requires of External v2",
+    "influenced_v5_design": false,
+    "influence_evidence": "FACT: not used by V5 documents. V4-clean contains rows derived from it (benign and sql_injection), so V4 has seen CSIC shapes.",
+    "text_field": "CSV columns (header begins ',Method,User-Agent,Pragma,Cache-Control,...' and includes 'classification' and 'URL' per docs/data_sources.md); payload substring match, not a JSONL text field",
+    "text_field_verified_by": "docs/data_sources.md",
+    "allowed_use_for_v5": "collision-gate only",
+    "collision_policy": {
+      "v5_train": "WARN_RULING",
+      "v5_validation": "WARN_RULING",
+      "v5_internal_test": "WARN_RULING",
+      "v5_stability_heldout": "WARN_RULING",
+      "external_v2_candidates": "WARN_RULING (the check must be implemented and run before freeze, D40; hits need a logged manual ruling, protocol section 7 check 7)"
+    },
+    "tracked_in_git": "unverified across branches",
+    "evidence": ["docs/data_sources.md", "DECISIONS.md D40", "docs/external_test_v1_protocol.md section 7 check 7"]
+  }
+]

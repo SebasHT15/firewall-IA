@@ -165,9 +165,12 @@ Model 1 stays frozen; this is not a gateway or cascade result.
 - Embedded Linux deployment (M4)
 - Formal end-to-end latency benchmark (Issue #18)
 - HTTPS / TLS, HTTP/2 and WebSocket validation
-- V5 — a possible TinyLlama revision for the external false positives found by External
-  Test v1, to be decided after the V4 ↔ Analyzer disagreement analysis (External v2 required
-  for any V5 claim, D40)
+- V5 — the next TinyLlama revision, aimed at the false-positive causes found in development
+  diagnostics (not by inspecting External Test v1 cases, D40)
+  - Dataset decisions: approved as D56–D61.
+  - Specification: `reports/v5/v5-data-spec-draft/` — `V5-DATA-SPEC-r3`, FROZEN 2026-10-13 (D62). Thresholds and constants remain open, per its §11.2.
+  - Generator, dataset and training: not started.
+  - External v2 is required for any V5 claim (D40).
 - Hybrid Architecture beyond Model 1: Small Decision Model, cascade orchestrator,
   UNCERTAIN → V4 fallback, gateway integration (see the status table in §2)
 - Concurrency / load validation; adversarial / evasion suite (E6)
@@ -442,7 +445,8 @@ Next, in order (detail and constraints: [`CONTEXT.md` §0.9](CONTEXT.md#09-next-
      V4's misses; and on V4's 68 benign false positives Model 1 agrees (≥ 0.5) on 64, so a low-score
      override is unsupported. A cascade on RequestFeatures v2 inherits both blind spots.
 3. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision (External v2
-   required for any V5 claim, D40). The #59 diagnostic recommends this V5 hard-negative branch next
+   required for any V5 claim, D40). *(Dataset decisions taken 2026-10-11: D56–D61; V5 spec
+   r3 frozen 2026-10-13, D62.)* The #59 diagnostic recommends this V5 hard-negative branch next
    (V4's benign false positives are concrete defects), and raises for the owner whether D44 should
    be revised for header-borne families — the only region where a cascade could add FN coverage.
 4. **Model 2 — Small Decision Model**, then ALLOW / BLOCK / UNCERTAIN policy, cascade
@@ -503,7 +507,7 @@ Run everything from the repository root.
 | Path | Contents |
 |---|---|
 | [`CONTEXT.md`](CONTEXT.md) | **§0: current state and handoff (read first)**; then the audit trail, full latency evidence, standards mapping |
-| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D55) |
+| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D62) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |
 | [`docs/external_test_v1_protocol.md`](docs/external_test_v1_protocol.md) | External Test v1 methodology, pre-registered before the data |
