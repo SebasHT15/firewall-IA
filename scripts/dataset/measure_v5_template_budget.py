@@ -270,8 +270,20 @@ def measure_candidate(tok, fam):
             # the assistant turn starts only where EOS is followed by the assistant marker
             hits = [i for i in range(len(ids) - len(asst)) if ids[i] == eos and ids[i + 1:i + 1 + len(asst)] == asst]
             structural += len(hits) != 1
+    import v5_output_contract as oc
+    alt_b = v5tok.output_token_counts(tok, tpl, oc.VOCABULARY_ALT_B)
+    fp_a, _ = oc.fingerprint(tpl, oc.VOCABULARY_ALT_A)
+    fp_b, _ = oc.fingerprint(tpl, oc.VOCABULARY_ALT_B)
+    segs = {k: getattr(tpl, k) for k in ("system", "user_prefix", "assistant_prefix")}
     return {
         "status": "CANDIDATE (PROPOSED, not ratified): template and vocabulary await owner ratification",
+        "segments_utf8_sha256": {k: hashlib.sha256(v.encode("utf-8")).hexdigest() for k, v in segs.items()},
+        "segments_utf8_bytes": {k: len(v.encode("utf-8")) for k, v in segs.items()},
+        "fingerprint_vocabulary_alt_A_11_block": fp_a,
+        "fingerprint_vocabulary_alt_B_primary_6_block": fp_b,
+        "label_budget_vocabulary_alt_B": max(alt_b.values()),
+        "B_CANDIDATE_vocabulary_alt_B": v5tok.token_budget(
+            v5tok.PROVISIONAL_MAX_LENGTH, overhead, max(alt_b.values()), v5tok.PROVISIONAL_MARGIN),
         "instruction": v5tok.V5_CANDIDATE_INSTRUCTION,
         "template_overhead_CANDIDATE": overhead,
         "label_budget_CANDIDATE_vocabulary": label,

@@ -215,7 +215,12 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
        - R1 is UNVERIFIED. P4 and P9 are conditioned.
        - The V5 template is a PROPOSED candidate (candidate B = 415, not final).
        - Report: `reports/v5/canonical-request-v1/`.
-     - The generator (stages 2–6) and every deterministic control are **not** built.
+     - **Stage 2 (2026-10-14, issue #70):**
+       - Built and tested: a V5 template proposal (candidate B = 415, PROPOSED, not frozen), a strict output parser, and the source pools (PATT attack pool, Tatoeba CC0 prose, Wikidata given names, street and symbol lexicons).
+       - Every attack payload is `PENDING_ADJUDICATION`; none is VERIFIED.
+       - `names_family` is BLOCKED by a WDQS outage.
+       - Report: `reports/v5/dataset-foundation/`.
+     - Identities, split and generation (later stages) and every deterministic control are **not** built.
      - V4 and its runtime are unchanged.
      - Open security item: #65 (template special tokens in the V4 prompt). It is a representation
        finding; no decision effect has been measured. For V5, D56 prevents content from producing special-token

@@ -1,0 +1,180 @@
+{
+  "schema": "v5-lexicon/streets/v1",
+  "id": "streets_v1",
+  "license": "MIT",
+  "authored_by": "firewall-IA project, repo-authored; every component is invented or generic",
+  "decision": "D58 / spec r3 section 3: streets are a synthetic lexicon authored in this repository",
+  "min_pool_size": 2000,
+  "notes": [
+    "Purpose: street-name VALUES for the benign street-address family (spec 2.1). A value is a street string only: it never carries a house number or a city. House numbers and cities are drawn independently at generator time and are never paired with a street here, so no 'number + street + city' of a real dwelling can be produced by this file.",
+    "No real personal address and no real postal record is used. Stems are generic words, invented surnames or invented place-like words; a coincidence with a real street name somewhere is possible and harmless because no number or city accompanies it. Famous full person names are deliberately absent.",
+    "Expansion is deterministic (see expand_streets in scripts/dataset/build_v5_benign_pools.py): language x stem x street-type form, then directional, unit, numbered-road, fixed-phrase and cross-street patterns. The pool is the de-duplicated set of strings, keyed by the expansion key.",
+    "FINGERPRINT RISK: the pool comes from a small regular grammar (stem + type, optional directional / unit / cross street). A model could learn the grammar instead of the semantics 'this is a street'. Mitigations: several languages and abbreviation styles, apostrophes / hyphens / accents / ordinals / numbered roads / unit designators, and punctuation variety. Residual risk is NOT eliminated and is audited downstream (spec section 7, C-S checks); pool strings must not be the only way a street value can look.",
+    "Skew risk: English dominates the pool (largest stem lists and the directional / unit / cross-street patterns apply to English only). Downstream sampling should not be proportional to pool size without a per-language cap.",
+    "Unit designators contain '#', '.', digits and the ordinal signs; cross streets contain '&' and '/'. They are benign by construction and are kept on purpose (spec 2.1: legitimate punctuation in non-attack values).",
+    "Flags in the built pool (has_apostrophe, has_hyphen, non_ascii, has_symbol) describe values and never filter them."
+  ],
+  "languages": {
+    "en": {
+      "stems": {
+        "names": ["O'Connell", "D'Arcy", "O'Hara", "King's", "Queen's", "Bishop's", "Saint John's", "Smith", "Taylor", "Fairbanks", "Whitcombe", "Ashworth", "Hargreaves", "Pemberton", "Caldwell", "Thornbury", "Kingsley", "Ellerby", "Marlowe", "Brightwater", "Hollis", "Prentiss", "Rawlinson", "Sutherby", "Tavistock", "Underhill", "Vance", "Wexford", "Yarrow", "Zeller", "Abbotsford", "Beckett", "Carrow", "Dunmore", "Everly", "Fenwick", "Garrick", "Hadley", "Ingram", "Jessop", "Kerrigan", "Lindqvist", "Mac Allister", "McKenzie", "Norwood", "Oakhurst", "Penhallow", "Quill", "Redfern", "Stanhope", "Trevelyan", "Ullswater", "Vernon-Hall", "Wainwright", "Ashby-Moore", "Bell-Cross", "Clifton-Reeve", "Dale-Hart", "Eastbrook-Lyon", "Foxley-Ward", "Greene's", "Harper's", "Miller's", "Tanner's", "Collier's"],
+        "nouns": ["Oak", "Maple", "Cedar", "Pine", "Elm", "Birch", "Willow", "Walnut", "Chestnut", "Hawthorn", "Harbor", "Mill", "Church", "Market", "Station", "Bridge", "Ridge", "Valley", "Meadow", "Orchard", "Quarry", "Foundry", "Lantern", "Beacon", "Granary", "Windmill", "Sunset", "Lakeview", "Hilltop", "Riverside", "Parkside", "Brookside", "Cherry", "Magnolia", "Lilac", "Juniper", "Heron", "Falcon", "Mulberry", "Primrose", "Copper", "Silver", "Gable", "Crossing", "Commons", "Holly", "Sycamore", "Linden", "Poplar", "Laurel"],
+        "ordinals": ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth", "1st", "2nd", "3rd", "4th", "5th", "9th", "11th", "12th", "21st", "42nd", "56th", "101st", "Twelfth", "Twentieth"]
+      },
+      "types": [
+        {"pos": "suffix", "forms": ["Street", "St", "St."]},
+        {"pos": "suffix", "forms": ["Avenue", "Ave", "Ave."]},
+        {"pos": "suffix", "forms": ["Road", "Rd", "Rd."]},
+        {"pos": "suffix", "forms": ["Boulevard", "Blvd", "Blvd."]},
+        {"pos": "suffix", "forms": ["Lane", "Ln", "Ln."]},
+        {"pos": "suffix", "forms": ["Drive", "Dr", "Dr."]},
+        {"pos": "suffix", "forms": ["Court", "Ct", "Ct."]},
+        {"pos": "suffix", "forms": ["Place", "Pl", "Pl."]},
+        {"pos": "suffix", "forms": ["Terrace", "Ter", "Terr."]},
+        {"pos": "suffix", "forms": ["Way"]},
+        {"pos": "suffix", "forms": ["Close"]},
+        {"pos": "suffix", "forms": ["Crescent", "Cres", "Cres."]},
+        {"pos": "suffix", "forms": ["Square", "Sq", "Sq."]},
+        {"pos": "suffix", "forms": ["Parkway", "Pkwy", "Pkwy."]},
+        {"pos": "suffix", "forms": ["Circle", "Cir", "Cir."]},
+        {"pos": "suffix", "forms": ["Gardens", "Gdns"]},
+        {"pos": "suffix", "forms": ["Mews"]},
+        {"pos": "suffix", "forms": ["Walk"]},
+        {"pos": "suffix", "forms": ["Alley", "Aly"]},
+        {"pos": "suffix", "forms": ["Row"]}
+      ],
+      "fixed": ["The Green", "The Crescent", "The Mall", "Back Lane", "Church Row", "Station Approach", "Old Mill Lane", "Quay Side", "Market Square", "Top O' the Hill", "Hog's Back", "Cat & Fiddle Lane"],
+      "directionals": ["N", "S", "E", "W", "NE", "NW", "SE", "SW", "North", "South", "East", "West"],
+      "numbered_roads": ["Route", "Highway", "County Road", "State Route", "Rural Route"]
+    },
+    "es": {
+      "stems": {
+        "names": ["de los Álamos", "del Sol", "de la Paz", "de las Acacias", "del Ñandú", "Ñanco", "Ñuñumar", "de la Peña", "Cañada Real", "del Cañón", "Santa María", "San Ildefonso", "de los Olivos", "del Pino", "de la Concordia", "Mayor", "Nueva", "Vieja", "de Ñireco", "del Ángel", "Álvarez-Toledo", "de la Ilusión", "de las Águilas", "del Mirador", "de la Estación", "Costanera", "Los Almendros", "Las Palmeras", "El Sauce", "La Esperanza"],
+        "nouns": ["Jazmín", "Naranjo", "Limonero", "Cipreses", "Retamas", "Girasoles", "Higuera", "Encinas", "Nogales", "Ceibo"],
+        "ordinals": ["Primera", "Segunda", "Tercera", "Cuarta", "Quinta", "1ª", "2ª", "3ª"]
+      },
+      "types": [
+        {"pos": "prefix", "forms": ["Calle", "C/", "C."]},
+        {"pos": "prefix", "forms": ["Avenida", "Av.", "Avda."]},
+        {"pos": "prefix", "forms": ["Paseo", "Pº", "Pso."]},
+        {"pos": "prefix", "forms": ["Plaza", "Pza.", "Pl."]},
+        {"pos": "prefix", "forms": ["Camino", "Cno."]},
+        {"pos": "prefix", "forms": ["Carrera", "Cra."]},
+        {"pos": "prefix", "forms": ["Pasaje", "Pje."]},
+        {"pos": "prefix", "forms": ["Travesía", "Trva."]}
+      ],
+      "fixed": ["Ronda de Poniente", "Camino Viejo", "Rambla Nueva"],
+      "directionals": [],
+      "numbered_roads": ["Calle", "Carrera", "Avenida"]
+    },
+    "fr": {
+      "stems": {
+        "names": ["du Moulin", "de la Gare", "des Lilas", "de l'Église", "du Château", "des Tilleuls", "de la Paix", "du Général-Moreau", "Saint-Laurent", "Saint-Aubin", "Sainte-Anne", "du Vieux-Port", "des Écoles", "de l'Évêché", "de la Côte", "du Pré-Fleuri", "Notre-Dame-des-Champs", "des Frênes", "du Clos-Neuf", "de l'Abbé-Verdier", "d'Alsace", "des Bergers", "de la Fontaine", "du Cimetière-Neuf", "de l'Étoile", "de la Forêt", "du Marché", "des Hirondelles", "Lebrun-Maillard", "Carnot-Duval"],
+        "nouns": ["des Roses", "des Peupliers", "des Cerisiers", "du Bois", "de la Rivière", "des Pêcheurs", "des Vignes", "du Soleil"],
+        "ordinals": ["de la 1re Armée", "du 8-Mai", "du 11-Novembre"]
+      },
+      "types": [
+        {"pos": "prefix", "forms": ["Rue", "R."]},
+        {"pos": "prefix", "forms": ["Avenue", "Av."]},
+        {"pos": "prefix", "forms": ["Boulevard", "Bd"]},
+        {"pos": "prefix", "forms": ["Chemin", "Ch."]},
+        {"pos": "prefix", "forms": ["Impasse", "Imp."]},
+        {"pos": "prefix", "forms": ["Allée", "All."]},
+        {"pos": "prefix", "forms": ["Place", "Pl."]},
+        {"pos": "prefix", "forms": ["Quai", "Qu."]},
+        {"pos": "prefix", "forms": ["Route", "Rte"]}
+      ],
+      "fixed": ["Grande Rue", "Rue Neuve", "Passage du Cygne"],
+      "directionals": [],
+      "numbered_roads": ["Route nationale", "Chemin départemental"]
+    },
+    "de": {
+      "stems": {
+        "names": ["Linden", "Kirch", "Bahnhof", "Mühlen", "Schloss", "Wald", "Berg", "Garten", "Markt", "Rosen", "Eichen", "Buchen", "Birken", "Schul", "Gerber", "Weiden", "Hirsch", "Sonnen", "Fischer", "Schmied", "Brunnen", "Lessing-Hartmann", "Brauer", "Lerchen"],
+        "nouns": ["Ahorn", "Tannen", "Nelken", "Veilchen", "Wiesen", "Feld", "Hafen", "Ziegelei"],
+        "ordinals": []
+      },
+      "types": [
+        {"pos": "attached", "forms": ["straße", "str.", "strasse"]},
+        {"pos": "attached", "forms": ["weg"]},
+        {"pos": "attached", "forms": ["allee"]},
+        {"pos": "attached", "forms": ["platz"]},
+        {"pos": "attached", "forms": ["gasse"]},
+        {"pos": "attached", "forms": ["ring"]}
+      ],
+      "fixed": ["Am Mühlenberg", "An der Linde", "Im Grund", "Hinter den Gärten", "Zum Hirschen", "Am Anger", "Unter den Eichen"],
+      "directionals": [],
+      "numbered_roads": []
+    },
+    "it": {
+      "stems": {
+        "names": ["dei Tigli", "del Mulino", "della Pace", "dei Mille Fiori", "Garibaldini", "San Marino Vecchio", "delle Rose", "dell'Orto", "dell'Ulivo", "del Sole", "della Stazione", "dei Cappuccini", "dell'Aquila", "di Mezzo", "Nuova", "Vecchia", "dei Pescatori", "dell'Arte", "delle Querce", "d'Oltrarno"],
+        "nouns": ["dei Gelsi", "dei Ciliegi", "delle Mimose", "dei Castagni"],
+        "ordinals": []
+      },
+      "types": [
+        {"pos": "prefix", "forms": ["Via", "V."]},
+        {"pos": "prefix", "forms": ["Viale", "V.le"]},
+        {"pos": "prefix", "forms": ["Piazza", "P.za"]},
+        {"pos": "prefix", "forms": ["Corso", "C.so"]},
+        {"pos": "prefix", "forms": ["Vicolo", "Vic."]},
+        {"pos": "prefix", "forms": ["Largo", "L.go"]}
+      ],
+      "fixed": ["Strada Provinciale", "Lungomare Nuovo"],
+      "directionals": [],
+      "numbered_roads": []
+    },
+    "pt": {
+      "stems": {
+        "names": ["da Conceição", "dos Açores", "das Flores", "do Comércio", "da Liberdade", "dos Ipês", "das Acácias", "do Mercado", "da Esperança", "de São José", "do Cais", "dos Pescadores", "das Mangueiras", "Nova", "Velha", "do Sol", "da Fonte", "dos Cravos", "das Hortênsias", "Visconde-Almeida"],
+        "nouns": ["dos Coqueiros", "dos Jacarandás", "das Oliveiras"],
+        "ordinals": ["Primeira", "Segunda", "Terceira"]
+      },
+      "types": [
+        {"pos": "prefix", "forms": ["Rua", "R."]},
+        {"pos": "prefix", "forms": ["Avenida", "Av."]},
+        {"pos": "prefix", "forms": ["Travessa", "Tv."]},
+        {"pos": "prefix", "forms": ["Largo", "Lg."]},
+        {"pos": "prefix", "forms": ["Praça", "Pça."]},
+        {"pos": "prefix", "forms": ["Alameda", "Al."]},
+        {"pos": "prefix", "forms": ["Estrada", "Est."]}
+      ],
+      "fixed": ["Beco do Sino", "Calçada Velha"],
+      "directionals": [],
+      "numbered_roads": ["Rua", "Estrada"]
+    },
+    "nl": {
+      "stems": {
+        "names": ["Molen", "Kerk", "Dijk", "Linde", "Beuken", "Haven", "Stations", "Heide", "Wilgen", "Tulp"],
+        "nouns": ["Bloemen", "Appel", "Zwaan"],
+        "ordinals": []
+      },
+      "types": [
+        {"pos": "attached", "forms": ["straat", "str."]},
+        {"pos": "attached", "forms": ["laan", "ln."]},
+        {"pos": "attached", "forms": ["weg"]},
+        {"pos": "attached", "forms": ["plein"]}
+      ],
+      "fixed": ["Achter de Kerk", "Onder de Linden"],
+      "directionals": [],
+      "numbered_roads": []
+    }
+  },
+  "numbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 17, 19, 20, 21, 22, 24, 25, 27, 30, 32, 35, 40, 42, 44, 45, 50, 52, 55, 60, 61, 62, 65, 66, 70, 75, 80, 90, 95, 99, 101, 105, 110, 120, 127, 141, 200, 287, 301, 405, 520, 666, 777],
+  "number_suffixes": ["", " Norte", " Sur", " Bis", " A", " B"],
+  "units": {
+    "en": ["Apt #4", "Apt 4B", "Apt. 12", "Apt #17-C", "Suite 200", "Ste 5", "Ste. 310", "Unit 3B", "Unit #12", "Unit 7", "Bldg C", "Building 2", "Floor 5", "Fl. 2", "#7", "# 12", "Rm 14", "Lot 9"],
+    "es": ["Piso 2º", "Piso 3° B", "Bajo", "2º Izq.", "1º Dcha.", "Dpto. 5", "Dpto. #12", "Local 4", "Oficina 305", "Casa 3", "#7"],
+    "fr": ["Étage 3", "Porte 12", "Bt. A", "Apt 4", "Appartement n°7", "Bâtiment C", "Esc. 2"],
+    "de": ["Hinterhaus", "2. OG", "Wohnung 4", "Haus 3", "Stiege 2", "EG links"],
+    "it": ["Int. 4", "Scala B", "Piano 2", "Interno 12", "Pal. A"],
+    "pt": ["Apto 12", "Apto. 4B", "Sala 21", "Casa 3", "Bloco B", "Andar 5"],
+    "nl": ["bis", "Boven", "2e verdieping", "Unit 6"]
+  },
+  "unit_joiners": [", ", " ", " - "],
+  "unit_every": 11,
+  "cross_streets": {
+    "joiners": {"en": ["&", "/", "and", "at"], "es": ["y", "esq.", "/"]},
+    "every": 23
+  }
+}
