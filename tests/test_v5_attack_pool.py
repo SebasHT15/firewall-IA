@@ -36,6 +36,12 @@ FIXTURE = {
     "Directory Traversal/Intruder/a.txt": "../../etc/passwd\n..%c0%aF../etc/passwd\n",
     "File Inclusion/Intruders/b.txt": "../../etc/passwd\n%252e%252e/etc/passwd\n",
     "Command Injection/Intruder/c.txt": ";cat${IFS}/etc/passwd\ncat /etc/passwd # Read Users\n| id\n",
+    "Command Injection/Intruder/d.txt": "%0a%0d\n",                     # empty canonical_key (owner ruling D-4)
+    "SQL Injection/Intruder/e.txt": "/* only a comment */\n",          # empty canonical_key (owner ruling D-4)
+    # stage-3 admissibility (owner ruling, round 3): result-table borders (one repeated) and short keys
+    "SQL Injection/Intruder/f.txt": "+------+---------+\n+------+---------+\n+---+\n' --\n",
+    "Open Redirect/Intruder/g.txt": "/%5cexample.com\n/%5cexample.org\n/%5cevil.example/login\n",
+    "Command Injection/Intruder/h.txt": "& id\n",
     "Server Side Template Injection/Ruby.md": md(["<%= 7*7 %> # Rendered RCE", "{{7*7}}"]),
     "Server Side Request Forgery/README.md": md(["http://169.254.169.254/latest/meta-data/"]),
     "JSON Web Token/README.md": md(["eyJhbGciOiJub25lIn0.eyJ1c2VyIjoiYWRtaW4ifQ."]),
@@ -218,6 +224,66 @@ class ExclusionTests(Base):
         self.assertEqual(r["exclusion_reason"], "structural:trailing_doc_comment")
         self.assertEqual(r["category_v4"], "Command Injection")
 
+    def test_empty_canonical_identity_is_excluded_with_provenance(self):
+        # owner ruling D-4: no payload_family_id can be built; excluded, never relabelled, provenance kept
+        rows = [r for r in self.all if r["payload_wire"] in ("%0a%0d", "/* only a comment */")]
+        self.assertEqual(len(rows), 2)
+        for r in rows:
+            self.assertEqual(r["canonical_key"], "")
+            self.assertEqual((r["status"], r["exclusion_reason"]), (C.EXCLUDED, B.IDENTITY_EMPTY))
+            self.assertEqual(r["d59_exclusion_reason"], "AUDIT_REJECT")
+            self.assertIsNone(r["label_status"])
+            self.assertTrue(r["source_file"] and r["line_index"] is not None and r["record_id"])
+            self.assertIn(r["category_v4"], ("Command Injection", "SQL Injection"))
+        self.assertFalse(any(r["canonical_key"] == "" for r in self.acc))
+        self.assertFalse(any(r.get("duplicate_of") in {x["record_id"] for x in rows} for r in self.all))
+
+    def test_identity_admissibility_exclusions(self):
+        # stage-3 owner ruling (round 3): never relabelled, provenance kept, D59 AUDIT_REJECT (PROPOSED)
+        borders = [r for r in self.all if r["payload_raw"] in ("+------+---------+", "+---+")]
+        self.assertEqual(len(borders), 3)                     # the repeated border is not a "duplicate"
+        short = [r for r in self.all if r["payload_raw"] in ("' --", "& id", "/%5cexample.com", "/%5cexample.org")]
+        self.assertEqual(len(short), 4)
+        for rows, reason in ((borders, B.NOT_A_PAYLOAD_TABLE_BORDER), (short, B.IDENTITY_UNOBSERVABLE)):
+            for r in rows:
+                self.assertEqual((r["status"], r["exclusion_reason"]), (C.EXCLUDED, reason), r["payload_raw"])
+                self.assertEqual(r["d59_exclusion_reason"], "AUDIT_REJECT")
+                self.assertIsNone(r["label_status"])
+                self.assertIsNone(r["duplicate_of"])
+                self.assertTrue(r["source_file"] and r["line_index"] is not None and r["record_id"])
+        self.assertEqual(B.I.family_key("/%5cexample.org"), "/\\H")    # one short key, two records, both excluded
+        keys = {B.I.family_key(r["payload_wire"]) for r in borders + short}
+        for r in self.acc:
+            k = B.I.family_key(r["payload_wire"])
+            self.assertFalse(B.I.is_unobservable(k), r["payload_wire"])
+            self.assertNotIn(k, keys)
+        self.assertTrue(self.find(self.acc, payload_raw="/%5cevil.example/login"))      # long key: kept
+        counts = self.manifest["identity_admissibility"]["excluded_by_reason"]
+        self.assertEqual(counts, {B.IDENTITY_UNOBSERVABLE: 4, B.NOT_A_PAYLOAD_TABLE_BORDER: 3})
+        # the fixture holds none of the reviewed records: a stale or absent reviewed id is listed, never silent
+        self.assertEqual(self.manifest["identity_admissibility"]["reviewed_records_not_seen"], sorted(B.REVIEWED_DEGENERATE))
+
+    def test_reviewed_degenerate_records_need_their_reviewed_key(self):
+        rid = "40e435d53f53c46b"                                   # `%0Aid`, reviewed in round 3
+        self.assertEqual(B.admissibility_reason({"record_id": rid, "payload_wire": "%0Aid"}),
+                         "identity_degenerate:command_separator_lost")
+        with self.assertRaises(SystemExit):                        # same record, different identity: review again
+            B.admissibility_reason({"record_id": rid, "payload_wire": "%0Acat /etc/passwd"})
+        # an unreviewed record never inherits the reviewed reason; its short key falls to e3
+        self.assertEqual(B.admissibility_reason({"record_id": "0000000000000000", "payload_wire": "%0Aid"}),
+                         B.IDENTITY_UNOBSERVABLE)
+        self.assertIsNone(B.admissibility_reason({"record_id": "0000000000000000", "payload_wire": "' or 1=1 --"}))
+        for rid, (key, reason) in B.REVIEWED_DEGENERATE.items():
+            self.assertTrue(B.I.is_unobservable(key) and B.is_inadmissible(reason), rid)
+
+    def test_no_readmission_through_another_source(self):
+        recs = [{"record_id": "a", "status": C.EXCLUDED, "exclusion_reason": B.IDENTITY_UNOBSERVABLE, "payload_wire": "' --"},
+                {"record_id": "b", "status": C.ACCEPTED, "exclusion_reason": None, "payload_wire": "%27%20--"}]
+        with self.assertRaises(SystemExit):
+            B._check_no_readmission(recs)
+        recs[1]["payload_wire"] = "' or 1=1 --"
+        B._check_no_readmission(recs)
+
     def test_ssti_comment_is_stripped_not_dropped(self):
         r = self.find(self.acc, payload_raw="<%= 7*7 %> # Rendered RCE")[0]
         self.assertEqual(r["transform"], "stripped_doc_comment")
@@ -361,7 +427,8 @@ class ArtifactTests(Base):
             self.assertEqual(t["extracted"], len(rows))
             self.assertEqual(t["accepted"], len(self.find(self.acc, category_v4=cat)))
             self.assertEqual(t["extracted"], t["v4_filter_rejected"] + t["category_denied"] + t["third_party_denied"]
-                             + t["structural_excluded"] + t["duplicate_exact"] + t["duplicate_canonical"] + t["accepted"])
+                             + t["structural_excluded"] + t["identity_undefined"] + t["identity_inadmissible"] + t["duplicate_exact"]
+                             + t["duplicate_canonical"] + t["accepted"])
 
     def test_share_report_flags_without_capping(self):
         sh = self.manifest["per_source_file_share"]["scopes"]["SQL Injection"]

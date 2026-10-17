@@ -4,30 +4,30 @@ Status: **STAGE2_UNAUDITED**. No category is declared fit and no payload is VERI
 
 PATT `e961fef231d8` (clean=True); deny-list sha256 `56e4ae0ba7c651b2`; filter-rules fingerprint `da1335f7a346a8f9`.
 V4 equivalence on the real PATT: accepted rows 33517 (V4) vs 33517 (V5 loop), multiset equal=True, ordered equal=True, reject-reason counts equal=True.
-Determinism: two runs, artifacts identical=True; attack_pool.jsonl sha256 `abcc24553ee7e4f5` / `abcc24553ee7e4f5`, manifest `d37bc02bcca37e13`.
+Determinism: two runs, artifacts identical=True; attack_pool.jsonl sha256 `4c5d5869651fff35` / `4c5d5869651fff35`, manifest `63668a1f363000f4`.
 
-## Pipeline counts per category (each row sums: extracted = v4 + cat + 3rd + struct + dups + accepted)
+## Pipeline counts per category (each row sums: extracted = v4 + cat + 3rd + struct + identity + inadmissible + dups + accepted)
 
-| Category | Tier | Extracted | V4-rejected | Category-denied | 3rd-party | Structural | Dup exact/canon | Accepted |
-|---|---|---:|---:|---:|---:|---:|---:|---:|
-| SQL Injection | primary* | 1775 | 439 | 0 | 289 | 70 | 35/12 | 930 |
-| XSS Injection | primary* | 3416 | 473 | 0 | 2441 | 79 | 37/4 | 382 |
-| Directory Traversal | primary* | 23155 | 3546 | 0 | 19392 | 18 | 5/22 | 172 |
-| File Inclusion | primary* | 8182 | 529 | 0 | 5003 | 126 | 897/199 | 1428 |
-| Command Injection | primary* | 680 | 174 | 0 | 0 | 28 | 43/9 | 426 |
-| Server Side Template Injection | primary* | 566 | 173 | 0 | 0 | 41 | 17/0 | 335 |
-| Server Side Request Forgery | report_only* | 252 | 42 | 0 | 0 | 47 | 6/1 | 156 |
-| Open Redirect | report_only* | 380 | 123 | 0 | 0 | 23 | 12/3 | 219 |
-| NoSQL Injection | report_only* | 151 | 33 | 0 | 0 | 30 | 24/2 | 62 |
-| CRLF Injection | report_only* | 24 | 0 | 0 | 0 | 0 | 0/2 | 22 |
-| XPath Injection | report_only* | 31 | 0 | 0 | 0 | 0 | 0/0 | 31 |
-| Cross-Site Request Forgery | out_of_scope_v5 | 59 | 9 | 50 | 0 | 0 | 0/0 | 0 |
-| GraphQL Injection | out_of_scope_v5 | 231 | 110 | 121 | 0 | 0 | 0/0 | 0 |
-| Insecure Deserialization | out_of_scope_v5 | 52 | 40 | 12 | 0 | 0 | 0/0 | 0 |
-| JSON Web Token | out_of_scope_v5 | 158 | 73 | 85 | 0 | 0 | 0/0 | 0 |
-| LDAP Injection | out_of_scope_v5 | 171 | 64 | 107 | 0 | 0 | 0/0 | 0 |
-| Request Smuggling | out_of_scope_v5 | 9 | 8 | 1 | 0 | 0 | 0/0 | 0 |
-| XXE Injection | out_of_scope_v5 | 159 | 43 | 116 | 0 | 0 | 0/0 | 0 |
+| Category | Tier | Extracted | V4-rejected | Category-denied | 3rd-party | Structural | Identity undefined | Identity inadmissible | Dup exact/canon | Accepted |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| SQL Injection | primary* | 1775 | 439 | 0 | 289 | 70 | 1 | 28 | 17/11 | 920 |
+| XSS Injection | primary* | 3416 | 473 | 0 | 2441 | 79 | 0 | 0 | 37/4 | 382 |
+| Directory Traversal | primary* | 23155 | 3546 | 0 | 19392 | 18 | 0 | 3 | 5/21 | 170 |
+| File Inclusion | primary* | 8182 | 529 | 0 | 5003 | 126 | 0 | 0 | 897/199 | 1428 |
+| Command Injection | primary* | 680 | 174 | 0 | 0 | 28 | 1 | 9 | 39/7 | 422 |
+| Server Side Template Injection | primary* | 566 | 173 | 0 | 0 | 41 | 0 | 1 | 17/0 | 334 |
+| Server Side Request Forgery | report_only* | 252 | 42 | 0 | 0 | 47 | 0 | 0 | 6/1 | 156 |
+| Open Redirect | report_only* | 380 | 123 | 0 | 0 | 23 | 0 | 8 | 11/3 | 212 |
+| NoSQL Injection | report_only* | 151 | 33 | 0 | 0 | 30 | 0 | 0 | 24/2 | 62 |
+| CRLF Injection | report_only* | 24 | 0 | 0 | 0 | 0 | 0 | 0 | 0/2 | 22 |
+| XPath Injection | report_only* | 31 | 0 | 0 | 0 | 0 | 0 | 0 | 0/0 | 31 |
+| Cross-Site Request Forgery | out_of_scope_v5 | 59 | 9 | 50 | 0 | 0 | 0 | 0 | 0/0 | 0 |
+| GraphQL Injection | out_of_scope_v5 | 231 | 110 | 121 | 0 | 0 | 0 | 0 | 0/0 | 0 |
+| Insecure Deserialization | out_of_scope_v5 | 52 | 40 | 12 | 0 | 0 | 0 | 0 | 0/0 | 0 |
+| JSON Web Token | out_of_scope_v5 | 158 | 73 | 85 | 0 | 0 | 0 | 0 | 0/0 | 0 |
+| LDAP Injection | out_of_scope_v5 | 171 | 64 | 107 | 0 | 0 | 0 | 0 | 0/0 | 0 |
+| Request Smuggling | out_of_scope_v5 | 9 | 8 | 1 | 0 | 0 | 0 | 0 | 0/0 | 0 |
+| XXE Injection | out_of_scope_v5 | 159 | 43 | 116 | 0 | 0 | 0 | 0 | 0/0 | 0 |
 
 `*` = PROPOSED tiering. SSTI rows with a stripped trailing comment (kept, `transform`): 27. Hardcoded CRLF/XPath rows skip the V4 filter (as in V4). Directory traversal + file inclusion share one duplicate scope (D49).
 
@@ -70,30 +70,30 @@ Adjudication of the files the spec only noted: `XSSDetection.txt` DENIED (RSnake
 ## Per-source-file share of the ACCEPTED pool (cap NOT applied; flag threshold 25%)
 
 - CRLF Injection: `hardcoded:CRLF_PAYLOADS` 22/22 = 100.0%
-- Command Injection: `Command Injection/Intruder/command_exec.txt` 305/426 = 71.6%
+- Command Injection: `Command Injection/Intruder/command_exec.txt` 304/422 = 72.0%
 - NoSQL Injection: `NoSQL Injection/README.md` 39/62 = 62.9%
 - NoSQL Injection: `NoSQL Injection/Intruder/MongoDB.txt` 17/62 = 27.4%
-- Open Redirect: `Open Redirect/Intruder/Open-Redirect-payloads.txt` 173/219 = 79.0%
-- SQL Injection: `SQL Injection/Intruder/Generic_UnionSelect.txt` 328/930 = 35.3%
+- Open Redirect: `Open Redirect/Intruder/Open-Redirect-payloads.txt` 168/212 = 79.2%
+- SQL Injection: `SQL Injection/Intruder/Generic_UnionSelect.txt` 328/920 = 35.7%
 - Server Side Request Forgery: `Server Side Request Forgery/SSRF-Cloud-Instances.md` 68/156 = 43.6%
 - Server Side Request Forgery: `Server Side Request Forgery/README.md` 66/156 = 42.3%
-- Server Side Template Injection: `Server Side Template Injection/Python.md` 128/335 = 38.2%
+- Server Side Template Injection: `Server Side Template Injection/Python.md` 128/334 = 38.3%
 - XPath Injection: `hardcoded:XPATH_PAYLOADS` 31/31 = 100.0%
 - XSS Injection: `XSS Injection/README.md` 130/382 = 34.0%
-- path_file_access: `File Inclusion/Intruders/List_Of_File_To_Include.txt` 581/1600 = 36.3%
+- path_file_access: `File Inclusion/Intruders/List_Of_File_To_Include.txt` 581/1598 = 36.4%
 
 ## Comparison with the audit (R6, in-sample) and the spec
 
 | Category | Audit pool | Audit est. clean V+P [range] | Builder accepted |
 |---|---:|---|---:|
-| SQL Injection | 1278 | 1021 [802, 1133] | 930 |
+| SQL Injection | 1278 | 1021 [802, 1133] | 920 |
 | XSS Injection | 2238 | 881 [578, 1144] | 382 |
-| Directory Traversal | 10219 | 3161 [1865, 4322] | 172 |
+| Directory Traversal | 10219 | 3161 [1865, 4322] | 170 |
 | File Inclusion | 3321 | 2836 [2408, 3010] | 1428 |
-| Command Injection | 453 | 410 [348, 423] | 426 |
-| Server Side Template Injection | 369 | 257 [198, 287] | 335 |
+| Command Injection | 453 | 410 [348, 423] | 422 |
+| Server Side Template Injection | 369 | 257 [198, 287] | 334 |
 | Server Side Request Forgery | 202 | 133 [100, 148] | 156 |
-| Open Redirect | 242 | 219 [192, 219] | 219 |
+| Open Redirect | 242 | 219 [192, 219] | 212 |
 | NoSQL Injection | 83 | 56 [39, 61] | 62 |
 | CRLF Injection | 22 | 22 [18, 22] | 22 |
 | XPath Injection | 31 | 27 [19, 30] | 31 |

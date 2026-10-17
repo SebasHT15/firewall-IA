@@ -169,6 +169,10 @@ Model 1 stays frozen; this is not a gateway or cascade result.
   diagnostics (not by inspecting External Test v1 cases, D40)
   - Dataset decisions: approved as D56–D61.
   - Specification: `reports/v5/v5-data-spec-draft/` — `V5-DATA-SPEC-r3`, FROZEN 2026-10-13 (D62). Thresholds and constants remain open, per its §11.2.
+  - Independent libraries, tested but not integrated: stage 1 `canonical-request/v1` (#67, D63),
+    stage 2 template proposal and source pools (#70), stage 3 identities and deterministic split
+    (#72, `reports/v5/dataset-identities-split/`, contract tested on synthetic fixtures only; round-3
+    D64 approved; ready for integration, not merged; real split not executed, V5 dataset not frozen).
   - Generator, dataset and training: not started.
   - External v2 is required for any V5 claim (D40).
 - Hybrid Architecture beyond Model 1: Small Decision Model, cascade orchestrator,
@@ -507,7 +511,7 @@ Run everything from the repository root.
 | Path | Contents |
 |---|---|
 | [`CONTEXT.md`](CONTEXT.md) | **§0: current state and handoff (read first)**; then the audit trail, full latency evidence, standards mapping |
-| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D62) |
+| [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D64) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |
 | [`docs/external_test_v1_protocol.md`](docs/external_test_v1_protocol.md) | External Test v1 methodology, pre-registered before the data |

@@ -12,6 +12,16 @@ negative structural rules R1 of freeze-prep/E_attack_pool_audit:
     c. file deny-list  `v5_lexicon/patt_third_party_denylist_v1.json` -> EXCLUDED `third_party_file`
     d. structural      `audit_v5_attack_pool.structural_flags` -> EXCLUDED `structural:<rule>`;
                        SSTI trailing documentation comments are STRIPPED, not dropped
+    e0. identity       a record whose D16 `canonical_key` is empty cannot receive a payload family
+                       (V5-DATA-SPEC-r3 §4.6) -> EXCLUDED `identity_undefined:empty_canonical_key`
+                       (owner ruling D-4, stage 3; not a statement that the payload is benign)
+    e1-e3. admissibility  stage-3 owner ruling (round 3, issue #72), applied to the payload family key of
+                       V5-DATA-SPEC-r3 §4.6 (`v5_identities.family_key`, imported, not re-implemented):
+                       e1 a SQL result-table border (`+---+---+`) -> `not_a_payload:result_table_border`;
+                       e2 records reviewed one by one whose identity degenerated -> their recorded reason;
+                       e3 any other key shorter than the SPL-9 n-gram (4 code points) cannot be compared
+                       by SPL-9 -> `identity_unobservable_spl9`. Applied before duplicates, so no duplicate
+                       of an excluded record can take its place. None of these says a payload is benign
     e. duplicates      exact / V4 `canonical_key` duplicates inside one dedup scope
     f. derived fields  payload_logical, payload_wire_form, native_forms, canonical_key, ...
 
@@ -53,6 +63,7 @@ import audit_v5_attack_pool as audit  # noqa: E402  (structural_flags: imported,
 import hybrid_contracts  # noqa: E402  (ANALYZER_CATEGORIES: read only)
 import parse_dataset_v4 as p4  # noqa: E402  (V4 extraction / filter: imported, never edited)
 import v5_pools_common as C  # noqa: E402
+import v5_identities as I  # noqa: E402  (stage-3 family key: imported, never re-implemented)
 
 BUILDER_SCHEMA = "v5-attack-pool/v1"
 PINNED_PATT_COMMIT = "e961fef231d8327bae83b563fab50aec2e6b77c0"
@@ -380,8 +391,18 @@ def process(cands, denied):
         if flags:
             r.update(status=C.EXCLUDED, exclusion_reason=f"structural:{flags[0]}")
             continue
-        r["status"] = "CANDIDATE"          # survives a-d; duplicates decided below
+        # e0. identity: an empty D16 canonical_key leaves no payload_family_id (§4.6, owner ruling D-4)
+        if r["canonical_key"] == "":
+            r.update(status=C.EXCLUDED, exclusion_reason=IDENTITY_EMPTY)
+            continue
+        # e1-e3. admissibility of the family identity (owner ruling, stage 3 round 3)
+        inadmissible = admissibility_reason(r)
+        if inadmissible:
+            r.update(status=C.EXCLUDED, exclusion_reason=inadmissible)
+            continue
+        r["status"] = "CANDIDATE"          # survives a-e3; duplicates decided below
     _dedupe(recs)
+    _check_no_readmission(recs)
     _cross_category(recs)
     for r in recs:
         if r["status"] == C.ACCEPTED:
@@ -390,6 +411,58 @@ def process(cands, denied):
 
 
 C_DENY_CATEGORY = "category_not_extracted_v5"
+IDENTITY_EMPTY = "identity_undefined:empty_canonical_key"
+
+# e1-e3 (owner ruling, stage 3 round 3, issue #72). Methodological admissibility of the data, not a
+# security claim: an excluded record is never declared benign and keeps its provenance in the ledger.
+NOT_A_PAYLOAD_TABLE_BORDER = "not_a_payload:result_table_border"
+IDENTITY_UNOBSERVABLE, is_inadmissible = C.IDENTITY_UNOBSERVABLE, C.is_inadmissible   # one vocabulary
+_TABLE_BORDER = re.compile(r"\+(?:-+\+)+")          # a MySQL client result-table rule line, nothing else
+# e2: records reviewed individually in round 3 (the accepted record and every duplicate of it), with the
+# family key they were reviewed under. A reviewed record whose key changes stops the build; a record
+# not listed here never inherits these reasons (a short key then falls to e3).
+REVIEWED_DEGENERATE = {
+    # `1/*'*/`, `1/*!1111'*/`: the D16 comment collapse leaves digits only
+    "375a6a10bcf137a3": ("0", "identity_degenerate:digits_only_key"),
+    "5ed636c938fe1826": ("0", "identity_degenerate:digits_only_key"),
+    # `%0Aid`, `%0Aid%0A`, `%0a id %0a`: the LF command separator is removed with the whitespace
+    "40e435d53f53c46b": ("id", "identity_degenerate:command_separator_lost"),
+    "1c1f8a6e308ca42e": ("id", "identity_degenerate:command_separator_lost"),
+    "6b556c01ad5bd7fd": ("id", "identity_degenerate:command_separator_lost"),
+    "1c43843b62d09e77": ("id", "identity_degenerate:command_separator_lost"),
+    "d9e8783e0b37b4aa": ("id", "identity_degenerate:command_separator_lost"),
+    "72dc0fab507ede36": ("id", "identity_degenerate:command_separator_lost"),
+    # `7 * 7`: an isolated arithmetic expression, no template delimiter that would justify BLOCK
+    "722c3ef462f5c8bc": ("0*0", "not_a_payload:isolated_arithmetic"),
+}
+
+
+def admissibility_reason(r):
+    """e1-e3 for a record that survived a-e0; None when admissible."""
+    if _TABLE_BORDER.fullmatch(r["payload_wire"].strip()):
+        return NOT_A_PAYLOAD_TABLE_BORDER
+    key = I.family_key(r["payload_wire"])
+    reviewed = REVIEWED_DEGENERATE.get(r["record_id"])
+    if reviewed is not None:
+        if key != reviewed[0]:
+            raise SystemExit(f"REFUSED: reviewed record {r['record_id']} now has family key {key!r}, "
+                             f"reviewed under {reviewed[0]!r}; review it again")
+        return reviewed[1]
+    if I.is_unobservable(key):
+        return IDENTITY_UNOBSERVABLE
+    return None
+
+
+def _check_no_readmission(recs):
+    """No ACCEPTED record, in any scope or from any source, carries the family key of a record excluded
+    by e1-e3: an excluded identity cannot come back through another file."""
+    keys = {I.family_key(r["payload_wire"]) for r in recs
+            if r["status"] == C.EXCLUDED and is_inadmissible(r["exclusion_reason"])}
+    back = sorted(r["record_id"] for r in recs if r["status"] == C.ACCEPTED and I.family_key(r["payload_wire"]) in keys)
+    if back:
+        raise SystemExit(f"REFUSED: ACCEPTED records share a family key with an inadmissible record: {back}")
+
+
 
 
 def _fill(r, work):
@@ -449,6 +522,8 @@ def compute_counts(recs):
         by_reason = Counter(r["exclusion_reason"] for r in rs if r["status"] == C.EXCLUDED)
         v4 = sum(n for k, n in by_reason.items() if k.startswith("v4_filter:"))
         struct = sum(n for k, n in by_reason.items() if k.startswith("structural:"))
+        ident = sum(n for k, n in by_reason.items() if k.startswith("identity_undefined:"))
+        inadm = sum(n for k, n in by_reason.items() if is_inadmissible(k))
         table[cat] = {
             "tier": tier_of(cat), "d47_category": d47_of(cat),
             "extracted": len(rs),
@@ -456,6 +531,8 @@ def compute_counts(recs):
             "category_denied": by_reason.get(C_DENY_CATEGORY, 0),
             "third_party_denied": by_reason.get("third_party_file", 0),
             "structural_excluded": struct,
+            "identity_undefined": ident,
+            "identity_inadmissible": inadm,
             "duplicate_exact": by_reason.get("duplicate_exact", 0),
             "duplicate_canonical": by_reason.get("duplicate_canonical", 0),
             "accepted": sum(1 for r in rs if r["status"] == C.ACCEPTED),
@@ -464,7 +541,8 @@ def compute_counts(recs):
         }
         t = table[cat]
         assert t["extracted"] == (t["v4_filter_rejected"] + t["category_denied"] + t["third_party_denied"]
-                                  + t["structural_excluded"] + t["duplicate_exact"] + t["duplicate_canonical"]
+                                  + t["structural_excluded"] + t["identity_undefined"] + t["identity_inadmissible"]
+                                  + t["duplicate_exact"] + t["duplicate_canonical"]
                                   + t["accepted"]), cat
     return table
 
@@ -618,7 +696,7 @@ def build(patt, out_dir=C.DEFAULT_OUT_DIR, denylist_path=DEFAULT_DENYLIST, *, pa
                                                                   r["payload_wire"]))
 
     code = C.code_fingerprint([os.path.abspath(__file__), audit.__file__, p4.__file__, C.__file__,
-                               hybrid_contracts.__file__])
+                               hybrid_contracts.__file__, I.__file__])
     manifest = OrderedDict([
         ("schema", BUILDER_SCHEMA), ("pool_schema", C.SCHEMA),
         ("status", "STAGE2_UNAUDITED: no category is declared fit; no payload is VERIFIED (post-filter audit "
@@ -641,7 +719,16 @@ def build(patt, out_dir=C.DEFAULT_OUT_DIR, denylist_path=DEFAULT_DENYLIST, *, pa
         ("environment", C.environment()),
         ("python", python_info),
         ("provenance", C.provenance([os.path.abspath(__file__), audit.__file__, p4.__file__, C.__file__,
-                                     hybrid_contracts.__file__, os.path.abspath(denylist_path)])),
+                                     hybrid_contracts.__file__, I.__file__, os.path.abspath(denylist_path)])),
+        ("identity_admissibility", {
+            "ruling": "stage 3 round 3 owner ruling (issue #72): data admissibility, not a security claim",
+            "pfid_rules_version": I.PFID_RULES_VERSION, "spl9_ngram": I.NEAR_DUP_N,
+            "table_border_pattern": _TABLE_BORDER.pattern,
+            "reviewed_degenerate_records": {k: list(v) for k, v in sorted(REVIEWED_DEGENERATE.items())},
+            # a reviewed id absent from this build (stale list, or a changed source) is shown, never silent
+            "reviewed_records_not_seen": sorted(set(REVIEWED_DEGENERATE) - {r["record_id"] for r in recs}),
+            "excluded_by_reason": dict(sorted(Counter(r["exclusion_reason"] for r in excluded
+                                                      if is_inadmissible(r["exclusion_reason"])).items()))}),
         ("d59_mapping", C.d59_mapping_table()),
         ("d59_exclusion_counts", dict(sorted(Counter(str(r["d59_exclusion_reason"]) for r in excluded).items()))),
         ("v4_equivalence", equivalence),
@@ -719,12 +806,12 @@ def render_summary(m, det=None, doc=None):
     if det:
         L.append(f"Determinism: two runs, artifacts identical={det['identical']}; attack_pool.jsonl sha256 "
                  f"`{det['run1'][POOL_NAME][:16]}` / `{det['run2'][POOL_NAME][:16]}`, manifest `{det['run1'][MANIFEST_NAME][:16]}`.")
-    L += ["", "## Pipeline counts per category (each row sums: extracted = v4 + cat + 3rd + struct + dups + accepted)", "",
-          "| Category | Tier | Extracted | V4-rejected | Category-denied | 3rd-party | Structural | Dup exact/canon | Accepted |",
-          "|---|---|---:|---:|---:|---:|---:|---:|---:|"]
+    L += ["", "## Pipeline counts per category (each row sums: extracted = v4 + cat + 3rd + struct + identity + inadmissible + dups + accepted)", "",
+          "| Category | Tier | Extracted | V4-rejected | Category-denied | 3rd-party | Structural | Identity undefined | Identity inadmissible | Dup exact/canon | Accepted |",
+          "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|"]
     for cat, t in cnt.items():
         L.append(f"| {cat} | {t['tier'].replace('_PROPOSED', '*')} | {t['extracted']} | {t['v4_filter_rejected']} | "
-                 f"{t['category_denied']} | {t['third_party_denied']} | {t['structural_excluded']} | "
+                 f"{t['category_denied']} | {t['third_party_denied']} | {t['structural_excluded']} | {t['identity_undefined']} | {t['identity_inadmissible']} | "
                  f"{t['duplicate_exact']}/{t['duplicate_canonical']} | {t['accepted']} |")
     L += ["", "`*` = PROPOSED tiering. SSTI rows with a stripped trailing comment (kept, `transform`): "
           f"{cnt[SSTI]['ssti_comment_stripped_accepted']}. Hardcoded CRLF/XPath rows skip the V4 filter (as in V4). "

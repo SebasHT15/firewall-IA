@@ -114,7 +114,7 @@ def assert_not_protected(path):
 
 # ─────────────── provenance, interpreter control and the D59 mapping (stage-2 closure) ───────────────
 # Bump when a filter, a record field or a selection rule changes meaning (manifest field).
-GENERATOR_VERSION = "v5-pools/1.1"
+GENERATOR_VERSION = "v5-pools/1.3"   # 1.2: empty canonical_key EXCLUDED (owner ruling D-4); 1.3: identity admissibility (stage 3 round 3)
 
 # Interpreters on which every pool artifact was rebuilt byte-identical (2026-10-14: CPython 3.12.15
 # and 3.14.4). Another minor version may change stdlib-derived behaviour (`unicodedata`,
@@ -155,11 +155,23 @@ def provenance(code_paths):
 # records keep their original reason and gain `d59_exclusion_reason`. None = pool hygiene that never
 # becomes a dataset row (duplicates, parse failures, other languages). Mapping status: PROPOSED.
 D59_REASONS = ("AMBIGUOUS", "INSUFFICIENT_CONTEXT", "ORACLE_REJECT", "AUDIT_REJECT", "OUT_OF_SCOPE", "OVER_LIMIT")
-_D59_PREFIX = {"v4_filter:": "AUDIT_REJECT", "structural:": "AUDIT_REJECT"}
+# Identity admissibility reasons of the attack pool (stage-3 owner ruling, round 3): one definition,
+# imported by the builder and the reconciler.
+IDENTITY_UNOBSERVABLE = "identity_unobservable_spl9"
+INADMISSIBLE_PREFIXES = ("not_a_payload:", "identity_degenerate:")
+
+
+def is_inadmissible(reason):
+    return reason == IDENTITY_UNOBSERVABLE or reason.startswith(INADMISSIBLE_PREFIXES)
+
+
+_D59_PREFIX = {"v4_filter:": "AUDIT_REJECT", "structural:": "AUDIT_REJECT", "identity_undefined:": "AUDIT_REJECT",
+               "not_a_payload:": "AUDIT_REJECT", "identity_degenerate:": "AUDIT_REJECT"}
 _D59_EXACT = {
     # attack pool
     "category_not_extracted_v5": "OUT_OF_SCOPE", "third_party_file": "OUT_OF_SCOPE",
     "duplicate_exact": None, "duplicate_canonical": None,
+    IDENTITY_UNOBSERVABLE: "AUDIT_REJECT",               # stage 3 round 3: SPL-9 cannot compare the key
     # benign pools: oracle
     "oracle_exact_collision": "ORACLE_REJECT",
     # benign pools: privacy and value hygiene (not a value the pool is meant to hold)

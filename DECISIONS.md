@@ -2676,6 +2676,167 @@ were fixed and tested. The evidence is in
 
 ---
 
+## D64 — V5 Stage 3: owner rulings for the identity and split contract
+
+- **Date:** 2026-10-16 (America/Costa_Rica)
+- **Status:** APPROVED (owner approval of 2026-10-16 of the text proposed in the stage-3 report §S.13,
+  issue #72), including D-1–D-6, the documented exclusions, the benign value policy and interpretation
+  I-8b. The items under "Deferred" are **not** approved for implementation.
+- **Implementation:** DONE in the stage-3 working tree on synthetic fixtures (`scripts/dataset/v5_identities.py`,
+  `v5_split.py`, `v5_split_checks.py`; stage-2 builder changes), **not integrated**; **no real split**.
+  Report: `reports/v5/dataset-identities-split/README.md` (§R round 2, §S round 3).
+
+**Context.** Stage 3 implemented the identities, explicit merges, the deterministic 70/10/20 assignment,
+the E6 reserve and gates SPL-1…SPL-9 of `V5-DATA-SPEC-r3` §4.6 (D62) as independent libraries. Where the
+frozen text is silent, the implementation had to choose. The owner ruled in two rounds: round 2
+(2026-10-14) and round 3 (2026-10-16, after a read-only decision audit). This entry records those rulings
+and what was implemented. It approves nothing retroactively and changes no frozen requirement, so no r4 is
+needed.
+
+**Scope.** Stage 3 only: the identities (`payload_family_id`, `template_id`, `struct_cluster_id`,
+`value_entry_id` reused, `pair_id`), explicit merges, the deterministic 70/10/20 assignment, the E6
+reserve, gates SPL-1…SPL-9, and the stage-2 selection changes those identities require. Out of scope:
+templates, slots, rows, rendering, labels, the generator (stage 4 onwards), training and integration.
+
+**Decision.**
+
+1. **Identity rules (round 2, D-1…D-6).**
+   - **D-1:** the SPL-9 / template-audit near-duplicate representation is the set of contiguous 4-grams of
+     Unicode code points of each pre-merge family key; Jaccard ≥ 0.60 as frozen, compared as integers;
+     whole components are merged explicitly before ranking. n = 4 was chosen after a structural audit of
+     the stage-2 pool and before any real split.
+   - **D-2:** a cluster spanning two carrier strata is refused (the build stops).
+   - **D-3:** benign value equivalence for SPL-6 and pre-split deduplication = NFC + casefold; no
+     whitespace collapse; `value_entry_id` keeps its frozen formula.
+   - **D-4:** attack records with an empty D16 `canonical_key` are EXCLUDED upstream as
+     `identity_undefined:empty_canonical_key`.
+   - **D-5:** "digits → 0" = each maximal ASCII digit run becomes one `0`.
+   - **D-6:** hosts are masked only in the URL / redirect forms of §4.3 (separator runs in URL context,
+     `http(s):h`, userinfo integer hosts); a bare dotted word is not a host. Round-3 residual: the
+     integer / `0x` host of `http:h` (`http:3627734734`, `http:0xd83ad6ce`) is masked (`pfid-rules/v3`);
+     as a consequence `http:<digits>` is one key.
+2. **Unobservable and inadmissible identities (round 3).** Before duplicate removal, the stage-2 builder
+   EXCLUDES: MySQL result-table borders (`not_a_payload:result_table_border`); records reviewed one by one
+   whose identity degenerated (`identity_degenerate:digits_only_key`,
+   `identity_degenerate:command_separator_lost`, `not_a_payload:isolated_arithmetic`); and every other
+   record whose family key is shorter than 4 code points (`identity_unobservable_spl9`).
+   - This is a methodological admissibility rule, not a security statement: no excluded record is
+     declared benign, every record stays in the reconciliation ledger with its provenance, and no record
+     with an excluded family key may be ACCEPTED from any source.
+   - The Jaccard threshold and n are unchanged; no "declared unobservable" pass exists; `gate_spl9` stays
+     `BLOCKED_UNOBSERVABLE` while any short key is present.
+   - The loss of the legitimate short payloads (16 records, 13 of them ACCEPTED) is a documented coverage
+     loss.
+3. **Benign value policy (round 3, policy B).** NFC + casefold deduplicates every equivalence group with
+   one deterministic rule (configured pool precedence, then the smallest `value_entry_id`); there are no
+   holds.
+   - Where the members differ in meaning, the excluded member records the difference and the reason
+     `value_equivalence_policy:split_contamination_guard`; it is never presented as a synonym (`wasps`
+     kept, `WASPs` excluded).
+   - Only `symbols > names_given` is backed by analysis, as a candidate; no global precedence is ratified,
+     and a real build that needs an unratified precedence stops.
+   - The ß / ss tie-break stays the content hash provisionally; its semantic policy is open.
+4. **I-8, hybrid reading (round 3).** Strata are processed in code-point order of the category. Each
+   family is assigned once, in its stratum. An attempt's evaluability (≥ 100 families, ≥ 30 in INTERNAL
+   TEST) counts the stratum's own non-reserve families plus the category's families already placed by
+   earlier strata in TRAIN / VALIDATION / INTERNAL TEST; reserve families never count; nothing is counted
+   twice. Earlier strata are never changed; a stratum stopped by an E6 overflow stops every later stratum
+   that counts its families. The step-2 outcome must agree with the final SPL-8 flag; SPL-8 fails
+   otherwise.
+   - **I-8b (interpretation, adopted for stage 3 with the limitations below):** R, the roundings and the
+     cuts apply to the stratum's own families. §4.6 defines the cuts "for a stratum of size n", and they
+     cannot use the category's full count without re-cutting families already placed by earlier strata,
+     which would assign a family twice or change an earlier stratum. R is the one ambiguous quantity ("n
+     is the number of families of the category after merges"); an "R on all occurring families" variant
+     could be filled from own families without moving anyone, but it would size the reserve on one count
+     and cut on another. Measured on the real pool, that variant changes R by at most 1 family and no
+     outcome. I-8b is therefore the reading consistent with the cuts, not a change to the frozen text.
+5. **Deferred to stage 4 — not approved for implementation.**
+   - **I-16:** cross-carrier clusters stay refused; carrier-qualified audit tokens are a candidate only; if
+     real templates of two carriers reach the threshold and cannot be assigned validly, the build stops.
+   - **I-6:** the frozen `pair_id` is unchanged; `pair_content_id` is a candidate diagnostic (not in SPL-3,
+     not blocking) to be specified with the stage-4 slot model.
+   - Also deferred: I-4 (template skeleton), I-9 (step-5 rebalancing rule), I-10 (ENC-5 overflow policy
+     choice), I-14 (`names_family` pool identity).
+6. **Round-2 interpretations made binding for stage 3** (provisionally ratified on 2026-10-14):
+   - I-3: a single character repeated 4+ times → 3 copies;
+   - I-7: category vocabulary = stage-2 `dedup_scope`, code-point order;
+   - I-11: `E6_RESERVE` is a fourth partition for SPL-9;
+   - I-12: the family key is the id;
+   - I-17: `master_seed` required and hashed, unused in stage 3;
+   - I-18: rule order as listed;
+   - I-19: no Unicode normalisation of payloads beyond `canonical_key`.
+
+**Implemented.**
+- Files: `scripts/dataset/v5_identities.py`, `v5_split.py`, `v5_split_checks.py`; stage-2
+  `build_v5_attack_pool.py`, `reconcile_v5_attack_pool.py`, `v5_pools_common.py`; tests
+  `test_v5_identities.py`, `test_v5_split.py`, `test_v5_attack_pool.py`.
+- Versions: `pfid-rules/v3`, `v5-split-config/v3`, `v5-pools/1.3`, census `v5-stage3-census/v3`.
+- Attack pool: 39,451 = 4,139 ACCEPTED + 35,312 EXCLUDED (51 identity exclusions: 2 D-4 + 49 round 3);
+  every ACCEPTED record `PENDING_ADJUDICATION`.
+
+**Evidence.**
+- Stage-3 tests 101 OK; stage 1/2/3 suites 524 OK (3.14) and 563 OK (3.12; the 39 extra tests are the
+  tokenizer suites, which need `transformers`, absent on 3.14); data-plane venv 380 OK; V4 suites 77 OK.
+- SPL-1 and SPL-2 PASS; fixture SPL-3…SPL-9 PASS.
+- Byte-identical rebuilds on CPython 3.12 and 3.14 with PYTHONHASHSEED 0 and 31337 (fixture assignment
+  `571a0a06…`, census `420ddc20…`, attack pool `4c5d5869…`); specification hash unchanged.
+- Real-pool census (counts only): 3,754 families before merges, 1,692 after merging every proposed
+  component, 17,048 SPL-9 pairs, largest component 90, 0 unobservable keys; EVALUABLE CmdI, SQLi, SSTI,
+  XSS, `path_file_access`; NOT EVALUABLE CRLF, NoSQL, Open Redirect, SSRF, XPath.
+- Four independent read-only reviews (round 3) found no contradiction with the frozen text, no leakage
+  path and no determinism hazard; their verified findings were fixed (report §S.10).
+
+**Limitations and remaining risks.**
+- All counts are pre post-filter audit, on a PROPOSED deny-list and without `names_family`.
+- `path_file_access` components chain within one target concept (merging is conservative for leakage and
+  lowers family counts).
+- Near-duplicate benign values beyond NFC + casefold are not grouped.
+- The excluded short payloads leave a coverage gap.
+- The hybrid I-8 changes no real outcome today but would matter for multi-category families.
+- Templates, slots, rows and the generator do not exist, so I-4, I-6, I-9, I-16 remain untestable on real
+  data.
+- Verified on CPython 3.12 and 3.14 only.
+
+**Still pending — not decided by D64.** The post-filter audit (spec §7) and the blind human review
+(§11.3); the final third-party deny-list (PROPOSED); `names_family` (BLOCKED); the approval of the stage-2
+attack and benign pools (every ACCEPTED payload is `PENDING_ADJUDICATION`, no payload is VERIFIED, no
+category is declared fit); the cluster-share thresholds (PROPOSED). No real split exists and the V5 dataset
+is not FROZEN.
+
+**Conditions for a real split.**
+- (a) D64 approved and recorded (met by this entry);
+- (b) post-filter audit done, the deny-list final, and every ACCEPTED payload adjudicated (none
+  `PENDING_ADJUDICATION`);
+- (c) `names_family` built, or a configuration without it explicitly approved;
+- (d) the explicit family-merge list reviewed and written into the config;
+- (e) the template catalogue with cluster declarations, passing the template audit;
+- (f) a value precedence ratified for every configured pool;
+- (g) the cluster-share thresholds and the rebalancing rule in the dataset preregistration;
+- (h) every SPL gate run on the real build and passing, including SPL-9 with 0 unobservable keys;
+- (i) INTERNAL TEST read once behind its single-run guard.
+
+**Conditions for starting stage 4.** D64 approved and recorded; the stage-3 work merged into `develop`
+through a reviewed PR; issue #72 closed by the owner. Stage 4 must deliver the template catalogue (I-4 and
+the I-16 check), the slot model (I-6), the quota model and rebalancing rule (I-9), the ENC-5 overflow choice
+(I-10) and the `names_family` identity (I-14), and run every SPL gate as a build gate.
+
+**Rationale.** The round-2 decision package (B-1…B-4, I-1…I-19) and the round-3 read-only decision audit,
+with the measurements of the stage-3 report (§R, §S): the word representation left 413 families without
+an SPL-9 representation and produced a 455-family component; the 13 short keys could not be observed by
+SPL-9; the round-2 `wasps` hold made the build depend on ranking; the stratum-local I-8 reading could
+contradict the final SPL-8 flag. The owner prioritises leakage safety and methodological integrity over
+evaluable-family counts: evaluability is a consequence of the rules, never a target.
+
+**Relationship to earlier entries.**
+- Applies D62 (`V5-DATA-SPEC-r3` §4.6) and D60 (split principles, E6 reserve, evaluability from real
+  counts), and D16 (identities before rendering).
+- **D56–D63 and the frozen file are unchanged** (SHA-256 `f1580634…` verified). No r4.
+- Every item interprets text the frozen specification leaves open, adds a stage-2 admissibility rule, or
+  defers. It amends neither D60 nor D62. Nothing is superseded.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -2743,6 +2904,7 @@ were fixed and tested. The evidence is in
 | D61 | Documented V4 limitations: double encoding, `%25XX` class shortcut, D15 incidental forms, 89 label-truncated rows, third-party PATT files (addendum to D15, D20) | APPROVED | DONE (documentation) |
 | D62 | V5 Data Specification r3 FROZEN (`V5-DATA-SPEC-r3`, SHA-256 `f1580634…`): §4.6, §5.2–§5.6 and §4.3 classes/precedence ratified; thresholds, constants, category distribution and open lists excluded (r3 §11.2) | APPROVED | DONE (freeze record; spec not implemented) |
 | D63 | V5 stage 1 `canonical-request/v1` rulings: P1–P3, P5 (corrected), P6–P8, P10–P12 ratified; P4, P9 conditioned; I7/CONNECT and "stdlib-only" clarified; decoder bounds; V5 candidate template PROPOSED (candidate B = 415, not final) | APPROVED (P4, P9 conditioned; template PROPOSED) | DONE (stage 1, not integrated, #67) |
+| D64 | V5 stage 3 identity and split contract: D-1–D-6, identity admissibility exclusions (`identity_unobservable_spl9`, `not_a_payload:*`, `identity_degenerate:*`), benign value policy B, hybrid I-8 + I-8b; I-6, I-16 (and I-4, I-9, I-10, I-14) deferred to stage 4 | APPROVED (deferred items not approved for implementation) | DONE (stage 3, fixtures only; not integrated; no real split, #72) |
 
 ---
 

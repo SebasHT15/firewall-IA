@@ -3,7 +3,7 @@
 ## 0. HANDOFF — current state (2026-10-05; V5 dataset decisions added 2026-10-12, §0.9 item 5) · READ THIS FIRST
 
 This section is the current state. Everything after it is a chronological audit trail;
-where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D62).
+where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D64).
 
 ### 0.1 What the project is
 
@@ -220,7 +220,30 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
        - Every attack payload is `PENDING_ADJUDICATION`; none is VERIFIED.
        - `names_family` is BLOCKED by a WDQS outage.
        - Report: `reports/v5/dataset-foundation/`.
-     - Identities, split and generation (later stages) and every deterministic control are **not** built.
+     - **Stage 3 (2026-10-14 / 2026-10-16, issue #72, open; D64 APPROVED; READY FOR INTEGRATION):**
+       - Built and tested on synthetic fixtures: the §4.6 identities (`payload_family_id`, `template_id`,
+         `struct_cluster_id`, `pair_id`; `value_entry_id` reused), explicit merges, the deterministic
+         70/10/20 assignment, the E6 reserve and gates SPL-1…SPL-9 (`scripts/dataset/v5_identities.py`,
+         `v5_split.py`, `v5_split_checks.py`). Byte-identical on CPython 3.12 and 3.14.
+       - Owner rulings of round 2 implemented: SPL-9 on 4-grams of the family key (D-1), digit runs (D-5),
+         §4.3 redirect host forms (D-6), NFC + casefold value deduplication before the split (D-3, precedence
+         and holds PROPOSED), and the two attack records with an empty `canonical_key` excluded upstream (D-4;
+         pool now 4,161 ACCEPTED). No D64 recorded (draft in the report).
+       - Owner rulings of round 3 implemented (2026-10-16): the 13 short family keys and the result-table
+         borders are excluded upstream with specific reasons (`identity_unobservable_spl9`,
+         `not_a_payload:result_table_border`, `identity_degenerate:*`; a documented coverage loss, nothing
+         declared benign; pool now 4,139 ACCEPTED, 0 unobservable keys); value policy B (no hold, `WASPs`
+         excluded with its semantic difference recorded); D-6 residual (`http:<dword>` → `http:H`,
+         2 identities); hybrid I-8 (attempts count families already placed by earlier strata; no real
+         outcome changed). I-6 and I-16 deferred to stage 4; precedence beyond `symbols > names_given` and
+         the ß/ss tie-break not ratified.
+       - **D64 APPROVED and recorded (2026-10-16).** The stage-3 contract is ready for integration; it is not
+         merged, #72 stays open until the owner closes it, and it is **not** a V5 dataset approval:
+         `names_family` BLOCKED, deny-list PROPOSED, post-filter audit and payload adjudication PENDING,
+         cluster-share thresholds PROPOSED, real split NOT EXECUTED, V5 dataset NOT FROZEN. Stage 4 not started.
+       - No real split exists: the real-pool census is counts only.
+       - Report: `reports/v5/dataset-identities-split/` (§R round 2, §S round 3).
+     - Generation, labels (stage 4 onwards) and every deterministic control are **not** built.
      - V4 and its runtime are unchanged.
      - Open security item: #65 (template special tokens in the V4 prompt). It is a representation
        finding; no decision effect has been measured. For V5, D56 prevents content from producing special-token
@@ -245,7 +268,7 @@ firewall-IA is a fine-tuned TinyLlama-1.1B-Chat classifier. Given a raw HTTP req
 The device is an **authorized inline supervisor (a legitimate security gateway), NOT a man-in-the-middle.** Maintain this distinction in all design discussion. Distinguish between: MITM attack / authorized inline interception / reverse proxy / security gateway / application-layer inspection. This project uses **authorized inline interception**.
 
 > **Companion documents:**
-> - `DECISIONS.md` — the project decision log (D1–D62). Read it before proposing architectural changes.
+> - `DECISIONS.md` — the project decision log (D1–D64). Read it before proposing architectural changes.
 > - `docs/ml_evaluation_methodology.md` — evaluation rules: data sets, metrics, diagnostics vs benchmarks, latency layers.
 > - `docs/external_test_v1_protocol.md` — External Test v1 methodology (pre-registered; status note at the top).
 > - `docs/technical_reference.md` — component detail moved out of the README at stage close.
