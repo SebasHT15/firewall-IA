@@ -1,0 +1,47 @@
+{
+  "schema": "v5-oracle-signatures/v1",
+  "spec": "V5-DATA-SPEC-r3 §4.4",
+  "status": "PENDING (spec §11.2): CANDIDATE breakout signatures written from the structure of the attack categories (never from probe or development material); calibrated on the pilot and ratified in the preregistration. Not approved.",
+  "note": "Matched case-insensitively on the value and on canonical_key(value) (D16: one URL-decode chain, entities, comments removed, whitespace collapsed, lowercase). A signature rejects a benign generator value only for categories compatible with its slot (§4.2). The survival fixture O'Neil, Apt #4, AT&T, 100%, a<b must pass for every slot type.",
+  "signatures": {
+    "SQL Injection": [
+      {"id": "sqli-quote-boolean", "pattern": "['\"`]\\s*(?:or|and|xor)\\s+['\"`]?[\\w]+['\"`]?\\s*(?:=|<|>|like\\b|between\\b|is\\b)"},
+      {"id": "sqli-quote-terminator", "pattern": "['\"`]\\s*(?:;|--|#|/\\*|\\)\\s*(?:or|and|;|--|#))"},
+      {"id": "sqli-union-select", "pattern": "\\bunion\\b(?:\\s+all)?\\s+select\\b"},
+      {"id": "sqli-stacked", "pattern": ";\\s*(?:drop|delete|insert|update|exec|shutdown|waitfor)\\b"},
+      {"id": "sqli-time", "pattern": "\\b(?:sleep|benchmark|pg_sleep|waitfor\\s+delay)\\s*\\("}
+    ],
+    "XSS Injection": [
+      {"id": "xss-tag", "pattern": "<\\s*/?\\s*(?:script|iframe|svg|img|object|embed|body|math|details|video|audio|style|link|meta|base|form|input)\\b"},
+      {"id": "xss-handler", "pattern": "\\bon[a-z]{3,}\\s*="},
+      {"id": "xss-js-scheme", "pattern": "\\b(?:javascript|vbscript)\\s*:"}
+    ],
+    "Command Injection": [
+      {"id": "cmdi-separator-command", "pattern": "(?:;|\\|\\|?|&&|\\$\\(|`)\\s*(?:cat|id|whoami|ls|uname|ping|curl|wget|nc|bash|sh|sleep|echo|nslookup|dir|type)\\b"},
+      {"id": "cmdi-subshell", "pattern": "\\$\\([^)]*\\)|`[^`]+`"}
+    ],
+    "Server Side Template Injection": [
+      {"id": "ssti-mustache", "pattern": "\\{\\{.*?\\}\\}"},
+      {"id": "ssti-dollar-brace", "pattern": "\\$\\{.*?\\}"},
+      {"id": "ssti-erb", "pattern": "<%.*?%>"},
+      {"id": "ssti-hash-brace", "pattern": "#\\{.*?\\}"},
+      {"id": "ssti-jinja-stmt", "pattern": "\\{%.*?%\\}"}
+    ],
+    "NoSQL Injection": [
+      {"id": "nosql-operator", "pattern": "\\$(?:ne|eq|gt|gte|lt|lte|where|regex|or|and|in|nin|exists|expr)\\b"}
+    ],
+    "XPath Injection": [
+      {"id": "xpath-quote-boolean", "pattern": "['\"]\\s*(?:or|and)\\s+['\"]?\\w+['\"]?\\s*=\\s*['\"]?\\w"},
+      {"id": "xpath-function", "pattern": "\\b(?:count|name|string-length|substring)\\s*\\(\\s*(?:/|\\.|name\\()"}
+    ],
+    "CRLF Injection": [
+      {"id": "crlf-header", "pattern": "[\\r\\n]\\s*[\\w-]+\\s*:"},
+      {"id": "crlf-encoded", "pattern": "%0[da]"}
+    ],
+    "path_file_access": [
+      {"id": "path-dotdot", "pattern": "\\.\\.[/\\\\]|[/\\\\]\\.\\.(?:$|[/\\\\])"},
+      {"id": "path-sensitive", "pattern": "(?:/etc/(?:passwd|shadow|hosts)|boot\\.ini|win\\.ini|/proc/self)"},
+      {"id": "path-wrapper", "pattern": "\\b(?:php|file|expect|zip|phar|data)://"}
+    ]
+  }
+}

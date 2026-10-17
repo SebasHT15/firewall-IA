@@ -173,7 +173,13 @@ Model 1 stays frozen; this is not a gateway or cascade result.
     stage 2 template proposal and source pools (#70), stage 3 identities and deterministic split
     (#72, `reports/v5/dataset-identities-split/`, contract tested on synthetic fixtures only; round-3
     D64 approved; ready for integration, not merged; real split not executed, V5 dataset not frozen).
-  - Generator, dataset and training: not started.
+  - Stage 4 constructive generator (#74, `reports/v5/constructive-generator/`): template catalogue,
+    encoder/renderer, labeller/policies, benign oracle, constructive pair generator and I-9 realised-share
+    rebalancing — implemented and tested on synthetic fixtures only; READY FOR PR, not
+    merged. I-9 uses the literal D62 reading (WARN is the reduction trigger; D65 APPROVED); the WARN/BLOCK
+    numeric values and the low-cluster-split policy are PROPOSED, deferred to the pilot/preregistration.
+    No real split, dataset or training; `names_family` blocked (#75).
+  - Dataset and training: not started.
   - External v2 is required for any V5 claim (D40).
 - Hybrid Architecture beyond Model 1: Small Decision Model, cascade orchestrator,
   UNCERTAIN → V4 fallback, gateway integration (see the status table in §2)

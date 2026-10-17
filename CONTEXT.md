@@ -240,10 +240,34 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
        - **D64 APPROVED and recorded (2026-10-16).** The stage-3 contract is ready for integration; it is not
          merged, #72 stays open until the owner closes it, and it is **not** a V5 dataset approval:
          `names_family` BLOCKED, deny-list PROPOSED, post-filter audit and payload adjudication PENDING,
-         cluster-share thresholds PROPOSED, real split NOT EXECUTED, V5 dataset NOT FROZEN. Stage 4 not started.
+         cluster-share thresholds PROPOSED, real split NOT EXECUTED, V5 dataset NOT FROZEN.
        - No real split exists: the real-pool census is counts only.
        - Report: `reports/v5/dataset-identities-split/` (§R round 2, §S round 3).
-     - Generation, labels (stage 4 onwards) and every deterministic control are **not** built.
+     - **Stage 4 (2026-10-16 / 2026-10-17, issue #74, open; READY FOR PR; UNCOMMITTED):**
+       - Built and tested on synthetic fixtures only (abstract attack markers, no exploit content): a
+         41-template catalogue with declared clusters and the Jaccard/I-16 audit (`v5_catalog.py`); the
+         shared encoder + rendering through the stage-1 `canonicalize()` (`v5_render.py`); the §4.3
+         labeller with M-1…M-10 and the `POL-*` table (`v5_labels.py`); the §4.4 benign oracle
+         (`v5_oracle.py`); the constructive pair generator (`v5_generator.py`); the I-9 realised-share
+         rebalancer (`v5_rebalance.py`); and the synthetic fixture + CLI (`v5_fixture.py`). 601 tests OK
+         on CPython 3.12 and 3.14; V4 behavioural suites unchanged.
+       - **I-9 (D62 §4.6 step 5)** runs as generate → measure realised cluster share over admitted rows →
+         rebalance the quota plan within carrier+split → regenerate, stopping (`StopBuild`) on
+         impossibility / non-convergence / an unrecorded obligatory-concept exception. The enforceable
+         reduction trigger is **WARN** (`i9.cap="warn"`, literal reading; BLOCK is the higher-severity
+         band) — D65 APPROVED (2026-10-17). No r4; the frozen spec is unchanged.
+       - **PROPOSED / deferred to the pilot/preregistration:** the WARN/BLOCK numeric values (2 %/5 %) and
+         the low-cluster-split policy. Diagnostic infeasibility of the current catalogue (recompute if it
+         changes): min feasible cap TRAIN 6.90 %, INTERNAL_TEST 16.67 %, VALIDATION 33.33 %; no blanket
+         VALIDATION/INTERNAL_TEST exception is authorized; an infeasible config yields `StopBuild`.
+       - **I-10 (ENC-5 overflow)** deferred: `forced_overflow_policy=None` (fail-closed stop on unresolved
+         E6 overflow); `reserve_equals_forced` / `enc5_retire` both implemented and tested (stage 3), the
+         choice pending preregistration. Not triggered by the current pool.
+       - Carried: I-6 `pair_content_id` optional diagnostic (non-blocking, D64 §S.6); I-14 `names_family`
+         data BLOCKED (#75). No real split, dataset or training; nothing committed.
+       - Report: `reports/v5/constructive-generator/` (README, `D62-i9-discrepancy.md`, `D65-proposal.md`, `i9_feasibility_fixture.json`).
+     - Generation and labels exist for Stage 4 (above) on synthetic fixtures only; gateway integration and
+       every deterministic runtime control are **not** built.
      - V4 and its runtime are unchanged.
      - Open security item: #65 (template special tokens in the V4 prompt). It is a representation
        finding; no decision effect has been measured. For V5, D56 prevents content from producing special-token

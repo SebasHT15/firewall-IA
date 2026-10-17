@@ -2837,6 +2837,114 @@ evaluable-family counts: evaluability is a consequence of the rules, never a tar
 
 ---
 
+## D65 — V5 Stage 4 constructive generator: I-9 interpretation and deferred dataset configuration
+
+- **Date:** 2026-10-17 (America/Costa_Rica)
+- **Status:** APPROVED (owner approval of 2026-10-17 of the text proposed in
+  `reports/v5/constructive-generator/D65-proposal.md`, issue #74), after verifying the per-row RNG stability
+  below. The I-9 `cap="warn"` reading is approved for implementation; the numeric thresholds, the
+  small-split policy, the I-10 overflow choice, source/pool approval, `names_family`, the post-filter audit
+  and the preregistration/real split stay **pending** and are **not** approved here.
+- **Implementation:** DONE in the stage-4 working tree on synthetic fixtures only
+  (`scripts/dataset/v5_catalog.py`, `v5_render.py`, `v5_labels.py`, `v5_oracle.py`, `v5_generator.py`,
+  `v5_rebalance.py`, `v5_fixture.py`; data under `v5_templates/` and `v5_policy/`; tests
+  `tests/test_v5_{catalog,generator,rebalance}.py`), **not integrated**; **no real split, dataset or
+  training**. Report: `reports/v5/constructive-generator/` (README, `D62-i9-discrepancy.md`,
+  `D65-proposal.md`, `i9_feasibility_fixture.json`).
+
+**Context.** D62 froze `V5-DATA-SPEC-r3` (§4.6 identities/split/cluster-share step 5, §6 encoding, §7
+acceptance), with numeric thresholds and open lists kept PROPOSED (§11.2). D64 recorded the stage-3
+identity/split rulings and deferred to stage 4 the template catalogue (I-4 and the I-16 check), the slot
+model (I-6), the quota model and rebalancing rule (I-9), the ENC-5 overflow choice (I-10) and the
+`names_family` identity (I-14). D65 records the stage-4 interpretations and the configuration that stays
+deferred. It interprets text D62 left open and records owner decisions; it amends no frozen requirement and
+needs no r4.
+
+**Decision.**
+
+1. **I-9 cluster-share rebalancing (§4.6 step 5) — approved interpretation.** The generator applies step 5
+   as a deterministic **generate → measure realised cluster share → rebalance the quota plan → regenerate**
+   loop. The realised share is `rows of a cluster ÷ rows of its split`, computed over **admitted** rows only
+   (EXCLUDED rows and abandoned/withheld pairs are not valid dataset rows). A cluster over the enforceable
+   cap is reduced to the cap and the removed pairs are redistributed proportionally to the other clusters of
+   the **same carrier stratum and split**; a cluster is never fragmented and no identity or row moves between
+   splits; per-split totals are preserved when a feasible solution exists. The loop stops with `StopBuild`
+   and an explicit diagnostic on impossibility, non-convergence, or an obligatory-concept exception that is
+   not recorded. Each round's original quotas, adjusted quotas, realised rows, shares, attempts and outcome
+   are recorded in the manifest.
+2. **Per-row RNG stability (verified).** `row_rng` / `pair_id` are seeded by `(SALT, split, cluster, quota,
+   i)` exactly as §4.6 step 4 requires, with `quota` bound to the twin's **category slug** (a stable
+   generation-bucket label) and `i` the attempt index. The numeric target/pair-count is **not** in the seed,
+   so reducing or raising a cell's quota preserves the lower-index rows byte-identically — the only reading
+   of step 4 consistent with step 5's quota rebalancing. Verified by code
+   (`scripts/dataset/v5_identities.py` `row_seed`; `v5_generator.py` binds `quota = slug(category)`) and by
+   `test_quota_change_preserves_earlier_rows_byte_identical` plus the reproducibility tests. This is an
+   interpretation of step 4's `{quota}` placeholder, not a change to D62.
+3. **WARN vs BLOCK — literal reading.** §4.6 step 5 says "On WARN or BLOCK, the cluster's row quota is
+   reduced." The approved reading is literal: **WARN is the enforceable reduction trigger** (any cluster
+   above WARN is reduced) and **BLOCK is a higher-severity classification band** that is also reduced.
+   Implemented as `i9.cap="warn"` (the default). `cap="block"` is **not** authorized for a real build;
+   `real_build_preconditions` emits `I9_CAP_NOT_LITERAL` so it cannot be used silently. No r4.
+4. **Numeric thresholds — PROPOSED, deferred.** WARN = 2 % and BLOCK = 5 % stay PROPOSED (§11.2), ratified
+   only in the dataset preregistration on pilot evidence, to a band feasible for the final catalogue. They
+   are never raised arbitrarily to obtain a PASS; an infeasible configuration yields `StopBuild`.
+5. **Current-catalogue infeasibility — diagnostic.** With the split-row denominator and within-carrier
+   redistribution, the minimum feasible cluster-share cap per split on the synthetic fixture is TRAIN
+   6.90 %, INTERNAL_TEST 16.67 %, VALIDATION 33.33 % (`i9_feasibility_fixture.json`). Neither 2 % nor 5 % is
+   feasible in any split at the current scale, because the cluster-count 70/10/20 split leaves few clusters
+   per carrier in the 10 % and 20 % splits. These figures are diagnostic of the current catalogue and must
+   be recomputed if it changes; they do not by themselves justify raising the thresholds.
+6. **Small-split policy — deferred, no blanket exception.** No blanket exception for VALIDATION or
+   INTERNAL_TEST is authorized. The policy for low-cluster splits — a feasible cap, a per-cluster
+   obligatory-concept ruling (each needing a specific justified owner decision), or a different share
+   granularity/unit (which would need an r4) — is decided with owner-approved evidence before the real
+   build. Until then an infeasible configuration stops the build.
+7. **I-10 (ENC-5 overflow) — fail-closed, deferred.** `e6.forced_overflow_policy = None`, so an unresolved
+   E6 overflow stops the build explicitly. Both D62 alternatives — `reserve_equals_forced` and
+   `enc5_retire` — are implemented and tested (stage 3); neither is selected automatically. The current
+   attack pool does not trigger the overflow (forced families ≤ R). The selection is ratified at the
+   preregistration.
+
+**Guarantees implemented and tested** (synthetic fixtures only; 601 tests on CPython 3.12 and 3.14; V4
+behavioural suites unchanged): template catalogue with `template_id` (I-4), declared clusters, the Jaccard
+≥ 0.60 audit and the I-16 cross-carrier stop; the typed slot model (I-6) and the §4.2 compatibility table;
+the shared encoder (ENC-1/2/6) and rendering through the single stage-1 `canonicalize()` (I1), per-row
+idempotence (I3), only `Content-Type` in the text (A-G3), JSON bodies parsing under their declared type
+(A-G2); the §4.3 labeller with precedence and the `POL-*` table, invariants M-1…M-10, the §4.4 benign
+oracle (survival fixture passes; `L` and signatures PENDING); constructive pairs with exactly one leaf
+differing (proven on the canonical text), identities belonging to the row's split, SPL-3…SPL-9 on generated
+rows, ENC-3/7 enforced, over-budget rows EXCLUDED `OVER_LIMIT` and never truncated; the I-9 realised-share
+loop above, deterministic and reproducible (data byte-identical across two `PYTHONHASHSEED` values and
+across CPython 3.12 / 3.14; the manifest differs only in the recorded Python version).
+
+**Limitations of the synthetic generator.** Abstract attack *markers* with no functional exploit content
+(the only real strings reused are the V4/D47 reason labels, M-7); nothing is VERIFIED attack ground truth
+(`fixture_synthetic` basis; `AttackBasis` refuses any record without `synthetic: true`). Benign pools are
+synthetic stand-ins; `names_family` is BLOCKED (#75); `passwords`, `urls_public/relative`, `rel_paths`,
+`addr_data` have stand-ins only. Three acceptance controls that need real data — the post-filter audit
+(§7), the oracle `L` / signature calibration (§4.4), real-split leakage — are explicit test skips, never a
+synthetic PASS. **The synthetic generator is tested infrastructure, not an approved V5 dataset.**
+
+**Conditions before the real build.** All D64 conditions remain, plus: the post-filter audit and payload
+adjudication (no `PENDING_ADJUDICATION`); the final third-party deny-list; source and pool approval;
+`names_family` built or a configuration without it explicitly approved (#75); the dataset preregistration
+fixing the WARN/BLOCK values, the small-split policy, `L`, the oracle signatures, placement shares, length
+bins, quotas, the token budget `B` and the per-file cap; the I-10 overflow policy selected; `i9.cap="warn"`
+(a real build refuses any other); every SPL / M / ENC / acceptance gate run on the real build; INTERNAL
+TEST read once behind its single-run guard. `real_build_preconditions` enumerates the unmet items and
+refuses today.
+
+**Rationale.** The literal WARN reading keeps the generator faithful to the frozen contract without an r4;
+deferring the numeric values and the small-split policy to the preregistration follows §11.2 and avoids
+ratifying thresholds infeasible for the current catalogue; fail-closed I-10 avoids an unauthorized automatic
+choice. Leakage safety, group/partition integrity and reproducibility are prioritised over evaluable-family
+counts.
+
+**Relationship to earlier entries.** Applies D62 (§4.6, §6, §7) and D64 (stage-4 deliverables); amends
+neither. D56–D64 and the frozen file are unchanged (SHA-256 `f1580634…`). No r4. Nothing is superseded.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -2905,6 +3013,7 @@ evaluable-family counts: evaluability is a consequence of the rules, never a tar
 | D62 | V5 Data Specification r3 FROZEN (`V5-DATA-SPEC-r3`, SHA-256 `f1580634…`): §4.6, §5.2–§5.6 and §4.3 classes/precedence ratified; thresholds, constants, category distribution and open lists excluded (r3 §11.2) | APPROVED | DONE (freeze record; spec not implemented) |
 | D63 | V5 stage 1 `canonical-request/v1` rulings: P1–P3, P5 (corrected), P6–P8, P10–P12 ratified; P4, P9 conditioned; I7/CONNECT and "stdlib-only" clarified; decoder bounds; V5 candidate template PROPOSED (candidate B = 415, not final) | APPROVED (P4, P9 conditioned; template PROPOSED) | DONE (stage 1, not integrated, #67) |
 | D64 | V5 stage 3 identity and split contract: D-1–D-6, identity admissibility exclusions (`identity_unobservable_spl9`, `not_a_payload:*`, `identity_degenerate:*`), benign value policy B, hybrid I-8 + I-8b; I-6, I-16 (and I-4, I-9, I-10, I-14) deferred to stage 4 | APPROVED (deferred items not approved for implementation) | DONE (stage 3, fixtures only; not integrated; no real split, #72) |
+| D65 | V5 stage 4 constructive generator: I-9 realised-share rebalance+regenerate with `cap="warn"` (literal D62 §4.6 step 5); per-row RNG stable under quota change (`quota`=category slug, count not in seed); WARN/BLOCK values, small-split policy and I-10 overflow choice deferred to preregistration; current-catalogue infeasibility diagnostic; I-10 fail-closed | APPROVED (deferred items not approved) | DONE (stage 4, fixtures only; not integrated; no real split, #74) |
 
 ---
 

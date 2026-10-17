@@ -1,0 +1,49 @@
+{
+  "schema": "v5-policy-table/v1",
+  "spec": "V5-DATA-SPEC-r3 §4.3",
+  "status": {
+    "classes_contexts_precedence": "FROZEN (D62): policy classes, assumed contexts, separation of responsibilities and precedence are copied from the frozen text",
+    "lists": "PROPOSED (spec §11.2): concrete host / scheme / form lists and the navigation-role lexicon are closed at generator stage 4 after owner review; NOT approved"
+  },
+  "policies": [
+    {"policy_id": "POL-URL-META", "label": "BLOCK", "attack_category": "Server Side Request Forgery",
+     "rule": "URL host in link-local 169.254.0.0/16 (incl. the common cloud metadata address), fd00:ec2::254, metadata.google.internal, 100.100.100.200",
+     "assumed_context": "The application does not legitimately receive client-supplied URLs targeting cloud metadata or link-local services"},
+    {"policy_id": "POL-URL-SCHEME", "label": "BLOCK", "attack_category": "Server Side Request Forgery",
+     "attack_category_by_scheme": {"javascript": "XSS Injection", "data": "XSS Injection"},
+     "rule": "URL scheme other than http/https",
+     "assumed_context": "The application accepts only http(s) URLs from clients"},
+    {"policy_id": "POL-URL-OBFUSCATED", "label": "BLOCK", "attack_category": "Server Side Request Forgery",
+     "rule": "Host in decimal / octal / hex / dword IPv4, IPv4-mapped IPv6, userinfo @ confusion, mixed-radix forms",
+     "assumed_context": "The application does not legitimately receive host representations whose only function is defeating host validation"},
+    {"policy_id": "POL-REDIRECT-DIFF", "label": "BLOCK", "attack_category": "Open Redirect",
+     "rule": "//h, /\\h, \\/\\/h, /%2F%2Fh, https:h, CR / LF / TAB inside a URL value",
+     "assumed_context": "The application does not legitimately receive scheme-relative or malformed URL forms in URL values"},
+    {"policy_id": "POL-URL-PUBLIC", "label": "ALLOW", "attack_category": null,
+     "rule": "Absolute http(s) URL to a public host (RFC 2606 stand-ins), no attack structure, in a non-navigation role",
+     "assumed_context": "The application authorizes public destinations. Destination authorization is enforced by the application or an egress policy, not by V5. Not a claim that every external callback is legitimate"},
+    {"policy_id": "POL-ADDR-DATA", "label": "ALLOW", "attack_category": null,
+     "rule": "IP address or hostname in a non-URL field",
+     "assumed_context": "Non-URL values are not dereferenced by the application"}
+  ],
+  "precedence": ["POL-URL-META", "POL-URL-SCHEME", "POL-URL-OBFUSCATED", "POL-REDIRECT-DIFF", "INSUFFICIENT_CONTEXT",
+                 "POL-URL-PUBLIC", "POL-ADDR-DATA"],
+  "lists": {
+    "meta_hosts": ["metadata.google.internal", "100.100.100.200"],
+    "meta_networks": ["169.254.0.0/16", "fd00:ec2::254/128"],
+    "allowed_schemes": ["http", "https"],
+    "loopback_hosts": ["localhost"],
+    "loopback_suffixes": ["localhost"],
+    "loopback_networks": ["127.0.0.0/8", "::1/128", "0.0.0.0/8"],
+    "private_networks": ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16", "100.64.0.0/10", "fc00::/7", "fe80::/10"],
+    "internal_suffixes": ["internal", "local", "lan"],
+    "public_host_suffixes": ["example.com", "example.net", "example.org", "example"],
+    "navigation_role_names": ["next", "return_to", "redirect", "redirect_uri", "redirect_url", "continue", "return_url",
+                              "goto", "dest", "destination", "back", "target", "forward"]
+  },
+  "list_notes": {
+    "loopback_networks": "0.0.0.0/8 is added as a loopback alias (PROPOSED); the frozen text names localhost, 127/8 and [::1]",
+    "private_networks": "100.64.0.0/10 (shared address space) and fe80::/10 (IPv6 link-local) are PROPOSED additions to the frozen RFC 1918 / fc00::/7 list",
+    "public_host_suffixes": "RFC 2606 reserved second-level domains and the .example TLD; benign URL and address pools must use only these"
+  }
+}
