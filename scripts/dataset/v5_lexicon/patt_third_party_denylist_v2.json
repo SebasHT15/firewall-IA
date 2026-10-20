@@ -1,0 +1,583 @@
+{
+  "applies_to": {
+    "patt_commit": "e961fef231d8327bae83b563fab50aec2e6b77c0",
+    "spec": "V5-DATA-SPEC r3 section 3.1 item 1 (deny-list contents PROPOSED; final at generator stage 2)"
+  },
+  "approval": {
+    "approved_by": "owner (SebasHT15)",
+    "approved_content_sha256_before_approval": "bb88c7611375f6279469b017127eb289f788a0ba65b230a93e3ac102e6ef88cc",
+    "date": "2026-10-19",
+    "decision_ref": "D66 (DECISIONS.md); owner approval in the data-readiness session 2026-10-19, issue #77; evidence reports/v5/data-readiness/README.md §B",
+    "scope": "final third-party deny-list for this V5 build round (spec §3.1 / §11.2 'Final third-party deny-list'); the PATT structural filters, including the XSS rules literal_backslash_x and prose_sentence, are kept unchanged (owner, same decision)"
+  },
+  "denied": [
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name is the tool name; Directory Traversal/README.md line 29 links wireghoul/dotdotpwn \"The Directory Traversal Fuzzer\"",
+      "evidence_kind": "name",
+      "path": "Directory Traversal/Intruder/dotdotpwn.txt",
+      "reason": "tool_generated_list",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix JHADDIX_ (third-party wordlist author handle)",
+      "evidence_kind": "name",
+      "path": "File Inclusion/Intruders/JHADDIX_LFI.txt",
+      "reason": "jhaddix_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "stage2_file_review (NEW, not in the spec initial list)",
+      "evidence": "line 849: \"# Luca \"ikki\" Carettoni - v0.1\"; line 3568: \"# Derived from the awesome \"Directory Traversal Fuzzing Code\" v0.2 by Luca Carettoni\"",
+      "evidence_kind": "header",
+      "path": "File Inclusion/Intruders/Traversal.txt",
+      "reason": "named_author_header_inside_file",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "stage5_online_provenance_check (spec 'noted for review'; issue #75 data-readiness session 2026-10-19)",
+      "evidence": "77 of 78 distinct lines identical to the 77-line list foospidy/payloads@38ac97fc0adfd149dd976f3dbd42c025232aaa47 other/sqli/camoufl4g3.txt (sha256 99301faba9413833c02cf9d74a5a32a06482aea5b373f8e843edbca3ca2b0b7e; added there 2016-02-26; that repository is GPL-3.0 and its README attributes the file to https://github.com/camoufl4g3/SQLi-payload-Fuzz3R payloads.txt, which returns 404 on 2026-10-19, so the original licence cannot be verified). PATT added the file 2017-07-30 (af48fc1), after the foospidy copy. The same lines also occur in SecLists Fuzzing/login_bypass.txt (MIT), added there only 2024-10-21, i.e. downstream. Certainty of third-party origin: high; licence of the original: unknown",
+      "evidence_kind": "content",
+      "path": "SQL Injection/Intruder/Auth_Bypass.txt",
+      "reason": "third_party_list_in_content",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "stage5_online_provenance_check (spec 'noted for review'; issue #75 data-readiness session 2026-10-19)",
+      "evidence": "117 of 119 distinct lines identical to the 117-line list 1N3/IntruderPayloads@9b84328441e0b1d5b63764941bfd72a2460dba5d FuzzLists/auth_bypass.txt (sha256 39f4a19bccfe2079c574ec87bcb8962150f27337fd2c9d16521e356454a6047c; added there 2016-05-04; the repository declares NO licence, GitHub API 2026-10-19). PATT added the file 2017-08-06 (dad26ce, 'More Burp Intruder file'). SecLists Fuzzing/login_bypass.txt (MIT) contains the same lines but was added only 2024-10-21 (downstream). Certainty of third-party origin: high; licence: none granted. Also carries typographic corruption (U+2013, U+2032)",
+      "evidence_kind": "content",
+      "path": "SQL Injection/Intruder/Auth_Bypass2.txt",
+      "reason": "unlicensed_third_party_list_in_content",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_MSSQL-WHERE_Time.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_MSSQL.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_MSSQL_Enumeration.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_MYSQL.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_MySQL-WHERE_Time.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_MySQL_ReadLocalFiles.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance); header line 1: \"# contains statements from jbrofuzz\"",
+      "evidence_kind": "name+header",
+      "path": "SQL Injection/Intruder/FUZZDB_Oracle.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix FUZZDB_ (FuzzDB project; New BSD / CC BY with citation request, freeze-prep D_sources_provenance)",
+      "evidence_kind": "name",
+      "path": "SQL Injection/Intruder/FUZZDB_Postgres_Enumeration.txt",
+      "reason": "fuzzdb_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "header line 1: \"# from wapiti\" (Wapiti is GPL-2.0; applicability to a payload list unverified)",
+      "evidence_kind": "header",
+      "path": "SQL Injection/Intruder/Generic_TimeBased.txt",
+      "reason": "wapiti_header",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix 0xcela_ (third-party handle)",
+      "evidence_kind": "name",
+      "path": "XSS Injection/Intruders/0xcela_event_handlers.txt",
+      "reason": "named_author_file",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix BRUTELOGIC- (third-party author)",
+      "evidence_kind": "name",
+      "path": "XSS Injection/Intruders/BRUTELOGIC-XSS-JS.txt",
+      "reason": "brutelogic_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix BRUTELOGIC-; line 29 \"<script src=//brutelogic.com.br/1.js>\"",
+      "evidence_kind": "name+content",
+      "path": "XSS Injection/Intruders/BRUTELOGIC-XSS-STRINGS.txt",
+      "reason": "brutelogic_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "stage2_file_review (spec 'noted for review': adjudicated DENY)",
+      "evidence": "108 of 180 distinct lines identical to BRUTELOGIC-XSS-STRINGS.txt; line 82 \"<script src=//brutelogic.com.br/1.js>\"",
+      "evidence_kind": "content",
+      "path": "XSS Injection/Intruders/IntrudersXSS.txt",
+      "reason": "brutelogic_vectors_in_content",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix JHADDIX_ (third-party wordlist author handle)",
+      "evidence_kind": "name",
+      "path": "XSS Injection/Intruders/JHADDIX_XSS.txt",
+      "reason": "jhaddix_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name \"MarioXSSVectors\" (HTML5-security-cheatsheet style vectors; XSS md names Mario Heiderich/Cure53)",
+      "evidence_kind": "name",
+      "path": "XSS Injection/Intruders/MarioXSSVectors.txt",
+      "reason": "named_author_file",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name prefix RSNAKE_; line 3 \"<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>\"",
+      "evidence_kind": "name+content",
+      "path": "XSS Injection/Intruders/RSNAKE_XSS.txt",
+      "reason": "rsnake_prefix",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "stage2_file_review (spec 'noted for review': adjudicated DENY)",
+      "evidence": "lines 26/41/43 \"ha.ckers.org/xss.js\"; line 30 \"RSnake says\"; 63/202 distinct lines identical to RSNAKE_XSS.txt, 70 to xss_alert.txt",
+      "evidence_kind": "content",
+      "path": "XSS Injection/Intruders/XSSDetection.txt",
+      "reason": "rsnake_vectors_in_content",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "stage5_online_provenance_check (spec 'noted for review'; issue #75 data-readiness session 2026-10-19)",
+      "evidence": "44 of 45 payload lines name an endpoint listed in zigoo0/JSONBee@c0c87fc6b9d7dc6e6e46a79255af67add7034c1b jsonp.txt (sha256 e4925a5a3ae957047b6c6b8a1e0263ef74822cc2cf5368355867c9d51d3d1b79), repository licence GPL-3.0 (GitHub API, 2026-10-19), repository created 2018-10-29: 31 byte-identical, 13 same endpoint URL; 10 of 11 '#Vendor:' group headers byte-identical. PATT first commit of the file 2018-12-23 (b4aff1a), after JSONBee's creation",
+      "evidence_kind": "content",
+      "path": "XSS Injection/Intruders/jsonp_endpoint.txt",
+      "reason": "gpl_list_in_content",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "file name \"port_swigger_xss_cheatsheet_event_handlers\" (PortSwigger XSS cheat sheet list)",
+      "evidence_kind": "name",
+      "path": "XSS Injection/Intruders/port_swigger_xss_cheatsheet_event_handlers.txt",
+      "reason": "portswigger_cheatsheet",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "line 475: \"<SCRIPT SRC=http://ha.ckers.org/xss.js></SCRIPT>\"; line 480 carries \"RSnake says\"; templated fuzzer output",
+      "evidence_kind": "content",
+      "path": "XSS Injection/Intruders/xss_alert.txt",
+      "reason": "rsnake_and_fuzzdb_derived_content",
+      "status": "APPROVED"
+    },
+    {
+      "basis": "spec_initial_list",
+      "evidence": "same templated vectors as xss_alert.txt with random ids; line 475 \"ha.ckers.org/xss.js\", line 480 \"RSnake says\"",
+      "evidence_kind": "content",
+      "path": "XSS Injection/Intruders/xss_alert_identifiable.txt",
+      "reason": "rsnake_and_fuzzdb_derived_content",
+      "status": "APPROVED"
+    }
+  ],
+  "not_read_by_extraction": [
+    {
+      "note": "extensionless; FuzzDB-style name; not read by the V4 extraction",
+      "path": "SQL Injection/Intruder/payloads-sql-blind-MSSQL-INSERT"
+    },
+    {
+      "note": "extensionless; FuzzDB-style name; not read",
+      "path": "SQL Injection/Intruder/payloads-sql-blind-MSSQL-WHERE"
+    },
+    {
+      "note": "extensionless; FuzzDB-style name; not read",
+      "path": "SQL Injection/Intruder/payloads-sql-blind-MySQL-INSERT"
+    },
+    {
+      "note": "extensionless; FuzzDB-style name; not read",
+      "path": "SQL Injection/Intruder/payloads-sql-blind-MySQL-ORDER_BY"
+    },
+    {
+      "note": "extensionless; FuzzDB-style name; not read",
+      "path": "SQL Injection/Intruder/payloads-sql-blind-MySQL-WHERE"
+    },
+    {
+      "note": "extensionless; FuzzDB-style name; not read",
+      "path": "SQL Injection/Intruder/SQL-Injection"
+    },
+    {
+      "note": ".fuzz extension; not read",
+      "path": "Server Side Template Injection/Intruder/ssti.fuzz"
+    }
+  ],
+  "reviewed_not_denied": [
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "Command Injection/Intruder/command-execution-unix.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "Command Injection/Intruder/command_exec.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Command Injection/README.md"
+    },
+    {
+      "decision": "KEPT_NO_ROWS_SURVIVE",
+      "note": "File name is a FuzzDB-style name (INFERENCE, not verifiable offline). Every line is a {FILE} placeholder and is rejected by the V4 filter, so no row can enter the pool.",
+      "path": "Directory Traversal/Intruder/deep_traversal.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN_FLAGGED",
+      "note": "No header or name evidence, but 132 of 140 distinct lines are identical to lines of the denied dotdotpwn.txt / Traversal.txt (generic traversal strings). Kept under the MIT assumption; the overlap is reported because it weakens the effect of those two denials.",
+      "path": "Directory Traversal/Intruder/directory_traversal.txt"
+    },
+    {
+      "decision": "KEPT_NO_ROWS_SURVIVE",
+      "note": "File name matches a FuzzDB path-traversal list name (INFERENCE, not verifiable offline). Every line is a {FILE} placeholder and is rejected by the V4 filter, so no row can enter the pool.",
+      "path": "Directory Traversal/Intruder/traversals-8-deep-exotic-encoding.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Directory Traversal/README.md"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/BSD-files.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/LFI-FD-check.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/LFI-WindowsFileCheck.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No evidence. 37 of 62 lines also occur in denied JHADDIX_LFI/Traversal lists (generic system file paths).",
+      "path": "File Inclusion/Intruders/Linux-files.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No evidence. 244 of 680 lines also occur in denied lists (generic system file paths).",
+      "path": "File Inclusion/Intruders/List_Of_File_To_Include.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/List_Of_File_To_Include_NullByteAdded.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/Mac-files.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/Web-files.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/Windows-files.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/dot-slash-PathTraversal_and_LFI_pairing.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/php-filter-iconv.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "File Inclusion/Intruders/simple-check.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "File Inclusion/LFI-to-RCE.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "File Inclusion/README.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "File Inclusion/Wrappers.md"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "NoSQL Injection/Intruder/MongoDB.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "NoSQL Injection/Intruder/NoSQL.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "NoSQL Injection/README.md"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "Open Redirect/Intruder/Open-Redirect-payloads.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "Open Redirect/Intruder/open_redirect_wordlist.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "Open Redirect/Intruder/openredirects.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Open Redirect/README.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/BigQuery Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/Cassandra Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/DB2 Injection.md"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "SQL Injection/Intruder/Generic_ErrorBased.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "SQL Injection/Intruder/Generic_Fuzz.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "SQL Injection/Intruder/Generic_UnionSelect.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "SQL Injection/Intruder/SQLi_Polyglots.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/MSSQL Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/MySQL Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/OracleSQL Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/PostgreSQL Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/README.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "SQL Injection/SQLite Injection.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found. Blocks are sqlmap command lines (tool_invocation rule).",
+      "path": "SQL Injection/SQLmap.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Request Forgery/README.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Request Forgery/SSRF-Advanced-Exploitation.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Request Forgery/SSRF-Cloud-Instances.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/ASP.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/Elixir.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/Java.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/JavaScript.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/PHP.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/Python.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/README.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "Server Side Template Injection/Ruby.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "XSS Injection/1 - XSS Filter Bypass.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found. Inline attributions to individual vectors ('Polyglot XSS - Rsnake', '// Author: crlf/europa/EdOverflow') exist: disclosed, not file-level.",
+      "path": "XSS Injection/2 - XSS Polyglot.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "XSS Injection/3 - XSS Common WAF Bypass.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "XSS Injection/4 - CSP Bypass.md"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "XSS Injection/5 - XSS in Angular.md"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN_FLAGGED",
+      "note": "No header or author. 11 of 16 distinct lines also occur in denied files and the entries are well-known public polyglots; kept under the MIT assumption, flagged.",
+      "path": "XSS Injection/Intruders/XSS_Polyglots.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "XSS Injection/Intruders/xss_payloads_quick.txt"
+    },
+    {
+      "decision": "KEPT_UNKNOWN_ORIGIN",
+      "note": "No name, header or content evidence of third-party origin (header and first lines read, comment lines grepped). Used under PATT MIT as a disclosed assumption.",
+      "path": "XSS Injection/Intruders/xss_swf_fuzz.txt"
+    },
+    {
+      "decision": "KEPT_DOCUMENTATION",
+      "note": "PATT documentation page; only fenced code blocks are extracted. No file-level origin statement found.",
+      "path": "XSS Injection/README.md"
+    }
+  ],
+  "rule": "A PATT file whose name, header or content identifies a third-party origin is excluded (EXCLUDED third_party_file). Files without such evidence are used under PATT's MIT licence as a disclosed ASSUMPTION; a missing header does not prove authorship.",
+  "schema": "v5-patt-third-party-denylist/v1",
+  "scope_of_review": "Every .md/.txt file under the nine PATT directories of the planned PATT-sourced categories (SQL Injection, XSS Injection, Directory Traversal, File Inclusion, Command Injection, Server Side Template Injection, Server Side Request Forgery, Open Redirect, NoSQL Injection): first ~12 lines of every .txt read, comment lines grepped, keyword grep (fuzzdb, wapiti, rsnake, ha.ckers, jhaddix, portswigger, seclists, sqlmap, brutelogic, dotdotpwn, jbrofuzz), and distinct-line overlap with the denied files. Review was done offline; no licence was verified over the network.",
+  "status": "APPROVED",
+  "supersedes": {
+    "note": "v1 + 3 content-evidenced denials (Auth_Bypass.txt, Auth_Bypass2.txt, jsonp_endpoint.txt) resolving v1 'unresolved_for_human_review' items 1-2. Comparison files were fetched read-only on 2026-10-19 and are not stored in the repository.",
+    "path": "scripts/dataset/v5_lexicon/patt_third_party_denylist_v1.json"
+  },
+  "unresolved_for_human_review": [
+    "Licences of the denied lists were not re-verified; denial is a precaution, not a licence finding.",
+    "Flagged, kept under the PATT MIT assumption (overlap with denied lists consists of generic strings, not origin evidence): Directory Traversal/Intruder/directory_traversal.txt, XSS Injection/Intruders/XSS_Polyglots.txt, File Inclusion/Intruders/Linux-files.txt, File Inclusion/Intruders/List_Of_File_To_Include.txt.",
+    "Inline per-vector attributions inside PATT .md pages (e.g. '2 - XSS Polyglot.md') are disclosed, not denied."
+  ]
+}

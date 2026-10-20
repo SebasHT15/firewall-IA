@@ -1,0 +1,91 @@
+{
+  "schema": "v5-postfilter-preregistration/r4",
+  "status": "FROZEN",
+  "frozen_date": "2026-10-20",
+  "decision_ref": "D67 (owner approval 2026-10-20, issue #77)",
+  "spec_ref": {
+    "id": "V5-DATA-SPEC-r4",
+    "path": "reports/v5/v5-data-spec-r4/README.md",
+    "sha256": "54514850e9875f4a71d6ad3726d95746bb4e61687db4f56b072e0a01bfdc01be",
+    "source_r3_sha256": "f1580634d35d2baf10b99d7985f9bfb1e56ebc956326a58a61b665fc5958d9cb"
+  },
+  "preregistration_rule": "These acceptance criteria are frozen BEFORE any reviewer R3 labels are produced (C-R6). They are IDENTICAL for every ML-trained category and CANNOT be changed, relaxed or reinterpreted on the basis of R3 results. Any change requires a new owner decision and a new revision id; the rejected/prior version is preserved.",
+  "r3_executed": false,
+  "r3_labels_count_at_freeze": 0,
+  "acceptance_criteria": {
+    "C1": {"metric": "Wilson 95% upper bound of adjudicated INCORRECT", "limit": 0.20, "comparator": "<="},
+    "C2": {"metric": "Wilson 95% upper bound of adjudicated UNCERTAIN+INCORRECT", "limit": 0.35, "comparator": "<="},
+    "coverage": {"metric": "share of gate-relevant items reviewed and resolved", "required": 1.00},
+    "unresolved_gate_relevant": {"metric": "count of UNRESOLVED/MISSING/FURTHER_REVIEW gate-relevant items at PASS", "required_max": 0},
+    "model_agreement": "DIAGNOSTIC ONLY — never independent ground-truth validation",
+    "sample_floor_n": 50,
+    "sample_floor_or_whole_pool_if_smaller": true,
+    "subsample_floor_per_category": 20,
+    "identical_for_all_categories": true,
+    "post_hoc_small_n_exception": "NONE (CRLF n=22 and XPath n=31 held to the same thresholds)"
+  },
+  "wilson": {"method": "Wilson score interval", "confidence": 0.95, "z": 1.96, "bound": "upper"},
+  "review_populations": {
+    "audit_frame_records": 453,
+    "r3_blind_subset_records": 200,
+    "gate_relevant_disagreements": 33,
+    "overlap_subset_and_disagreements": 16,
+    "unique_r3_review_records": 217,
+    "overlap_identity": "217 = 200 ∪ 33 (= 200 + 33 - 16)"
+  },
+  "denominators": {
+    "per_category_wilson_denominator": "the category's size in the original 453-record stratified frame",
+    "no_duplicate_counting": "each physical record is counted once per metric; the 16 shared records carry one R3 label serving both coverage and disagreement resolution",
+    "no_independent_denominator_for_targeted_33": "the 33 gate-relevant disagreements are already inside the 453 frame; they resolve labels in place and DO NOT create a separate Wilson denominator",
+    "per_category_n_453_frame": {
+      "CRLF Injection": 22,
+      "Command Injection": 50,
+      "NoSQL Injection": 50,
+      "Open Redirect": 50,
+      "SQL Injection": 50,
+      "Server Side Request Forgery": 50,
+      "Server Side Template Injection": 50,
+      "XPath Injection": 31,
+      "XSS Injection": 50,
+      "path_file_access": 50
+    }
+  },
+  "feasibility_reference_non_binding": {
+    "note": "Illustrative Wilson-95 upper feasibility at the real n; NOT a threshold change. Bounds an AI-adjudicated classification rate, not ground-truth error.",
+    "n=22": {"wilson_upper_at_k0_pct": 14.9, "max_INCORRECT_k_for_<=20pct": 0, "max_U+I_k_for_<=35pct": 3},
+    "n=31": {"wilson_upper_at_k0_pct": 11.0, "max_INCORRECT_k_for_<=20pct": 1, "max_U+I_k_for_<=35pct": 5},
+    "n=50": {"wilson_upper_at_k0_pct": 7.1, "max_INCORRECT_k_for_<=20pct": 4, "max_U+I_k_for_<=35pct": 10}
+  },
+  "adjudication_policy": {
+    "step1_agreement": "a1 = a2 keeps that label (R3 minority never overrides a concordant pair)",
+    "step2_vp_rule": "vp_split_to_probably_correct/v1 (owner-approved) resolves VERIFIABLE vs PROBABLY_CORRECT splits",
+    "step3_majority": "for a1 != a2, strict majority of {a1,a2,R3} ONLY when all three valid labels exist",
+    "step4_unresolved": "three-way disagreement OR any missing required vote -> UNRESOLVED -> evidence-based owner decision; never automatic INCORRECT",
+    "missing_label_handling": "a missing/unparseable reviewer label is a non-vote; if it leaves no majority the item is UNRESOLVED; never scored as correct or incorrect",
+    "owner_adjudication": "requires documented evidence; permits procedural disposition, exclusion or commissioning further review; CANNOT manufacture ground truth"
+  },
+  "unresolved_case_handling": "any UNRESOLVED/MISSING/FURTHER_REVIEW gate-relevant item blocks category acceptance (status INSUFFICIENT_EVIDENCE); it is never scored as INCORRECT to force a FAIL",
+  "r3_diagnostics": {
+    "r3_incorrect_share": "diagnostic only; never reported as a human/ground-truth error rate",
+    "r3_vs_a1a2_only_resolved_reference": "diagnostic only; computed against the a1/a2-only resolved reference (excluding R3's own vote); unresolved disagreements are not scored without a prior independent reference"
+  },
+  "status_semantics": {
+    "VERIFIED": "per-payload label_status (D59), independently established; NEVER conferred by the audit or by model consensus",
+    "AI_AUDITED": "provenance tag: audited with LLM reviewers, no independent human review",
+    "PASS_AI_AUDITED": "category eligible for V5 TRAIN; strictly weaker than human-validated; confers no VERIFIED",
+    "PENDING": "round/category state (PENDING_ADJUDICATION / PENDING_HUMAN_REVIEW)",
+    "INSUFFICIENT_EVIDENCE": "coverage/resolution not met; category not supported"
+  },
+  "category_dispositions_at_freeze": {
+    "Server Side Request Forgery": "NOT SUPPORTED — recorded C1 failure (21/50 concordant INCORRECT, Wilson-95 upper ~55.8%, 0 of the 33); excluded from the eligible V5 dataset pending a separately approved correction and re-audit (C-R6: one re-audit after a documented filter change, new seed)",
+    "all_other_categories": "PENDING audit (no PASS; R3 not run)"
+  },
+  "limitations": [
+    "No trusted independent human reference labels exist for the post-filter pool; the TRUE annotator error rate cannot be established.",
+    "Deterministic/stratified sampling alone does not prove statistical representativeness; Wilson bounds describe the adjudicated audit sample under the stated sampling assumptions, not ground-truth error.",
+    "AI-only adjudication: model agreement, including R3, is diagnostic and never independent validation.",
+    "This is a disclosed post-hoc methodological deviation; no report may describe AI-assisted review as human validation.",
+    "FINAL V5 training remains BLOCKED until separately authorized and all training-readiness controls pass."
+  ],
+  "immutability_note": "The SHA-256 of this file is recorded in reports/v5/postfilter-audit/preregistration/SHA256SUMS and in D67. R3 must be run only after this file is committed by the owner; the audit code must read these frozen criteria, not recompute them."
+}

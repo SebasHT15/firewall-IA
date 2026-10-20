@@ -1,0 +1,31 @@
+{
+  "round": 1,
+  "schema": "v5-postfilter-adjudication-rules/v1",
+  "vp_split_to_probably_correct": {
+    "approved": true,
+    "approved_by": "owner (SebasHT15)",
+    "conditions": [
+      "applies ONLY to VERIFIABLE vs PROBABLY_CORRECT disagreements",
+      "never to any disagreement involving UNCERTAIN or INCORRECT",
+      "both original annotations are kept unchanged; each automatic decision is traced per item in adjudication_rule_applied.jsonl",
+      "no record becomes VERIFIED by this rule (label_status is not touched)",
+      "the blind human review of 200 items is not affected; on that subsample human labels prevail"
+    ],
+    "date": "2026-10-19",
+    "decision_ref": "owner approval in the data-readiness session 2026-10-19 (issue #77), conditional on prior documentation",
+    "disclosed_discrepancies": [
+      "V5-DATA-SPEC-r3 §7 (frozen) does not mention the rule; it is an audit convention, not frozen text",
+      "a2_preregistration.json does not cite the rule",
+      "the owner-approval gate (opt-in) was added after Haiku's labels were seen; it only restricted application, the rule content is unchanged",
+      "the owner approved after seeing aggregate counts (69 V/P, 33 other); the rule cannot change either gate rate"
+    ],
+    "gate_effect": "none on criteria 1-2 (VERIFIABLE and PROBABLY_CORRECT are both usable; the criteria count INCORRECT and UNCERTAIN+INCORRECT)",
+    "prior_documentation": [
+      "2026-10-13 commit 0958d99: scripts/dataset/audit_v5_attack_pool.py adjudicate() basis 'conservative_v_p'; reports/v5/freeze-prep/E_attack_pool_audit/README.md §11 (43 V/P splits resolved to PROBABLY_CORRECT in the pre-filter audit)",
+      "2026-10-19 08:39 (round-1 draw, before any annotation): round-1 README step 4 'V/P splits resolve to P by rule'; audit_v5_postfilter.adjudicate() implemented it",
+      "2026-10-19 ~10:02 (Opus interim, before Haiku ran at 10:13+): documented as a PROPOSED rule needing owner approval"
+    ],
+    "rule": "when exactly one annotator says VERIFIABLE and the other PROBABLY_CORRECT, the adjudicated label is PROBABLY_CORRECT",
+    "rule_id": "vp_split_to_probably_correct/v1"
+  }
+}

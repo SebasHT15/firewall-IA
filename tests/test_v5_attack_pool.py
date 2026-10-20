@@ -521,7 +521,11 @@ class PlanTests(unittest.TestCase):
         doc, denied, sha = B.load_denylist(B.DEFAULT_DENYLIST)
         self.assertEqual(len(sha), 64)
         self.assertGreaterEqual(len(denied), 23)
-        self.assertTrue(all(e["status"] == "PROPOSED" and e["evidence"] for e in denied.values()))
+        self.assertEqual(doc["status"], "APPROVED")                        # v2, D66
+        self.assertTrue(all(e["status"] == "APPROVED" and e["evidence"] for e in denied.values()))
+        for p in ("SQL Injection/Intruder/Auth_Bypass.txt", "SQL Injection/Intruder/Auth_Bypass2.txt",
+                  "XSS Injection/Intruders/jsonp_endpoint.txt"):
+            self.assertIn(p, denied)
         for p in ("XSS Injection/Intruders/XSSDetection.txt", "XSS Injection/Intruders/IntrudersXSS.txt",
                   "Directory Traversal/Intruder/dotdotpwn.txt", "File Inclusion/Intruders/JHADDIX_LFI.txt"):
             self.assertIn(p, denied)
@@ -531,7 +535,8 @@ class PlanTests(unittest.TestCase):
         for p in ("XSS Injection/Intruders/jsonp_endpoint.txt", "SQL Injection/Intruder/Auth_Bypass.txt",
                   "SQL Injection/Intruder/Auth_Bypass2.txt"):
             self.assertIn(p, decided)
-            self.assertNotIn(p, denied)
+            self.assertIn(p, denied)          # v1 kept them flagged; v2 denies them on content evidence (D66)
+            self.assertNotIn(p, {e["path"] for e in doc["reviewed_not_denied"]})
 
 
 if __name__ == "__main__":

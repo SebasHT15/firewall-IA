@@ -1,0 +1,613 @@
+{
+  "annotators": {
+    "a1": {
+      "approved_by": "owner, 2026-10-19 ('Annotator 1: Claude Sonnet')",
+      "date": "2026-10-19",
+      "execution": {
+        "batches": "6 consecutive batches of annotation_<who>/packet.jsonl (76,76,76,76,76,73), see annotation_<who>/batches.json",
+        "data_handling": "payloads treated as untrusted data; no execution, no network",
+        "harness": "Claude Code (desktop app) subagents spawned by the coordinator session",
+        "identity_evidence": "API `model` field of every assistant turn in the subagent transcript (not self-report)",
+        "isolation": "one fresh agent per batch; no shared context; each agent may Read only its own batch file and its own annotation_<who>/README.md (enforced by audit of every tool call in the transcript)",
+        "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, models served and tool calls in raw/*.provenance.json",
+        "prompt_template": {
+          "note": "identical for both annotators except {who}, {NN}, {rows}",
+          "path": "annotation_prompt_template.txt",
+          "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0"
+        },
+        "sampling_parameters": "harness defaults (temperature, top_p and thinking budget are not exposed to the coordinator and are not recorded)",
+        "subagent_type": "Explore (no Edit/Write/NotebookEdit tools)"
+      },
+      "harness_alias": "sonnet",
+      "model": "claude-sonnet-5-5",
+      "model_name": "Claude Sonnet 5.5",
+      "role": "LLM annotator 1 (blind to a2 and to the human review)"
+    },
+    "a2": {
+      "approved_by": "owner, 2026-10-19 (option A); pre-registered in a2_preregistration.json before any label",
+      "date": "2026-10-19",
+      "execution": {
+        "batches": "6 consecutive batches of annotation_<who>/packet.jsonl (76,76,76,76,76,73), see annotation_<who>/batches.json",
+        "data_handling": "payloads treated as untrusted data; no execution, no network",
+        "harness": "Claude Code (desktop app) subagents spawned by the coordinator session",
+        "identity_evidence": "API `model` field of every assistant turn in the subagent transcript (not self-report)",
+        "isolation": "one fresh agent per batch; no shared context; each agent may Read only its own batch file and its own annotation_<who>/README.md (enforced by audit of every tool call in the transcript)",
+        "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, models served and tool calls in raw/*.provenance.json",
+        "prompt_template": {
+          "note": "identical for both annotators except {who}, {NN}, {rows}",
+          "path": "annotation_prompt_template.txt",
+          "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0"
+        },
+        "sampling_parameters": "harness defaults (temperature, top_p and thinking budget are not exposed to the coordinator and are not recorded)",
+        "subagent_type": "Explore (no Edit/Write/NotebookEdit tools)"
+      },
+      "harness_alias": "haiku",
+      "model": "claude-haiku-5-5",
+      "model_name": "Claude Haiku 5.5",
+      "preregistration": {
+        "path": "a2_preregistration.json",
+        "sha256": "acf7207883ff0230b3bd1d81304d0767582a2d603d3eeacc98489fb576eeb555"
+      },
+      "role": "LLM annotator 2 for all 453 items (blind to a1, to the supplementary Opus annotation and to the human review)"
+    },
+    "coordinator": {
+      "model": "claude-opus-5-5",
+      "note": "claude-opus-5-5 differs from both gate annotators (claude-sonnet-5-5, claude-haiku-5-5); owner adjudication still recommended",
+      "role": "batching, verbatim collection, validation, reports; never labels"
+    },
+    "methodological_limitations": [
+      "Both annotators are Claude models from the same provider (Anthropic): D58 requires different models, which holds, but errors may be correlated; agreement between them is not independent evidence and is never human validation (owner-recorded limitation).",
+      "Annotator 2 is now claude-haiku-5-5 (option A). The coordinator (claude-opus-5-5) differs from both gate annotators; it was the model of the now-supplementary Opus annotation.",
+      "The coordinator saw annotator 1's outputs (when collecting) before annotator 2 was launched; annotator 2's prompts are the fixed template above and contain nothing from annotator 1.",
+      "Sampling parameters are harness defaults and not recorded; re-running an annotator is not expected to reproduce labels byte-identically. The stored raw outputs are the record.",
+      "Safety-classifier events (from the transcripts): a2 batches 05 and 06 attempt 1 were stopped before any label was produced (REFUSED, raw text kept). a2 batch 06 attempt 2 completed (ACCEPTED). a2 batch 05 attempt 2: claude-opus-5-5 was stopped twice and the harness fell back to claude-opus-4-8, which produced the labels; the collector REFUSED it because the declared a2 model is claude-opus-5-5. These 76 labels are stored verbatim in raw/ but are NOT used.",
+      "a1 batch 06 and a2 batch 02 each had one classifier-interrupted turn after which the SAME declared model completed the hand-back; accepted (single model), disclosed here.",
+      "No further retries were made (bounded protocol: at most one retry per batch, identical template, no rewording or splitting to get past a classifier).",
+      "claude-haiku-5-5 is a smaller model than a1; more UNCERTAIN labels and disagreements are possible. All three LLMs are from one provider."
+    ],
+    "round": 1,
+    "schema": "v5-postfilter-annotators/v1",
+    "status": {
+      "a1": "COMPLETE 453/453",
+      "a2": "COMPLETE 453/453 (claude-haiku-5-5; batches 01,02,04,05,06 attempt 1, batch 03 attempt 2 after attempt 1 REFUSED for an extra non-data tool call update_plan)",
+      "supplementary_opus55_partial": "377/453, descriptive only; batch 05 pending/excluded fallback (see annotation_a2_opus55_partial/annotation_a2/batch_05_interruption.json)"
+    },
+    "supplementary_opus55_partial": {
+      "approved_by": "owner, 2026-10-19: requested 'Claude Opus 4.8'; that model is not available in this harness (alias 'opus' serves claude-opus-5-5, verified from the transcript); owner then chose Opus 5.5",
+      "date": "2026-10-19",
+      "execution": {
+        "batches": "6 consecutive batches of annotation_<who>/packet.jsonl (76,76,76,76,76,73), see annotation_<who>/batches.json",
+        "data_handling": "payloads treated as untrusted data; no execution, no network",
+        "harness": "Claude Code (desktop app) subagents spawned by the coordinator session",
+        "identity_evidence": "API `model` field of every assistant turn in the subagent transcript (not self-report)",
+        "isolation": "one fresh agent per batch; no shared context; each agent may Read only its own batch file and its own annotation_<who>/README.md (enforced by audit of every tool call in the transcript)",
+        "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, models served and tool calls in raw/*.provenance.json",
+        "prompt_template": {
+          "note": "identical for both annotators except {who}, {NN}, {rows}",
+          "path": "annotation_prompt_template.txt",
+          "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0"
+        },
+        "sampling_parameters": "harness defaults (temperature, top_p and thinking budget are not exposed to the coordinator and are not recorded)",
+        "subagent_type": "Explore (no Edit/Write/NotebookEdit tools)"
+      },
+      "harness_alias": "opus",
+      "model": "claude-opus-5-5",
+      "model_name": "Claude Opus 5.5",
+      "role": "LLM annotator 2 (blind to a1 and to the human review)",
+      "slot": "annotation_a2_opus55_partial/ (moved 2026-10-19, see MOVED.json; former paths annotation_a2/... and annotations_a2.partial.jsonl)",
+      "use": "SUPPLEMENTARY, descriptive only; never in the gate, adjudication or acceptance report (owner, option A)"
+    }
+  },
+  "categories": {
+    "CRLF Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 19,
+        "incorrect_vs_not": {
+          "both": 0,
+          "cohen_kappa": 1.0,
+          "n": 22,
+          "neither": 22,
+          "observed_agreement": 1.0,
+          "only_first": 0,
+          "only_second": 0
+        },
+        "n": 22
+      },
+      "n_human_required": 20,
+      "n_sample": 22,
+      "pending_adjudication": [
+        "PF1-0423"
+      ],
+      "resolved_by_vp_rule": 2,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "Command Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 33,
+        "incorrect_vs_not": {
+          "both": 4,
+          "cohen_kappa": 0.878,
+          "n": 50,
+          "neither": 45,
+          "observed_agreement": 0.98,
+          "only_first": 0,
+          "only_second": 1
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0030",
+        "PF1-0139",
+        "PF1-0340",
+        "PF1-0349"
+      ],
+      "resolved_by_vp_rule": 13,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "NoSQL Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 41,
+        "incorrect_vs_not": {
+          "both": 16,
+          "cohen_kappa": 0.9548,
+          "n": 50,
+          "neither": 33,
+          "observed_agreement": 0.98,
+          "only_first": 1,
+          "only_second": 0
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0019",
+        "PF1-0136"
+      ],
+      "resolved_by_vp_rule": 7,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "Open Redirect": {
+      "llm_agreement_not_human_validation": {
+        "exact": 32,
+        "incorrect_vs_not": {
+          "both": 1,
+          "cohen_kappa": 0.4845,
+          "n": 50,
+          "neither": 47,
+          "observed_agreement": 0.96,
+          "only_first": 0,
+          "only_second": 2
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0027",
+        "PF1-0032",
+        "PF1-0041",
+        "PF1-0295",
+        "PF1-0366",
+        "PF1-0372",
+        "PF1-0437"
+      ],
+      "resolved_by_vp_rule": 11,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "SQL Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 38,
+        "incorrect_vs_not": {
+          "both": 10,
+          "cohen_kappa": 1.0,
+          "n": 50,
+          "neither": 40,
+          "observed_agreement": 1.0,
+          "only_first": 0,
+          "only_second": 0
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0140",
+        "PF1-0162"
+      ],
+      "resolved_by_vp_rule": 10,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "Server Side Request Forgery": {
+      "counts": {
+        "INCORRECT": 21,
+        "PROBABLY_CORRECT": 8,
+        "UNCERTAIN": 0,
+        "VERIFIABLE": 21
+      },
+      "criterion_1_incorrect_upper": false,
+      "criterion_2_uncertain_or_incorrect_upper": false,
+      "criterion_3_human_incorrect_share": null,
+      "incorrect": {
+        "k": 21,
+        "n": 50,
+        "wilson95": [
+          0.2937500335471198,
+          0.5576655823142176
+        ]
+      },
+      "labels_basis": "LLM-adjudicated, human labels substituted on the reviewed human subsample",
+      "llm_agreement_not_human_validation": {
+        "exact": 48,
+        "incorrect_vs_not": {
+          "both": 21,
+          "cohen_kappa": 1.0,
+          "n": 50,
+          "neither": 29,
+          "observed_agreement": 1.0,
+          "only_first": 0,
+          "only_second": 0
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_human_reviewed": 0,
+      "n_sample": 50,
+      "provisional": "criteria 1-2 are provisional until the human subsample is complete",
+      "resolved_by_vp_rule": 2,
+      "status": "PENDING_HUMAN_REVIEW",
+      "uncertain_or_incorrect": {
+        "k": 21,
+        "n": 50,
+        "wilson95": [
+          0.2937500335471198,
+          0.5576655823142176
+        ]
+      }
+    },
+    "Server Side Template Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 47,
+        "incorrect_vs_not": {
+          "both": 9,
+          "cohen_kappa": 1.0,
+          "n": 50,
+          "neither": 41,
+          "observed_agreement": 1.0,
+          "only_first": 0,
+          "only_second": 0
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0056",
+        "PF1-0107"
+      ],
+      "resolved_by_vp_rule": 1,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "XPath Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 23,
+        "incorrect_vs_not": {
+          "both": 1,
+          "cohen_kappa": 1.0,
+          "n": 31,
+          "neither": 30,
+          "observed_agreement": 1.0,
+          "only_first": 0,
+          "only_second": 0
+        },
+        "n": 31
+      },
+      "n_human_required": 20,
+      "n_sample": 31,
+      "pending_adjudication": [
+        "PF1-0282"
+      ],
+      "resolved_by_vp_rule": 7,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "XSS Injection": {
+      "llm_agreement_not_human_validation": {
+        "exact": 30,
+        "incorrect_vs_not": {
+          "both": 6,
+          "cohen_kappa": 0.5012,
+          "n": 50,
+          "neither": 36,
+          "observed_agreement": 0.84,
+          "only_first": 5,
+          "only_second": 3
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0047",
+        "PF1-0108",
+        "PF1-0141",
+        "PF1-0154",
+        "PF1-0169",
+        "PF1-0224",
+        "PF1-0246",
+        "PF1-0270",
+        "PF1-0355",
+        "PF1-0386",
+        "PF1-0392",
+        "PF1-0422"
+      ],
+      "resolved_by_vp_rule": 8,
+      "status": "PENDING_ADJUDICATION"
+    },
+    "path_file_access": {
+      "llm_agreement_not_human_validation": {
+        "exact": 40,
+        "incorrect_vs_not": {
+          "both": 2,
+          "cohen_kappa": 0.7899,
+          "n": 50,
+          "neither": 47,
+          "observed_agreement": 0.98,
+          "only_first": 1,
+          "only_second": 0
+        },
+        "n": 50
+      },
+      "n_human_required": 20,
+      "n_sample": 50,
+      "pending_adjudication": [
+        "PF1-0232",
+        "PF1-0238"
+      ],
+      "resolved_by_vp_rule": 8,
+      "status": "PENDING_ADJUDICATION"
+    }
+  },
+  "denylist": {
+    "approval": {
+      "approved_by": "owner (SebasHT15)",
+      "approved_content_sha256_before_approval": "bb88c7611375f6279469b017127eb289f788a0ba65b230a93e3ac102e6ef88cc",
+      "date": "2026-10-19",
+      "decision_ref": "D66 (DECISIONS.md); owner approval in the data-readiness session 2026-10-19, issue #77; evidence reports/v5/data-readiness/README.md §B",
+      "scope": "final third-party deny-list for this V5 build round (spec §3.1 / §11.2 'Final third-party deny-list'); the PATT structural filters, including the XSS rules literal_backslash_x and prose_sentence, are kept unchanged (owner, same decision)"
+    },
+    "denied_files": 26,
+    "path": "scripts/dataset/v5_lexicon/patt_third_party_denylist_v2.json",
+    "sha256": "3e5570580a10319fc03ca622c034786a384a3ea6dddaf95bfeb413cf3fc7dd7e",
+    "status": "APPROVED"
+  },
+  "mode": "REAL",
+  "note": "§7 post-filter audit. LLM agreement is not human validation. PASS makes a category eligible; it labels no payload VERIFIED (owner decision). Thresholds PROPOSED (§11.2).",
+  "open_issue_count": 200,
+  "open_issues": [
+    "PF1-0004: not reviewed yet",
+    "PF1-0447: not reviewed yet",
+    "PF1-0141: not reviewed yet",
+    "PF1-0289: not reviewed yet",
+    "PF1-0422: not reviewed yet",
+    "PF1-0092: not reviewed yet",
+    "PF1-0303: not reviewed yet",
+    "PF1-0055: not reviewed yet",
+    "PF1-0057: not reviewed yet",
+    "PF1-0081: not reviewed yet",
+    "PF1-0130: not reviewed yet",
+    "PF1-0277: not reviewed yet",
+    "PF1-0056: not reviewed yet",
+    "PF1-0280: not reviewed yet",
+    "PF1-0010: not reviewed yet",
+    "PF1-0087: not reviewed yet",
+    "PF1-0338: not reviewed yet",
+    "PF1-0245: not reviewed yet",
+    "PF1-0062: not reviewed yet",
+    "PF1-0449: not reviewed yet",
+    "PF1-0453: not reviewed yet",
+    "PF1-0420: not reviewed yet",
+    "PF1-0383: not reviewed yet",
+    "PF1-0217: not reviewed yet",
+    "PF1-0170: not reviewed yet",
+    "PF1-0376: not reviewed yet",
+    "PF1-0226: not reviewed yet",
+    "PF1-0168: not reviewed yet",
+    "PF1-0112: not reviewed yet",
+    "PF1-0089: not reviewed yet",
+    "PF1-0134: not reviewed yet",
+    "PF1-0203: not reviewed yet",
+    "PF1-0232: not reviewed yet",
+    "PF1-0401: not reviewed yet",
+    "PF1-0202: not reviewed yet",
+    "PF1-0272: not reviewed yet",
+    "PF1-0425: not reviewed yet",
+    "PF1-0181: not reviewed yet",
+    "PF1-0199: not reviewed yet",
+    "PF1-0335: not reviewed yet",
+    "PF1-0332: not reviewed yet",
+    "PF1-0292: not reviewed yet",
+    "PF1-0276: not reviewed yet",
+    "PF1-0162: not reviewed yet",
+    "PF1-0398: not reviewed yet",
+    "PF1-0418: not reviewed yet",
+    "PF1-0221: not reviewed yet",
+    "PF1-0039: not reviewed yet",
+    "PF1-0086: not reviewed yet",
+    "PF1-0075: not reviewed yet",
+    "PF1-0066: not reviewed yet",
+    "PF1-0428: not reviewed yet",
+    "PF1-0005: not reviewed yet",
+    "PF1-0158: not reviewed yet",
+    "PF1-0285: not reviewed yet",
+    "PF1-0446: not reviewed yet",
+    "PF1-0271: not reviewed yet",
+    "PF1-0196: not reviewed yet",
+    "PF1-0367: not reviewed yet",
+    "PF1-0268: not reviewed yet",
+    "PF1-0371: not reviewed yet",
+    "PF1-0406: not reviewed yet",
+    "PF1-0122: not reviewed yet",
+    "PF1-0052: not reviewed yet",
+    "PF1-0351: not reviewed yet",
+    "PF1-0097: not reviewed yet",
+    "PF1-0215: not reviewed yet",
+    "PF1-0047: not reviewed yet",
+    "PF1-0255: not reviewed yet",
+    "PF1-0210: not reviewed yet",
+    "PF1-0265: not reviewed yet",
+    "PF1-0079: not reviewed yet",
+    "PF1-0030: not reviewed yet",
+    "PF1-0305: not reviewed yet",
+    "PF1-0068: not reviewed yet",
+    "PF1-0348: not reviewed yet",
+    "PF1-0316: not reviewed yet",
+    "PF1-0201: not reviewed yet",
+    "PF1-0257: not reviewed yet",
+    "PF1-0193: not reviewed yet",
+    "PF1-0252: not reviewed yet",
+    "PF1-0137: not reviewed yet",
+    "PF1-0308: not reviewed yet",
+    "PF1-0151: not reviewed yet",
+    "PF1-0380: not reviewed yet",
+    "PF1-0100: not reviewed yet",
+    "PF1-0095: not reviewed yet",
+    "PF1-0365: not reviewed yet",
+    "PF1-0115: not reviewed yet",
+    "PF1-0364: not reviewed yet",
+    "PF1-0085: not reviewed yet",
+    "PF1-0344: not reviewed yet",
+    "PF1-0019: not reviewed yet",
+    "PF1-0174: not reviewed yet",
+    "PF1-0108: not reviewed yet",
+    "PF1-0405: not reviewed yet",
+    "PF1-0439: not reviewed yet",
+    "PF1-0298: not reviewed yet",
+    "PF1-0297: not reviewed yet",
+    "PF1-0419: not reviewed yet",
+    "PF1-0244: not reviewed yet",
+    "PF1-0046: not reviewed yet",
+    "PF1-0074: not reviewed yet",
+    "PF1-0175: not reviewed yet",
+    "PF1-0222: not reviewed yet",
+    "PF1-0337: not reviewed yet",
+    "PF1-0037: not reviewed yet",
+    "PF1-0070: not reviewed yet",
+    "PF1-0106: not reviewed yet",
+    "PF1-0333: not reviewed yet",
+    "PF1-0192: not reviewed yet",
+    "PF1-0279: not reviewed yet",
+    "PF1-0249: not reviewed yet",
+    "PF1-0119: not reviewed yet",
+    "PF1-0385: not reviewed yet",
+    "PF1-0050: not reviewed yet",
+    "PF1-0187: not reviewed yet",
+    "PF1-0163: not reviewed yet",
+    "PF1-0061: not reviewed yet",
+    "PF1-0093: not reviewed yet",
+    "PF1-0173: not reviewed yet",
+    "PF1-0234: not reviewed yet",
+    "PF1-0377: not reviewed yet",
+    "PF1-0343: not reviewed yet",
+    "PF1-0260: not reviewed yet",
+    "PF1-0393: not reviewed yet",
+    "PF1-0241: not reviewed yet",
+    "PF1-0299: not reviewed yet",
+    "PF1-0407: not reviewed yet",
+    "PF1-0034: not reviewed yet",
+    "PF1-0442: not reviewed yet",
+    "PF1-0125: not reviewed yet",
+    "PF1-0133: not reviewed yet",
+    "PF1-0033: not reviewed yet",
+    "PF1-0448: not reviewed yet",
+    "PF1-0190: not reviewed yet",
+    "PF1-0219: not reviewed yet",
+    "PF1-0314: not reviewed yet",
+    "PF1-0152: not reviewed yet",
+    "PF1-0450: not reviewed yet",
+    "PF1-0417: not reviewed yet",
+    "PF1-0223: not reviewed yet",
+    "PF1-0443: not reviewed yet",
+    "PF1-0283: not reviewed yet",
+    "PF1-0379: not reviewed yet",
+    "PF1-0080: not reviewed yet",
+    "PF1-0102: not reviewed yet",
+    "PF1-0211: not reviewed yet",
+    "PF1-0031: not reviewed yet",
+    "PF1-0025: not reviewed yet",
+    "PF1-0104: not reviewed yet",
+    "PF1-0124: not reviewed yet",
+    "PF1-0191: not reviewed yet",
+    "PF1-0145: not reviewed yet",
+    "PF1-0035: not reviewed yet",
+    "PF1-0426: not reviewed yet",
+    "PF1-0029: not reviewed yet",
+    "PF1-0432: not reviewed yet",
+    "PF1-0433: not reviewed yet",
+    "PF1-0242: not reviewed yet",
+    "PF1-0250: not reviewed yet",
+    "PF1-0320: not reviewed yet",
+    "PF1-0286: not reviewed yet",
+    "PF1-0409: not reviewed yet",
+    "PF1-0084: not reviewed yet",
+    "PF1-0098: not reviewed yet",
+    "PF1-0259: not reviewed yet",
+    "PF1-0121: not reviewed yet",
+    "PF1-0355: not reviewed yet",
+    "PF1-0021: not reviewed yet",
+    "PF1-0228: not reviewed yet",
+    "PF1-0262: not reviewed yet",
+    "PF1-0435: not reviewed yet",
+    "PF1-0015: not reviewed yet",
+    "PF1-0307: not reviewed yet",
+    "PF1-0233: not reviewed yet",
+    "PF1-0024: not reviewed yet",
+    "PF1-0090: not reviewed yet",
+    "PF1-0069: not reviewed yet",
+    "PF1-0256: not reviewed yet",
+    "PF1-0138: not reviewed yet",
+    "PF1-0006: not reviewed yet",
+    "PF1-0129: not reviewed yet",
+    "PF1-0397: not reviewed yet",
+    "PF1-0032: not reviewed yet",
+    "PF1-0282: not reviewed yet",
+    "PF1-0013: not reviewed yet",
+    "PF1-0120: not reviewed yet",
+    "PF1-0235: not reviewed yet",
+    "PF1-0437: not reviewed yet",
+    "PF1-0423: not reviewed yet",
+    "PF1-0045: not reviewed yet",
+    "PF1-0169: not reviewed yet",
+    "PF1-0165: not reviewed yet",
+    "PF1-0049: not reviewed yet",
+    "PF1-0083: not reviewed yet",
+    "PF1-0291: not reviewed yet",
+    "PF1-0350: not reviewed yet",
+    "PF1-0107: not reviewed yet",
+    "PF1-0127: not reviewed yet"
+  ],
+  "params": {
+    "human_min_per_category": 20,
+    "max_human_incorrect_share": 0.2,
+    "max_rounds": 2,
+    "max_wilson_upper_incorrect": 0.2,
+    "max_wilson_upper_uncertain_or_incorrect": 0.35,
+    "n_min_per_category": 50,
+    "wilson_z": 1.959963984540054
+  },
+  "params_status": "PROPOSED (V5-DATA-SPEC-r3 §11.2; ratified in the dataset preregistration)",
+  "pool": {
+    "path": "datasets/v5_sources/attack/attack_pool.jsonl",
+    "records": 3933,
+    "sha256": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21"
+  },
+  "real_gate_run": true,
+  "round": 1,
+  "schema": "v5-postfilter-audit/v1",
+  "seed": "v5-postfilter-audit-r1-2026-10-19-d66",
+  "summary": {
+    "PENDING_ADJUDICATION": 9,
+    "PENDING_HUMAN_REVIEW": 1
+  }
+}

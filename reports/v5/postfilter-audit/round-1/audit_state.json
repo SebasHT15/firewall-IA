@@ -1,0 +1,186 @@
+{
+  "categories_audited": [
+    "CRLF Injection",
+    "Command Injection",
+    "NoSQL Injection",
+    "Open Redirect",
+    "SQL Injection",
+    "Server Side Request Forgery",
+    "Server Side Template Injection",
+    "XPath Injection",
+    "XSS Injection",
+    "path_file_access"
+  ],
+  "code": {
+    "scripts/dataset/audit_v5_attack_pool.py": "0a16c7a7466170b7d6a0020d85e00c6d3fba3e42cbda32c55d6af9d6d07afc78",
+    "scripts/dataset/audit_v5_postfilter.py": "4001416f93e1ede8dcbd8b755155e0ede41039240fb613280e70a951c7a6c795"
+  },
+  "denylist": {
+    "approval": {
+      "approved_by": "owner (SebasHT15)",
+      "approved_content_sha256_before_approval": "bb88c7611375f6279469b017127eb289f788a0ba65b230a93e3ac102e6ef88cc",
+      "date": "2026-10-19",
+      "decision_ref": "D66 (DECISIONS.md); owner approval in the data-readiness session 2026-10-19, issue #77; evidence reports/v5/data-readiness/README.md §B",
+      "scope": "final third-party deny-list for this V5 build round (spec §3.1 / §11.2 'Final third-party deny-list'); the PATT structural filters, including the XSS rules literal_backslash_x and prose_sentence, are kept unchanged (owner, same decision)"
+    },
+    "denied_files": 26,
+    "path": "scripts/dataset/v5_lexicon/patt_third_party_denylist_v2.json",
+    "sha256": "3e5570580a10319fc03ca622c034786a384a3ea6dddaf95bfeb413cf3fc7dd7e",
+    "status": "APPROVED"
+  },
+  "filter_change_doc": null,
+  "human_sample": {
+    "path": "human_review/human_review_sample.csv",
+    "rows": 200,
+    "sha256": "8667a4276c6a10f15a8aec5278f635040a7aa6cc8418d82213f30e2f82920740"
+  },
+  "human_seed": "v5-postfilter-audit-r1-2026-10-19-d66/human",
+  "method": "stratified by source file within category; within a file rank by sha256(seed NUL '' NUL category NUL record_id); human subsample drawn from the sample with human_seed before any annotation exists",
+  "mode": "REAL",
+  "params": {
+    "human_min_per_category": 20,
+    "max_human_incorrect_share": 0.2,
+    "max_rounds": 2,
+    "max_wilson_upper_incorrect": 0.2,
+    "max_wilson_upper_uncertain_or_incorrect": 0.35,
+    "n_min_per_category": 50,
+    "wilson_z": 1.959963984540054
+  },
+  "params_status": "PROPOSED (V5-DATA-SPEC-r3 §11.2; ratified in the dataset preregistration)",
+  "per_category": {
+    "CRLF Injection": {
+      "by_file": {
+        "hardcoded:CRLF_PAYLOADS": 22
+      },
+      "human": 20,
+      "sample": 22
+    },
+    "Command Injection": {
+      "by_file": {
+        "Command Injection/Intruder/command-execution-unix.txt": 7,
+        "Command Injection/Intruder/command_exec.txt": 35,
+        "Command Injection/README.md": 8
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "NoSQL Injection": {
+      "by_file": {
+        "NoSQL Injection/Intruder/MongoDB.txt": 14,
+        "NoSQL Injection/Intruder/NoSQL.txt": 5,
+        "NoSQL Injection/README.md": 31
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "Open Redirect": {
+      "by_file": {
+        "Open Redirect/Intruder/Open-Redirect-payloads.txt": 38,
+        "Open Redirect/Intruder/open_redirect_wordlist.txt": 3,
+        "Open Redirect/Intruder/openredirects.txt": 6,
+        "Open Redirect/README.md": 3
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "SQL Injection": {
+      "by_file": {
+        "SQL Injection/Cassandra Injection.md": 1,
+        "SQL Injection/DB2 Injection.md": 1,
+        "SQL Injection/Intruder/Generic_ErrorBased.txt": 4,
+        "SQL Injection/Intruder/Generic_Fuzz.txt": 1,
+        "SQL Injection/Intruder/Generic_UnionSelect.txt": 17,
+        "SQL Injection/Intruder/SQLi_Polyglots.txt": 1,
+        "SQL Injection/MSSQL Injection.md": 5,
+        "SQL Injection/MySQL Injection.md": 7,
+        "SQL Injection/OracleSQL Injection.md": 2,
+        "SQL Injection/PostgreSQL Injection.md": 4,
+        "SQL Injection/README.md": 4,
+        "SQL Injection/SQLite Injection.md": 2,
+        "SQL Injection/SQLmap.md": 1
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "Server Side Request Forgery": {
+      "by_file": {
+        "Server Side Request Forgery/README.md": 21,
+        "Server Side Request Forgery/SSRF-Advanced-Exploitation.md": 7,
+        "Server Side Request Forgery/SSRF-Cloud-Instances.md": 22
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "Server Side Template Injection": {
+      "by_file": {
+        "Server Side Template Injection/ASP.md": 1,
+        "Server Side Template Injection/Elixir.md": 2,
+        "Server Side Template Injection/Java.md": 11,
+        "Server Side Template Injection/JavaScript.md": 4,
+        "Server Side Template Injection/PHP.md": 10,
+        "Server Side Template Injection/Python.md": 17,
+        "Server Side Template Injection/README.md": 2,
+        "Server Side Template Injection/Ruby.md": 3
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "XPath Injection": {
+      "by_file": {
+        "hardcoded:XPATH_PAYLOADS": 31
+      },
+      "human": 20,
+      "sample": 31
+    },
+    "XSS Injection": {
+      "by_file": {
+        "XSS Injection/1 - XSS Filter Bypass.md": 4,
+        "XSS Injection/2 - XSS Polyglot.md": 4,
+        "XSS Injection/3 - XSS Common WAF Bypass.md": 3,
+        "XSS Injection/4 - CSP Bypass.md": 2,
+        "XSS Injection/5 - XSS in Angular.md": 10,
+        "XSS Injection/Intruders/xss_payloads_quick.txt": 5,
+        "XSS Injection/Intruders/xss_swf_fuzz.txt": 4,
+        "XSS Injection/README.md": 18
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "path_file_access": {
+      "by_file": {
+        "Directory Traversal/Intruder/directory_traversal.txt": 3,
+        "Directory Traversal/README.md": 3,
+        "File Inclusion/Intruders/BSD-files.txt": 1,
+        "File Inclusion/Intruders/LFI-FD-check.txt": 2,
+        "File Inclusion/Intruders/LFI-WindowsFileCheck.txt": 2,
+        "File Inclusion/Intruders/Linux-files.txt": 2,
+        "File Inclusion/Intruders/List_Of_File_To_Include.txt": 14,
+        "File Inclusion/Intruders/List_Of_File_To_Include_NullByteAdded.txt": 1,
+        "File Inclusion/Intruders/Mac-files.txt": 1,
+        "File Inclusion/Intruders/Web-files.txt": 1,
+        "File Inclusion/Intruders/Windows-files.txt": 5,
+        "File Inclusion/Intruders/dot-slash-PathTraversal_and_LFI_pairing.txt": 8,
+        "File Inclusion/Intruders/php-filter-iconv.txt": 2,
+        "File Inclusion/LFI-to-RCE.md": 2,
+        "File Inclusion/README.md": 1,
+        "File Inclusion/Wrappers.md": 2
+      },
+      "human": 20,
+      "sample": 50
+    }
+  },
+  "pool": {
+    "path": "datasets/v5_sources/attack/attack_pool.jsonl",
+    "records": 3933,
+    "sha256": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21"
+  },
+  "pool_manifest_sha256": "12887aa6c1a4505be563c1b30b56f347ac371b94779ae3b1014badcabd9aa5d1",
+  "round": 1,
+  "sample": {
+    "path": "sample.jsonl",
+    "rows": 453,
+    "sha256": "eb001e959a43ea0e6f70ad5c7ee47c9ce4cb4ba1616948740a61648f0acef006"
+  },
+  "schema": "v5-postfilter-audit/v1",
+  "seed": "v5-postfilter-audit-r1-2026-10-19-d66"
+}
