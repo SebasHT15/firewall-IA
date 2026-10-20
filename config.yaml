@@ -42,3 +42,14 @@ data_plane:
   #   startup_timeout_seconds: 10      # worker start (imports + artifact load)
   #   restart_backoff_seconds: 2       # minimum wait before replacing a killed/crashed worker
   #   max_consecutive_failures: 3      # then the runtime gives up until the gateway restarts
+
+  # Hybrid Architecture — Fast Path in SHADOW mode (PROPOSED; data_plane/fast_path.py).
+  # true: each request is also evaluated for a *hypothetical* FAST_ALLOW and the answer is
+  # logged ("FAST PATH (shadow)") beside V4's decision. Nothing reads it: every request still
+  # goes to V4, V4 decides, enforcement and fail-closed are unchanged, and an error is logged
+  # and ignored. It stays ineligible (logs CONTINUE) until the gateway can supply a
+  # canonical-request ACCEPT and VERIFIED wire framing. false, or absent: not run.
+  shadow_fast_path: false
+  # Owner-supplied policy file (JSON, schema fast-path-policy/v1), relative to the repository
+  # root. null or absent: no policy, so the Fast Path can never log FAST_ALLOW.
+  fast_path_policy_file: null

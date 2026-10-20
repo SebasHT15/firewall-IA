@@ -36,7 +36,16 @@ own timeout; a worker that exceeds it is killed and replaced. Its score,
 auxiliary category, status and time are logged on a "HYBRID SHADOW" line carrying the same
 `[tag]` as that request's V4 decision line. Nothing reads it: V4 is the only decision, there
 is no new ALLOW path, and an Analyzer that is unavailable, invalid, failing or slow is a
-status in that line, never a BLOCK, an ALLOW or a delay. Off unless configured.
+status in that line, never a BLOCK or an ALLOW. Scheduling and extraction overhead still
+need measurement; the request does not await analyzer completion. Off unless configured.
+
+SHADOW FAST PATH (Hybrid Architecture, PROPOSED; `fast_path.py`). When enabled, each request is also
+evaluated for a hypothetical FAST_ALLOW, after the verdict, and the answer is logged as a
+"FAST PATH (shadow)" line next to V4's decision. Nothing reads it: every request still goes to
+the classifier, V4 decides, enforcement and fail-closed are those above. FAST_ALLOW is a
+recorded hypothesis, never a bypass. Its protocol prerequisites (a canonical-request ACCEPT and
+VERIFIED wire framing) are not produced by the gateway today, so it logs CONTINUE with the
+unmet prerequisites. Errors are logged and ignored.
 
 RUN (from the repository root, in the data plane environment):
     .venv-dataplane/bin/mitmdump -s data_plane/data_plane.py --listen-host 127.0.0.1 -p 8080
@@ -60,12 +69,16 @@ from mitmproxy import ctx, http
 # loading it, as the tests and capture_addon.py do explicitly.
 import hybrid_shadow
 import hybrid_shadow_process
+
+import fast_path
 import request_features
 
 log = logging.getLogger("firewall.data_plane")
 # A child logger, so feature lines can be filtered apart from decision lines.
 features_log = logging.getLogger("firewall.data_plane.features")
 shadow_log = logging.getLogger("firewall.data_plane.shadow")
+
+fastpath_log = logging.getLogger("firewall.data_plane.fastpath")
 # httpx logs every classifier call at INFO; the ALLOW/BLOCK line already covers it.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -176,6 +189,24 @@ def load_shadow_analyzer(path: str = CONFIG_PATH) -> Optional[ShadowAnalyzerConf
     return ShadowAnalyzerConfig(file("python"), file("artifact_path"), number("timeout_seconds", 0),
                                 number("startup_timeout_seconds", 0),
                                 number("restart_backoff_seconds", 0, inclusive=True), failures)
+
+def load_shadow_fast_path(path: str = CONFIG_PATH) -> tuple[bool, str | None]:
+    """Return `(data_plane.shadow_fast_path, data_plane.fast_path_policy_file)` from config.yaml.
+
+    Both are optional: absent means off / no policy, so a configuration written before this
+    switch existed keeps its exact behaviour. The switch must be a YAML boolean and the policy
+    file a string or null; anything else raises, like every other invalid gateway setting.
+    """
+    with open(path, encoding="utf-8") as f:
+        section = yaml.safe_load(f)["data_plane"]
+    enabled = section.get("shadow_fast_path", False)
+    if not isinstance(enabled, bool):
+        raise ValueError(f"data_plane.shadow_fast_path must be true or false, got {enabled!r}")
+    policy_file = section.get("fast_path_policy_file")
+    if policy_file is not None and not isinstance(policy_file, str):
+        raise ValueError("data_plane.fast_path_policy_file must be a string or null, "
+                         f"got {policy_file!r}")
+    return enabled, policy_file
 
 
 # ── Request representation (D1) ────────────────────────────────────────────
@@ -296,6 +327,73 @@ async def shadow_analyze(runner, tag: str, raw_request: str,
         shadow_log.warning("[%s] HYBRID SHADOW FAILED v4=%s detail=internal:%s; ignored, "
                            "the request continues unchanged", tag, v4, type(exc).__name__)
 
+# ── Shadow Fast Path (PROPOSED; see fast_path.py) ───────────────────────────
+class GatewayEvidence:
+    """The two protocol-validation prerequisites of the Fast Path, as the gateway can supply them.
+
+    Today it can supply neither:
+    - canonical: the canonical-request/v1 `canonicalize()` is not integrated here (D56: the data
+      plane keeps V4's D1 rendering and must not import the contract) and its `Limits` values (max decoded body, token budget) are
+      PENDING in V5-DATA-SPEC-r3 §11.2, so no ACCEPT can be produced without inventing them;
+    - framing: wire-level framing (R1) is not verified by any project control; mitmproxy's own
+      header validation is third-party behaviour the project neither pins nor tests (D57).
+    Both answers are therefore "unavailable", and the Fast Path stays ineligible. A later change
+    replaces these two methods (or passes a subclass) once the dependencies exist."""
+
+    def canonical(self, req: http.Request):
+        return None
+
+    def framing(self, req: http.Request) -> fast_path.FramingEvidence:
+        return fast_path.FramingEvidence(
+            fast_path.FRAMING_UNAVAILABLE,
+            "no project-owned wire-level framing control (canonical-request R1) in the gateway")
+
+
+def fast_path_input(req: http.Request, evidence: GatewayEvidence) -> fast_path.FastPathInput:
+    """Raw received parts of a mitmproxy request plus the two prerequisites."""
+    return fast_path.FastPathInput(
+        method=req.data.method, target=req.data.path, http_version=req.http_version,
+        headers=tuple((bytes(n), bytes(v)) for n, v in req.headers.fields),
+        body=req.raw_content or b"",
+        canonical=evidence.canonical(req), framing=evidence.framing(req))
+
+
+def shadow_fast_path(tag: str, req: http.Request, policy, policy_problem: str | None,
+                     evidence: GatewayEvidence, v4_decision: str) -> None:
+    """Evaluate the Fast Path for this request and log the hypothesis beside V4's decision.
+    Returns nothing, so no caller can act on it, and never raises.
+
+    The line carries codes and identifiers only: no path, query, header value or body (same
+    policy as the decision lines). `v4=` is V4's decision, logged for later analysis; it is
+    not a label and nothing here compares or enforces."""
+    started = time.perf_counter()
+    try:
+        decision = fast_path.safe_evaluate(fast_path_input(req, evidence), policy)
+        if policy_problem and policy is None:
+            # A policy that failed to load is reported as such, not as "absent".
+            decision = fast_path.FastPathDecision(
+                fast_path.CONTINUE,
+                tuple("POLICY_INVALID" if r == "POLICY_UNAVAILABLE" else r
+                      for r in decision.reasons))
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        if decision.decision == fast_path.FAST_ALLOW:
+            fastpath_log.info(
+                "[%s] FAST PATH (shadow) FAST_ALLOW (hypothetical; V4 decision unchanged) "
+                "rule=%s policy=%s/%s v4=%s %.3f ms", tag, decision.rule_id,
+                decision.policy_id, (decision.policy_sha256 or "")[:8], v4_decision, elapsed_ms)
+        else:
+            fastpath_log.info(
+                "[%s] FAST PATH (shadow) CONTINUE reasons=%s policy=%s v4=%s %.3f ms",
+                tag, ",".join(decision.reasons),
+                (decision.policy_sha256 or "none")[:8], v4_decision, elapsed_ms)
+    except Exception as exc:
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        where = traceback.extract_tb(exc.__traceback__)[-1]
+        fastpath_log.warning(
+            "[%s] FAST PATH (shadow) failed after %.3f ms: %s at %s:%d; "
+            "ignored, the request continues unchanged",
+            tag, elapsed_ms, type(exc).__name__, os.path.basename(where.filename), where.lineno)
+
 
 # ── mitmproxy addon ────────────────────────────────────────────────────────
 def blocked_response(verdict: Verdict) -> http.Response:
@@ -311,7 +409,10 @@ class FirewallGateway:
     def __init__(self, classifier_url: str, timeout_seconds: float,
                  transport: httpx.AsyncBaseTransport | None = None,
                  shadow_features: bool = False,
-                 shadow_analyzer=None) -> None:
+                 shadow_analyzer=None,
+                 shadow_fast_path: bool = False,
+                 fast_path_policy_file: str | None = None,
+                 fast_path_evidence: GatewayEvidence | None = None) -> None:
         self.classifier_url = classifier_url
         self.timeout_seconds = timeout_seconds
         self.transport = transport  # None in production; tests pass an httpx.MockTransport
@@ -319,6 +420,21 @@ class FirewallGateway:
         self.shadow_analyzer = shadow_analyzer
         # Strong references: asyncio keeps only weak ones to running tasks.
         self._shadow_tasks: set[asyncio.Task] = set()
+
+        self.shadow_fast_path = shadow_fast_path
+        self.fast_path_evidence = fast_path_evidence or GatewayEvidence()
+        # An unreadable or invalid policy never stops the gateway: the shadow Fast Path just has
+        # no policy (CONTINUE, POLICY_INVALID). Only the error class is kept, never its text.
+        self.fast_path_policy = None
+        self.fast_path_policy_problem = None
+        if shadow_fast_path and fast_path_policy_file:
+            path = fast_path_policy_file
+            if not os.path.isabs(path):
+                path = os.path.join(os.path.dirname(CONFIG_PATH), path)
+            try:
+                self.fast_path_policy = fast_path.load_policy(path)
+            except (OSError, fast_path.PolicyError) as exc:
+                self.fast_path_policy_problem = type(exc).__name__
 
     def running(self) -> None:
         log.info("data plane ready: classifier=%s timeout=%.1fs policy=fail-closed",
@@ -333,6 +449,13 @@ class FirewallGateway:
             level, message = runner.startup_summary()
             shadow_log.log(level, "%s", message)
             runner.prewarm()   # a separate-process runner starts its worker here, in the background
+
+        fastpath_log.info(
+            "fast path: %s", "shadow (hypothetical FAST_ALLOW logged only; V4 decides every "
+            "request)" if self.shadow_fast_path else "off")
+        if self.shadow_fast_path and self.fast_path_policy_problem:
+            fastpath_log.warning("fast path policy not loaded (%s): every request will log "
+                                 "CONTINUE", self.fast_path_policy_problem)
 
     async def request(self, flow: http.HTTPFlow) -> None:
         if flow.response is not None:
@@ -371,6 +494,11 @@ class FirewallGateway:
         # its definition (render_request + the /classify call).
         if self.shadow_features:
             shadow_extract(tag, raw_request)  # timed and logged on its own line
+        if self.shadow_fast_path:
+            # Same position and guarantees as the extractor: after the verdict, own log line,
+            # no return value, no exception. V4 has already decided and is not re-asked.
+            shadow_fast_path(tag, req, self.fast_path_policy, self.fast_path_policy_problem,
+                             self.fast_path_evidence, verdict.decision)
 
         if self.shadow_analyzer is not None:
             self.spawn_shadow_analysis(tag, raw_request, verdict)
@@ -429,5 +557,8 @@ def build_shadow_analyzer(config: Optional[ShadowAnalyzerConfig]):
         config.max_consecutive_failures)
 
 
+_SHADOW_FAST_PATH = load_shadow_fast_path()
 addons = [FirewallGateway(*load_config(), shadow_features=load_shadow_feature_extraction(),
-                          shadow_analyzer=build_shadow_analyzer(load_shadow_analyzer()))]
+                          shadow_analyzer=build_shadow_analyzer(load_shadow_analyzer()),
+                          shadow_fast_path=_SHADOW_FAST_PATH[0],
+                          fast_path_policy_file=_SHADOW_FAST_PATH[1])]
