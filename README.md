@@ -161,7 +161,10 @@ Model 1 stays frozen; this is not a gateway or cascade result.
 - Fast path and heuristic suspicious score (D29 / D30, Issues #35–#38) — **deferred and
   optional**: not part of the current architecture, whose role is taken by RequestFeatures →
   learned Analyzer; may be evaluated later as a Model 2 feature if it adds value
-- GGUF / Q4_K_M export and a llama.cpp runtime (M2)
+- GGUF export and a llama.cpp runtime (M2). Offline diagnostic only: adapter → NF4-faithful merge → GGUF → `llama-server`
+  fed token ids works and is byte-reproducible on a CPU build (`reports/v5/training-readiness/` §5b–§5h). bf16 is the
+  fidelity reference and Q8_0 the provisional candidate; **Q4_K_M is not authorized** (BLOCK→ALLOW flips on synthetic
+  inputs). Not integrated; no CUDA build; no equivalence measured on labelled V5 development data
 - Embedded Linux deployment (M4)
 - Formal end-to-end latency benchmark (Issue #18)
 - HTTPS / TLS, HTTP/2 and WebSocket validation
@@ -179,7 +182,10 @@ Model 1 stays frozen; this is not a gateway or cascade result.
     merged. I-9 uses the literal D62 reading (WARN is the reduction trigger; D65 APPROVED); the WARN/BLOCK
     numeric values and the low-cluster-split policy are PROPOSED, deferred to the pilot/preregistration.
     No real split, dataset or training; `names_family` blocked (#75).
-  - Dataset and training: not started.
+  - Training readiness (`reports/v5/training-readiness/`): gated QLoRA trainer `finetune_v5.py` (SMOKE / EXPERIMENTAL /
+    FINAL) — **SMOKE READY, FINAL BLOCKED** (27 unmet conditions). Only an engineering smoke run on the synthetic
+    fixture was done; **V5 is not trained**.
+  - Dataset: not built (no real split; see the conditions above).
   - External v2 is required for any V5 claim (D40).
 - Hybrid Architecture beyond Model 1: Small Decision Model, cascade orchestrator,
   UNCERTAIN → V4 fallback, gateway integration (see the status table in §2)
@@ -499,6 +505,7 @@ data_plane/          data_plane.py                                 mitmproxy inl
                      request_features.py, hybrid_contracts.py      Hybrid Architecture Phase 1: shadow feature extraction, stage contracts
 scripts/dataset/     V4 dataset generation and the E0 integrity gate
 scripts/training/    finetune.py; hybrid_analyzer.py, run_hybrid_analyzer_baselines.py (Analyzer research, own env)
+                     finetune_v5.py, v5_train_data.py (gated V5 trainer); check_lora_merge_fidelity.py, check_gguf_fidelity.py
 scripts/evaluation/  test_model.py (frozen E5 scorer)
 scripts/benchmarks/  inference benchmark and comparison tools
 scripts/external/    External Test v1 capture, labelling, gate, freeze and run tooling

@@ -1,0 +1,105 @@
+{
+  "schema": "v5-training-recipe/v1",
+  "recipe_id": "v5-training-recipe-v1-candidate",
+  "status": "PROPOSED",
+  "note": "Candidate V5 training recipe (training readiness, 2026-10-19). Nothing here is ratified. The FINAL mode of finetune_v5.py refuses every section whose status is not RATIFIED or APPROVED. Values are recorded in the training preregistration only after owner approval.",
+  "base_model": {
+    "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "local_files_only": true,
+    "status": "PROPOSED",
+    "source": "snapshot already used by V4 and by the D63 template measurements"
+  },
+  "template": {
+    "id": "V5_CANDIDATE_TEMPLATE",
+    "module": "control_plane/v5_tokenization.py",
+    "status": "PROPOSED",
+    "source": "D63: TinyLlama-Chat structure + owner candidate instruction of 2026-10-13; PROPOSED, not frozen"
+  },
+  "vocabulary": {
+    "id": "PILOT_VOCABULARY",
+    "module": "control_plane/v5_output_contract.py",
+    "status": "PROPOSED",
+    "source": "owner pilot choice 2026-10-14 (#70): alternative B; final vocabulary fixed in the dataset preregistration"
+  },
+  "token_budget": {
+    "max_length": 512,
+    "margin": 8,
+    "B": 415,
+    "status": "PROPOSED",
+    "source": "D56/D62 provisional max_length and margin; D63 candidate B=415; final values in the preregistration (spec §11.2)"
+  },
+  "loss": {
+    "on": "completion",
+    "status": "PROPOSED",
+    "source": "V5 candidate: loss on the assistant output + EOS only. V4 trained on the full sequence; 'full_sequence' is kept for parity experiments"
+  },
+  "quantization": {
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16",
+    "status": "APPROVED",
+    "source": "D11 (bf16 compute, bf16 training) — environment compatibility decision of the V4 recipe"
+  },
+  "lora": {
+    "r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "bias": "none",
+    "target_modules": ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    "status": "PROPOSED",
+    "source": "V4-clean recipe values; not re-validated for V5"
+  },
+  "optimization": {
+    "num_train_epochs": 4,
+    "per_device_train_batch_size": 4,
+    "per_device_eval_batch_size": 4,
+    "gradient_accumulation_steps": 8,
+    "gradient_checkpointing": true,
+    "learning_rate": 0.0002,
+    "lr_scheduler_type": "cosine",
+    "warmup_ratio": 0.05,
+    "optim": "paged_adamw_8bit",
+    "bf16": true,
+    "eval_steps": 200,
+    "save_steps": 200,
+    "logging_steps": 50,
+    "save_total_limit": 2,
+    "load_best_model_at_end": true,
+    "status": "PROPOSED",
+    "source": "V4-clean schedule (save_total_limit per D12); epochs/steps for V5 depend on the frozen dataset size"
+  },
+  "seed": {
+    "seed": 20261019,
+    "data_seed": 20261019,
+    "status": "PROPOSED"
+  },
+  "library_pins": {
+    "python": "3.12",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0",
+    "trl": "1.4.0",
+    "peft": "0.19.1",
+    "bitsandbytes": "0.49.2",
+    "datasets": "4.8.5",
+    "accelerate": "1.13.0",
+    "status": "PROPOSED",
+    "source": "versions installed for python3.12 on the training machine (E1 port, D11)"
+  },
+  "smoke": {
+    "max_steps": 40,
+    "max_steps_hard_cap": 60,
+    "per_device_train_batch_size": 4,
+    "gradient_accumulation_steps": 1,
+    "learning_rate": 0.0002,
+    "warmup_ratio": 0.0,
+    "eval_steps": 20,
+    "save_steps": 20,
+    "logging_steps": 1,
+    "save_total_limit": 1,
+    "generation_checks": 12,
+    "status": "ENGINEERING",
+    "source": "engineering smoke settings only; never a V5 training schedule"
+  }
+}
