@@ -52,13 +52,23 @@ BENIGN_SUBDIR = "benign"
 BLOCKED = "BLOCKED: source not acquired"
 BUILT = "BUILT"
 MIN_POOL_SIZE = 200          # spec 4.6 step 3 (report only)
-USER_AGENT = "firewall-IA-v5-dataset/0.1 (research; contact via repo)"
+# Wikimedia User-Agent policy: client/version (contact) library/version. The contact is the public
+# project repository (no personal data). Changed 2026-10-19 (issue #75): the earlier "(research;
+# contact via repo)" carried no usable contact; the given-name sidecar keeps the UA it was fetched with.
+USER_AGENT = ("firewall-IA-v5-dataset/0.2 (https://github.com/SebasHT15/firewall-IA; research dataset build) "
+              f"Python-urllib/{sys.version_info[0]}.{sys.version_info[1]}")
 
 # Spec 4.4: these must survive the benign oracle.  The build fails if one is not ACCEPTED.
 SURVIVAL_FIXTURE = ["O'Neil", "Apt #4", "AT&T", "100%", "a<b"]
 
 # ───────────────────────────────── acquisition plan ─────────────────────────────────
 WDQS_ENDPOINT = "https://query.wikidata.org/sparql"
+# First-party Wikimedia WDQS endpoints only (same Wikidata CC0 data, same pinned query). The
+# main-graph host serves every non-scholarly item, which includes all given/family-name items.
+# On 2026-10-19 query.wikidata.org still answered HTTP 429 under the 2026-10-14 outage rule while
+# query-main.wikidata.org answered normally (issue #75). The endpoint used is recorded in the
+# sidecar; third-party mirrors (e.g. QLever) are NOT accepted here.
+WDQS_ENDPOINTS = (WDQS_ENDPOINT, "https://query-main.wikidata.org/sparql")
 TATOEBA_URL = "https://downloads.tatoeba.org/exports/sentences_CC0.tar.bz2"
 WIKIDATA_LICENCE_URL = "https://www.wikidata.org/wiki/Wikidata:Licensing"
 TATOEBA_LICENCE_URL = "https://tatoeba.org/en/downloads"
@@ -75,17 +85,21 @@ GIVEN_NAME_QUERY = (
     "}\n"
     "LIMIT 100000"
 )
-# LIMIT 50000 (was 200000): on 2026-10-14 WDQS was under an outage rule (HTTP 429, 1 req/min)
-# and returned truncated JSON for this query at LIMIT 200000, 50000 and 15000 alike. 50,000
-# family-name items far exceed the >= 200-element pool minimum (spec §4.6 step 3). The pool
-# stays BLOCKED until a complete, pinned response is acquired.
+# LIMIT 20000 (was 50000, originally 200000): the pinned query must finish inside the WDQS 60 s
+# query timeout, otherwise the server truncates the JSON (issue #75). On 2026-10-19 and 2026-10-20
+# LIMIT 50000 was truncated (~1-2 MB of ~11 MB expected); LIMIT 20000 completed twice (26 s, 19 s).
+# Without ORDER BY the subset is arbitrary and a re-run returns a DIFFERENT subset (93% item
+# overlap measured), so reproducibility is the archived raw file + its SHA-256, never a re-run, and
+# the subset carries no representativeness claim. 20,000 rows far exceed the >= 200-element pool
+# minimum (spec §4.6 step 3). The pool is built only from a complete, pinned raw file; without one
+# it stays BLOCKED (snapshot: reports/v5/data-readiness/names_family-candidate/).
 FAMILY_NAME_QUERY = (
     "SELECT ?item ?label WHERE {\n"
     "  ?item wdt:P31 wd:Q101352 ;\n"
     "        rdfs:label ?label .\n"
     "  FILTER(LANG(?label) IN (\"en\",\"mul\"))\n"
     "}\n"
-    "LIMIT 50000"
+    "LIMIT 20000"
 )
 
 SOURCES = {
@@ -662,8 +676,9 @@ def cmd_build(args):
             "containment_ge_L": "PENDING: L not calibrated (spec 4.4)",
             "breakout_signatures": "PENDING: signature list not frozen (spec 4.4)"},
         "survival_fixture": {"values": survival, "all_survive": all(survival.values())},
-        "pending": ["Wikidata family-name source: BLOCKED until a complete pinned WDQS response exists",
-                    "oracle containment length L and breakout signatures (spec 4.4)"],
+        "pending": (["Wikidata family-name source: BLOCKED until a complete pinned WDQS response exists"]
+                    if "names_family" in blocked else [])
+                   + ["oracle containment length L and breakout signatures (spec 4.4)"],
         "privacy": ("Names: Wikidata name items only (Q202444, Q101352), recombined later, never a person record. "
                     "Prose: Tatoeba CC0 export with digit-run/phone/e-mail/URL/date/possible-full-name filters. "
                     "Streets: synthetic, no house number or city. Pools are local and gitignored."),
@@ -686,7 +701,9 @@ def cmd_build(args):
 
 
 # ───────────────────────────────── acquire command ─────────────────────────────────
-def acquire_plan(only=None, raw_dir=DEFAULT_RAW_DIR):
+def acquire_plan(only=None, raw_dir=DEFAULT_RAW_DIR, endpoint=WDQS_ENDPOINT):
+    if endpoint not in WDQS_ENDPOINTS:
+        raise SystemExit(f"REFUSED: {endpoint!r} is not a first-party Wikimedia WDQS endpoint {WDQS_ENDPOINTS}")
     items = []
     for sid, s in SOURCES.items():
         if only and sid not in only:
@@ -695,7 +712,8 @@ def acquire_plan(only=None, raw_dir=DEFAULT_RAW_DIR):
                 "licence": s["licence"], "expected_bytes": s["expected_bytes"],
                 "max_bytes": s["max_bytes"], "timeout_s": s["timeout_s"]}
         if s["kind"] == "wdqs":
-            item["method"] = "GET " + WDQS_ENDPOINT + "?format=json&query=<query>"
+            item["url"] = endpoint
+            item["method"] = "GET " + endpoint + "?format=json&query=<query>"
             item["query"] = s["query"]
         else:
             item["method"] = "GET archive, extract one member safely"
@@ -765,7 +783,9 @@ def _write_sidecar(path, side):
     C.write_json(path + ".source.json", side)
 
 
-def _acquire_one(sid, raw_dir):
+def _acquire_one(sid, raw_dir, endpoint=WDQS_ENDPOINT):
+    if endpoint not in WDQS_ENDPOINTS:
+        raise SystemExit(f"REFUSED: {endpoint!r} is not a first-party Wikimedia WDQS endpoint {WDQS_ENDPOINTS}")
     s = SOURCES[sid]
     os.makedirs(raw_dir, exist_ok=True)
     dest = os.path.join(raw_dir, s["file"])
@@ -773,12 +793,12 @@ def _acquire_one(sid, raw_dir):
         raise SystemExit(f"REFUSED: {dest} (or its sidecar) already exists; pinned raw files are never overwritten")
     retrieved_at = _utc_now()                      # recorded once, at download
     if s["kind"] == "wdqs":
-        url = WDQS_ENDPOINT + "?" + urllib.parse.urlencode({"query": s["query"], "format": "json"})
+        url = endpoint + "?" + urllib.parse.urlencode({"query": s["query"], "format": "json"})
         data = http_get(url, "application/sparql-results+json", s["timeout_s"], s["max_bytes"])
         parse_wdqs(data)                           # must be valid SPARQL JSON results
         with open(dest, "wb") as fh:
             fh.write(data)
-        _write_sidecar(dest, {"url": url, "endpoint": WDQS_ENDPOINT, "query": s["query"],
+        _write_sidecar(dest, {"url": url, "endpoint": endpoint, "query": s["query"],
                               "retrieved_at": retrieved_at, "sha256": C.sha256_bytes(data), "bytes": len(data),
                               "licence": s["licence"], "licence_evidence_url": s["licence_evidence_url"],
                               "user_agent": USER_AGENT})
@@ -802,7 +822,7 @@ def _acquire_one(sid, raw_dir):
 
 def cmd_acquire(args):
     raw_dir = C.assert_not_protected(args.raw_dir)
-    plan = acquire_plan(args.only, raw_dir)
+    plan = acquire_plan(args.only, raw_dir, args.endpoint)
     if args.dry_run:
         print(json.dumps({"dry_run": True, "network": "none", "items": plan}, indent=2, ensure_ascii=False))
         return 0
@@ -812,7 +832,7 @@ def cmd_acquire(args):
               file=sys.stderr)
         return 2
     for item in plan:
-        print("downloading", item["source_id"], "->", _acquire_one(item["source_id"], raw_dir))
+        print("downloading", item["source_id"], "->", _acquire_one(item["source_id"], raw_dir, args.endpoint))
     return 0
 
 
@@ -824,6 +844,8 @@ def build_parser():
     a.add_argument("--only", action="append", choices=sorted(SOURCES))
     a.add_argument("--dry-run", action="store_true", help="print the plan, no network")
     a.add_argument("--yes-download", action="store_true", help="explicit authorization to use the network")
+    a.add_argument("--endpoint", default=WDQS_ENDPOINT, choices=WDQS_ENDPOINTS,
+                   help="first-party Wikimedia WDQS endpoint (recorded in the sidecar)")
     b = sub.add_parser("build", help="build the pools from pinned raw files and the lexicons")
     b.add_argument("--raw-dir", default=None, help="default: <out-dir>/raw")
     b.add_argument("--out-dir", default=C.DEFAULT_OUT_DIR)

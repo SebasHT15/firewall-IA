@@ -27,7 +27,7 @@ sys.path.insert(0, HERE)
 import v5_pools_common as C  # noqa: E402
 
 DEFAULT_DIR = os.path.join(C.DEFAULT_OUT_DIR, "attack")
-DEFAULT_DENYLIST = os.path.join(HERE, "v5_lexicon", "patt_third_party_denylist_v1.json")
+DEFAULT_DENYLIST = os.path.join(HERE, "v5_lexicon", "patt_third_party_denylist_v2.json")   # APPROVED, D66
 DEFAULT_OUT = os.path.join(C.REPO_ROOT, "reports", "v5", "dataset-foundation", "attack_pool_reconciliation.md")
 V4_PASSED = ("accepted", "not_applied_project_authored")
 BUCKETS = ("v4_filter", "category_not_extracted_v5", "third_party_file", "structural", "identity_undefined",
@@ -102,8 +102,12 @@ def reconcile(attack_dir, denylist_path):
     excluded = C.read_jsonl(os.path.join(attack_dir, "attack_excluded.jsonl"))
     with open(os.path.join(attack_dir, "manifest.json"), encoding="utf-8") as fh:
         manifest = json.load(fh)
-    with open(denylist_path, encoding="utf-8") as fh:
-        deny = json.load(fh)
+    with open(denylist_path, "rb") as fh:
+        deny_bytes = fh.read()
+    deny = json.loads(deny_bytes.decode("utf-8"))
+    deny_info = {"status": deny.get("status"), "sha256": C.sha256_bytes(deny_bytes)}
+    if deny_info["sha256"] != manifest["denylist"]["sha256"]:
+        raise AssertionError("the deny-list is not the one the pool was built with (sha256 differs from the manifest)")
     check_artifacts(attack_dir, manifest)
     if any(r["label_status"] != C.LABEL_PENDING for r in accepted):
         raise AssertionError("an accepted record is not PENDING_ADJUDICATION")
@@ -117,7 +121,7 @@ def reconcile(attack_dir, denylist_path):
     return {"total_extracted": len(records), "accepted": len(accepted), "excluded": len(excluded),
             "inadmissible": inadmissible,
             "ledger": ledger(records), "waterfall": waterfall(records, spec_initial, denied),
-            "structural": structural, "manifest_counts": manifest["counts"]}
+            "structural": structural, "manifest_counts": manifest["counts"], "denylist": deny_info}
 
 
 def render(res):
@@ -137,8 +141,8 @@ def render(res):
                  f"{r['ACCEPTED']} | {100 * r['ACCEPTED'] / r['extracted']:.1f}% |")
     L += ["", "## 2. Unique canonical payloads per dedup scope (cumulative)", "",
           "U0 = canonical keys of V4-accepted rows. U1 = U0 restricted to files outside the spec's initial "
-          "20-file deny-list (this is how spec §2.3 computed its figures). U2 = outside the full PROPOSED "
-          "deny-list. U3 = survivors of the structural rules (= ACCEPTED rows, one per canonical key).", "",
+          "20-file deny-list (this is how spec §2.3 computed its figures). U2 = outside the full deny-list "
+          f"({res['denylist']['status']}, sha256 `{res['denylist']['sha256'][:16]}`). U3 = survivors of the structural rules (= ACCEPTED rows, one per canonical key).", "",
           "| Scope | U0 | U1 (spec §2.3 basis) | U2 | U3 = accepted |", "|---|---:|---:|---:|---:|"]
     for scope, w in res["waterfall"].items():
         L.append(f"| {scope} | {w['U0_v4_accepted']} | {w['U1_minus_spec_initial_denylist']} | "

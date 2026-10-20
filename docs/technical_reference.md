@@ -8,7 +8,7 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D62: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions D1–D67: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
@@ -27,6 +27,28 @@ Contents: [Control Plane](#control-plane-issue-15) ·
 [Repository Workflow](#repository-workflow)
 
 ---
+
+## Integration update — 2026-10-20
+
+The current target and completed/pending matrix are in `continuity-2026-10-20.md` and the
+root README. Older target diagrams below describe their recorded stage, not current routing.
+
+- `/classify` now consumes `classify_timed` token-level `ended_with_eos` evidence. False or
+  non-boolean termination evidence yields invalid; a missing key fails the API call. Complete
+  responses keep their schema. The gateway enforces invalid/non-200 as fail-closed.
+- Legacy `parse_prediction(text)` benchmark callers preserve historical text-only semantics.
+  #65 input-template-token injection is separate and remains unresolved.
+- The data plane can observe both Fast Path and Analyzer after V4's verdict. Neither output
+  is used for enforcement; both new modes default off. The Analyzer runs in a bounded separate
+  process; scheduling/extraction overhead still needs measurement. See `hybrid_shadow_runtime.md`.
+- Fast Path gets unavailable framing/canonical evidence from today's gateway, hence CONTINUE.
+  An eligible test fixture is not a production bypass or an approved application policy.
+- C1 means deterministic features; optional C2 is learned evidence. Model 2 BLOCK/DEFER and
+  V5 selective fallback remain unimplemented proposals, not the old ALLOW/BLOCK/UNCERTAIN target.
+- D1 feature input is preserved in current shadow operation. Compatibility with canonical
+  input must be measured before reusing learned weights on the target representation.
+
+Validation commands and limitations: `../reports/v5/integration/README.md`.
 
 ## Control Plane (Issue #15)
 
@@ -495,8 +517,8 @@ implementation defects.
 - Model behaviour on real HTTP traffic: diagnosed in `real-http-fp-v1` (see above) and
   evaluated independently in External Test v1 *(updated at stage close;* see
   [`../README.md`](../README.md#5-external-test-v1)*)*
-- Heuristics, suspicious score, fast path: not implemented (Issues #35–#38); *(2026-10-04)*
-  deferred and optional — not part of the Hybrid Architecture (see below)
+- Fast Path: default-off observer implemented; active bypass, deferred validation and performance
+  evidence pending (#36–#38). Legacy heuristic scoring (#35/D29) needs scope reconciliation.
 - Request feature extraction (Hybrid Architecture Phase 1): shadow mode only — logged,
   never used for a decision (see [Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1))
 
@@ -504,33 +526,29 @@ implementation defects.
 
 ## Hybrid Architecture — target design, status and interfaces
 
-*(Added 2026-10-04.)* The target architecture the project is building. **Only feature
-extraction (shadow mode) runs in the gateway; V4 makes every decision today.**
+Updated 2026-10-20. V4 remains the sole enforced decision. The target is:
 
+```text
+Wire HTTP → parser → framing + canonicalization → canonical request
+  → Fast Path: FAST_ALLOW → ALLOW
+               CONTINUE  → C1 deterministic evidence + optional learned C2
+                         → Model 2: BLOCK → BLOCK
+                                    DEFER → V5 → ALLOW / BLOCK
 ```
-HTTP request → data plane (mitmproxy) → render_request() → D1 text
-  → extract_features() → RequestFeatures v2
-  → control plane (FastAPI)* → Model 1: Lightweight Request Analyzer → AnalyzerOutput
-  → Model 2: Small Decision Model → DecisionOutput: ALLOW / BLOCK / UNCERTAIN
-        UNCERTAIN → TinyLlama V4 (/classify, as today) → ALLOW / BLOCK
-  → data plane enforcement (fail-closed)
-```
-\*Runtime location of Models 1–2 is decided after measurement (D52); the control plane is the
-intended host because the data-plane environment must stay free of the ML stack (D33).
 
 | Component | Status | Where |
 |---|---|---|
-| Request Feature Extraction | **DONE** (shadow) | `data_plane/request_features.py` |
-| Model 1 — Lightweight Request Analyzer | **FROZEN**, offline | `scripts/training/hybrid_analyzer.py`, artifact gitignored |
-| Model 2 — Small Decision Model | not implemented | contract `DecisionOutput` only |
-| Cascade orchestrator / UNCERTAIN routing / TinyLlama selective fallback | not implemented | — |
-| Hybrid shadow integration, Hybrid enforcement | not implemented | — |
-| External validation of the Hybrid system | pending | — |
+| Request Feature Extraction | implemented, shadow | `data_plane/request_features.py` |
+| Fast Path | implemented observer, default off; gateway prerequisites unavailable | `data_plane/fast_path.py` |
+| Model 1 / learned C2 | frozen artifact; isolated shadow worker, default off | `data_plane/hybrid_shadow*.py` |
+| Model 2 BLOCK/DEFER | proposal only | `../reports/v5/hybrid/model2-contract-proposal.md` |
+| Cascade / selective V5 fallback / hybrid enforcement | not implemented | V4 still decides every request |
+| External validation of the Hybrid system | pending | no cascade quality claim |
 
-The heuristic **suspicious score / fast path** of D29 / D30 (Issues #35–#38) is **not part of
-this architecture** and not implemented: RequestFeatures → learned Analyzer takes its intended
-role. It is deferred and optional (a possible Model 2 feature, if it shows incremental value);
-D29 remains recorded as APPROVED / NOT YET until a decision says otherwise.
+The Fast Path proposal uses positive rules and explicit protocol/application evidence, not
+heuristic suspicious-score thresholds. This does not silently supersede D29: reconcile its
+legacy formulation and #35–#38 before enforcement. Runtime placement under D52 is still open;
+the separate Analyzer process is an experimental runtime, preserving D33 environment isolation.
 
 ### Interfaces (`data_plane/hybrid_contracts.py`)
 
@@ -547,8 +565,9 @@ D29 remains recorded as APPROVED / NOT YET until a decision says otherwise.
   the probabilities. `attack` is learned on V4-clean's 50 / 50 prior — not an operational
   attack prevalence (D42). Unknown signals, values outside [0, 1] or a partial / non-summing
   category set are rejected.
-- **`DecisionInput`** (`features`, `analysis`) → **`DecisionOutput`** (`decision` ∈ ALLOW / BLOCK
-  / UNCERTAIN, `confidence`, `reason`): UNCERTAIN means "defer to V4". No producer yet.
+- **Legacy placeholder:** `DecisionInput` → `DecisionOutput` still has ALLOW/BLOCK/UNCERTAIN
+  in code, with no producer. It is not the proposed Model 2 contract: a separate BLOCK/DEFER
+  output is required after ratification; do not wire this legacy ALLOW-capable type into Model 2.
 
 ### Model 1 as frozen (run-002, D54 / D55)
 
@@ -579,10 +598,11 @@ the v2 freeze). Results, limitations and the run-001 history:
   scikit-learn 1.9.1). The data plane must never import scikit-learn.
 - **Today:** fail-closed is exactly D4 / D34 — anything but a valid V4 ALLOW is 403 / 503. An
   extractor failure is not a classifier failure (D43): logged, verdict enforced unchanged.
-- **Hybrid (not designed yet):** how an Analyzer / Decision Model failure is handled, whether a
-  Hybrid stage may ever BLOCK without V4 (excluded for D29's heuristic score), and the
-  UNCERTAIN policy are open decisions for the Model 2 / orchestrator phase. Until then nothing
-  Hybrid can alter a decision.
+- **Current observers:** errors, missing artifacts, busy workers and timeouts are observational
+  statuses; they cannot change V4 enforcement. See `hybrid_shadow_runtime.md`.
+- **Proposed Model 2:** missing or invalid evidence is DEFER-equivalent; fallback failure remains
+  fail-closed. Early BLOCK authority and the operating policy still require ratification. No
+  hybrid decision path is active today.
 
 ### Model artifact handling (D55)
 
@@ -978,13 +998,14 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
 - External Test v1 — frozen at `36df2ee`, executed as `external-v1-run-001`
 - Docker demo (`docker/demo.sh`), runtime verified from a clean state
 
-The current ordered plan is kept in one place: [`../CONTEXT.md`](../CONTEXT.md) §0.9
-*(updated 2026-10-04; it was "Current checkpoint" at the stage close)* and
-[`../README.md`](../README.md#next-steps).
+The current ordered plan is in [`continuity-2026-10-20.md`](continuity-2026-10-20.md) and
+[`../README.md`](../README.md#next-steps); issue acceptance is in
+[`issue-plan-2026-10-20.md`](issue-plan-2026-10-20.md). Older CONTEXT §0.9 is historical.
 
 **Hybrid Architecture** *(added 2026-10-04)*: Phase 1 feature extraction (#49), Phase 2A
 Analyzer design (#51) and Phase 2B Model 1 (#53) are done and merged into `develop`; Model 2,
-the orchestrator and gateway integration are not started.
+the orchestrator and enforcement are not implemented. PR #79 adds the default-off Analyzer
+and Fast Path observers and their combined regression tests.
 
 **M3 — partially started ahead of M2 (D26)**
 
@@ -998,12 +1019,11 @@ the orchestrator and gateway integration are not started.
   [`external_test_v1_protocol.md`](external_test_v1_protocol.md))
 - Issue #18 — end-to-end gateway latency (no-fast-path baseline): not started
 
-Latency-reduction layer — **designed, not built** (D29, D30); *(2026-10-04)* **deferred and
-optional**, not part of the Hybrid Architecture (see
-[Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces)):
+Latency-reduction layer — Fast Path is in the target; observation exists, bypass and measured
+benefit do not. Legacy issue criteria require reconciliation with the proposed policy:
 
 - Issue #35 — heuristic suspicious scoring: not started
-- Issue #36 — benign fast-path ALLOW: not started
+- Issue #36 — benign fast-path ALLOW: observer delivered; active routing and prerequisites pending
 - Issue #37 — asynchronous model validation of fast-path traffic: not started
 - Issue #38 — fast-path calibration and benchmark: not started
 

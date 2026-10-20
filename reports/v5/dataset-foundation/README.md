@@ -1,5 +1,13 @@
 # V5 stage 2 — dataset foundation (issue #70)
 
+**Update (2026-10-20):** stage #70 is merged/closed. PR #79 adopts a pinned family-name
+snapshot with 12,104 accepted values; the source acquisition blocker is resolved. #75 remains
+open for generator integration, ratified cross-pool precedence and per-split checks.
+The approved attack deny-list is v2 (D66); its pool has 3,933 ACCEPTED records, not adjudicated
+training rows. Audit protocol r4/D67 is frozen; R3 remains pending. Current details:
+`../data-readiness/names_family-candidate/ADOPTION.md` and `../integration/README.md`.
+The dated stage-2 findings below remain historical; do not repeat the old acquisition attempts.
+
 **Status (2026-10-14):** implemented and tested, **not frozen**. Two things are still open:
 
 - The template and vocabulary await the owner's ratification.
@@ -146,3 +154,16 @@ The text and the D-4 addendum above are kept as recorded. A second selection cha
 - The benign pool files are byte-identical; only their manifest changed (attack-pool pin, D59 mapping table, generator
   version). `attack_pool_summary.md` and `attack_pool_reconciliation.md` are regenerated with an "Identity inadmissible"
   column; the reconciliation lists all 49 records with provenance (§4).
+
+## Addendum (2026-10-19, data-readiness session; issues #75, #77)
+
+The text above is kept as recorded. See `reports/v5/data-readiness/README.md`.
+
+- **`names_family`:** still BLOCKED.
+  - The 429 outage rule is still active.
+  - With a policy-compliant User-Agent the query passes the rate limit, but it then hits the WDQS 60 s timeout.
+  - The builder gained `acquire --endpoint` (first-party Wikimedia hosts only) and a new User-Agent. The query text is unchanged.
+- **Deny-list:** candidate v2 (PROPOSED) = v1 + `Auth_Bypass.txt`, `Auth_Bypass2.txt`, `jsonp_endpoint.txt`, based on content evidence of third-party origin.
+  - The candidate pool has 3,933 ACCEPTED; it is built separately and not adopted.
+  - The deny-list loader now accepts a whole list marked `APPROVED`, with an approval record.
+- **Canonical pool:** rebuilt with v1, byte-identical (`4c5d5869…`). Only the manifest changed, through the code fingerprint; `attack_pool_summary.md` was regenerated, and its only change is the manifest hash. The reconciliation is unchanged.

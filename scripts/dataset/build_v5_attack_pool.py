@@ -68,7 +68,8 @@ import v5_identities as I  # noqa: E402  (stage-3 family key: imported, never re
 BUILDER_SCHEMA = "v5-attack-pool/v1"
 PINNED_PATT_COMMIT = "e961fef231d8327bae83b563fab50aec2e6b77c0"
 DEFAULT_PATT = os.path.expanduser("~/PayloadsAllTheThings")
-DEFAULT_DENYLIST = os.path.join(HERE, "v5_lexicon", "patt_third_party_denylist_v1.json")
+# v2 APPROVED by the owner on 2026-10-19 (D66); v1 stays in the repository as the superseded PROPOSED list.
+DEFAULT_DENYLIST = os.path.join(HERE, "v5_lexicon", "patt_third_party_denylist_v2.json")
 POOL_NAME, EXCLUDED_NAME, MANIFEST_NAME = "attack_pool.jsonl", "attack_excluded.jsonl", "manifest.json"
 
 LICENSE_PATT = "MIT (PATT, assumed for unattributed content)"
@@ -212,6 +213,13 @@ def check_patt(patt, pinned=PINNED_PATT_COMMIT):
     return {"commit": head, "clean": True}
 
 
+# A deny-list is PROPOSED or APPROVED as a whole (spec §3.1: "the final list is reviewed file by file and
+# hashed in the manifest"). An APPROVED list records who approved it, when, and the decision reference;
+# a list mixing entry statuses is refused, so a partial approval cannot pass as a final list.
+DENYLIST_STATUSES = ("PROPOSED", "APPROVED")
+DENYLIST_APPROVAL_FIELDS = ("approved_by", "date", "decision_ref")
+
+
 def load_denylist(path):
     C.assert_not_protected(path)
     with open(path, "rb") as fh:
@@ -219,10 +227,17 @@ def load_denylist(path):
     doc = json.loads(data.decode("utf-8"))
     if doc.get("schema") != "v5-patt-third-party-denylist/v1":
         raise SystemExit(f"REFUSED: unknown deny-list schema {doc.get('schema')!r}")
+    status = doc.get("status")
+    if status not in DENYLIST_STATUSES:
+        raise SystemExit(f"REFUSED: deny-list status {status!r} not in {DENYLIST_STATUSES}")
+    if status == "APPROVED":
+        appr = doc.get("approval")
+        if not isinstance(appr, dict) or any(not str(appr.get(k) or "").strip() for k in DENYLIST_APPROVAL_FIELDS):
+            raise SystemExit(f"REFUSED: an APPROVED deny-list needs approval.{'/'.join(DENYLIST_APPROVAL_FIELDS)}")
     denied = {}
     for e in doc["denied"]:
-        if e.get("status") != "PROPOSED":
-            raise SystemExit(f"REFUSED: deny-list entry without status PROPOSED: {e['path']}")
+        if e.get("status") != status:
+            raise SystemExit(f"REFUSED: deny-list entry status differs from the list status {status}: {e['path']}")
         if e["path"] in denied:
             raise SystemExit(f"REFUSED: duplicate deny-list path {e['path']}")
         denied[e["path"]] = e
@@ -709,7 +724,8 @@ def build(patt, out_dir=C.DEFAULT_OUT_DIR, denylist_path=DEFAULT_DENYLIST, *, pa
                       "sha256": deny_sha, "status": doc["status"], "denied_files": len(denied),
                       "denied_by_basis": dict(sorted(Counter(e["basis"].split(" ")[0] for e in denied.values()).items())),
                       "reviewed_not_denied": len(doc["reviewed_not_denied"]),
-                      "denied_paths_missing_from_patt": missing, "unreviewed_files_read": unreviewed}),
+                      "denied_paths_missing_from_patt": missing, "unreviewed_files_read": unreviewed,
+                      **({"approval": doc["approval"]} if doc["status"] == "APPROVED" else {})}),
         ("project_authored_lists", {"used": list(HARDCODED_USED), "not_used": list(HARDCODED_NOT_USED),
                                     "sha256": C.sha256_bytes(json.dumps(
                                         {"CRLF_PAYLOADS": p4.CRLF_PAYLOADS, "XPATH_PAYLOADS": p4.XPATH_PAYLOADS},

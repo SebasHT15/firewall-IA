@@ -23,7 +23,7 @@ import build_v5_benign_pools as B  # noqa: E402
 
 FIX = os.path.join(REPO, "tests", "fixtures", "v5_benign")
 PATT = os.path.expanduser("~/PayloadsAllTheThings")
-DENYLIST = os.path.join(REPO, "scripts", "dataset", "v5_lexicon", "patt_third_party_denylist_v1.json")
+DENYLIST = os.path.join(REPO, "scripts", "dataset", "v5_lexicon", "patt_third_party_denylist_v2.json")   # APPROVED, D66
 
 
 class D59Mapping(unittest.TestCase):
@@ -119,9 +119,10 @@ class DenylistEvidence(unittest.TestCase):
             self.skipTest("PATT clone not available")
         with open(DENYLIST, encoding="utf-8") as fh:
             deny = json.load(fh)
-        self.assertEqual(deny["status"], "PROPOSED")
+        self.assertEqual(deny["status"], "APPROVED")
+        self.assertTrue(all(deny["approval"][k] for k in ("approved_by", "date", "decision_ref")))
         for e in deny["denied"]:
-            self.assertEqual(e["status"], "PROPOSED")
+            self.assertEqual(e["status"], "APPROVED")
             self.assertTrue(e["evidence"], e["path"])
             if not e["basis"].startswith("stage2"):
                 continue

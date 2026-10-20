@@ -56,3 +56,28 @@ docker/.lab-logs/*
 # V5 (spec r3 §8, D58): source pools, raw downloads and the future dataset are never committed.
 datasets/v5_sources/
 datasets/v5/
+
+# Separately preserved V5 audit evidence
+# PROPOSED .gitignore addition (NOT applied; content-free). Owner decision pending.
+# Ignore rules do NOT remove already-staged/tracked files: run `git rm --cached` first
+# (see reports/v5/data-readiness/first-pr-inventory.md, "Owner Git actions").
+#
+# V5 post-filter audit: raw third-party (PayloadsAllTheThings, MIT) payload text and the review records that
+# reproduce it. Preserved outside Git; integrity + restoration in
+# reports/v5/data-readiness/evidence-preservation-manifest.json
+/reports/v5/postfilter-audit/round-1/sample.jsonl
+/reports/v5/postfilter-audit/round-1/annotations_a?.jsonl
+/reports/v5/postfilter-audit/round-1/adjudication_pending.jsonl
+/reports/v5/postfilter-audit/round-1/adjudication_rule_applied.jsonl
+/reports/v5/postfilter-audit/round-1/adjudication/
+/reports/v5/postfilter-audit/round-1/human_review/*.csv
+/reports/v5/postfilter-audit/round-1/**/discrepancy_sheet.jsonl
+/reports/v5/postfilter-audit/round-1/**/annotations_a?.partial.jsonl
+/reports/v5/postfilter-audit/round-1/**/packet.jsonl
+/reports/v5/postfilter-audit/round-1/**/batches/
+/reports/v5/postfilter-audit/round-1/**/*.handback.txt
+/reports/v5/postfilter-audit/r3-review/reviewer/batch_*.jsonl
+/reports/v5/data-readiness/xss_known_false_exclusions.md
+
+# Pinned raw source snapshots remain local.
+/reports/v5/data-readiness/names_family-candidate/wikidata_family_names.limit20000.json

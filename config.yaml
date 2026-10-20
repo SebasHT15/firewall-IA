@@ -22,3 +22,34 @@ data_plane:
   # still makes every decision; enforcement and fail-closed are unchanged, and an
   # extractor error is logged and ignored. false, or absent: not run.
   shadow_feature_extraction: true
+
+  # Hybrid Architecture — frozen lightweight Analyzer in SHADOW mode, in a SEPARATE worker
+  # process (data_plane/hybrid_shadow_process.py; runtime PROPOSED for D52, not ratified).
+  # OFF unless enabled; shown here commented out, deliberately NOT enabled. When on, the
+  # Analyzer scores each request in a background task AFTER V4's verdict and logs a
+  # "HYBRID SHADOW" line with the same [tag]. V4 stays the only decision; an Analyzer that is
+  # unavailable, busy, invalid, failing or slower than timeout_seconds (the worker is then
+  # killed and restarted) is a status in that line. Every key is required: no default bound
+  # or interpreter is chosen here. The worker needs the analyzer environment
+  # (docs/hybrid_shadow_runtime.md): numpy + scikit-learn, which this venv does not have (D33).
+  # shadow_analyzer:
+  #   enabled: true
+  #   runtime: process
+  #   python: .venv-analyzer/bin/python
+  #   artifact_path: model-output-hybrid-analyzer-v2/recommended.pkl  # SHA-256 verified against
+  #                                                                   # the frozen evidence first
+  #   timeout_seconds: 0.25            # per analysis; on expiry the worker is SIGKILLed
+  #   startup_timeout_seconds: 10      # worker start (imports + artifact load)
+  #   restart_backoff_seconds: 2       # minimum wait before replacing a killed/crashed worker
+  #   max_consecutive_failures: 3      # then the runtime gives up until the gateway restarts
+
+  # Hybrid Architecture — Fast Path in SHADOW mode (PROPOSED; data_plane/fast_path.py).
+  # true: each request is also evaluated for a *hypothetical* FAST_ALLOW and the answer is
+  # logged ("FAST PATH (shadow)") beside V4's decision. Nothing reads it: every request still
+  # goes to V4, V4 decides, enforcement and fail-closed are unchanged, and an error is logged
+  # and ignored. It stays ineligible (logs CONTINUE) until the gateway can supply a
+  # canonical-request ACCEPT and VERIFIED wire framing. false, or absent: not run.
+  shadow_fast_path: false
+  # Owner-supplied policy file (JSON, schema fast-path-policy/v1), relative to the repository
+  # root. null or absent: no policy, so the Fast Path can never log FAST_ALLOW.
+  fast_path_policy_file: null

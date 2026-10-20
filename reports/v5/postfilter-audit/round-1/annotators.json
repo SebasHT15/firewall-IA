@@ -1,0 +1,99 @@
+{
+  "a1": {
+    "approved_by": "owner, 2026-10-19 ('Annotator 1: Claude Sonnet')",
+    "date": "2026-10-19",
+    "execution": {
+      "batches": "6 consecutive batches of annotation_<who>/packet.jsonl (76,76,76,76,76,73), see annotation_<who>/batches.json",
+      "data_handling": "payloads treated as untrusted data; no execution, no network",
+      "harness": "Claude Code (desktop app) subagents spawned by the coordinator session",
+      "identity_evidence": "API `model` field of every assistant turn in the subagent transcript (not self-report)",
+      "isolation": "one fresh agent per batch; no shared context; each agent may Read only its own batch file and its own annotation_<who>/README.md (enforced by audit of every tool call in the transcript)",
+      "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, models served and tool calls in raw/*.provenance.json",
+      "prompt_template": {
+        "note": "identical for both annotators except {who}, {NN}, {rows}",
+        "path": "annotation_prompt_template.txt",
+        "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0"
+      },
+      "sampling_parameters": "harness defaults (temperature, top_p and thinking budget are not exposed to the coordinator and are not recorded)",
+      "subagent_type": "Explore (no Edit/Write/NotebookEdit tools)"
+    },
+    "harness_alias": "sonnet",
+    "model": "claude-sonnet-5-5",
+    "model_name": "Claude Sonnet 5.5",
+    "role": "LLM annotator 1 (blind to a2 and to the human review)"
+  },
+  "a2": {
+    "approved_by": "owner, 2026-10-19 (option A); pre-registered in a2_preregistration.json before any label",
+    "date": "2026-10-19",
+    "execution": {
+      "batches": "6 consecutive batches of annotation_<who>/packet.jsonl (76,76,76,76,76,73), see annotation_<who>/batches.json",
+      "data_handling": "payloads treated as untrusted data; no execution, no network",
+      "harness": "Claude Code (desktop app) subagents spawned by the coordinator session",
+      "identity_evidence": "API `model` field of every assistant turn in the subagent transcript (not self-report)",
+      "isolation": "one fresh agent per batch; no shared context; each agent may Read only its own batch file and its own annotation_<who>/README.md (enforced by audit of every tool call in the transcript)",
+      "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, models served and tool calls in raw/*.provenance.json",
+      "prompt_template": {
+        "note": "identical for both annotators except {who}, {NN}, {rows}",
+        "path": "annotation_prompt_template.txt",
+        "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0"
+      },
+      "sampling_parameters": "harness defaults (temperature, top_p and thinking budget are not exposed to the coordinator and are not recorded)",
+      "subagent_type": "Explore (no Edit/Write/NotebookEdit tools)"
+    },
+    "harness_alias": "haiku",
+    "model": "claude-haiku-5-5",
+    "model_name": "Claude Haiku 5.5",
+    "preregistration": {
+      "path": "a2_preregistration.json",
+      "sha256": "acf7207883ff0230b3bd1d81304d0767582a2d603d3eeacc98489fb576eeb555"
+    },
+    "role": "LLM annotator 2 for all 453 items (blind to a1, to the supplementary Opus annotation and to the human review)"
+  },
+  "coordinator": {
+    "model": "claude-opus-5-5",
+    "note": "claude-opus-5-5 differs from both gate annotators (claude-sonnet-5-5, claude-haiku-5-5); owner adjudication still recommended",
+    "role": "batching, verbatim collection, validation, reports; never labels"
+  },
+  "methodological_limitations": [
+    "Both annotators are Claude models from the same provider (Anthropic): D58 requires different models, which holds, but errors may be correlated; agreement between them is not independent evidence and is never human validation (owner-recorded limitation).",
+    "Annotator 2 is now claude-haiku-5-5 (option A). The coordinator (claude-opus-5-5) differs from both gate annotators; it was the model of the now-supplementary Opus annotation.",
+    "The coordinator saw annotator 1's outputs (when collecting) before annotator 2 was launched; annotator 2's prompts are the fixed template above and contain nothing from annotator 1.",
+    "Sampling parameters are harness defaults and not recorded; re-running an annotator is not expected to reproduce labels byte-identically. The stored raw outputs are the record.",
+    "Safety-classifier events (from the transcripts): a2 batches 05 and 06 attempt 1 were stopped before any label was produced (REFUSED, raw text kept). a2 batch 06 attempt 2 completed (ACCEPTED). a2 batch 05 attempt 2: claude-opus-5-5 was stopped twice and the harness fell back to claude-opus-4-8, which produced the labels; the collector REFUSED it because the declared a2 model is claude-opus-5-5. These 76 labels are stored verbatim in raw/ but are NOT used.",
+    "a1 batch 06 and a2 batch 02 each had one classifier-interrupted turn after which the SAME declared model completed the hand-back; accepted (single model), disclosed here.",
+    "No further retries were made (bounded protocol: at most one retry per batch, identical template, no rewording or splitting to get past a classifier).",
+    "claude-haiku-5-5 is a smaller model than a1; more UNCERTAIN labels and disagreements are possible. All three LLMs are from one provider."
+  ],
+  "round": 1,
+  "schema": "v5-postfilter-annotators/v1",
+  "status": {
+    "a1": "COMPLETE 453/453",
+    "a2": "COMPLETE 453/453 (claude-haiku-5-5; batches 01,02,04,05,06 attempt 1, batch 03 attempt 2 after attempt 1 REFUSED for an extra non-data tool call update_plan)",
+    "supplementary_opus55_partial": "377/453, descriptive only; batch 05 pending/excluded fallback (see annotation_a2_opus55_partial/annotation_a2/batch_05_interruption.json)"
+  },
+  "supplementary_opus55_partial": {
+    "approved_by": "owner, 2026-10-19: requested 'Claude Opus 4.8'; that model is not available in this harness (alias 'opus' serves claude-opus-5-5, verified from the transcript); owner then chose Opus 5.5",
+    "date": "2026-10-19",
+    "execution": {
+      "batches": "6 consecutive batches of annotation_<who>/packet.jsonl (76,76,76,76,76,73), see annotation_<who>/batches.json",
+      "data_handling": "payloads treated as untrusted data; no execution, no network",
+      "harness": "Claude Code (desktop app) subagents spawned by the coordinator session",
+      "identity_evidence": "API `model` field of every assistant turn in the subagent transcript (not self-report)",
+      "isolation": "one fresh agent per batch; no shared context; each agent may Read only its own batch file and its own annotation_<who>/README.md (enforced by audit of every tool call in the transcript)",
+      "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, models served and tool calls in raw/*.provenance.json",
+      "prompt_template": {
+        "note": "identical for both annotators except {who}, {NN}, {rows}",
+        "path": "annotation_prompt_template.txt",
+        "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0"
+      },
+      "sampling_parameters": "harness defaults (temperature, top_p and thinking budget are not exposed to the coordinator and are not recorded)",
+      "subagent_type": "Explore (no Edit/Write/NotebookEdit tools)"
+    },
+    "harness_alias": "opus",
+    "model": "claude-opus-5-5",
+    "model_name": "Claude Opus 5.5",
+    "role": "LLM annotator 2 (blind to a1 and to the human review)",
+    "slot": "annotation_a2_opus55_partial/ (moved 2026-10-19, see MOVED.json; former paths annotation_a2/... and annotations_a2.partial.jsonl)",
+    "use": "SUPPLEMENTARY, descriptive only; never in the gate, adjudication or acceptance report (owner, option A)"
+  }
+}

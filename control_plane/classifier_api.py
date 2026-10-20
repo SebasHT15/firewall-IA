@@ -13,7 +13,9 @@ Data Plane (`data_plane/data_plane.py`, Issues #16/#17, D34), which decides what
 to do with an `invalid` result, a 5xx, or a timeout.
 
 An unparseable model output is NEVER coerced into a decision — not to ALLOW,
-not to BLOCK. See `inference_core.parse_prediction`.
+not to BLOCK. See `inference_core.parse_prediction`. That includes a TRUNCATED
+generation (stopped at the token cap instead of the native EOS): it is
+reported `status: "invalid"` even when its text starts with `ALLOW | ...`.
 
 RUN (from the repository root; single worker: one GPU, model loaded once at startup):
     python3.12 -m uvicorn --app-dir control_plane classifier_api:app --host 127.0.0.1 --port 8000
@@ -131,14 +133,20 @@ def classify(body: ClassifyRequest) -> ClassifyResponse:
 
     try:
         with _GPU_LOCK:
-            raw, model_latency_ms = core.classify_raw(
+            # classify_timed, not classify_raw: the latter drops the termination
+            # signal, and a generation cut at the token cap is not a decision.
+            raw, measure = core.classify_timed(
                 app.state.tokenizer, app.state.model, body.request, app.state.device
             )
+        model_latency_ms = measure["generate_ms"]
+        ended_with_eos = measure["ended_with_eos"]
     except Exception:
         log.exception("classify: inference failed")   # traceback to the log ...
         raise HTTPException(status_code=500, detail="Inference failed")  # ... not to the client
 
-    decision, reason, status = core.parse_prediction(raw)
+    # Only an explicit True counts as "finished on EOS"; a missing or non-boolean
+    # flag is treated as truncated (fail-closed).
+    decision, reason, status = core.parse_prediction(raw, ended_with_eos=ended_with_eos is True)
 
     if status == "ok":
         log.info("classify: status=ok decision=%s reason=%r model_latency_ms=%.1f",
@@ -146,8 +154,8 @@ def classify(body: ClassifyRequest) -> ClassifyResponse:
     else:
         # Not coerced. The raw output is logged (it is model output, not the
         # request body) because it is the only way to diagnose the failure.
-        log.warning("classify: status=invalid model_latency_ms=%.1f raw=%r",
-                    model_latency_ms, raw[:200])
+        log.warning("classify: status=invalid model_latency_ms=%.1f ended_with_eos=%s raw=%r",
+                    model_latency_ms, ended_with_eos, raw[:200])
 
     return ClassifyResponse(
         status=status,

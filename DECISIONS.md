@@ -3,6 +3,28 @@
 Authoritative record of confirmed project decisions. Companion to `CONTEXT.md` (project memory)
 and `reports/` (experimental evidence).
 
+## Implementation checkpoint — 2026-10-20 (status note, not a new decision)
+
+The historical decision entries below remain unchanged. Their phrases “working tree” and
+“uncommitted” describe the time of recording, not the current Git state.
+
+- D66 and D67 implementation is committed on `feat/v5-data-readiness` and submitted in PR #79
+  to `develop` (open at this checkpoint). r3, frozen r4 and preregistered criteria are unchanged.
+- D67 R3 preparation is complete; R3 execution, adjudication and category acceptance remain
+  pending. FINAL is blocked; the proposed enforceable audit-provenance gate remains unapplied.
+- #75 acquisition is resolved with the pinned family-name snapshot; generator inclusion,
+  ratified value precedence and per-split acceptance remain pending.
+- D4/D25/D34 now include API protection against truncated generation using token EOS evidence.
+  The input-prompt issue #65 remains open; no benchmark baseline is retroactively rewritten.
+- Analyzer and Fast Path shadow code exists, disabled by default, with V4 as sole enforcement.
+  This does not close D29/D30, ratify D52 runtime placement, or authorize Model 2 enforcement.
+- The target design includes Fast Path FAST_ALLOW/CONTINUE and proposed Model 2 BLOCK/DEFER.
+  Its difference from D29's legacy suspicious-score design needs an explicit decision before
+  enforcement. No D68 or other approval is invented by this documentation update.
+
+Current detail: `docs/continuity-2026-10-20.md`, `docs/issue-plan-2026-10-20.md` and
+`reports/v5/integration/README.md`. This note updates implementation status only.
+
 **Rules for this file**
 
 - One entry per decision. Entries are **append-only**; never rewrite or delete a decision.
@@ -2945,6 +2967,150 @@ neither. D56–D64 and the frozen file are unchanged (SHA-256 `f1580634…`). No
 
 ---
 
+## D66 — V5 final third-party deny-list (v2) and XSS structural filters kept for this build round
+
+- **Date:** 2026-10-19 (America/Costa_Rica)
+- **Status:** APPROVED (owner approval of 2026-10-19, data-readiness session, issue #77) of deny-list v2 as the final
+  list for this V5 build round, and of keeping the current XSS structural filters unchanged. The owner did **not**
+  authorize widening any filter to recover the suspected false exclusions.
+- **Implementation:** DONE in the working tree (branch `feat/v5-data-readiness`, uncommitted).
+  - `scripts/dataset/v5_lexicon/patt_third_party_denylist_v2.json`: status `APPROVED`, with an `approval` record.
+  - The builder and reconciler defaults now point to v2.
+  - `load_denylist` accepts only a list that is entirely PROPOSED or entirely APPROVED with approver, date and decision
+    reference.
+  - The canonical pool was rebuilt. Report: `reports/v5/data-readiness/README.md` §B (final review) and §D.
+
+**Context.** V5-DATA-SPEC-r3 §3.1 (D58, D62) excludes a PATT file whose name, header or content identifies a
+third-party origin, unless its licence is verified for the approved use. The final list was PROPOSED in the §11.2
+register ("finalized at generator stage 2"). The v1 list (23 files) left three files "noted for review" unresolved. An
+online provenance check (2026-10-19, read-only, comparison files not stored) resolved them.
+
+**Decision.**
+
+1. **Deny-list v2 (26 files) is final** for this build round. It is v1 plus three files, each denied on content
+   evidence:
+   - `XSS Injection/Intruders/jsonp_endpoint.txt` (45 ACCEPTED rows): 44 of 45 endpoints are in
+     `zigoo0/JSONBee@c0c87fc` `jsonp.txt`, which is GPL-3.0. 31 lines are byte-identical and 13 share the endpoint.
+     PATT added the file after JSONBee existed. Certainty: high.
+   - `SQL Injection/Intruder/Auth_Bypass.txt` (67): 77 of 78 lines are identical to the `camoufl4g3` list. That list
+     is held in `foospidy/payloads` (GPL-3.0, 2016), whose README attributes it to a repository that now returns 404,
+     so the original licence is unknown. Certainty of third-party origin: high.
+   - `SQL Injection/Intruder/Auth_Bypass2.txt` (99): 117 of 119 lines are identical to
+     `1N3/IntruderPayloads@9b84328` `FuzzLists/auth_bypass.txt`, added there in 2016 with no licence declared. PATT
+     added its copy in 2017. Certainty: high.
+   - The SecLists copies (MIT) date from 2024 and are downstream. They do not license these files.
+2. **Hashes.**
+   - Approved file: SHA-256 `3e5570580a10319fc03ca622c034786a384a3ea6dddaf95bfeb413cf3fc7dd7e`. The reviewed content
+     before the approval fields were added was `bb88c761…`.
+   - Pool built with it: `attack_pool.jsonl` `ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21`,
+     3,933 ACCEPTED + 35,518 EXCLUDED = 39,451. Byte-identical rebuild; the reconciliation balances.
+3. **Impact by category.**
+   - **SQL Injection** 920 → 759. 166 rows were denied and 5 duplicates were promoted. 141 pre-merge families were
+     lost, and 5 families moved from (SQLi, XPath) to XPath only. Families after the proposed merges: 383 → 324.
+   - **XSS** 382 → 337. 45 rows and 43 families were lost. Families after the proposed merges: 271 → 241.
+   - All other categories are unchanged. Evaluability flags are unchanged: SQLi and XSS remain EVALUABLE. No category
+     is removed, and no pool was grown to compensate.
+4. **XSS structural filters are kept unchanged.** `literal_backslash_x` and `prose_sentence` stay as implemented. The
+   known false exclusions are documented as a coverage loss and are **not** recovered:
+   - about 5 complete JS-escape vectors under `literal_backslash_x`;
+   - about 5 payloads with a trailing remark or in markdown-link form under `prose_sentence`.
+   - Consequence: 0 of 337 accepted XSS payloads contain `\xNN`. The JS hex-escape obfuscation mechanism is absent
+     from V5 XSS TRAIN.
+   - Rationale:
+     - the filters must be final before the post-filter round-1 draw (§7 allows only one re-audit);
+     - the gain is about 10 rows (about 3% of XSS);
+     - the `\xNN` rendering ambiguity stated in D62 makes BLOCK-only `\xNN` payloads a shortcut risk.
+5. **Not decided here:**
+   - the per-source-file cap (still PENDING, pilot);
+   - the §7 thresholds (PROPOSED);
+   - `names_family` (#75, BLOCKED);
+   - payload adjudication (every ACCEPTED record is still `PENDING_ADJUDICATION`).
+
+**Limitations.**
+- Licences of the denied lists were not verified; a denial is a precaution, not a licence finding.
+- Files without origin evidence are used under PATT's MIT licence as a disclosed assumption. Four of them are flagged
+  for generic overlap with denied lists.
+- The XSS coverage gap above.
+
+**Relationship to earlier entries.** Resolves the §11.2 register item "Final third-party deny-list (file-by-file
+review)" for this build round under D58/D62 §3.1. It changes no frozen text and needs no r4. D56–D65 and
+`V5-DATA-SPEC-r3` (SHA-256 `f1580634…`) are unchanged. v1 stays in the repository as the superseded PROPOSED list.
+Nothing else is superseded.
+
+---
+
+## D67 — V5 post-filter audit: AI-assisted third review replaces the unavailable independent human review; V5-DATA-SPEC-r4 FROZEN
+
+- **Date:** 2026-10-20 (America/Costa_Rica)
+- **Status:** **APPROVED** (owner approval of 2026-10-20, data-readiness session, issue #77). Adopts `V5-DATA-SPEC-r4`
+  as the applicable dataset-audit specification and **FREEZES** it.
+- **Implementation:** DONE in the working tree (branch `feat/v5-data-readiness`, uncommitted):
+  - Spec: `reports/v5/v5-data-spec-r4/README.md`, SHA-256
+    `54514850e9875f4a71d6ad3726d95746bb4e61687db4f56b072e0a01bfdc01be`, with `FREEZE.md` and `SHA256SUMS`.
+  - Minimal change from r3: `reports/v5/v5-data-spec-r4-proposal/r3-to-r4-minimal.diff` (a valid unified diff; `git
+    apply -p1` to a copy of frozen r3 reproduces r4 byte-for-byte; the frozen r3 is never patched).
+  - Preregistration (criteria frozen before any R3 label): `reports/v5/postfilter-audit/preregistration/
+    v5-postfilter-prereg-r4.json`, SHA-256 `1039a3ddf4d614c1700d1fd13303c50dec50619502fcc13a8df8243c5cdd73bf`.
+  - Proposal of record (rev 4) and preserved drafts: `reports/v5/v5-data-spec-r4-proposal/`.
+
+**Context.** D58 and r3 §7 (D62, `f1580634…`) require an independent, blind **human** review of a stratified subsample,
+whose labels prevail. Specialised human reviewers are unavailable. After the round-1 LLM results existed (a1
+`claude-sonnet-5-5` 453/453, a2 `claude-haiku-5-5` 453/453; 351 exact, 102 disagreements = 69 V/P + 33 gate-relevant),
+the owner authorised replacing that human review with an AI-assisted third review.
+
+**Methodological justification and its limit.** This is a **post-hoc methodological deviation** made after observing the
+Sonnet/Haiku results; it is adopted because of the human-reviewer constraint, **not** because the AI review is of
+equivalent quality. It is explicitly disclosed and is **not** equivalent to independent human validation. Without
+trusted independent reference labels the true annotator error rate cannot be established. **No future report may
+describe AI-assisted review as human validation.**
+
+**Decision.**
+
+1. Replace mandatory independent human review with an AI-assisted technical review (disclosed post-hoc deviation).
+2. Adopt and FREEZE `V5-DATA-SPEC-r4` (above) as the applicable dataset-audit spec; frozen r3 is unchanged.
+3. Third reviewer **R3 = ChatGPT GPT-6**, run blind, from a different provider than a1/a2; the exact exposed model
+   designation, execution date and available settings are recorded at run time, with raw output kept. No internal model
+   revision is fabricated.
+4. **Preregistered acceptance criteria (frozen before any R3 evaluation, C-R6; identical for all categories):**
+   C1 Wilson-95 upper of adjudicated INCORRECT ≤ 20%; C2 Wilson-95 upper of adjudicated UNCERTAIN+INCORRECT ≤ 35%;
+   review coverage 100%; 0 gate-relevant UNRESOLVED cases for acceptance; model agreement **diagnostic only**, never
+   independent ground-truth validation.
+5. Identical thresholds for **CRLF (n=22) and XPath (n=31)**, with **no post-hoc exceptions**; a failing category stays
+   ineligible.
+6. **SSRF marked NOT SUPPORTED** for the eligible V5 dataset (recorded C1 failure: 21/50 concordant INCORRECT,
+   Wilson-95 upper ~55.8%, 0 of the 33). Evidence preserved; any restoration requires a separately approved correction
+   and re-audit (C-R6: one re-audit, documented filter change, new seed).
+7. **Adjudication policy:** preserve a1/a2 agreements; apply the approved V/P rule (`vp_split_to_probably_correct/v1`);
+   three-reviewer majority only when all three valid labels exist; a three-way disagreement or a missing required vote →
+   `UNRESOLVED` → evidence-based owner decision (documented evidence required; cannot manufacture ground truth; never
+   automatic INCORRECT).
+8. Maintain explicit distinctions among `AI_AUDITED`, `PASS_AI_AUDITED`, `VERIFIED`, `PENDING` and
+   `INSUFFICIENT_EVIDENCE` (see the prereg and r4 §4).
+9. AI reviewer agreement does **not** establish independently verified correctness.
+10. **FINAL V5 training stays BLOCKED** until separately authorised and all training-readiness controls pass. A
+    `PASS_AI_AUDITED` category does not imply `VERIFIED`, and AI-audited evidence does not by itself unblock FINAL.
+
+**Applicability.** r4 governs the attack-pool post-filter audit of every ML-trained category (§7). The spec is frozen;
+**the dataset is not.** No category is PASS and no payload is VERIFIED because the methodology was approved. R3 has not
+run (0 labels at freeze).
+
+**Review populations (preregistered).** Audit frame 453; R3 blind subset 200; gate-relevant disagreements 33; overlap
+16; unique R3 review records 217 (= 200 ∪ 33). Per-category Wilson denominator = the category's size in the 453 frame;
+no duplicate counting; the targeted 33 add **no** independent Wilson denominator.
+
+**Limitations.** Disclosed post-hoc deviation; no independent human validation; true error rate not establishable;
+deterministic sampling does not prove representativeness (Wilson bounds describe the adjudicated sample, not
+ground-truth error); AI-only adjudication is diagnostic. A training-gate caveat is recorded for follow-up:
+`v5_train_data.py`'s `attack_label_basis == "post_filter_audit"` check does not distinguish an AI-audited from a
+human-audited pass, so the "AI-audited evidence will not feed FINAL" guarantee is **procedural (owner authorisation),
+not code-enforced** — see the follow-up issue draft in `reports/v5/data-readiness/`.
+
+**Relationship to earlier entries.** Supersedes r3 §7's human-review requirement and r3 §11.3 item 1 **for the r4
+protocol only**, via a new revision (r4) and this decision. **D58, D62 and D66 are not rewritten**; the frozen r3
+(`f1580634…`) and `V5-DATA-SPEC-r3` are unchanged and retained as history. D56–D66 stand.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -3014,6 +3180,8 @@ neither. D56–D64 and the frozen file are unchanged (SHA-256 `f1580634…`). No
 | D63 | V5 stage 1 `canonical-request/v1` rulings: P1–P3, P5 (corrected), P6–P8, P10–P12 ratified; P4, P9 conditioned; I7/CONNECT and "stdlib-only" clarified; decoder bounds; V5 candidate template PROPOSED (candidate B = 415, not final) | APPROVED (P4, P9 conditioned; template PROPOSED) | DONE (stage 1, not integrated, #67) |
 | D64 | V5 stage 3 identity and split contract: D-1–D-6, identity admissibility exclusions (`identity_unobservable_spl9`, `not_a_payload:*`, `identity_degenerate:*`), benign value policy B, hybrid I-8 + I-8b; I-6, I-16 (and I-4, I-9, I-10, I-14) deferred to stage 4 | APPROVED (deferred items not approved for implementation) | DONE (stage 3, fixtures only; not integrated; no real split, #72) |
 | D65 | V5 stage 4 constructive generator: I-9 realised-share rebalance+regenerate with `cap="warn"` (literal D62 §4.6 step 5); per-row RNG stable under quota change (`quota`=category slug, count not in seed); WARN/BLOCK values, small-split policy and I-10 overflow choice deferred to preregistration; current-catalogue infeasibility diagnostic; I-10 fail-closed | APPROVED (deferred items not approved) | DONE (stage 4, fixtures only; not integrated; no real split, #74) |
+| D66 | V5 final third-party deny-list v2 (26 files; +`jsonp_endpoint.txt`, `Auth_Bypass.txt`, `Auth_Bypass2.txt` on content evidence), SHA-256 `3e557058…`; pool `ba385fa2…` 3,933 ACCEPTED (SQLi 759, XSS 337); XSS structural filters kept, false exclusions documented as coverage loss | APPROVED | DONE (working tree; pool rebuilt; no payload adjudicated, #77) |
+| D67 | V5 post-filter audit: AI-assisted third review (R3 = ChatGPT GPT-6) replaces the unavailable blind human review (disclosed post-hoc deviation, not equivalent); `V5-DATA-SPEC-r4` FROZEN (SHA-256 `54514850…`, from frozen r3 `f1580634…` via validated diff); criteria preregistered (`1039a3dd…`): INCORRECT ≤20% / U+I ≤35% / coverage 100% / 0 unresolved, agreement diagnostic-only, no small-n exception; SSRF NOT SUPPORTED (21/50 C1 fail); majority only with 3 labels else UNRESOLVED→owner; AI_AUDITED/PASS_AI_AUDITED≠VERIFIED; FINAL training BLOCKED | APPROVED | DONE (r4 frozen; prereg sealed; audit pending, R3 not run, #77) |
 
 ---
 

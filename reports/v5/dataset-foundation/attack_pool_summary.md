@@ -2,16 +2,16 @@
 
 Status: **STAGE2_UNAUDITED**. No category is declared fit and no payload is VERIFIED: every ACCEPTED record is `PENDING_ADJUDICATION`. The post-filter audit (spec section 7) and the blind human review (section 11.3) are pending. Tiering and deny-list are PROPOSED. Nothing is capped (cap value PENDING).
 
-PATT `e961fef231d8` (clean=True); deny-list sha256 `56e4ae0ba7c651b2`; filter-rules fingerprint `da1335f7a346a8f9`.
+PATT `e961fef231d8` (clean=True); deny-list sha256 `3e5570580a10319f`; filter-rules fingerprint `da1335f7a346a8f9`.
 V4 equivalence on the real PATT: accepted rows 33517 (V4) vs 33517 (V5 loop), multiset equal=True, ordered equal=True, reject-reason counts equal=True.
-Determinism: two runs, artifacts identical=True; attack_pool.jsonl sha256 `4c5d5869651fff35` / `4c5d5869651fff35`, manifest `63668a1f363000f4`.
+Determinism: two runs, artifacts identical=True; attack_pool.jsonl sha256 `ba385fa256d5e5c5` / `ba385fa256d5e5c5`, manifest `12887aa6c1a4505b`.
 
 ## Pipeline counts per category (each row sums: extracted = v4 + cat + 3rd + struct + identity + inadmissible + dups + accepted)
 
 | Category | Tier | Extracted | V4-rejected | Category-denied | 3rd-party | Structural | Identity undefined | Identity inadmissible | Dup exact/canon | Accepted |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| SQL Injection | primary* | 1775 | 439 | 0 | 289 | 70 | 1 | 28 | 17/11 | 920 |
-| XSS Injection | primary* | 3416 | 473 | 0 | 2441 | 79 | 0 | 0 | 37/4 | 382 |
+| SQL Injection | primary* | 1775 | 439 | 0 | 466 | 70 | 1 | 26 | 9/5 | 759 |
+| XSS Injection | primary* | 3416 | 473 | 0 | 2487 | 79 | 0 | 0 | 36/4 | 337 |
 | Directory Traversal | primary* | 23155 | 3546 | 0 | 19392 | 18 | 0 | 3 | 5/21 | 170 |
 | File Inclusion | primary* | 8182 | 529 | 0 | 5003 | 126 | 0 | 0 | 897/199 | 1428 |
 | Command Injection | primary* | 680 | 174 | 0 | 0 | 28 | 1 | 9 | 39/7 | 422 |
@@ -37,13 +37,15 @@ Determinism: two runs, artifacts identical=True; attack_pool.jsonl sha256 `4c5d5
 
 ## Third-party file deny-list (PROPOSED; `v5_lexicon/patt_third_party_denylist_v1.json`)
 
-23 files denied ({'spec_initial_list': 20, 'stage2_file_review': 3}); 66 reviewed and kept; unreviewed files read: 0.
+26 files denied ({'spec_initial_list': 20, 'stage2_file_review': 3, 'stage5_online_provenance_check': 3}); 63 reviewed and kept; unreviewed files read: 0.
 
 | Denied file | V4-accepted rows | Basis |
 |---|---:|---|
 | `Intruder/dotdotpwn.txt` | 19392 | spec |
 | `Intruders/JHADDIX_LFI.txt` | 871 | spec |
 | `Intruders/Traversal.txt` | 4132 | NEW stage-2 |
+| `Intruder/Auth_Bypass.txt` | 67 | stage5_online_provenance_check |
+| `Intruder/Auth_Bypass2.txt` | 110 | stage5_online_provenance_check |
 | `Intruder/FUZZDB_MSSQL-WHERE_Time.txt` | 40 | spec |
 | `Intruder/FUZZDB_MSSQL.txt` | 16 | spec |
 | `Intruder/FUZZDB_MSSQL_Enumeration.txt` | 8 | spec |
@@ -61,6 +63,7 @@ Determinism: two runs, artifacts identical=True; attack_pool.jsonl sha256 `4c5d5
 | `Intruders/MarioXSSVectors.txt` | 242 | spec |
 | `Intruders/RSNAKE_XSS.txt` | 71 | spec |
 | `Intruders/XSSDetection.txt` | 194 | NEW stage-2 |
+| `Intruders/jsonp_endpoint.txt` | 46 | stage5_online_provenance_check |
 | `Intruders/port_swigger_xss_cheatsheet_event_handlers.txt` | 114 | spec |
 | `Intruders/xss_alert.txt` | 654 | spec |
 | `Intruders/xss_alert_identifiable.txt` | 654 | spec |
@@ -74,20 +77,20 @@ Adjudication of the files the spec only noted: `XSSDetection.txt` DENIED (RSnake
 - NoSQL Injection: `NoSQL Injection/README.md` 39/62 = 62.9%
 - NoSQL Injection: `NoSQL Injection/Intruder/MongoDB.txt` 17/62 = 27.4%
 - Open Redirect: `Open Redirect/Intruder/Open-Redirect-payloads.txt` 168/212 = 79.2%
-- SQL Injection: `SQL Injection/Intruder/Generic_UnionSelect.txt` 328/920 = 35.7%
+- SQL Injection: `SQL Injection/Intruder/Generic_UnionSelect.txt` 328/759 = 43.2%
 - Server Side Request Forgery: `Server Side Request Forgery/SSRF-Cloud-Instances.md` 68/156 = 43.6%
 - Server Side Request Forgery: `Server Side Request Forgery/README.md` 66/156 = 42.3%
 - Server Side Template Injection: `Server Side Template Injection/Python.md` 128/334 = 38.3%
 - XPath Injection: `hardcoded:XPATH_PAYLOADS` 31/31 = 100.0%
-- XSS Injection: `XSS Injection/README.md` 130/382 = 34.0%
+- XSS Injection: `XSS Injection/README.md` 130/337 = 38.6%
 - path_file_access: `File Inclusion/Intruders/List_Of_File_To_Include.txt` 581/1598 = 36.4%
 
 ## Comparison with the audit (R6, in-sample) and the spec
 
 | Category | Audit pool | Audit est. clean V+P [range] | Builder accepted |
 |---|---:|---|---:|
-| SQL Injection | 1278 | 1021 [802, 1133] | 920 |
-| XSS Injection | 2238 | 881 [578, 1144] | 382 |
+| SQL Injection | 1278 | 1021 [802, 1133] | 759 |
+| XSS Injection | 2238 | 881 [578, 1144] | 337 |
 | Directory Traversal | 10219 | 3161 [1865, 4322] | 170 |
 | File Inclusion | 3321 | 2836 [2408, 3010] | 1428 |
 | Command Injection | 453 | 410 [348, 423] | 422 |

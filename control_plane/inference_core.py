@@ -79,7 +79,7 @@ def build_prompt(request):
 
 
 # ── Prediction parsing ─────────────────────────────────────────────────────
-def parse_prediction(text):
+def parse_prediction(text, ended_with_eos=None):
     """Parse raw decoder output into (decision, reason, status).
 
     POLICY (frozen): extract the FIRST valid ALLOW/BLOCK decision using the E4
@@ -87,8 +87,24 @@ def parse_prediction(text):
     it is NOT coerced into a decision. Invalid outputs are counted explicitly
     and reported separately (see score_binary).
 
+    `ended_with_eos` is the generation-termination signal, and it is what makes
+    a TRUNCATED generation invalid. `EXTRACT_RE` ends in `$`, so it happily
+    matches `ALLOW | <reason cut at the token cap>`; the text alone cannot tell
+    a complete answer from a cut one. The caller that ran the generation knows
+    (see `classify_timed()["ended_with_eos"]`) and MUST pass it:
+
+        True   generation stopped on the model's native EOS — parse the text.
+        False  generation stopped on a bound (max_new_tokens) — INVALID, the
+               text is never inspected. An incomplete generation is not an
+               ALLOW (D4, D25).
+        None   unknown: text-only callers (offline evaluation of a recorded
+               string, unit tests). Legacy behaviour; never used by the
+               serving path.
+
     status is "ok" or "invalid".
     """
+    if ended_with_eos is False:
+        return None, None, "invalid"
     if text is None:
         return None, None, "invalid"
     m = EXTRACT_RE.search(text)
@@ -168,7 +184,11 @@ def classify_timed(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
         prompt_tokens     input_ids length fed to generate()
         generated_tokens  new tokens produced
         stopped_on_eos    True if generation ended on native EOS rather than
-                          hitting the max_new_tokens safety bound
+                          hitting the max_new_tokens safety bound (length-based
+                          proxy, kept for the recorded benchmarks)
+        ended_with_eos    True iff the native EOS token is among the new tokens.
+                          This is the termination signal `parse_prediction`
+                          needs; a False means the text is TRUNCATED.
 
     `generate_ms` is bracketed by `device_sync()` on both sides, so it contains
     the whole generation and nothing queued before it. It is model-side
@@ -201,6 +221,13 @@ def classify_timed(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
     t5 = time.perf_counter()
 
     n_new = int(new.shape[0])
+    # Termination, read from the token ids: HF generate() exposes no finish
+    # reason, but it keeps the EOS token in the returned sequence, so EOS is
+    # present iff the model chose to stop. Batch size 1, so there is no
+    # EOS-as-padding ambiguity. Unlike `stopped_on_eos` (length-based, kept as
+    # is for the recorded benchmarks), this is exact when EOS is the very last
+    # token allowed.
+    ended_with_eos = bool(n_new > 0 and tok.eos_token_id in new.tolist())
     return text, {
         "prompt_build_ms": (t1 - t0) * 1000,
         "tokenize_ms": (t2 - t1) * 1000,
@@ -210,6 +237,7 @@ def classify_timed(tok, mdl, request, device, max_new_tokens=MAX_NEW_TOKENS):
         "prompt_tokens": int(prompt_len),
         "generated_tokens": n_new,
         "stopped_on_eos": bool(n_new < max_new_tokens),
+        "ended_with_eos": ended_with_eos,
     }
 
 

@@ -1,5 +1,13 @@
 # V5 training readiness — gated QLoRA trainer, smoke test and GGUF / llama.cpp path (closeout 2026-10-19)
 
+**Integration update (2026-10-20):** training-readiness code was merged via PR #78.
+PR #79 consolidates data-readiness and shadow work in the main checkout; the old stash and
+“nothing committed” statements below describe the original session only. The active trainer
+has not been adapted to r4: FINAL stays blocked. A proposed audit-provenance/authorization
+patch is preserved, unapplied, in `../data-readiness/proposals/`. R3 and a real V5 dataset are
+still pending. This update does not change the smoke/quantization evidence or authorize training.
+Use `../../../docs/continuity-2026-10-20.md` for current session handoff.
+
 | Item | Final status |
 |---|---|
 | **V5 training** | **SMOKE READY / FINAL BLOCKED.** The trainer is built and tested. FINAL refuses with 27 specific diagnostics (§6). **V5 is not trained** |

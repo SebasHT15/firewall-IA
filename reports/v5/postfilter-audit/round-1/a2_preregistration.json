@@ -1,0 +1,32 @@
+{
+  "annotator_2": {
+    "harness_alias": "haiku",
+    "items": 453,
+    "model": "claude-haiku-5-5",
+    "scope": "all 453 sample items; the gate uses this annotator as a2 regardless of its labels"
+  },
+  "approved_by": "owner (SebasHT15), 2026-10-19: 'Approve option A: pre-register claude-haiku-5-5 as annotator 2 for all 453 items with the same protocol (one retry per batch, no fallback). Move the Opus 5.5 partial to a supplementary slot, descriptive only.'",
+  "date": "2026-10-19",
+  "protocol": {
+    "batches": "6 consecutive batches of 76 (last 73), identical boundaries and files to the earlier a2 batches",
+    "isolation": "one fresh read-only agent per batch; Read only its batch file and annotation_a2/README.md",
+    "model_check": "every assistant turn must be served by claude-haiku-5-5; any fallback or other model makes the attempt REFUSED",
+    "packet": "annotation_a2/packet.jsonl, byte-identical to the packet drawn for a2 (sha256 in annotation_packets.json)",
+    "prompt_template": {
+      "path": "annotation_prompt_template.txt",
+      "sha256": "56581c0542a6464ba2d098748fe2318b50955961805eea721915de99aa0efde0",
+      "who": "a2"
+    },
+    "retry": "at most one retry per batch with the identical prompt and a fresh agent; no rewording, splitting or prompt change",
+    "stop_rule": "if any batch has no ACCEPTED attempt after its retry, annotation stops; the round stays PENDING_ANNOTATION and moves to option B (owner)"
+  },
+  "registered_before_any_label": true,
+  "round": 1,
+  "schema": "v5-postfilter-a2-preregistration/v1",
+  "selection_rule": "No annotator is chosen after comparing agreement; this file is written and hashed before the first Haiku agent runs.",
+  "supplementary": {
+    "slot": "annotation_a2_opus55_partial/",
+    "use": "descriptive only; never enters the gate, the adjudication or the acceptance report",
+    "what": "claude-opus-5-5 partial annotation (377/453)"
+  }
+}
