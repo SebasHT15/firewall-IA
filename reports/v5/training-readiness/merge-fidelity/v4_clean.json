@@ -1,0 +1,175 @@
+{
+  "A_vs_B_nf4_vs_bf16_unmerged": {
+    "differences": [
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 0
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "BLOCK | SQL injection payload detected.",
+        "i": 2
+      },
+      {
+        "a": "BLOCK | SQL injection payload detected.",
+        "b": "BLOCK | Cross-site scripting payload detected.",
+        "i": 7
+      },
+      {
+        "a": "BLOCK | NoSQL injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 12
+      },
+      {
+        "a": "BLOCK | NoSQL injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 15
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 20
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 22
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 24
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 27
+      },
+      {
+        "a": "BLOCK | SQL injection payload detected.",
+        "b": "BLOCK | Command injection payload detected.",
+        "i": 29
+      }
+    ],
+    "identical_decisions": 56,
+    "identical_generations": 40,
+    "n": 64
+  },
+  "A_vs_C_runtime_vs_merged_artifact": {
+    "differences": [
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 0
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "BLOCK | SQL injection payload detected.",
+        "i": 2
+      },
+      {
+        "a": "BLOCK | SQL injection payload detected.",
+        "b": "BLOCK | Cross-site scripting payload detected.",
+        "i": 7
+      },
+      {
+        "a": "BLOCK | NoSQL injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 12
+      },
+      {
+        "a": "BLOCK | NoSQL injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 15
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 20
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 22
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 24
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 27
+      },
+      {
+        "a": "BLOCK | SQL injection payload detected.",
+        "b": "BLOCK | Command injection payload detected.",
+        "i": 29
+      }
+    ],
+    "identical_decisions": 56,
+    "identical_generations": 40,
+    "n": 64
+  },
+  "A_vs_D_runtime_vs_faithful_merged_artifact": {
+    "differences": [],
+    "identical_decisions": 64,
+    "identical_generations": 64,
+    "n": 64
+  },
+  "B_vs_C_merge_arithmetic": {
+    "differences": [
+      {
+        "a": "BLOCK | File inclusion attack detected.",
+        "b": "BLOCK | HTTP request smuggling attack detected.",
+        "i": 50
+      }
+    ],
+    "identical_decisions": 64,
+    "identical_generations": 63,
+    "n": 64
+  },
+  "adapter": "model-output-v4-clean",
+  "adapter_sha256": "7bf168758a428fa7775dff0328de3d07d3063ddf99b961dc8b8406a0dce93de1",
+  "decisions_A": {
+    "ALLOW": 5,
+    "BLOCK": 59,
+    "INVALID": 0
+  },
+  "decisions_C": {
+    "ALLOW": 13,
+    "BLOCK": 51,
+    "INVALID": 0
+  },
+  "decisions_D": {
+    "ALLOW": 5,
+    "BLOCK": 59,
+    "INVALID": 0
+  },
+  "faithful_merged_dir": "model-output-v5/merge-check/v4-clean-nf4dequant",
+  "format": "v4",
+  "inputs": "64 synthetic fixture texts (manifest 4b66c311fc9c)",
+  "merged": {
+    "architectures": [
+      "LlamaForCausalLM"
+    ],
+    "bytes": 2203740389,
+    "dir": "model-output-v5/merge-check/v4-clean",
+    "lora_tensors_left": 0,
+    "tensors": 201
+  },
+  "note": "fidelity between runtimes on synthetic inputs; NOT an accuracy or quality measurement",
+  "runtime_A_double_quant": false,
+  "schema": "v5-merge-fidelity/v1",
+  "seconds_A": 10.97,
+  "seconds_B": 7.95,
+  "seconds_C": 4.35,
+  "seconds_D": 4.19,
+  "versions": {
+    "peft": "0.19.1",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0"
+  }
+}

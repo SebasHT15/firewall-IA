@@ -266,6 +266,25 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
        - Carried: I-6 `pair_content_id` optional diagnostic (non-blocking, D64 §S.6); I-14 `names_family`
          data BLOCKED (#75). No real split, dataset or training; nothing committed.
        - Report: `reports/v5/constructive-generator/` (README, `D62-i9-discrepancy.md`, `D65-proposal.md`, `i9_feasibility_fixture.json`).
+     - **Training readiness (2026-10-19, branch `feat/v5-training-readiness`, UNCOMMITTED; closeout done):**
+       - Gated QLoRA trainer: `scripts/training/finetune_v5.py` + `v5_train_data.py` + `v5_training_recipe_v1.json`
+         (PROPOSED). Modes SMOKE (fixture only) / EXPERIMENTAL (written authorization per manifest) / FINAL (F1–F9:
+         REAL build, ratified values, post-filter label basis, committed dataset preregistration, §11.3 freeze record,
+         training preregistration, ratified recipe, clean committed code, library pins). Examples are pre-tokenized
+         with `encode_prompt` + completion mask; any invalid / over-budget row stops the run; only TRAIN and
+         VALIDATION are opened. **Status: SMOKE READY / FINAL BLOCKED (27 unmet conditions). V5 is NOT trained.**
+       - Smoke on the synthetic fixture: 7/7 checks PASS (GPU, NF4 load, LoRA-only training, finite decreasing loss,
+         adapter save, reload, strict-format inference 12/12). Not evidence of model quality.
+       - Deployment path (offline diagnostic, gateway untouched): the naive bf16 `merge_and_unload` changes decisions vs
+         the NF4 runtime; the **NF4-faithful merge** (into `dequantize_4bit(NF4(W))`) matches 64/64 → export only from it.
+         llama.cpp b11381 CPU build in `~/opt`; GGUF bf16 = fidelity reference, **Q8_0 = provisional candidate,
+         Q4_K_M NOT authorized** (V4 55/64, V5 smoke 57/64 decisions, all flips BLOCK→ALLOW; cause recorded as
+         hypothesis H-Q4, not concluded). llama.cpp must receive token ids, never text (it inserts `▁` after `</s>`);
+         a generation cut by the context end returns `stop_type: limit` with partial text — fail-closed only with the
+         strict V5 parser. Merge + GGUF chain byte-reproducible. All of it on 64 synthetic inputs: no quality, recall,
+         FPR or security claim; equivalence on labelled V5 development data NOT evaluated. CUDA build / GPU latency pending
+         (owner installs the toolkit).
+       - Report: `reports/v5/training-readiness/README.md` (artifacts and deletable files in §5h, `artifacts_manifest.json`).
      - Generation and labels exist for Stage 4 (above) on synthetic fixtures only; gateway integration and
        every deterministic runtime control are **not** built.
      - V4 and its runtime are unchanged.

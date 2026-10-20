@@ -1,0 +1,146 @@
+==============================================================================
+V5 TRAINER — MODE SMOKE
+  evidence class: ENGINEERING_SMOKE — pipeline check on synthetic fixtures; NOT evidence of V5 model quality
+  This run checks that the pipeline works. It is NOT a V5 training run, and its loss
+  and outputs say NOTHING about V5 model quality.
+  output dir: /home/sebas/Desktop/firewall-IA/model-output-v5/smoke/smoke-run-002
+==============================================================================
+[1/7] Gates ...
+      gates PASSED for SMOKE: TRAIN=232 VALIDATION=24; INTERNAL_TEST not opened
+[2/7] Tokenizer and template-safe examples ...
+      overhead=76 label_budget=13 B=415 (template max 415); examples train=232 val=24; max seq 203 ≤ 512; 0 rejected, 0 truncated
+[3/7] GPU and 4-bit base model ...
+      NVIDIA GeForce RTX 4090 Laptop GPU · 15.5 GiB total · 14.5 GiB free
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  21%|██        | 42/201 [00:00<00:00, 408.53it/s]Loading weights:  61%|██████    | 123/201 [00:00<00:00, 633.38it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 675.81it/s]
+      loaded 4-bit=True in 1.0s; VRAM allocated 0.73 GiB
+[4/7] QLoRA training ...
+[transformers] warmup_ratio is deprecated and will be removed in v5.2. Use `warmup_steps` instead.
+[transformers] The tokenizer has new PAD/BOS/EOS tokens that differ from the model config and generation config. The model config and generation config were aligned accordingly, being updated with the tokenizer's values. Updated tokens: {'pad_token_id': 2}.
+  0%|          | 0/40 [00:00<?, ?it/s]  2%|▎         | 1/40 [00:00<00:15,  2.52it/s]      step    1  loss 4.1677  grad_norm 30.750
+                                                2%|▎         | 1/40 [00:00<00:15,  2.52it/s]  5%|▌         | 2/40 [00:00<00:09,  3.92it/s]{'loss': '4.168', 'grad_norm': '30.75', 'learning_rate': '0.0002', 'entropy': '2.768', 'num_tokens': '537', 'mean_token_accuracy': '0.3111', 'epoch': '0.01724'}
+      step    2  loss 2.5590  grad_norm 12.062
+                                                5%|▌         | 2/40 [00:00<00:09,  3.92it/s]  8%|▊         | 3/40 [00:00<00:07,  4.81it/s]{'loss': '2.559', 'grad_norm': '12.06', 'learning_rate': '0.0001997', 'entropy': '2.293', 'num_tokens': '1164', 'mean_token_accuracy': '0.5909', 'epoch': '0.03448'}
+      step    3  loss 2.0038  grad_norm 8.438
+                                                8%|▊         | 3/40 [00:00<00:07,  4.81it/s] 10%|█         | 4/40 [00:00<00:06,  5.38it/s]{'loss': '2.004', 'grad_norm': '8.438', 'learning_rate': '0.0001988', 'entropy': '2.266', 'num_tokens': '1772', 'mean_token_accuracy': '0.5417', 'epoch': '0.05172'}
+      step    4  loss 0.9257  grad_norm 5.500
+                                               10%|█         | 4/40 [00:00<00:06,  5.38it/s] 12%|█▎        | 5/40 [00:01<00:06,  5.75it/s]{'loss': '0.9257', 'grad_norm': '5.5', 'learning_rate': '0.0001972', 'entropy': '1.382', 'num_tokens': '2358', 'mean_token_accuracy': '0.7826', 'epoch': '0.06897'}
+      step    5  loss 0.6436  grad_norm 4.781
+                                               12%|█▎        | 5/40 [00:01<00:06,  5.75it/s] 15%|█▌        | 6/40 [00:01<00:05,  6.00it/s]{'loss': '0.6436', 'grad_norm': '4.781', 'learning_rate': '0.0001951', 'entropy': '1.144', 'num_tokens': '2906', 'mean_token_accuracy': '0.8542', 'epoch': '0.08621'}
+      step    6  loss 0.2680  grad_norm 3.672
+                                               15%|█▌        | 6/40 [00:01<00:05,  6.00it/s] 18%|█▊        | 7/40 [00:01<00:05,  6.18it/s]{'loss': '0.268', 'grad_norm': '3.672', 'learning_rate': '0.0001924', 'entropy': '0.5335', 'num_tokens': '3525', 'mean_token_accuracy': '0.9583', 'epoch': '0.1034'}
+      step    7  loss 0.1752  grad_norm 5.469
+                                               18%|█▊        | 7/40 [00:01<00:05,  6.18it/s] 20%|██        | 8/40 [00:01<00:05,  6.30it/s]{'loss': '0.1752', 'grad_norm': '5.469', 'learning_rate': '0.0001891', 'entropy': '0.2298', 'num_tokens': '4073', 'mean_token_accuracy': '0.94', 'epoch': '0.1207'}
+      step    8  loss 0.0574  grad_norm 1.688
+                                               20%|██        | 8/40 [00:01<00:05,  6.30it/s] 22%|██▎       | 9/40 [00:01<00:04,  6.32it/s]{'loss': '0.05743', 'grad_norm': '1.688', 'learning_rate': '0.0001853', 'entropy': '0.07532', 'num_tokens': '4639', 'mean_token_accuracy': '0.9792', 'epoch': '0.1379'}
+      step    9  loss 0.1897  grad_norm 7.219
+                                               22%|██▎       | 9/40 [00:01<00:04,  6.32it/s] 25%|██▌       | 10/40 [00:01<00:04,  6.36it/s]{'loss': '0.1897', 'grad_norm': '7.219', 'learning_rate': '0.0001809', 'entropy': '0.1023', 'num_tokens': '5305', 'mean_token_accuracy': '0.9318', 'epoch': '0.1552'}
+      step   10  loss 0.5051  grad_norm 8.562
+                                                25%|██▌       | 10/40 [00:01<00:04,  6.36it/s] 28%|██▊       | 11/40 [00:01<00:04,  6.57it/s]{'loss': '0.5051', 'grad_norm': '8.562', 'learning_rate': '0.000176', 'entropy': '0.1052', 'num_tokens': '5930', 'mean_token_accuracy': '0.8889', 'epoch': '0.1724'}
+      step   11  loss 0.0359  grad_norm 2.391
+                                                28%|██▊       | 11/40 [00:01<00:04,  6.57it/s] 30%|███       | 12/40 [00:02<00:04,  6.53it/s]{'loss': '0.03594', 'grad_norm': '2.391', 'learning_rate': '0.0001707', 'entropy': '0.05887', 'num_tokens': '6438', 'mean_token_accuracy': '1', 'epoch': '0.1897'}
+      step   12  loss 0.1486  grad_norm 2.516
+                                                30%|███       | 12/40 [00:02<00:04,  6.53it/s] 32%|███▎      | 13/40 [00:02<00:04,  6.71it/s]{'loss': '0.1486', 'grad_norm': '2.516', 'learning_rate': '0.0001649', 'entropy': '0.05202', 'num_tokens': '7055', 'mean_token_accuracy': '0.9574', 'epoch': '0.2069'}
+      step   13  loss 0.0042  grad_norm 0.185
+                                                32%|███▎      | 13/40 [00:02<00:04,  6.71it/s] 35%|███▌      | 14/40 [00:02<00:03,  6.63it/s]{'loss': '0.0042', 'grad_norm': '0.1846', 'learning_rate': '0.0001588', 'entropy': '0.02217', 'num_tokens': '7585', 'mean_token_accuracy': '1', 'epoch': '0.2241'}
+      step   14  loss 0.0068  grad_norm 0.299
+                                                35%|███▌      | 14/40 [00:02<00:03,  6.63it/s] 38%|███▊      | 15/40 [00:02<00:03,  6.64it/s]{'loss': '0.006833', 'grad_norm': '0.2988', 'learning_rate': '0.0001522', 'entropy': '0.03017', 'num_tokens': '8160', 'mean_token_accuracy': '1', 'epoch': '0.2414'}
+      step   15  loss 0.1232  grad_norm 1.867
+                                                38%|███▊      | 15/40 [00:02<00:03,  6.64it/s] 40%|████      | 16/40 [00:02<00:03,  6.64it/s]{'loss': '0.1232', 'grad_norm': '1.867', 'learning_rate': '0.0001454', 'entropy': '0.06208', 'num_tokens': '8789', 'mean_token_accuracy': '0.9545', 'epoch': '0.2586'}
+      step   16  loss 0.1796  grad_norm 4.094
+                                                40%|████      | 16/40 [00:02<00:03,  6.64it/s] 42%|████▎     | 17/40 [00:02<00:03,  6.62it/s]{'loss': '0.1796', 'grad_norm': '4.094', 'learning_rate': '0.0001383', 'entropy': '0.179', 'num_tokens': '9457', 'mean_token_accuracy': '0.8611', 'epoch': '0.2759'}
+      step   17  loss 0.0796  grad_norm 1.305
+                                                42%|████▎     | 17/40 [00:02<00:03,  6.62it/s] 45%|████▌     | 18/40 [00:02<00:03,  6.67it/s]{'loss': '0.07957', 'grad_norm': '1.305', 'learning_rate': '0.0001309', 'entropy': '0.1504', 'num_tokens': '1.01e+04', 'mean_token_accuracy': '0.9787', 'epoch': '0.2931'}
+      step   18  loss 0.0871  grad_norm 2.094
+                                                45%|████▌     | 18/40 [00:02<00:03,  6.67it/s] 48%|████▊     | 19/40 [00:03<00:03,  6.66it/s]{'loss': '0.08715', 'grad_norm': '2.094', 'learning_rate': '0.0001233', 'entropy': '0.1097', 'num_tokens': '1.064e+04', 'mean_token_accuracy': '0.9375', 'epoch': '0.3103'}
+      step   19  loss 0.0466  grad_norm 0.504
+                                                48%|████▊     | 19/40 [00:03<00:03,  6.66it/s] 50%|█████     | 20/40 [00:03<00:03,  6.61it/s]{'loss': '0.04662', 'grad_norm': '0.5039', 'learning_rate': '0.0001156', 'entropy': '0.1308', 'num_tokens': '1.124e+04', 'mean_token_accuracy': '0.975', 'epoch': '0.3276'}
+      step   20  loss 0.0613  grad_norm 0.605
+                                                50%|█████     | 20/40 [00:03<00:03,  6.61it/s]{'loss': '0.06134', 'grad_norm': '0.6055', 'learning_rate': '0.0001078', 'entropy': '0.1158', 'num_tokens': '1.19e+04', 'mean_token_accuracy': '0.9783', 'epoch': '0.3448'}
+
+  0%|          | 0/6 [00:00<?, ?it/s][A
+ 67%|██████▋   | 4/6 [00:00<00:00, 29.82it/s][A                                               
+                                             [A 50%|█████     | 20/40 [00:03<00:03,  6.61it/s]
+100%|██████████| 6/6 [00:00<00:00, 29.82it/s][A
+                                             [AWarning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+ 52%|█████▎    | 21/40 [00:04<00:08,  2.25it/s]{'eval_loss': '0.04371', 'eval_runtime': '0.2578', 'eval_samples_per_second': '93.1', 'eval_steps_per_second': '23.27', 'eval_entropy': '0.09467', 'eval_num_tokens': '1.19e+04', 'eval_mean_token_accuracy': '0.9824', 'epoch': '0.3448'}
+      step   21  loss 0.0495  grad_norm 1.461
+                                                52%|█████▎    | 21/40 [00:04<00:08,  2.25it/s] 55%|█████▌    | 22/40 [00:04<00:06,  2.81it/s]{'loss': '0.04946', 'grad_norm': '1.461', 'learning_rate': '0.0001', 'entropy': '0.07569', 'num_tokens': '1.255e+04', 'mean_token_accuracy': '0.9583', 'epoch': '0.3621'}
+      step   22  loss 0.0464  grad_norm 1.133
+                                                55%|█████▌    | 22/40 [00:04<00:06,  2.81it/s] 57%|█████▊    | 23/40 [00:04<00:04,  3.43it/s]{'loss': '0.04637', 'grad_norm': '1.133', 'learning_rate': '9.215e-05', 'entropy': '0.08245', 'num_tokens': '1.315e+04', 'mean_token_accuracy': '0.9787', 'epoch': '0.3793'}
+      step   23  loss 0.0184  grad_norm 0.398
+                                                57%|█████▊    | 23/40 [00:04<00:04,  3.43it/s] 60%|██████    | 24/40 [00:04<00:03,  4.01it/s]{'loss': '0.01839', 'grad_norm': '0.3984', 'learning_rate': '8.436e-05', 'entropy': '0.04797', 'num_tokens': '1.368e+04', 'mean_token_accuracy': '1', 'epoch': '0.3966'}
+      step   24  loss 0.1737  grad_norm 2.672
+                                                60%|██████    | 24/40 [00:04<00:03,  4.01it/s] 62%|██████▎   | 25/40 [00:04<00:03,  4.63it/s]{'loss': '0.1737', 'grad_norm': '2.672', 'learning_rate': '7.666e-05', 'entropy': '0.1221', 'num_tokens': '1.426e+04', 'mean_token_accuracy': '0.9333', 'epoch': '0.4138'}
+      step   25  loss 0.0228  grad_norm 0.664
+                                                62%|██████▎   | 25/40 [00:04<00:03,  4.63it/s] 65%|██████▌   | 26/40 [00:05<00:02,  5.08it/s]{'loss': '0.02276', 'grad_norm': '0.6641', 'learning_rate': '6.91e-05', 'entropy': '0.06538', 'num_tokens': '1.482e+04', 'mean_token_accuracy': '1', 'epoch': '0.431'}
+      step   26  loss 0.0791  grad_norm 1.445
+                                                65%|██████▌   | 26/40 [00:05<00:02,  5.08it/s] 68%|██████▊   | 27/40 [00:05<00:02,  5.48it/s]{'loss': '0.07905', 'grad_norm': '1.445', 'learning_rate': '6.173e-05', 'entropy': '0.1239', 'num_tokens': '1.538e+04', 'mean_token_accuracy': '0.9574', 'epoch': '0.4483'}
+      step   27  loss 0.0475  grad_norm 1.461
+                                                68%|██████▊   | 27/40 [00:05<00:02,  5.48it/s] 70%|███████   | 28/40 [00:05<00:02,  5.75it/s]{'loss': '0.04748', 'grad_norm': '1.461', 'learning_rate': '5.46e-05', 'entropy': '0.04737', 'num_tokens': '1.594e+04', 'mean_token_accuracy': '0.9545', 'epoch': '0.4655'}
+      step   28  loss 0.0533  grad_norm 1.344
+                                                70%|███████   | 28/40 [00:05<00:02,  5.75it/s] 72%|███████▎  | 29/40 [00:05<00:01,  6.11it/s]{'loss': '0.05328', 'grad_norm': '1.344', 'learning_rate': '4.775e-05', 'entropy': '0.04998', 'num_tokens': '1.659e+04', 'mean_token_accuracy': '0.9574', 'epoch': '0.4828'}
+      step   29  loss 0.0427  grad_norm 1.305
+                                                72%|███████▎  | 29/40 [00:05<00:01,  6.11it/s] 75%|███████▌  | 30/40 [00:05<00:01,  6.37it/s]{'loss': '0.04271', 'grad_norm': '1.305', 'learning_rate': '4.122e-05', 'entropy': '0.05721', 'num_tokens': '1.713e+04', 'mean_token_accuracy': '0.9787', 'epoch': '0.5'}
+      step   30  loss 0.0442  grad_norm 0.598
+                                                75%|███████▌  | 30/40 [00:05<00:01,  6.37it/s] 78%|███████▊  | 31/40 [00:05<00:01,  6.44it/s]{'loss': '0.04423', 'grad_norm': '0.5977', 'learning_rate': '3.506e-05', 'entropy': '0.07566', 'num_tokens': '1.763e+04', 'mean_token_accuracy': '1', 'epoch': '0.5172'}
+      step   31  loss 0.0425  grad_norm 1.344
+                                                78%|███████▊  | 31/40 [00:05<00:01,  6.44it/s] 80%|████████  | 32/40 [00:06<00:01,  6.47it/s]{'loss': '0.04248', 'grad_norm': '1.344', 'learning_rate': '2.929e-05', 'entropy': '0.05213', 'num_tokens': '1.828e+04', 'mean_token_accuracy': '0.9804', 'epoch': '0.5345'}
+      step   32  loss 0.0111  grad_norm 0.488
+                                                80%|████████  | 32/40 [00:06<00:01,  6.47it/s] 82%|████████▎ | 33/40 [00:06<00:01,  6.62it/s]{'loss': '0.01106', 'grad_norm': '0.4883', 'learning_rate': '2.396e-05', 'entropy': '0.04705', 'num_tokens': '1.895e+04', 'mean_token_accuracy': '1', 'epoch': '0.5517'}
+      step   33  loss 0.0335  grad_norm 1.188
+                                                82%|████████▎ | 33/40 [00:06<00:01,  6.62it/s] 85%|████████▌ | 34/40 [00:06<00:00,  6.63it/s]{'loss': '0.03346', 'grad_norm': '1.188', 'learning_rate': '1.91e-05', 'entropy': '0.04658', 'num_tokens': '1.946e+04', 'mean_token_accuracy': '0.975', 'epoch': '0.569'}
+      step   34  loss 0.0109  grad_norm 0.688
+                                                85%|████████▌ | 34/40 [00:06<00:00,  6.63it/s] 88%|████████▊ | 35/40 [00:06<00:00,  6.77it/s]{'loss': '0.0109', 'grad_norm': '0.6875', 'learning_rate': '1.474e-05', 'entropy': '0.03531', 'num_tokens': '2.004e+04', 'mean_token_accuracy': '1', 'epoch': '0.5862'}
+      step   35  loss 0.0070  grad_norm 0.424
+                                                88%|████████▊ | 35/40 [00:06<00:00,  6.77it/s] 90%|█████████ | 36/40 [00:06<00:00,  6.89it/s]{'loss': '0.006959', 'grad_norm': '0.4238', 'learning_rate': '1.09e-05', 'entropy': '0.03165', 'num_tokens': '2.057e+04', 'mean_token_accuracy': '1', 'epoch': '0.6034'}
+      step   36  loss 0.0781  grad_norm 3.188
+                                                90%|█████████ | 36/40 [00:06<00:00,  6.89it/s] 92%|█████████▎| 37/40 [00:06<00:00,  6.82it/s]{'loss': '0.0781', 'grad_norm': '3.188', 'learning_rate': '7.612e-06', 'entropy': '0.06612', 'num_tokens': '2.108e+04', 'mean_token_accuracy': '0.9524', 'epoch': '0.6207'}
+      step   37  loss 0.1171  grad_norm 4.312
+                                                92%|█████████▎| 37/40 [00:06<00:00,  6.82it/s] 95%|█████████▌| 38/40 [00:06<00:00,  6.78it/s]{'loss': '0.1171', 'grad_norm': '4.312', 'learning_rate': '4.894e-06', 'entropy': '0.1622', 'num_tokens': '2.166e+04', 'mean_token_accuracy': '0.9211', 'epoch': '0.6379'}
+      step   38  loss 0.0508  grad_norm 2.266
+                                                95%|█████████▌| 38/40 [00:06<00:00,  6.78it/s] 98%|█████████▊| 39/40 [00:07<00:00,  6.74it/s]{'loss': '0.05081', 'grad_norm': '2.266', 'learning_rate': '2.763e-06', 'entropy': '0.0561', 'num_tokens': '2.223e+04', 'mean_token_accuracy': '0.9767', 'epoch': '0.6552'}
+      step   39  loss 0.0532  grad_norm 1.656
+                                                98%|█████████▊| 39/40 [00:07<00:00,  6.74it/s]100%|██████████| 40/40 [00:07<00:00,  6.85it/s]{'loss': '0.05319', 'grad_norm': '1.656', 'learning_rate': '1.231e-06', 'entropy': '0.06041', 'num_tokens': '2.283e+04', 'mean_token_accuracy': '0.9773', 'epoch': '0.6724'}
+      step   40  loss 0.0598  grad_norm 2.328
+                                               100%|██████████| 40/40 [00:07<00:00,  6.85it/s]{'loss': '0.05981', 'grad_norm': '2.328', 'learning_rate': '3.083e-07', 'entropy': '0.05052', 'num_tokens': '2.334e+04', 'mean_token_accuracy': '0.9545', 'epoch': '0.6897'}
+
+  0%|          | 0/6 [00:00<?, ?it/s][A
+ 67%|██████▋   | 4/6 [00:00<00:00, 29.73it/s][A                                               
+                                             [A100%|██████████| 40/40 [00:07<00:00,  6.85it/s]
+100%|██████████| 6/6 [00:00<00:00, 29.73it/s][A
+                                             [A                                               100%|██████████| 40/40 [00:07<00:00,  6.85it/s]100%|██████████| 40/40 [00:07<00:00,  5.03it/s]
+{'eval_loss': '0.01061', 'eval_runtime': '0.257', 'eval_samples_per_second': '93.38', 'eval_steps_per_second': '23.34', 'eval_entropy': '0.04062', 'eval_num_tokens': '2.334e+04', 'eval_mean_token_accuracy': '1', 'epoch': '0.6897'}
+{'train_runtime': '7.928', 'train_samples_per_second': '20.18', 'train_steps_per_second': '5.045', 'train_loss': '0.3327', 'epoch': '0.6897'}
+  0%|          | 0/6 [00:00<?, ?it/s] 67%|██████▋   | 4/6 [00:00<00:00, 29.57it/s]100%|██████████| 6/6 [00:00<00:00, 28.29it/s]
+      trained in 8.08s; eval_loss(VALIDATION)=0.0106; peak VRAM allocated 1.223 GiB reserved 2.586 GiB
+[5/7] Saving LoRA adapter ...
+      adapter 48.2 MiB, 308 tensors, non-LoRA tensors: []; checkpoints ['checkpoint-40']
+[6/7] Reloading base + adapter from disk ...
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  30%|██▉       | 60/201 [00:00<00:00, 598.04it/s]Loading weights:  72%|███████▏  | 144/201 [00:00<00:00, 734.42it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 746.16it/s]
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  30%|██▉       | 60/201 [00:00<00:00, 592.88it/s]Loading weights:  70%|███████   | 141/201 [00:00<00:00, 712.81it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 735.34it/s]
+      reload: max |Δlogit| per probe ['0.4375', '0.2500', '0.2812', '0.2500']; argmax identical [True, True, True, True]; checkpoint checkpoint-40 forward finite: True
+[7/7] Greedy inference with the reloaded adapter + strict V5 parser ...
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+      12 VALIDATION prompts: status {'ok': 12}, ended on EOS 12, matches expected 12 (fixture format check, not a quality metric)
+==============================================================================
+  [PASS] 1_gpu_available_and_bf16
+  [PASS] 2_tinyllama_loaded_4bit
+  [PASS] 3_forward_backward_ran
+  [PASS] 4_loss_finite_and_decreasing
+  [PASS] 5_adapter_saved_lora_only
+  [PASS] 6_reload_matches_in_memory
+  [PASS] 7_inference_strict_format
+  outcome: SMOKE_PASSED · total 18.0s · record /home/sebas/Desktop/firewall-IA/model-output-v5/smoke/smoke-run-002/run_record.json
+  SMOKE ONLY — this is not a trained V5 model and not evidence of V5 quality.
+==============================================================================

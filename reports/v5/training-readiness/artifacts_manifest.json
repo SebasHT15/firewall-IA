@@ -1,0 +1,581 @@
+{
+  "schema": "v5-training-readiness-artifacts/v1",
+  "created": "2026-10-19",
+  "gitignored_root": "model-output-v5",
+  "fixture": "<FIXTURE_DIR> = python3.12 scripts/dataset/v5_fixture.py generate --out <FIXTURE_DIR>  (manifest 4b66c311fc9c\u2026, deterministic, D65)",
+  "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0 @ fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+  "toolchain": {
+    "llama.cpp": {
+      "tag": "b11381",
+      "commit": "836d57176dc699a726c55418e4f96b8ca628e1bf",
+      "source": "https://github.com/ggml-org/llama.cpp",
+      "build": "cmake -B build -DGGML_CUDA=OFF -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release; targets llama-server llama-quantize llama-tokenize llama-bench llama-cli llama-simple",
+      "compiler": "GNU 15.2.0",
+      "cmake": "3.31.6 (uv tool)"
+    },
+    "converter_env": "PYTHONPATH=~/opt/llama.cpp/gguf-py:~/opt/llama-pydeps (sentencepiece 0.2.2); python3.12 with torch 2.6.0+cu124, transformers 5.8.0, peft 0.19.1, bitsandbytes 0.49.2"
+  },
+  "groups": [
+    {
+      "dir": "model-output-v5/smoke/smoke-run-001",
+      "role": "EVIDENCE (smoke run 1: adapter, checkpoint, run_record)",
+      "status": "KEEP",
+      "regenerate": "finetune_v5.py --mode smoke --run-id smoke-run-001 (GPU training is seeded but not bitwise deterministic: a re-run gives a different adapter hash)",
+      "bytes": 109079067,
+      "files": [
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/adapter/README.md",
+          "bytes": 5234,
+          "sha256": "3328e5d767a59560f38f0d102d62e697ba308bb005105a9d455e872b33dc94e3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/adapter/adapter_config.json",
+          "bytes": 1113,
+          "sha256": "4caf634027a484f2de8ba242a4e850bd1d4fc5b4a4c3318a7f5c44fe83b2c26b"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/adapter/adapter_model.safetensors",
+          "bytes": 50503544,
+          "sha256": "9261e4178b995f64704a84d3d26e67eec47273bf2b3797d658df7f9e46b9e591"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/adapter/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/adapter/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/adapter/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/README.md",
+          "bytes": 1425,
+          "sha256": "88ff27951dca3f81a264a8b82a9e99f34043aba146be4736b7c6f158e0efc2a3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/README.md",
+          "bytes": 5234,
+          "sha256": "3328e5d767a59560f38f0d102d62e697ba308bb005105a9d455e872b33dc94e3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/adapter_config.json",
+          "bytes": 1113,
+          "sha256": "4caf634027a484f2de8ba242a4e850bd1d4fc5b4a4c3318a7f5c44fe83b2c26b"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/adapter_model.safetensors",
+          "bytes": 25272360,
+          "sha256": "b9646a63ff895a32a0009d6604d81343b636d0e9a08690f9b3a1682bcbb81ef6"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/optimizer.pt",
+          "bytes": 25989284,
+          "sha256": "ea43ae8450cd83723001666890a60bff4db47eec9a5fbc3c692122ac0ba3c4f5"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/rng_state.pth",
+          "bytes": 14244,
+          "sha256": "ef3343978c7dd2476dc1accd61bffc4b0ba83c367f5a8b0ef492d3bade9c3b91"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/scheduler.pt",
+          "bytes": 1064,
+          "sha256": "2d01151db1fc4f9c05131abecdc90435e3aab7eb2c3021fc926311286e779587"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/trainer_state.json",
+          "bytes": 13012,
+          "sha256": "c15ba58b15e0c9a124ec3d4eafddb3340c5ad91d81a495d763863f21cf35fff2"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/checkpoints/checkpoint-40/training_args.bin",
+          "bytes": 5368,
+          "sha256": "89799abe1e9b989bbda1c68305d444d2e52561a0e7a83032d5e2e8992fbbcb1b"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-001/run_record.json",
+          "bytes": 26718,
+          "sha256": "9c8b30eb23d4b34ef1213f4d9bccfb8302cba082795d48586f126637dbba2e4f"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/smoke/smoke-run-002",
+      "role": "EVIDENCE (smoke run 2, final trainer code)",
+      "status": "KEEP",
+      "regenerate": "same as above, --run-id smoke-run-002",
+      "bytes": 109079158,
+      "files": [
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/adapter/README.md",
+          "bytes": 5234,
+          "sha256": "3328e5d767a59560f38f0d102d62e697ba308bb005105a9d455e872b33dc94e3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/adapter/adapter_config.json",
+          "bytes": 1151,
+          "sha256": "ed214901b842c0142f80c51cda691127d86ce8f4c4ef0721551a7bd1a18243f3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/adapter/adapter_model.safetensors",
+          "bytes": 50503544,
+          "sha256": "7bbaa50efd2ddcf2936d4f91e51f10c8e0f507779962eb51da33b90920394295"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/adapter/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/adapter/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/adapter/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/README.md",
+          "bytes": 1425,
+          "sha256": "437c408cdf6f2e125335320f4591da055bdf2e2a85857abad5b0cfd85f46b438"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/README.md",
+          "bytes": 5234,
+          "sha256": "3328e5d767a59560f38f0d102d62e697ba308bb005105a9d455e872b33dc94e3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/adapter_config.json",
+          "bytes": 1151,
+          "sha256": "ed214901b842c0142f80c51cda691127d86ce8f4c4ef0721551a7bd1a18243f3"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/adapter_model.safetensors",
+          "bytes": 25272360,
+          "sha256": "9f6269be975cec2c68b664b3cac612500463b3b4d5439d70968ed3b9ec7c4006"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/optimizer.pt",
+          "bytes": 25989284,
+          "sha256": "50020bb2d415e428e09088ba1018c81c67d2e9aee6e46d46f075ffc091fdee7d"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/rng_state.pth",
+          "bytes": 14244,
+          "sha256": "ef3343978c7dd2476dc1accd61bffc4b0ba83c367f5a8b0ef492d3bade9c3b91"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/scheduler.pt",
+          "bytes": 1064,
+          "sha256": "2d01151db1fc4f9c05131abecdc90435e3aab7eb2c3021fc926311286e779587"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/trainer_state.json",
+          "bytes": 13001,
+          "sha256": "d12d9f48cf30dd16d34c2d348682bf92d5696642708c3f8acb60e0f7b03cd35d"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/checkpoints/checkpoint-40/training_args.bin",
+          "bytes": 5368,
+          "sha256": "089f614796db203d00f50c19adc5352881d26e6ecb95bc74c57682ba55395a7c"
+        },
+        {
+          "path": "model-output-v5/smoke/smoke-run-002/run_record.json",
+          "bytes": 26744,
+          "sha256": "d4d6911d5951fd86955a60d9ce497f91abfc5f6e28c016dcd13f6a54a251ccb8"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/merge-check/v4-clean",
+      "role": "naive bf16 merge of V4-clean (\u00a75 comparison C; source of the H1 GGUFs)",
+      "status": "DELETABLE \u2014 regenerable",
+      "regenerate": "check_lora_merge_fidelity.py --adapter model-output-v4-clean --format v4 --merged-dir model-output-v5/merge-check/v4-clean",
+      "bytes": 2204240112,
+      "files": [
+        {
+          "path": "model-output-v5/merge-check/v4-clean/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean/config.json",
+          "bytes": 725,
+          "sha256": "959ec4d82c2b7393e929508c45c6861dd8df23e9a903086722d458e50fb5c8af"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean/generation_config.json",
+          "bytes": 123,
+          "sha256": "4a6f3a90cc9eebf0f310b1477e3083b297f3fa5bf9f80c7ad38cbff683a7e154"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean/model.safetensors",
+          "bytes": 2200119864,
+          "sha256": "c35ebbfc89bbf20ce1ad57b3e6f7db69d1cf8ea5bf4e2a54c44527284b54d1ce"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean/tokenizer.model",
+          "bytes": 499723,
+          "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/merge-check/v4-clean-nf4dequant",
+      "role": "NF4-faithful merge of V4-clean (source of gguf/v4-clean)",
+      "status": "DELETABLE \u2014 regenerable byte-identically (verified: repro-check, model.safetensors e2db6655\u2026)",
+      "regenerate": "same command as above (writes <merged-dir>-nf4dequant); then copy tokenizer.model from the base snapshot fe8a4ea",
+      "bytes": 2204240112,
+      "files": [
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/config.json",
+          "bytes": 725,
+          "sha256": "959ec4d82c2b7393e929508c45c6861dd8df23e9a903086722d458e50fb5c8af"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/generation_config.json",
+          "bytes": 123,
+          "sha256": "4a6f3a90cc9eebf0f310b1477e3083b297f3fa5bf9f80c7ad38cbff683a7e154"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/model.safetensors",
+          "bytes": 2200119864,
+          "sha256": "e2db665597f14ba87ca252242028875efc03f223a2889235bef041443df4a99d"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/tokenizer.model",
+          "bytes": 499723,
+          "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+        },
+        {
+          "path": "model-output-v5/merge-check/v4-clean-nf4dequant/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/merge-check/v5-smoke-run-001",
+      "role": "naive bf16 merge of the V5 smoke adapter (comparison C)",
+      "status": "DELETABLE \u2014 regenerable",
+      "regenerate": "check_lora_merge_fidelity.py --adapter model-output-v5/smoke/smoke-run-001/adapter --format v5 --merged-dir model-output-v5/merge-check/v5-smoke-run-001",
+      "bytes": 2203740389,
+      "files": [
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001/config.json",
+          "bytes": 725,
+          "sha256": "959ec4d82c2b7393e929508c45c6861dd8df23e9a903086722d458e50fb5c8af"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001/generation_config.json",
+          "bytes": 123,
+          "sha256": "4a6f3a90cc9eebf0f310b1477e3083b297f3fa5bf9f80c7ad38cbff683a7e154"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001/model.safetensors",
+          "bytes": 2200119864,
+          "sha256": "d6fd234ee7d893a572188e3d8180b8f7e83433ef53813dde189486f9a90c7fa0"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant",
+      "role": "NF4-faithful merge of the V5 smoke adapter (source of gguf/v5-smoke-run-001)",
+      "status": "DELETABLE \u2014 regenerable from the kept adapter (byte-identity verified on the V4 chain only)",
+      "regenerate": "same command as above; then copy tokenizer.model",
+      "bytes": 2204240112,
+      "files": [
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/config.json",
+          "bytes": 725,
+          "sha256": "959ec4d82c2b7393e929508c45c6861dd8df23e9a903086722d458e50fb5c8af"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/generation_config.json",
+          "bytes": 123,
+          "sha256": "4a6f3a90cc9eebf0f310b1477e3083b297f3fa5bf9f80c7ad38cbff683a7e154"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/model.safetensors",
+          "bytes": 2200119864,
+          "sha256": "e7f17c9f8998c9be13427b72980e22b3cff4732c93604bfb617f0445b254bfba"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/tokenizer.model",
+          "bytes": 499723,
+          "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+        },
+        {
+          "path": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/repro-check",
+      "role": "byte-identical regeneration of the V4 chain (merge + 3 GGUFs), produced only to prove reproducibility",
+      "status": "DELETABLE \u2014 duplicates of hashed files",
+      "regenerate": "see reports/v5/training-readiness/README.md \u00a75c",
+      "bytes": 6242971450,
+      "files": [
+        {
+          "path": "model-output-v5/repro-check/convert.log",
+          "bytes": 21924,
+          "sha256": "b453c7724d1f47d69fc354ffeba8da55b4c28fe2b58c79e2b2e96ee3964ecaab"
+        },
+        {
+          "path": "model-output-v5/repro-check/quantize-Q4_K_M.log",
+          "bytes": 33957,
+          "sha256": "02b81701ea529ecca7b5f59cd4111cd6665edb97b785f233a9f02c47e00fd3b7"
+        },
+        {
+          "path": "model-output-v5/repro-check/quantize-Q8_0.log",
+          "bytes": 33953,
+          "sha256": "71ab74d4a467ee985a7b0dde4aeda56ef3bf7d1522432a6ea18d015bacc9c523"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/chat_template.jinja",
+          "bytes": 410,
+          "sha256": "66291cf0045c2425a3a667cf3cbb7af2b11f09e025c02f97245323ab79119362"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/config.json",
+          "bytes": 725,
+          "sha256": "959ec4d82c2b7393e929508c45c6861dd8df23e9a903086722d458e50fb5c8af"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/generation_config.json",
+          "bytes": 123,
+          "sha256": "4a6f3a90cc9eebf0f310b1477e3083b297f3fa5bf9f80c7ad38cbff683a7e154"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/model.safetensors",
+          "bytes": 2200119864,
+          "sha256": "e2db665597f14ba87ca252242028875efc03f223a2889235bef041443df4a99d"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/tokenizer.json",
+          "bytes": 3618870,
+          "sha256": "81bb383c6138159665cd350a59fbcb5aa1fe65712cf5ed9b6481bc802cdbd8e5"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/tokenizer.model",
+          "bytes": 499723,
+          "sha256": "9e556afd44213b6bd1be2b850ebbbd98f5481437a8021afaf58ee7fb1818d347"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4dequant/tokenizer_config.json",
+          "bytes": 397,
+          "sha256": "0c54367a270ae45614211bad01b4cd7443ab645b68d76b34b829f4f76ff6c71d"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4faithful-Q4_K_M.gguf",
+          "bytes": 667815200,
+          "sha256": "dadee91d96471cfee370280d0d175b543322319a583a1d9e10b873125aa2bc5e"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4faithful-Q8_0.gguf",
+          "bytes": 1169808672,
+          "sha256": "5f2733ede0dbbd7849add7b55bf15a542de79ce583d04836ae4400851c7f66b8"
+        },
+        {
+          "path": "model-output-v5/repro-check/v4-clean-nf4faithful-bf16.gguf",
+          "bytes": 2201017632,
+          "sha256": "5d4877afb7cb5ef94f864ca077c2f7ecbfe0d9b9f5ce725dcf92173eac4a9f06"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/gguf/v4-clean",
+      "role": "GGUF bf16 (fidelity reference) / Q8_0 (provisional candidate) / Q4_K_M (not authorized) of V4-clean",
+      "status": "KEEP while the GGUF track is open (regenerable byte-identically)",
+      "regenerate": "convert_hf_to_gguf.py <nf4dequant dir> --outtype bf16; llama-quantize <bf16> <out> Q8_0|Q4_K_M 16",
+      "bytes": 4038732427,
+      "files": [
+        {
+          "path": "model-output-v5/gguf/v4-clean/convert.log",
+          "bytes": 23181,
+          "sha256": "b44ef9d71e5bbfcc53fbf5f0f450059937a6a24a42395f8f5fb41372100fbb0d"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean/quantize-Q4_K_M.log",
+          "bytes": 33873,
+          "sha256": "dc0b654d2171ff045b784cf5484a9e8b73162f62e3eadda68846d36640117ce3"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean/quantize-Q8_0.log",
+          "bytes": 33869,
+          "sha256": "7ed8d7d8f8c070f952b0c89e4707adea9d8e4c84d1f818cdae638e3b633a265b"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean/v4-clean-nf4faithful-Q4_K_M.gguf",
+          "bytes": 667815200,
+          "sha256": "dadee91d96471cfee370280d0d175b543322319a583a1d9e10b873125aa2bc5e"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean/v4-clean-nf4faithful-Q8_0.gguf",
+          "bytes": 1169808672,
+          "sha256": "5f2733ede0dbbd7849add7b55bf15a542de79ce583d04836ae4400851c7f66b8"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean/v4-clean-nf4faithful-bf16.gguf",
+          "bytes": 2201017632,
+          "sha256": "5d4877afb7cb5ef94f864ca077c2f7ecbfe0d9b9f5ce725dcf92173eac4a9f06"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/gguf/v5-smoke-run-001",
+      "role": "GGUF bf16 / Q8_0 / Q4_K_M of the V5 smoke adapter (smoke only, no quality meaning)",
+      "status": "DELETABLE after review \u2014 regenerable",
+      "regenerate": "as above, from merge-check/v5-smoke-run-001-nf4dequant",
+      "bytes": 4038731969,
+      "files": [
+        {
+          "path": "model-output-v5/gguf/v5-smoke-run-001/convert.log",
+          "bytes": 22479,
+          "sha256": "ed916b4e2f721041937ab810b82edeee8b4311b53bb56213e5970211b97f8389"
+        },
+        {
+          "path": "model-output-v5/gguf/v5-smoke-run-001/quantize-Q4_K_M.log",
+          "bytes": 33995,
+          "sha256": "d667bc760acd281074bc1fa608abe12be75649a3284fcda2b61c4e83692aac7b"
+        },
+        {
+          "path": "model-output-v5/gguf/v5-smoke-run-001/quantize-Q8_0.log",
+          "bytes": 33991,
+          "sha256": "10c33390fca1b44098d1f232a4a3e26000154c13c59b10be171a921687aba31d"
+        },
+        {
+          "path": "model-output-v5/gguf/v5-smoke-run-001/v5-smoke-nf4faithful-Q4_K_M.gguf",
+          "bytes": 667815200,
+          "sha256": "407936905979523526206bfb8f43edb27ca0ad2c98f20ee57216732976bcb222"
+        },
+        {
+          "path": "model-output-v5/gguf/v5-smoke-run-001/v5-smoke-nf4faithful-Q8_0.gguf",
+          "bytes": 1169808672,
+          "sha256": "1cf5b961f41219687b56c83772e777687c7ea364322fb49c6fb0fc7f5a6fb2dc"
+        },
+        {
+          "path": "model-output-v5/gguf/v5-smoke-run-001/v5-smoke-nf4faithful-bf16.gguf",
+          "bytes": 2201017632,
+          "sha256": "6cc228be19ce0a3f8dd81a7c6bd4bfc6e637a110d7e61d41702ea99bd40ecf3b"
+        }
+      ]
+    },
+    {
+      "dir": "model-output-v5/gguf/v4-clean-naive-merge-h1",
+      "role": "GGUF bf16 / Q4_K_M of the naive merge, Q4 hypothesis test (\u00a75c)",
+      "status": "DELETABLE \u2014 regenerable",
+      "regenerate": "as above, from merge-check/v4-clean",
+      "bytes": 2868889302,
+      "files": [
+        {
+          "path": "model-output-v5/gguf/v4-clean-naive-merge-h1/convert.log",
+          "bytes": 22476,
+          "sha256": "131603736a7588fe18f24b82073822d8e88699f4d573d966cfda5cb7f15720c5"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean-naive-merge-h1/quantize-Q4_K_M.log",
+          "bytes": 33994,
+          "sha256": "4fb18e7e04e122361868a999716d5bc7b8e5c60982f97b80059c05ec420cbd54"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean-naive-merge-h1/v4-clean-naivemerge-Q4_K_M.gguf",
+          "bytes": 667815200,
+          "sha256": "5f0615582779b468d838bd86696ff1837fa9ff28523a9b8309088a39aaa0e24d"
+        },
+        {
+          "path": "model-output-v5/gguf/v4-clean-naive-merge-h1/v4-clean-naivemerge-bf16.gguf",
+          "bytes": 2201017632,
+          "sha256": "fd717fd30bea32a0ddc622617d4a5b70870aec6e1b309faeb7925aa2979e57e7"
+        }
+      ]
+    }
+  ],
+  "total_bytes": 26223944098
+}
