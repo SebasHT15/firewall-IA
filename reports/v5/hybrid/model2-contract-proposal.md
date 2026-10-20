@@ -21,7 +21,8 @@ validated canonical request → Fast Path (FAST_ALLOW | CONTINUE)
 - **C1 is deterministic feature/evidence extraction. C2 is an optional learned analyzer.** The existing trained attack score and auxiliary category outputs both belong to the learned component. They are not the definitions of C1 and C2. Category outputs may be ablated separately within C2.
 
 
-Verified facts: the frozen Analyzer (`hybrid-analyzer-v2`) runs only in the research env; where Models 1–2 run is open
+Verified facts: the frozen Analyzer (`hybrid-analyzer-v2`) has an isolated, default-off shadow worker
+using the analyzer environment; production placement of Models 1–2 remains open
 (D52); its External v1 aggregate was over-confident (ECE 0.126) and its category head did not transfer (top-1 74/200);
 a stage that BLOCKs without V4/V5 is **not decided** (D43; D29 forbids a heuristic BLOCK). A Model 2 BLOCK is exactly
 that kind of early, final block, so it is a **new enforcement authority that this document does not grant.**

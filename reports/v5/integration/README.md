@@ -4,6 +4,15 @@ All reviewed changes are consolidated on `feat/v5-data-readiness` for one PR to 
 The original development worktrees remain unchanged as local recovery copies. Git integration
 does not authorize R3 execution, FINAL training, or hybrid enforcement.
 
+## Continuity
+
+PR #79 is open against `develop` at the 2026-10-20 checkpoint. Current project state and the
+next-session prompt are in `../../../docs/continuity-2026-10-20.md`; issue disposition and
+ready-to-file follow-ups are in `../../../docs/issue-plan-2026-10-20.md`. The root README,
+CONTEXT and technical reference now point to this state. DECISIONS has a status note while
+retaining every historical decision entry unchanged. These documentation changes do not
+authorize an experiment, ratify a policy, or change any frozen evidence.
+
 ## Included behavior
 
 - D67 and V5-DATA-SPEC-r4 ratification, frozen preregistration, post-filter audit tooling and

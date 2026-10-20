@@ -1,8 +1,10 @@
 # Follow-up issue (DRAFT for owner to file) — Make the r4 AI-audited training gate enforceable, not procedural
 
-**Status:** DRAFT. Not filed. No code changed. Prepared under D67 ratification (2026-10-20, #77).
-**Area:** `scripts/training/v5_train_data.py`, `scripts/training/finetune_v5.py` (both on `develop`, commit `3d77d52`;
-not present on `feat/v5-data-readiness`).
+**Status:** DRAFT, not filed as of 2026-10-20. Active trainer unchanged. A candidate implementation
+and its negative tests are preserved as `proposals/final-gate-ai-audit.patch`, not applied.
+Prepared under D67 ratification (#77); owner authorization schema still requires ratification.
+**Area:** `scripts/training/v5_train_data.py`, `scripts/training/finetune_v5.py` (now present on
+both `develop` and the consolidated `feat/v5-data-readiness` branch; training code merged via PR #78).
 **Severity:** medium (safety-relevant; FINAL is blocked today, so no live exposure).
 
 ## Summary
@@ -12,7 +14,7 @@ this and encodes the human-review requirement. Two concrete items must be handle
 and this r4 protocol are integrated with `develop`, so that AI-audited evidence cannot **silently** satisfy the FINAL
 training gate.
 
-## Evidence (read-only inspection of `develop`)
+## Evidence (original inspection of `develop`; line numbers describe that revision)
 1. `v5_train_data.py:82` (verbatim intent): the mandatory-gate list "… (e.g. an r4 that replaces the human review)
    must update this list deliberately, never implicitly." The list still contains:
    - `human_review_prefilter_sample`  (§11.3 item 1 — **retired by D67/r4**)

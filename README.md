@@ -13,10 +13,15 @@ fail-closed.**
 
 This is a pre-thesis research project. It is **not production-ready**.
 
-**Research direction (since 2026-10):** a **Hybrid Architecture** — deterministic request
-features → a small learned **Lightweight Request Analyzer** (Model 1, **frozen**) → a **Small
-Decision Model** (Model 2, not built) → TinyLlama V4 only as the fallback for uncertain cases.
-Today V4 still makes every decision; see [§2](#hybrid-architecture--target-under-construction).
+**Current integration (2026-10-20):** [PR #79](https://github.com/SebasHT15/firewall-IA/pull/79)
+consolidates V5 data readiness, truncated-output protection and Analyzer/Fast Path shadow code
+on `feat/v5-data-readiness`. At this checkpoint the PR is open, not merged.
+
+**Research direction:** validated canonical request → **Fast Path** (FAST_ALLOW / CONTINUE)
+→ **Analyzer** (C1 deterministic evidence + optional learned C2) → **Model 2** (BLOCK / DEFER)
+→ **V5 semantic fallback** (ALLOW / BLOCK). This is the target, not active enforcement.
+V4 still decides every request; both new shadow modes ship off.
+Read the [continuity dossier](docs/continuity-2026-10-20.md) before starting another session.
 
 ---
 
@@ -72,6 +77,8 @@ protected destination  (reached only on ALLOW)
 - **Control plane** — `GET /health` (readiness via `model_loaded`, D28) and
   `POST /classify`. It classifies and reports; it does not enforce. An unparseable model
   output is reported as `status: "invalid"` and never coerced into a decision (D25).
+  The API also requires token-level EOS evidence: a truncated generation is invalid even
+  when its text looks like a valid ALLOW or BLOCK. A missing termination flag returns HTTP 500.
 - **inference_core** — the only owner of prompt, model loading, generation and parsing,
   imported by both the control plane and the evaluation harness so runtime and evaluation
   cannot drift apart.
@@ -82,6 +89,10 @@ protected destination  (reached only on ALLOW)
   fail-closed are unchanged. `Host` and `User-Agent` are never features (D43, D44;
   [technical reference](docs/technical_reference.md#shadow-feature-extraction-hybrid-architecture-phase-1)).
   The data plane does **not** compute a heuristic suspicious score.
+- **Analyzer and Fast Path observers:** isolated Analyzer process plus conservative Fast Path
+  eligibility logging, integrated together and disabled by default. They do not change V4
+  responses or bypass classification. See [runtime details](docs/hybrid_shadow_runtime.md) and
+  [integration validation](reports/v5/integration/README.md).
   *Terminology (D45):* **V4** is the current TinyLlama model; **V5** is a future TinyLlama
   revision (D37, D40), never the new architecture.
 - **Two processes, two Python environments** (D33): mitmproxy's pins conflict with the ML
@@ -102,21 +113,29 @@ operational failure limit that triggers fail-closed, not a latency target (D35).
 ### Hybrid Architecture — target, under construction
 
 ```
-HTTP request → data plane (mitmproxy) → render_request() → RequestFeatures v2
-  → control plane (FastAPI)* → Model 1: Lightweight Request Analyzer
-  → Model 2: Small Decision Model → ALLOW / BLOCK / UNCERTAIN
-        UNCERTAIN → TinyLlama V4 fallback → decision
-  → data plane enforcement (fail-closed)
+Wire HTTP request → parser → framing validation + canonicalization
+  → canonical request → Fast Path ── FAST_ALLOW → ALLOW
+                         │ CONTINUE
+                         ▼
+                  Analyzer: C1 + optional C2 → evidence vector
+                         ▼
+                  Model 2 ── BLOCK → BLOCK
+                         │ DEFER
+                         ▼
+                  V5 semantic model → ALLOW / BLOCK
 ```
-\*Where Models 1–2 will run is decided after measurement (D52).
+Runtime placement remains subject to D52. A separate-process Analyzer runtime exists for
+shadow evaluation; it does not ratify the future production placement or Model 2 policy.
 
 | Component | Status |
 |---|---|
 | Request Feature Extraction (RequestFeatures v2) | **DONE** — shadow mode |
-| Model 1 — Lightweight Request Analyzer | **FROZEN** — offline research artifact, not in the gateway |
-| Model 2 — Small Decision Model | not implemented |
-| Cascade orchestrator · UNCERTAIN routing · TinyLlama selective fallback | not implemented |
-| Hybrid shadow integration · Hybrid enforcement | not implemented |
+| Fast Path | shadow observer implemented, off; real eligibility and bypass not integrated |
+| Model 1 — Lightweight Request Analyzer | **FROZEN** artifact; isolated shadow runtime implemented, off |
+| Model 2 — Small Decision Model | BLOCK/DEFER proposal only; no model, thresholds or enforcement |
+| Cascade orchestrator · DEFER routing · V5 selective fallback | not implemented |
+| Hybrid shadow integration | Analyzer + Fast Path implemented; Model 2 shadow and operational measurement pending |
+| Hybrid enforcement | not implemented; V4 still decides everything |
 | External validation of the Hybrid system | pending |
 | Embedded deployment | future |
 
@@ -154,13 +173,14 @@ Model 1 stays frozen; this is not a gateway or cascade result.
 | **External Test v1** — frozen 400-case set, executed through the complete gateway | [§5](#5-external-test-v1), [`reports/external/external-v1-run-001/`](reports/external/external-v1-run-001/) |
 | **Docker demo / smoke path** — `docker/demo.sh`, `docker/smoke_test.sh` | [§6](#6-demo); demo runtime-verified from a clean lab |
 | **Request feature extraction, shadow mode** (Hybrid Architecture Phase 1, Issue #49) — describes requests, decides nothing | unit + gateway integration tests; live run with V4, shadow off vs on identical: [`reports/hybrid/phase1-feature-extraction-v2/`](reports/hybrid/phase1-feature-extraction-v2/) |
-| **Lightweight Request Analyzer (Model 1), frozen offline** (Issues #51, #53; D46–D55) — not integrated into the gateway | [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/); dataset `hybrid_analyzer_v2`, unit tests; External v1 aggregate evaluation [`reports/hybrid/analyzer-external-v1-run-001/`](reports/hybrid/analyzer-external-v1-run-001/) |
+| **Lightweight Request Analyzer (Model 1), frozen** (Issues #51, #53; D46–D55) — shadow gateway runtime added in PR #79, off by default | [`reports/hybrid/phase2b-analyzer-v2-run-002/`](reports/hybrid/phase2b-analyzer-v2-run-002/); dataset `hybrid_analyzer_v2`, unit tests; External v1 aggregate evaluation [`reports/hybrid/analyzer-external-v1-run-001/`](reports/hybrid/analyzer-external-v1-run-001/) |
 
 ### Future — not implemented
 
-- Fast path and heuristic suspicious score (D29 / D30, Issues #35–#38) — **deferred and
-  optional**: not part of the current architecture, whose role is taken by RequestFeatures →
-  learned Analyzer; may be evaluated later as a Model 2 feature if it adds value
+- Active Fast Path routing and deferred validation (Issues #36–#38): observer code exists,
+  but framing/canonical evidence, an approved application policy and measurements are still
+  needed. The proposed Fast Path uses explicit closed rules, not suspicious-score thresholds.
+  Legacy #35 and D29 need a recorded scope decision; the proposal does not silently supersede them.
 - GGUF export and a llama.cpp runtime (M2). Offline diagnostic only: adapter → NF4-faithful merge → GGUF → `llama-server`
   fed token ids works and is byte-reproducible on a CPU build (`reports/v5/training-readiness/` §5b–§5h). bf16 is the
   fidelity reference and Q8_0 the provisional candidate; **Q4_K_M is not authorized** (BLOCK→ALLOW flips on synthetic
@@ -171,27 +191,30 @@ Model 1 stays frozen; this is not a gateway or cascade result.
 - V5 — the next TinyLlama revision, aimed at the false-positive causes found in development
   diagnostics (not by inspecting External Test v1 cases, D40)
   - Dataset decisions: approved as D56–D61.
-  - Specification: `reports/v5/v5-data-spec-draft/` — `V5-DATA-SPEC-r3`, FROZEN 2026-10-13 (D62). Thresholds and constants remain open, per its §11.2.
+  - Applicable audit specification: `reports/v5/v5-data-spec-r4/`, FROZEN under D67.
+    Historical r3 remains unchanged. Audit thresholds are preregistered; other open constants
+    still require their respective decisions. R3 is prepared, not executed (#77).
   - Independent libraries, tested but not integrated: stage 1 `canonical-request/v1` (#67, D63),
     stage 2 template proposal and source pools (#70), stage 3 identities and deterministic split
     (#72, `reports/v5/dataset-identities-split/`, contract tested on synthetic fixtures only; round-3
-    D64 approved; ready for integration, not merged; real split not executed, V5 dataset not frozen).
+    D64 approved; stage code merged, issue #72 closed; real split not executed, V5 dataset not frozen).
   - Stage 4 constructive generator (#74, `reports/v5/constructive-generator/`): template catalogue,
     encoder/renderer, labeller/policies, benign oracle, constructive pair generator and I-9 realised-share
-    rebalancing — implemented and tested on synthetic fixtures only; READY FOR PR, not
-    merged. I-9 uses the literal D62 reading (WARN is the reduction trigger; D65 APPROVED); the WARN/BLOCK
+    rebalancing — implemented and tested on synthetic fixtures only; stage code merged, #74 closed.
+    I-9 uses the literal D62 reading (WARN is the reduction trigger; D65 APPROVED); the WARN/BLOCK
     numeric values and the low-cluster-split policy are PROPOSED, deferred to the pilot/preregistration.
-    No real split, dataset or training; `names_family` blocked (#75).
+    No real split, dataset or training. `names_family` acquisition is complete (12,104 accepted),
+    but generator inclusion, ratified cross-pool precedence and per-split checks remain open (#75).
   - Training readiness (`reports/v5/training-readiness/`): gated QLoRA trainer `finetune_v5.py` (SMOKE / EXPERIMENTAL /
     FINAL) — **SMOKE READY, FINAL BLOCKED** (27 unmet conditions). Only an engineering smoke run on the synthetic
     fixture was done; **V5 is not trained**.
   - Dataset: not built (no real split; see the conditions above).
   - External v2 is required for any V5 claim (D40).
-- Hybrid Architecture beyond Model 1: Small Decision Model, cascade orchestrator,
-  UNCERTAIN → V4 fallback, gateway integration (see the status table in §2)
+- Hybrid Architecture beyond the current observers: Model 2, cascade orchestration,
+  DEFER → V5 fallback and enforcement (see the status table in §2)
 - Concurrency / load validation; adversarial / evasion suite (E6)
 
-Nothing in this list works today.
+The listed operational milestones remain incomplete; implemented preparatory pieces are identified above.
 
 ---
 
@@ -409,8 +432,9 @@ remains `./docker/smoke_test.sh`.
 - Formal end-to-end latency benchmark (Issue #18) pending
 - HTTPS / TLS, HTTP/2 and WebSockets not validated; plain HTTP/1.1 through an explicit proxy only
 - GGUF / llama.cpp not integrated; runtime is HF/PEFT on CUDA
-- Fast path not implemented (deferred)
-- Hybrid Architecture: only feature extraction (shadow) and an offline, frozen Model 1 exist;
+- Fast Path observer exists, but cannot bypass V4; protocol prerequisites are unavailable
+- Hybrid Architecture: feature extraction and default-off Analyzer/Fast Path observers exist;
+  Model 2, V5 fallback and hybrid enforcement remain pending;
   Model 1's FPR (≈ 0.06 on the internal second look) is far above V4's internal one; on External
   Test v1 (offline, aggregate) its ROC-AUC drops to 0.943, its probabilities are over-confident
   (ECE 0.126), FPR at the reporting-only 0.5 is 50/200 (`api-json` 29/40), header / cookie
@@ -428,47 +452,24 @@ Every metric with its source and status:
 
 ## Next steps
 
-Done so far on the Hybrid Architecture (merged into `develop`):
-**Phase 1** (Issue #49) request feature extraction ·
-**Phase 2A** (Issue #51) Analyzer design frozen, D46–D53 ([report](reports/hybrid/phase2a-analyzer-design/)) ·
-**Phase 2B** (Issue #53) Model 1 frozen ([run-002](reports/hybrid/phase2b-analyzer-v2-run-002/)).
-Run-001 ([report](reports/hybrid/phase2b-analyzer-baselines/), [errata](reports/hybrid/phase2b-analyzer-baselines/ERRATA.md))
-is kept as history: a TRAIN / VALIDATION generator-family leak found after its first INTERNAL
-TEST look was corrected by D54, and INTERNAL TEST has since been read a second time.
+Use the [continuity dossier](docs/continuity-2026-10-20.md) for the current task order and
+[issue review](docs/issue-plan-2026-10-20.md) for completion criteria.
 
-Next, in order (detail and constraints: [`CONTEXT.md` §0.9](CONTEXT.md#09-next-steps-start-here-do-not-reopen-phase-2b-except-for-an-objective-bug)):
+1. Review and merge PR #79 into `develop`; verify the merge before starting another batch.
+2. Close the remaining #75 pool-integration decisions and checks; do not reacquire the pinned snapshot.
+3. Complete #77 using a fresh, blind R3 reviewer, then adjudication and the r4 category report.
+   The coordinator's dossier must not be supplied to the blind reviewer.
+4. Ratify and implement the explicit audit-provenance / FINAL-authorization gate before any
+   FINAL training. An unapplied proposal is already preserved; no training is authorized here.
+5. Advance #68 framing/canonical prerequisites and #36 Fast Path policy, while measuring
+   Analyzer/Fast Path shadow overhead and failure isolation against V4. These do not require V5 training.
+6. Once data and policy prerequisites pass, build the real dataset pilot, validate the
+   Model 2 BLOCK/DEFER design and implement selective V5 fallback. No Model 2 ALLOW path is planned.
+7. Complete end-to-end latency (#18), independent external validation, deployment-runtime
+   work and embedded milestones. Q4_K_M remains unauthorized for gateway decisions.
 
-1. ~~One aggregate post-freeze evaluation of Model 1 on External Test v1~~ — **done**
-   ([`analyzer-external-v1-run-001`](reports/hybrid/analyzer-external-v1-run-001/)); it shows
-   aggregate behaviour only and does **not** show that a V4 + Analyzer cascade would help (no
-   joint count; different operating points). Model 1 stays frozen.
-2. **Disagreement analysis, TinyLlama V4 vs Model 1** — first diagnostic done on development data
-   (issue #57, [`v4-analyzer-disagreement-v1`](reports/hybrid/v4-analyzer-disagreement-v1/)). A low
-   Analyzer score is not shown to be a safe override of a V4 BLOCK: on texts it never saw, it scores
-   10 attacks V4 blocks below 0.1. V4's header-flip false positives are invisible to it by design
-   (D44). **The false-negative risk of a cascade cannot be estimated with the data we may use.**
-   Recommendation (pending owner review): **C**, i.e. build a development diagnostic set with
-   attacks, then test B (new features), V5 and a V4-reason-aware Model 2. External v1 cases stay
-   unused.
-   - **Option C built and run** — the paired development diagnostic (issue #59,
-     [`v4-analyzer-paired-dev-v1`](reports/hybrid/v4-analyzer-paired-dev-v1/)): 201 independent
-     attack payloads (5 families ≥ 30) with benign near-neighbours on the same lab endpoints,
-     captured through the gateway (434/434 byte-faithful; enforcement agreed with `/classify`
-     434/434), scored by frozen Model 1 read-only; the set is generator-disjoint from V4-clean /
-     `hybrid_analyzer_v2` (overlap 0), External v1 overlap UNKNOWN. **Findings (diagnostic counts,
-     not rates):** V4 blocks every surface attack here; its only misses are header-borne (JWT/CSRF),
-     where Model 1 is blind by construction (D44/D48) and also scores low — so Model 1 cannot rescue
-     V4's misses; and on V4's 68 benign false positives Model 1 agrees (≥ 0.5) on 64, so a low-score
-     override is unsupported. A cascade on RequestFeatures v2 inherits both blind spots.
-3. Decide with evidence whether TinyLlama needs a V5 / hard-negative revision (External v2
-   required for any V5 claim, D40). *(Dataset decisions taken 2026-10-11: D56–D61; V5 spec
-   r3 frozen 2026-10-13, D62.)* The #59 diagnostic recommends this V5 hard-negative branch next
-   (V4's benign false positives are concrete defects), and raises for the owner whether D44 should
-   be revised for header-borne families — the only region where a cascade could add FN coverage.
-4. **Model 2 — Small Decision Model**, then ALLOW / BLOCK / UNCERTAIN policy, cascade
-   orchestrator, Hybrid shadow mode, Hybrid enforcement, end-to-end evaluation, a new
-   independent external set.
-5. Also open: Issue #18 (end-to-end latency), M2 (GGUF / llama.cpp), then embedded deployment (M4).
+The existing V4/Analyzer development diagnostics and frozen evaluations remain historical
+evidence. Do not rerun or tune against protected test cases to make these milestones pass.
 
 ## Security and engineering references
 
@@ -523,7 +524,7 @@ Run everything from the repository root.
 
 | Path | Contents |
 |---|---|
-| [`CONTEXT.md`](CONTEXT.md) | **§0: current state and handoff (read first)**; then the audit trail, full latency evidence, standards mapping |
+| [`CONTEXT.md`](CONTEXT.md) | **Current checkpoint and handoff (read first)**; then the audit trail, full latency evidence, standards mapping |
 | [`DECISIONS.md`](DECISIONS.md) | Append-only decision log (D1–D64) |
 | [`docs/technical_reference.md`](docs/technical_reference.md) | Control plane, data plane, benchmark, dataset, full limitations |
 | [`docs/ml_evaluation_methodology.md`](docs/ml_evaluation_methodology.md) | Evaluation rules: data roles, metrics, diagnostics vs benchmarks, latency layers |

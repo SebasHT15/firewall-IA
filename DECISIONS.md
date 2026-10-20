@@ -3,6 +3,28 @@
 Authoritative record of confirmed project decisions. Companion to `CONTEXT.md` (project memory)
 and `reports/` (experimental evidence).
 
+## Implementation checkpoint — 2026-10-20 (status note, not a new decision)
+
+The historical decision entries below remain unchanged. Their phrases “working tree” and
+“uncommitted” describe the time of recording, not the current Git state.
+
+- D66 and D67 implementation is committed on `feat/v5-data-readiness` and submitted in PR #79
+  to `develop` (open at this checkpoint). r3, frozen r4 and preregistered criteria are unchanged.
+- D67 R3 preparation is complete; R3 execution, adjudication and category acceptance remain
+  pending. FINAL is blocked; the proposed enforceable audit-provenance gate remains unapplied.
+- #75 acquisition is resolved with the pinned family-name snapshot; generator inclusion,
+  ratified value precedence and per-split acceptance remain pending.
+- D4/D25/D34 now include API protection against truncated generation using token EOS evidence.
+  The input-prompt issue #65 remains open; no benchmark baseline is retroactively rewritten.
+- Analyzer and Fast Path shadow code exists, disabled by default, with V4 as sole enforcement.
+  This does not close D29/D30, ratify D52 runtime placement, or authorize Model 2 enforcement.
+- The target design includes Fast Path FAST_ALLOW/CONTINUE and proposed Model 2 BLOCK/DEFER.
+  Its difference from D29's legacy suspicious-score design needs an explicit decision before
+  enforcement. No D68 or other approval is invented by this documentation update.
+
+Current detail: `docs/continuity-2026-10-20.md`, `docs/issue-plan-2026-10-20.md` and
+`reports/v5/integration/README.md`. This note updates implementation status only.
+
 **Rules for this file**
 
 - One entry per decision. Entries are **append-only**; never rewrite or delete a decision.

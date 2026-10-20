@@ -1,5 +1,13 @@
 # V5 stage 2 — dataset foundation (issue #70)
 
+**Update (2026-10-20):** stage #70 is merged/closed. PR #79 adopts a pinned family-name
+snapshot with 12,104 accepted values; the source acquisition blocker is resolved. #75 remains
+open for generator integration, ratified cross-pool precedence and per-split checks.
+The approved attack deny-list is v2 (D66); its pool has 3,933 ACCEPTED records, not adjudicated
+training rows. Audit protocol r4/D67 is frozen; R3 remains pending. Current details:
+`../data-readiness/names_family-candidate/ADOPTION.md` and `../integration/README.md`.
+The dated stage-2 findings below remain historical; do not repeat the old acquisition attempts.
+
 **Status (2026-10-14):** implemented and tested, **not frozen**. Two things are still open:
 
 - The template and vocabulary await the owner's ratification.

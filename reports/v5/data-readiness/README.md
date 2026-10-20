@@ -1,6 +1,20 @@
 # V5 data readiness — sources and post-filter audit (2026-10-19)
 
-**Status:** working-tree evidence for the owner, **uncommitted**. The V5 dataset is **not** ready for training. Nothing here
+**Current checkpoint (2026-10-20):** committed on `feat/v5-data-readiness`, PR #79 open.
+D66 deny-list v2 is approved. D67/r4 and its preregistration are frozen. R3 is prepared,
+not executed; no category PASS and FINAL remains blocked. Family-name acquisition is resolved:
+12,104 accepted values, no blocked source pools; generator integration remains open (#75).
+See `names_family-candidate/ADOPTION.md`, `../integration/README.md` and
+`../../../docs/continuity-2026-10-20.md`. Evidence is preserved locally outside Git with the
+recorded archive hash and restore procedure in `evidence-preservation-manifest.json`.
+
+## Historical acquisition/audit chronology — 2026-10-19
+
+The status statements and counts below describe their respective attempts, not today's blockers.
+In particular, the WDQS outage, uncommitted state and pending deny-list approval were subsequently
+resolved; the then-proposed options are not new tasks to repeat.
+
+**Status at initial recording:** working-tree evidence for the owner, **uncommitted**. The V5 dataset is **not** ready for training. Nothing here
 freezes a dataset, runs a real split, trains a model, or labels a payload VERIFIED. `V5-DATA-SPEC-r3` (SHA-256
 `f1580634…`) and D62/D64/D65 are unchanged. Issues: #75 (`names_family`, evidence comment of 2026-10-19), #77 (post-filter audit, BLOCKED on the deny-list approval).
 

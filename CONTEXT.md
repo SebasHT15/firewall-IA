@@ -1,9 +1,54 @@
 # firewall-IA — Session Context for Claude Code
 
-## 0. HANDOFF — current state (2026-10-05; V5 dataset decisions added 2026-10-12, §0.9 item 5) · READ THIS FIRST
+## Current checkpoint — 2026-10-20 (read first)
 
-This section is the current state. Everything after it is a chronological audit trail;
-where an older section disagrees with §0, §0 wins. Decisions: `DECISIONS.md` (D1–D64).
+This checkpoint and `docs/continuity-2026-10-20.md` supersede older **status and next-step**
+statements below. Approved decisions remain authoritative in `DECISIONS.md` (D1–D67);
+no design proposal is ratified merely by being committed.
+
+- One working branch: `feat/v5-data-readiness`. PR #79 targets `develop` and is OPEN at this
+  checkpoint. Verify GitHub state before saying it is merged. Integrated code checkpoint:
+  `23c39e5`; the documentation refresh follows it on the same branch.
+- Prior main-branch work and the partial-inference, Analyzer and Fast Path worktrees have
+  been consolidated. Original worktrees remain recovery copies; do not reapply their patches.
+- D66 deny-list and D67/r4 are recorded. R3: 217 unique blinded records prepared, zero R3
+  labels; no category PASS; SSRF unsupported; FINAL training blocked.
+- `names_family`: pinned LIMIT-20000 source adopted; 12,104 accepted values. Acquisition
+  is resolved; generator SLOT_POOLS inclusion, cross-pool precedence and split minima are not.
+- Truncated HF/PEFT responses are rejected using token-level EOS evidence. This does not
+  fix #65's input-template-token injection concern or alter legacy text-only benchmark parsing.
+- Analyzer process observer and Fast Path observer coexist, both off by default. V4 makes
+  every enforced decision. No active bypass, Model 2 or V5 fallback exists.
+- Target: wire parser → framing/canonicalization → Fast Path FAST_ALLOW/CONTINUE →
+  Analyzer C1 deterministic evidence + optional learned C2 → Model 2 BLOCK/DEFER →
+  V5 ALLOW/BLOCK. A low learned attack score never authorizes ALLOW by itself.
+- Model 2 and Fast Path policy documents remain PROPOSED. D29's legacy scoring formulation
+  has not been formally superseded. D52 production placement remains open.
+- FINAL audit-provenance changes are saved as an **unapplied patch** in
+  `reports/v5/data-readiness/proposals/`; do not activate it without ratified contracts.
+- Validation: system suite 1,343 run / 141 skipped; data-plane suites 408 / 2 skipped;
+  Analyzer suites 83 / 2 skipped; all OK. Counts overlap. Evidence and exact commands:
+  `reports/v5/integration/README.md`.
+- Recovery: local source worktrees, verified pending-work archive and evidence archive.
+  Raw audit inputs remain outside Git; manifest/restore instructions are versioned. This
+  is same-machine preservation, not an off-device backup.
+
+Next: merge review → finish #75 and #77 prerequisites → enforce training provenance before
+FINAL. In the architecture track, advance #68/#36 and shadow measurement. Detailed acceptance
+and proposed new issues: `docs/issue-plan-2026-10-20.md`. Do not close #75/#77/#36 for partial work.
+
+Workflow: one working branch at a time in the main checkout. Do not create extra branches,
+worktrees or parallel agents without the owner's request. This handoff is for the coordinator;
+the R3 reviewer receives only its approved blinded packet. Git merge remains the owner's action.
+
+---
+
+## 0. Historical handoff — 2026-10-05 through 2026-10-19 (superseded status)
+
+This section is retained as a chronological audit trail, including its then-current plans.
+For present status, architecture and next steps, use the current checkpoint above. Old claims
+that Fast Path is optional/outside the target, Model 2 allows traffic, stages #72/#74 are open,
+or family-name acquisition is blocked do not describe the current checkpoint.
 
 ### 0.1 What the project is
 
