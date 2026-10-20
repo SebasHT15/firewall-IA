@@ -596,7 +596,7 @@ class Acquire(NoNetwork):
         self.assertEqual(by["wikidata_given_names"]["url"], "https://query.wikidata.org/sparql")
         self.assertIn("wd:Q202444", by["wikidata_given_names"]["query"])
         self.assertIn("wd:Q101352", by["wikidata_family_names"]["query"])
-        self.assertIn("LIMIT 50000", by["wikidata_family_names"]["query"])
+        self.assertIn("LIMIT 20000", by["wikidata_family_names"]["query"])
         self.assertFalse(os.path.exists(self.path("raw")))
 
     def test_queries_never_touch_person_items(self):
@@ -680,8 +680,23 @@ class Acquire(NoNetwork):
             return Resp()
         with mock.patch("urllib.request.urlopen", fake):
             B.http_get("https://example.invalid/x", "*/*", 7, 1000)
-        self.assertEqual(seen["ua"], "firewall-IA-v5-dataset/0.1 (research; contact via repo)")
+        # Wikimedia User-Agent policy: client/version (contact) library/version; contact = public repo URL
+        self.assertEqual(seen["ua"], B.USER_AGENT)
+        self.assertRegex(seen["ua"], r"^firewall-IA-v5-dataset/\d+\.\d+ \(https://github\.com/SebasHT15/firewall-IA; ")
+        self.assertIn("Python-urllib/", seen["ua"])
         self.assertEqual(seen["timeout"], 7)
+
+    def test_only_first_party_wdqs_endpoints(self):
+        for bad in ("https://qlever.cs.uni-freiburg.de/api/wikidata", "http://query.wikidata.org/sparql"):
+            with self.assertRaises(SystemExit):
+                B.acquire_plan(["wikidata_family_names"], self.tmp.name, bad)
+            with self.assertRaises(SystemExit):
+                B._acquire_one("wikidata_family_names", self.tmp.name, bad)
+        main = "https://query-main.wikidata.org/sparql"
+        item = B.acquire_plan(["wikidata_family_names"], self.tmp.name, main)[0]
+        self.assertEqual(item["url"], main)
+        self.assertTrue(item["method"].startswith("GET " + main + "?"))
+        self.assertEqual(B.acquire_plan(["wikidata_family_names"], self.tmp.name)[0]["url"], B.WDQS_ENDPOINT)
 
 
 # ─────────────────────────────── tar extraction safety ───────────────────────────────
