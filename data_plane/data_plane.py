@@ -27,6 +27,17 @@ enforcement and fail-closed are those above. An extractor error is logged and
 ignored; it never blocks a request (that would turn an experimental component
 into a new source of BLOCKs).
 
+SHADOW ANALYZER (Hybrid Architecture, `hybrid_shadow.py`, `hybrid_shadow_process.py`). When
+`data_plane.shadow_analyzer` is enabled, the frozen lightweight Analyzer scores the same
+features AFTER the verdict. It runs in a SEPARATE worker process under the analyzer
+environment's interpreter (this environment has no numpy / scikit-learn, D33; the runtime
+is a proposal pending D52), in a background task the request never waits for, bounded by its
+own timeout; a worker that exceeds it is killed and replaced. Its score,
+auxiliary category, status and time are logged on a "HYBRID SHADOW" line carrying the same
+`[tag]` as that request's V4 decision line. Nothing reads it: V4 is the only decision, there
+is no new ALLOW path, and an Analyzer that is unavailable, invalid, failing or slow is a
+status in that line, never a BLOCK, an ALLOW or a delay. Off unless configured.
+
 RUN (from the repository root, in the data plane environment):
     .venv-dataplane/bin/mitmdump -s data_plane/data_plane.py --listen-host 127.0.0.1 -p 8080
 
@@ -34,11 +45,12 @@ The classifier URL, timeout and shadow switch are read from config.yaml when the
 script loads. Restart mitmdump after editing this file or request_features.py.
 """
 
+import asyncio
 import logging
 import os
 import time
 import traceback
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 
 import httpx
 import yaml
@@ -46,11 +58,14 @@ from mitmproxy import ctx, http
 
 # Sibling module: mitmproxy puts this script's directory on sys.path while
 # loading it, as the tests and capture_addon.py do explicitly.
+import hybrid_shadow
+import hybrid_shadow_process
 import request_features
 
 log = logging.getLogger("firewall.data_plane")
 # A child logger, so feature lines can be filtered apart from decision lines.
 features_log = logging.getLogger("firewall.data_plane.features")
+shadow_log = logging.getLogger("firewall.data_plane.shadow")
 # httpx logs every classifier call at INFO; the ALLOW/BLOCK line already covers it.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -96,6 +111,71 @@ def load_shadow_feature_extraction(path: str = CONFIG_PATH) -> bool:
         raise ValueError("data_plane.shadow_feature_extraction must be true or false, "
                          f"got {value!r}")
     return value
+
+
+class ShadowAnalyzerConfig(NamedTuple):
+    python: str                         # the analyzer environment's interpreter (absolute)
+    artifact_path: str                  # absolute
+    timeout_seconds: float
+    startup_timeout_seconds: float
+    restart_backoff_seconds: float
+    max_consecutive_failures: int
+
+
+_SHADOW_ANALYZER_KEYS = ("enabled", "runtime", "python", "artifact_path", "timeout_seconds",
+                         "startup_timeout_seconds", "restart_backoff_seconds",
+                         "max_consecutive_failures")
+
+
+def load_shadow_analyzer(path: str = CONFIG_PATH) -> Optional[ShadowAnalyzerConfig]:
+    """Return `data_plane.shadow_analyzer` from config.yaml, or None when it is off.
+
+    Optional like `shadow_feature_extraction`: absent, or `enabled: false`, means off. When
+    enabled, EVERY key is required: this file picks no default bound or interpreter for the
+    Analyzer (the values are operational and the runtime is a proposal, D52). `runtime` must
+    be `process`, the separate-process runtime (hybrid_shadow_process.py); relative paths
+    resolve against the repository root. Anything invalid raises, like every gateway setting.
+    """
+    with open(path, encoding="utf-8") as f:
+        section = yaml.safe_load(f)["data_plane"]
+    value = section.get("shadow_analyzer")
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not isinstance(value.get("enabled"), bool):
+        raise ValueError("data_plane.shadow_analyzer must be a mapping with a boolean `enabled`, "
+                         f"got {value!r}")
+    unknown = set(value) - set(_SHADOW_ANALYZER_KEYS)
+    if unknown:
+        raise ValueError(f"data_plane.shadow_analyzer: unknown keys {sorted(unknown)}")
+    if not value["enabled"]:
+        return None
+    missing = [k for k in _SHADOW_ANALYZER_KEYS if k not in value]
+    if missing:
+        raise ValueError(f"data_plane.shadow_analyzer: missing keys {missing}")
+    if value["runtime"] != "process":
+        raise ValueError(f"data_plane.shadow_analyzer.runtime must be 'process', got {value['runtime']!r}")
+
+    def number(key, minimum, inclusive=False):
+        v = value[key]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) \
+                or not (v >= minimum if inclusive else v > minimum):
+            raise ValueError(f"data_plane.shadow_analyzer.{key} must be a number "
+                             f"{'>=' if inclusive else '>'} {minimum}, got {v!r}")
+        return float(v)
+
+    def file(key):
+        v = value[key]
+        if not isinstance(v, str) or not v:
+            raise ValueError(f"data_plane.shadow_analyzer.{key} must be a non-empty string, got {v!r}")
+        return os.path.join(os.path.dirname(CONFIG_PATH), v)
+
+    failures = value["max_consecutive_failures"]
+    if isinstance(failures, bool) or not isinstance(failures, int) or failures < 1:
+        raise ValueError("data_plane.shadow_analyzer.max_consecutive_failures must be an "
+                         f"integer >= 1, got {failures!r}")
+    return ShadowAnalyzerConfig(file("python"), file("artifact_path"), number("timeout_seconds", 0),
+                                number("startup_timeout_seconds", 0),
+                                number("restart_backoff_seconds", 0, inclusive=True), failures)
 
 
 # ── Request representation (D1) ────────────────────────────────────────────
@@ -199,6 +279,24 @@ def shadow_extract(tag: str, raw_request: str) -> None:
             tag, elapsed_ms, type(exc).__name__, os.path.basename(where.filename), where.lineno)
 
 
+# ── Shadow Analyzer (Hybrid Architecture) ──────────────────────────────────
+async def shadow_analyze(runner, tag: str, raw_request: str,
+                         verdict: Verdict) -> None:
+    """Score the request with the Analyzer and log the result beside V4's outcome.
+
+    Returns nothing and never raises, so no caller can act on it. `verdict` is read only to
+    NAME V4's outcome in the record; it is already enforced and is not touched.
+    """
+    v4 = hybrid_shadow.v4_outcome(verdict.decision, verdict.failure is not None)
+    try:
+        result = await runner.run(raw_request)
+        record = hybrid_shadow.ShadowRecord(tag, v4, result)
+        shadow_log.info("%s", hybrid_shadow.format_record(record))
+    except Exception as exc:  # noqa: BLE001 — exception type only: a message could quote the request
+        shadow_log.warning("[%s] HYBRID SHADOW FAILED v4=%s detail=internal:%s; ignored, "
+                           "the request continues unchanged", tag, v4, type(exc).__name__)
+
+
 # ── mitmproxy addon ────────────────────────────────────────────────────────
 def blocked_response(verdict: Verdict) -> http.Response:
     """The proxy's own answer. Setting it on a flow in the `request` hook stops
@@ -212,11 +310,15 @@ def blocked_response(verdict: Verdict) -> http.Response:
 class FirewallGateway:
     def __init__(self, classifier_url: str, timeout_seconds: float,
                  transport: httpx.AsyncBaseTransport | None = None,
-                 shadow_features: bool = False) -> None:
+                 shadow_features: bool = False,
+                 shadow_analyzer=None) -> None:
         self.classifier_url = classifier_url
         self.timeout_seconds = timeout_seconds
         self.transport = transport  # None in production; tests pass an httpx.MockTransport
         self.shadow_features = shadow_features
+        self.shadow_analyzer = shadow_analyzer
+        # Strong references: asyncio keeps only weak ones to running tasks.
+        self._shadow_tasks: set[asyncio.Task] = set()
 
     def running(self) -> None:
         log.info("data plane ready: classifier=%s timeout=%.1fs policy=fail-closed",
@@ -224,6 +326,13 @@ class FirewallGateway:
         features_log.info("feature extraction: %s",
                           "shadow (logged only, never used for decisions)"
                           if self.shadow_features else "off")
+        runner = self.shadow_analyzer
+        if runner is None:
+            shadow_log.info("hybrid shadow analyzer: off")
+        else:
+            level, message = runner.startup_summary()
+            shadow_log.log(level, "%s", message)
+            runner.prewarm()   # a separate-process runner starts its worker here, in the background
 
     async def request(self, flow: http.HTTPFlow) -> None:
         if flow.response is not None:
@@ -263,6 +372,9 @@ class FirewallGateway:
         if self.shadow_features:
             shadow_extract(tag, raw_request)  # timed and logged on its own line
 
+        if self.shadow_analyzer is not None:
+            self.spawn_shadow_analysis(tag, raw_request, verdict)
+
         if verdict.decision == "ALLOW":
             log.info("[%s] ALLOW %s reason=%r (classifier %.0f ms)",
                      tag, target, verdict.reason, elapsed_ms)
@@ -275,7 +387,21 @@ class FirewallGateway:
                         tag, target, verdict.reason, elapsed_ms)
         flow.response = blocked_response(verdict)
 
+    def spawn_shadow_analysis(self, tag: str, raw_request: str, verdict: Verdict) -> None:
+        """Start the shadow analysis in the background and return at once. Nothing here
+        can fail the request: scheduling errors are logged and dropped."""
+        try:
+            task = asyncio.get_running_loop().create_task(
+                shadow_analyze(self.shadow_analyzer, tag, raw_request, verdict))
+            self._shadow_tasks.add(task)
+            task.add_done_callback(self._shadow_tasks.discard)
+        except Exception as exc:  # noqa: BLE001
+            shadow_log.warning("[%s] HYBRID SHADOW not started: %s; ignored, the request "
+                               "continues unchanged", tag, type(exc).__name__)
+
     def done(self) -> None:
+        if self.shadow_analyzer is not None:
+            self.shadow_analyzer.close()   # SIGKILLs a separate-process worker
         # mitmdump reloads a script whenever its file changes. If the new version
         # fails to load, the proxy keeps running WITHOUT this addon and forwards
         # traffic unclassified (verified on 12.2.3). So if this addon is removed
@@ -289,4 +415,19 @@ class FirewallGateway:
                   "blocking ALL traffic (503) until mitmdump is restarted")
 
 
-addons = [FirewallGateway(*load_config(), shadow_features=load_shadow_feature_extraction())]
+def build_shadow_analyzer(config: Optional[ShadowAnalyzerConfig]):
+    """The shadow runner for a configuration, or None when the feature is off. Nothing is
+    loaded or started here: the worker process starts in the background after the gateway is
+    running, and an Analyzer that cannot be loaded is a status in the shadow lines
+    (UNAVAILABLE), never a startup failure. The gateway must not stop being a gateway because
+    an experiment is missing its artifact."""
+    if config is None:
+        return None
+    return hybrid_shadow_process.build_process_runner(
+        config.python, config.artifact_path, config.timeout_seconds,
+        config.startup_timeout_seconds, config.restart_backoff_seconds,
+        config.max_consecutive_failures)
+
+
+addons = [FirewallGateway(*load_config(), shadow_features=load_shadow_feature_extraction(),
+                          shadow_analyzer=build_shadow_analyzer(load_shadow_analyzer()))]
