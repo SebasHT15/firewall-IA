@@ -66,11 +66,15 @@ SLOT_COMPATIBILITY = {
     "path_file": frozenset({PATH_FILE}),
     "json_leaf": frozenset({NOSQL, SQLI, XSS, SSTI}),
 }
-# Benign value pools each attackable slot type may draw from. `names_family` is BLOCKED (#75) and is
-# never listed: a pool that does not exist is never silently substituted.
+# Benign value pools each attackable slot type may draw from. `names_family` is now an AVAILABLE
+# pool (I-14, #75: the pinned snapshot is acquired and built): a slot may list it. Its VALUES are
+# supplied only when the pool is built and loaded; a configured pool that is absent, BLOCKED or
+# invalid is never silently substituted — the split stops (POOL_UNAVAILABLE, v5_split.py). Membership
+# here is an allow-list of what a slot MAY draw, not a value precedence: the per-pool precedence for a
+# real build stays owner-ratified (D64 §3), and a build that needs an unratified precedence stops.
 SLOT_POOLS = {
-    "free_string": ("names_given", "streets", "prose_en", "symbols", "passwords", "addr_data"),
-    "json_leaf": ("names_given", "streets", "prose_en", "symbols", "passwords", "addr_data"),
+    "free_string": ("names_given", "names_family", "streets", "prose_en", "symbols", "passwords", "addr_data"),
+    "json_leaf": ("names_given", "names_family", "streets", "prose_en", "symbols", "passwords", "addr_data"),
     "url": ("urls_public", "urls_relative"),
     "path_file": ("rel_paths",),
 }

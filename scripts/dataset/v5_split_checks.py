@@ -499,10 +499,15 @@ def cmd_determinism(args) -> int:
 
 # ───────────────────────────── CLI: census (real pools, counts only) ─────────────────────────────
 BENIGN_POOLS = ("names_given", "names_family", "prose_en", "streets", "symbols")
-# PROPOSED for the real build (owner ruling D-3 asks for a justified precedence; report §R2): the pool
-# whose concept loses relatively more keeps the value. Measured: the 3 cross-pool names are 3 of 15
-# `apostrophe_surnames` entries in symbols (20%) vs 3 of 80 apostrophe names in names_given (3.75%).
-REAL_VALUE_PRECEDENCE = ["symbols", "streets", "names_given", "names_family", "prose_en"]
+# RATIFIED by D68 (DR-75, 2026-10-21) for these five examined pools ONLY; it assigns precedence to no
+# further pool (passwords, urls_*, rel_paths, addr_data stay unratified, and a real build that configures
+# them must get their precedence ruled too). Option B: names_family outranks names_given. The order only
+# redistributes representatives (the A/B swap moves 782 between the two name pools); total unique coverage
+# is invariant — 84,252 kept / 849 excluded either way — so it is not a security-performance claim.
+# `symbols > names_given` (the D64 §3 analysis-backed candidate) is preserved. Ratifying this does not
+# authorize a real split, a dataset freeze or training. Evidence:
+# reports/v5/data-readiness/names_family-integration/README.md.
+REAL_VALUE_PRECEDENCE = ["symbols", "streets", "names_family", "names_given", "prose_en"]
 # Owner ruling, stage 3 round 3 (policy B): the round-2 hold is removed; NFC + casefold applies to every
 # group. `wasps` (smallest value_entry_id) is kept; `WASPs` is excluded with this recorded difference.
 REAL_VALUE_SEMANTIC_NOTES = {

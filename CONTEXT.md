@@ -1,6 +1,40 @@
 # firewall-IA — Session Context for Claude Code
 
-## Current checkpoint — 2026-10-20 (read first)
+## Current checkpoint — 2026-10-21 (read first; supersedes the 2026-10-20 status below)
+
+- **PR #79 is MERGED** into `develop` (merge commit `79a8a6a`; integrated branch head `b4ae109`).
+  The 2026-10-20 checkpoint's "PR OPEN / verify before saying merged" is now resolved.
+- Working branch for this batch: **`feat/v5-pool-integration`**, based on `origin/develop` at the
+  merge. One branch in the main checkout; recovery worktrees untouched; two GitHub Desktop stashes
+  preserved. **All of this batch's changes are UNCOMMITTED; no new PR has been opened.**
+- **`names_family` pool integration (I-14, #75) — implemented, uncommitted; three distinct states:**
+  (a) *catalogue capability* — `names_family` listed in `SLOT_POOLS` (`v5_catalog.py`), an allow-list
+  entry, not a precedence; (b) *demonstrated generator consumption (synthetic)* — a template slot with
+  `pools=["names_family"]` draws from a loaded pool and records pool provenance `names_family` + a
+  namespaced `value_entry_id`; absent/empty pool → `StopBuild` with no silent substitution
+  (`tests.test_v5_generator.NamesFamilyConsumption`); (c) *pending real-data integration* — NOT done:
+  no real-World loader, real split config/precedence unset; every other `real_build_preconditions` gate
+  still refuses. The per-split ≥20 minimum is enforced in code but verified only on a gated real build
+  (NOT "trivially satisfied"). **DR-75 RATIFIED as D68 (2026-10-21):** value precedence Option B
+  `symbols>streets>names_family>names_given>prose_en` (five pools only; 84,252 kept / 849 excluded,
+  coverage invariant; redistributes 782 representatives; no security claim), dataset-source use approved
+  (not VERIFIED, no real build/freeze/training), ß/ss content-hash representatives kept for the 2
+  internal groups. `REAL_VALUE_PRECEDENCE` updated. **#75 stays OPEN**: its policy items are ratified
+  (D68); the remaining acceptance evidence is the *executed* real-build verification, which is **#82**
+  scope. This batch reads no protected data and does not access INTERNAL TEST. #82 (owner-gated) needs:
+  post-filter audit/adjudication (#77/R3); a real-data loader for `benign/names_family.jsonl` (reading +
+  unit-testing it is distinct from a real split; **not implemented this pass**); the dataset
+  preregistration incorporating D68 + the PENDING constants; every SPL/M/ENC gate **executed** on the
+  real build (≥20/split run, SPL-6 under the ratified precedence, INTERNAL TEST single-run under #82's
+  gates); precedence for any further configured pool. Evidence:
+  `reports/v5/data-readiness/names_family-integration/README.md`.
+- Validation for this batch (system `python3.12`): full `discover -s tests` = **1,347 run, OK, 141
+  skipped** (was 1,343; +4 added by this batch); `tests.test_v5_generator` 54 OK / 3 skipped.
+  `.venv-dataplane` and `.venv-analyzer` suites not re-run (out of scope for #75; counts overlap).
+- Everything else below (merge-state facts, D66/D67/r4, R3 unexecuted, shadow observers off, FINAL
+  blocked, SSRF unsupported, #65 input-token injection still open, #35/D29 not retired) is unchanged.
+
+## Current checkpoint — 2026-10-20 (historical; merge state updated above)
 
 This checkpoint and `docs/continuity-2026-10-20.md` supersede older **status and next-step**
 statements below. Approved decisions remain authoritative in `DECISIONS.md` (D1–D67);
@@ -281,7 +315,8 @@ whose files match every code hash in the v2 freeze). `main` is still at `5daa978
          excluded with its semantic difference recorded); D-6 residual (`http:<dword>` → `http:H`,
          2 identities); hybrid I-8 (attempts count families already placed by earlier strata; no real
          outcome changed). I-6 and I-16 deferred to stage 4; precedence beyond `symbols > names_given` and
-         the ß/ss tie-break not ratified.
+         the ß/ss tie-break not ratified at D64 (the five-pool order and the scoped `names_family` ß/ss
+         were later ratified by D68, 2026-10-21).
        - **D64 APPROVED and recorded (2026-10-16).** The stage-3 contract is ready for integration; it is not
          merged, #72 stays open until the owner closes it, and it is **not** a V5 dataset approval:
          `names_family` BLOCKED, deny-list PROPOSED, post-filter audit and payload adjudication PENDING,
