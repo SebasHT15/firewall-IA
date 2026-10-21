@@ -3111,6 +3111,61 @@ protocol only**, via a new revision (r4) and this decision. **D58, D62 and D66 a
 
 ---
 
+## D68 — V5 `names_family` pool integration: ratified precedence, dataset-source use and ß/ss handling (DR-75)
+
+- **Date:** 2026-10-21 (America/Costa_Rica)
+- **Status:** APPROVED (owner approval of 2026-10-21 of DR-75, the grouped request in
+  `reports/v5/data-readiness/names_family-integration/README.md`). It completes D64 condition (f) (value
+  precedence) for the five examined benign pools and resolves the I-14 precedence deferral of D64/D65.
+- **Implementation:** config/proposal status updated (`REAL_VALUE_PRECEDENCE` in
+  `scripts/dataset/v5_split_checks.py`; the stage-3 report's precedence note), catalogue capability and
+  demonstrated synthetic generator consumption (`v5_catalog.py` `SLOT_POOLS`,
+  `tests/test_v5_generator.py::NamesFamilyConsumption`). **Uncommitted** on `feat/v5-pool-integration`;
+  **no real split, dataset freeze or training**, and no frozen spec or sealed preregistration edited.
+
+**Decision.**
+
+1. **Value precedence (Option B), for the five examined pools only.** The ratified order is
+   `symbols > streets > names_family > names_given > prose_en`. It redistributes representatives of
+   NFC+casefold equivalence groups; it does **not** increase unique coverage or establish any
+   security-performance advantage. Input (ACCEPTED records / file SHA-256 prefix): names_given 26,050
+   (`ea998f97…`), names_family 12,104 (`7d65ea2c…`), prose_en 34,048 (`f378cb61…`), streets 12,604
+   (`316cd7a8…`), symbols 295 (`eb149ef6…`). Retained under B: names_family 12,093, names_given 25,247,
+   prose_en 34,045, streets 12,572, symbols 295 = 84,252 kept, **849 excluded** (identical total to
+   Option A; the A→B swap moves 782 representatives between the two name pools). This order assigns
+   precedence to **no additional pool**: `passwords`, `urls_public/relative`, `rel_paths`, `addr_data`
+   remain unratified and a real build configuring them must have their precedence ruled. The
+   `symbols > names_given` edge (D64 §3) is preserved.
+2. **Dataset-source use.** The already-adopted pinned Wikidata Q101352 `LIMIT 20000` snapshot (SHA-256
+   `039882…6d3ead`) and its constructed 12,104-value pool are approved as a **source of values for
+   dataset construction**, subject to the existing validation and eligibility controls. The
+   arbitrary-subset limitation, provenance and archived snapshot are preserved; it is not reacquired.
+   This approval does **not** mark generated rows VERIFIED, authorize a real dataset build, freeze a
+   dataset or permit training.
+3. **ß/ss handling for `names_family`.** For the two internal `names_family` equivalence groups, the
+   existing deterministic representative selection (smallest `value_entry_id` / content hash) is
+   retained: `steinbeisser` keeps `Steinbeißer`, `fuss` keeps `Fuss`. Original source variants are
+   preserved and the excluded variant is recorded in the exclusion ledger with its representative and
+   reason (`value_equivalent_duplicate`). Equivalence for split-contamination control is **not** a claim
+   of linguistic or semantic interchangeability. This does not extend to unresolved semantic policies in
+   other pools (the general ß/ss and ß-tie-break policy stays open, D64 §3).
+
+**Boundaries.** Bounded ratification. `V5-DATA-SPEC-r3`/`r4` (`f1580634…` / `54514850…`) and the sealed
+r4 preregistration (`1039a3dd…`) are **not** edited in place. A future dataset preregistration must
+incorporate this precedence, the source-use approval and the ß/ss handling — that dependency is recorded
+here and in the integration report. `AI_AUDITED/PASS_AI_AUDITED ≠ VERIFIED` (D67) is unaffected; FINAL
+training stays BLOCKED; SSRF stays NOT SUPPORTED.
+
+**Relationship to earlier entries.** Applies D62 (§4.6 value equivalence), D64 (benign value policy B,
+condition (f); I-14 deferral) and D65 (stage-4 deliverables). Amends no frozen file; D56–D67 stand.
+Nothing is superseded.
+
+**Evidence.** `reports/v5/data-readiness/names_family-integration/README.md` (verified counts, hashes,
+ß/ss groups); `tests/test_v5_generator.py::NamesFamilyConsumption`; `scripts/dataset/v5_split_checks.py`
+`REAL_VALUE_PRECEDENCE`.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -3182,6 +3237,7 @@ protocol only**, via a new revision (r4) and this decision. **D58, D62 and D66 a
 | D65 | V5 stage 4 constructive generator: I-9 realised-share rebalance+regenerate with `cap="warn"` (literal D62 §4.6 step 5); per-row RNG stable under quota change (`quota`=category slug, count not in seed); WARN/BLOCK values, small-split policy and I-10 overflow choice deferred to preregistration; current-catalogue infeasibility diagnostic; I-10 fail-closed | APPROVED (deferred items not approved) | DONE (stage 4, fixtures only; not integrated; no real split, #74) |
 | D66 | V5 final third-party deny-list v2 (26 files; +`jsonp_endpoint.txt`, `Auth_Bypass.txt`, `Auth_Bypass2.txt` on content evidence), SHA-256 `3e557058…`; pool `ba385fa2…` 3,933 ACCEPTED (SQLi 759, XSS 337); XSS structural filters kept, false exclusions documented as coverage loss | APPROVED | DONE (working tree; pool rebuilt; no payload adjudicated, #77) |
 | D67 | V5 post-filter audit: AI-assisted third review (R3 = ChatGPT GPT-6) replaces the unavailable blind human review (disclosed post-hoc deviation, not equivalent); `V5-DATA-SPEC-r4` FROZEN (SHA-256 `54514850…`, from frozen r3 `f1580634…` via validated diff); criteria preregistered (`1039a3dd…`): INCORRECT ≤20% / U+I ≤35% / coverage 100% / 0 unresolved, agreement diagnostic-only, no small-n exception; SSRF NOT SUPPORTED (21/50 C1 fail); majority only with 3 labels else UNRESOLVED→owner; AI_AUDITED/PASS_AI_AUDITED≠VERIFIED; FINAL training BLOCKED | APPROVED | DONE (r4 frozen; prereg sealed; audit pending, R3 not run, #77) |
+| D68 | V5 `names_family` integration (DR-75): value precedence Option B `symbols>streets>names_family>names_given>prose_en` for the five examined pools only (redistributes 782 representatives; 84,252 kept / 849 excluded, coverage invariant; no security claim); dataset-source use of the pinned snapshot approved (not VERIFIED, no real build/freeze/training); ß/ss keeps the content-hash representative for the 2 internal groups with a ledger; no frozen spec / sealed prereg edited; future prereg must incorporate | APPROVED | DONE (status/tests, fixtures only; uncommitted; no real split, #75) |
 
 ---
 

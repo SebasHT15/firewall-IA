@@ -385,17 +385,21 @@ Verification (all on the round-2 pool, 4,161 records):
 - **Representative.** First by the configured pool precedence, then the smallest `value_entry_id`
   (content-defined; independent of file and input order, tested by shuffling). `value_entry_id` keeps its
   frozen formula; only which entries enter the split changes.
-- **Precedence (PROPOSED):** `symbols, streets, names_given, names_family, prose_en`. Only the
-  `symbols` vs `names_given` order is exercised today: the 3 names are 3 of 15 `apostrophe_surnames` in
-  `symbols` (20%) against 3 of 80 apostrophe names in `names_given` (3.75%), so keeping them in `symbols`
-  minimises the relative loss of the apostrophe-name concept; `symbols` is also the curated pool built
-  for that trait. The rest of the order is a preference and must be re-justified when `names_family`
-  arrives (I-14).
+- **Precedence (RATIFIED by D68 for these five pools only):**
+  `symbols, streets, names_family, names_given, prose_en` (Option B). The `symbols` vs `names_given`
+  edge keeps its original rationale (the 3 cross-pool names are 3 of 15 `apostrophe_surnames` in
+  `symbols`, 20%, against 3 of 80 apostrophe names in `names_given`, 3.75%, and `symbols` is the curated
+  pool for that trait). The `names_family > names_given` edge was deferred to I-14 and is now ratified by
+  D68; it redistributes 782 shared representatives (total unique coverage is invariant: 84,252 kept /
+  849 excluded under either order). Pools beyond these five are not assigned a precedence. See
+  `reports/v5/data-readiness/names_family-integration/README.md`.
 - **Ledger.** Every excluded value keeps its pool, value, `value_entry_id`, `source_ref`, reason
   `value_equivalent_duplicate` and the representative's provenance; kept + excluded = input.
-- **Loss** (real pools): 55 excluded — `names_given` 21 (apostrophe 3/80, hyphen 2/1215), `prose_en` 2,
-  `streets` 32 (non-ASCII 17/1142: the hash tie-break drops the ß form in 17 of 32 pairs), `symbols` 0.
-  Every pool still meets ≥ 20 per split.
+- **Loss** (real pools, four-pool stage-3 measurement, before `names_family`): 55 excluded —
+  `names_given` 21 (apostrophe 3/80, hyphen 2/1215), `prose_en` 2, `streets` 32 (non-ASCII 17/1142: the
+  hash tie-break drops the ß form in 17 of 32 pairs), `symbols` 0. Every pool still meets ≥ 20 per split.
+  With `names_family` added under D68 Option B the total excluded is **849** across the five pools
+  (names_family 11, names_given 803, streets 32, prose_en 3, symbols 0); see the integration report.
 - **Pre-render check.** `pre_render_value_check` raises `StopBuild` (`VALUE_EQUIVALENCE_SPANS_SPLITS`) when an
   exact or equivalent group spans two splits; `fixture` runs it before writing anything, and SPL-6 uses the
   same equivalence. `build` itself still sees identities only (SPL-5).
@@ -653,10 +657,12 @@ Directory Traversal 172 → 170, SSTI 335 → 334. The evaluability flags do not
 - ß / ss (provisional, decision pending): the `streets` lexicon generates 32 `straße` / `strasse` pairs; the
   hash tie-break keeps the ß form in 15 pairs and excludes it in 17 (flag loss `non_ascii` 17/1142; one pair
   also costs a hyphenated value, `has_hyphen` 1/1070). The tie-break and the identifier formula are unchanged.
-- Precedence `symbols > names_given` (3 cross-pool names) remains a candidate. The rest of the order is not
-  exercised and is not ratified; a real build whose configuration needs an unratified precedence must stop.
-  This is a condition of the real build (§S.13 (f)); stage 3 has no real build, so no code enforces it yet
-  (`validate_config` checks only that the precedence lists every configured pool).
+- Precedence `symbols > names_given` (3 cross-pool names) was the analysis-backed candidate; **D68**
+  (2026-10-21) ratifies the full five-pool order (Option B, `names_family` above `names_given`).
+  Precedence for pools beyond these five is still unexercised and unratified; a real build whose
+  configuration needs an unratified precedence must stop. This is a condition of the real build
+  (§S.13 (f)); stage 3 has no real build, so no code enforces it yet (`validate_config` checks only that
+  the precedence lists every configured pool).
 - The real note is the constant `REAL_VALUE_SEMANTIC_NOTES`; the real-build configuration must carry it in
   `value_equivalence_semantic_notes`, so it is hashed with the config.
 
@@ -837,8 +843,9 @@ No reviewer found a contradiction with the frozen text, a leakage path, or a det
   conservative for leakage and lowers family counts (SQLi R 31, XSS without reserve after merges).
 - Userinfo host forms fragment families (merged back by SPL-9); e-mails and IP literals are masked anywhere,
   as the spec text says; the owner may confirm that D-6 restricts only dotted names.
-- Benign near-duplicates beyond NFC + casefold are not grouped; the ß / ss tie-break and the full pool
-  precedence are not ratified.
+- Benign near-duplicates beyond NFC + casefold are not grouped. The five-pool precedence and the scoped
+  `names_family` ß/ss representative handling are ratified by D68; the general cross-pool ß/ss semantic
+  policy and precedence for pools beyond the five examined remain unratified.
 - I-4, I-6, I-9, I-10, I-14, I-16 need stage-4 artefacts (templates, slots, quotas, `names_family`).
 - Verified on CPython 3.12 (Unicode 15.0) and 3.14 (Unicode 16.0) only; the Unicode version is not
   recorded in the manifests.

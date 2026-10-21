@@ -13,9 +13,13 @@ fail-closed.**
 
 This is a pre-thesis research project. It is **not production-ready**.
 
-**Current integration (2026-10-20):** [PR #79](https://github.com/SebasHT15/firewall-IA/pull/79)
-consolidates V5 data readiness, truncated-output protection and Analyzer/Fast Path shadow code
-on `feat/v5-data-readiness`. At this checkpoint the PR is open, not merged.
+**Current integration (2026-10-21):** [PR #79](https://github.com/SebasHT15/firewall-IA/pull/79)
+(V5 data readiness, truncated-output protection, Analyzer/Fast Path shadow code) is **merged** into
+`develop` (`79a8a6a`). Follow-up branch `feat/v5-pool-integration` adds the `names_family` pool
+integration (I-14, #75) as catalogue capability + synthetic-fixture exercise — **uncommitted, no new
+PR** — which does not unlock a real build. Its value precedence, dataset-source use and the scoped
+`names_family` ß/ss handling are ratified by **D68**; the real-data build, freeze and training stay
+gated. See `reports/v5/data-readiness/names_family-integration/README.md`.
 
 **Research direction:** validated canonical request → **Fast Path** (FAST_ALLOW / CONTINUE)
 → **Analyzer** (C1 deterministic evidence + optional learned C2) → **Model 2** (BLOCK / DEFER)
@@ -203,8 +207,13 @@ Model 1 stays frozen; this is not a gateway or cascade result.
     rebalancing — implemented and tested on synthetic fixtures only; stage code merged, #74 closed.
     I-9 uses the literal D62 reading (WARN is the reduction trigger; D65 APPROVED); the WARN/BLOCK
     numeric values and the low-cluster-split policy are PROPOSED, deferred to the pilot/preregistration.
-    No real split, dataset or training. `names_family` acquisition is complete (12,104 accepted),
-    but generator inclusion, ratified cross-pool precedence and per-split checks remain open (#75).
+    No real split, dataset or training. `names_family` acquisition is complete (12,104 accepted); it is
+    now wired as an available `SLOT_POOLS` pool and its **generator consumption is demonstrated on
+    synthetic fixtures** (slot draws it, records pool provenance; absent/empty pool stops the build with
+    no substitution) — I-14, uncommitted on `feat/v5-pool-integration`. DR-75 ratified by **D68**: value
+    precedence Option B (redistributes 782 shared representatives; total coverage invariant, 849 excluded
+    either order), dataset-source use, and the scoped `names_family` ß/ss handling. The gated real-data
+    build/pilot (#82) remains, so #75 stays open.
   - Training readiness (`reports/v5/training-readiness/`): gated QLoRA trainer `finetune_v5.py` (SMOKE / EXPERIMENTAL /
     FINAL) — **SMOKE READY, FINAL BLOCKED** (27 unmet conditions). Only an engineering smoke run on the synthetic
     fixture was done; **V5 is not trained**.

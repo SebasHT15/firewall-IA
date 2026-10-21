@@ -62,8 +62,14 @@ class RealCatalog(unittest.TestCase):
             self.assertEqual(table.cluster_stratum[t.struct_cluster_id], t.carrier)
         self.assertEqual(table.near_duplicates, ())
 
-    def test_no_names_family_pool(self):
-        self.assertFalse(any("names_family" in s.pools for t in self.c.templates for s in t.slots))
+    def test_names_family_available_in_slot_pools(self):
+        # I-14 / #75: names_family is now an available benign pool for free_string and json_leaf slots.
+        self.assertIn("names_family", K.SLOT_POOLS["free_string"])
+        self.assertIn("names_family", K.SLOT_POOLS["json_leaf"])
+        # Availability is an allow-list, not a mandate: the default catalogue need not reference it.
+        tpl = q("a", "c", ["x"], [{"type": "free_string", "names": "text", "pools": ["names_family"]}])
+        slot = K.catalog_from_objects(cat(tpl), LEXICON).templates[0].slots[0]
+        self.assertEqual(slot.pools, ("names_family",))
 
     def test_json_key_paths_are_positional(self):
         order = next(t for t in self.c.templates if t.name == "j-order-a")
@@ -114,7 +120,7 @@ class Refusals(unittest.TestCase):
         self.bad(q("a", "c", ["x"], [{"type": "free_string", "names": "nope"}]), "unknown field-name list")
         self.bad(q("a", "c", ["x"], [INT]), "no attackable slot")
         self.bad(q("a", "c", ["x"], [{"type": "enum", "names": "enum", "choices": ["a"]}, FS]), "enum needs")
-        self.bad(q("a", "c", ["x"], [{"type": "free_string", "names": "text", "pools": ["names_family"]}]), "pools")
+        self.bad(q("a", "c", ["x"], [{"type": "free_string", "names": "text", "pools": ["no_such_pool"]}]), "pools")
         self.bad(q("a", "c", ["x"], [{"type": "int", "names": "int", "pools": ["streets"]}, FS]), "takes no pools")
         self.bad(q("a", "c", ["x"], [{"type": "json_leaf", "names": "text"}]), "not allowed in the query")
         self.bad(q("a", "c", ["x", {"type": "free_string"}], [FS]), "attackable path slot outside")

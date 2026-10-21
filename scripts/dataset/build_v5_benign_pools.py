@@ -4,7 +4,7 @@
 Builds the benign VALUE pools of spec r3 (reports/v5/v5-data-spec-draft/README.md section 2.1/3):
 
     names_given   Wikidata CC0 given-name items (Q202444)         BLOCKED until acquired
-    names_family  Wikidata CC0 family-name items (Q101352)        BLOCKED until acquired
+    names_family  Wikidata CC0 family-name items (Q101352)        pinned snapshot adopted (#75); built once installed
     prose_en      Tatoeba `sentences_CC0` export, lang `eng`      BLOCKED until acquired
     streets       synthetic street lexicon (repo MIT)             always built
     symbols       benign values containing special symbols (MIT)  always built

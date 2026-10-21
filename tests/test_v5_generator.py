@@ -410,9 +410,24 @@ class ControlledErrors(unittest.TestCase):
         codes = {u["code"] for u in unmet}
         self.assertIn("REAL_SPLIT_NOT_AUTHORIZED", codes)
         self.assertIn("D64_B_POST_FILTER_AUDIT", codes)     # fixture records are PENDING_ADJUDICATION
-        self.assertIn("D64_C_NAMES_FAMILY", codes)          # names_family BLOCKED (#75)
+        self.assertIn("D64_C_NAMES_FAMILY", codes)          # names_family not loaded into this fixture world (#75)
         self.assertIn("PREREGISTRATION_MISSING", codes)
         self.assertIn("VALUE_NOT_RATIFIED", codes)          # fixture statuses are PROPOSED / FIXTURE
+
+    def test_names_family_loaded_clears_only_d64_c(self):
+        # #75 / I-14: once names_family is among the loaded pools the D64_C gate clears (pure key
+        # membership), WITHOUT unlocking a real build — every other precondition still refuses, and no
+        # other pool is silently substituted for it.
+        world = F.build_world()
+        pools = dict(world.pool_values)
+        pools["names_family"] = {}                          # present as a loaded pool
+        unmet = G.real_build_preconditions(world.gen_cfg, list(world.records.values()), pools)
+        codes = {u["code"] for u in unmet}
+        self.assertNotIn("D64_C_NAMES_FAMILY", codes)
+        self.assertIn("REAL_SPLIT_NOT_AUTHORIZED", codes)
+        self.assertIn("D64_B_POST_FILTER_AUDIT", codes)
+        self.assertIn("PREREGISTRATION_MISSING", codes)
+        self.assertIn("VALUE_NOT_RATIFIED", codes)
 
 
 def _i9(enabled=True, **over):
@@ -569,6 +584,80 @@ class I9Rebalancing(unittest.TestCase):
         self.assertFalse(gen["i9_report"]["enabled"])       # explicit plan override, not rebalanced
 
 
+class NamesFamilyConsumption(unittest.TestCase):
+    """#75 / I-14: the generator actually CONSUMES a loaded names_family pool — a template slot draws
+    from it, the row records names_family-namespaced provenance, and an absent/empty pool refuses with
+    no silent substitution. Synthetic fixtures only; the global fixtures are untouched; real-build and
+    training gates stay blocked; no real split. This is downstream availability validation, distinct
+    from the membership-only D64_C precondition in test_names_family_loaded_clears_only_d64_c."""
+
+    def _world(self, pool_values):
+        n = 250                                             # >= 20 per split
+        wires = [f"synthmark sqli {i:04d} nf" for i in range(n)]
+        recs = [{"record_id": f"nf-{i:04d}", "status": "ACCEPTED", "synthetic": True, "payload_wire": w,
+                 "payload_logical": w, "payload_wire_form": R.PLAIN, "canonical_key": canonical_key(w),
+                 "dedup_scope": "SQL Injection", "native_forms": [],
+                 "reason_string": "SQL injection payload detected.", "source_file": "SYNTHETIC/nf.txt"}
+                for i, w in enumerate(wires)]
+        tpls = [{"name": f"nf-text-{i}", "cluster": "nf-text", "carrier": "text", "method": "POST",
+                 "path": ["notes", f"v{i}"], "text": {"type": "free_string", "pools": ["names_family"]}}
+                for i in range(4)]
+        with open(K.DEFAULT_LEXICON, encoding="utf-8") as fh:
+            lexicon = json.load(fh)
+        catalog = K.catalog_from_objects({"schema": K.CATALOG_SCHEMA, "templates": tpls}, lexicon)
+        split_cfg = F.fixture_split_config(carrier_strata=list(K.CARRIERS), pools=["names_family"],
+                                           value_pool_precedence=["names_family"],
+                                           category_vocabulary={"source": "stage2_dedup_scope",
+                                                                "order": "python_str_code_point",
+                                                                "categories": ["SQL Injection"]})
+        gen_cfg = F.fixture_gen_config(
+            trained_categories={"categories": ["SQL Injection"], "status": "PROPOSED"},
+            placement_shares={"replace": 1, "prefix": 1, "suffix": 1, "embedded": 1, "status": "PROPOSED"})
+        return F.build_world(catalog=catalog, records=recs, pool_values=pool_values,
+                             split_cfg=split_cfg, gen_cfg=gen_cfg)
+
+    def test_generator_consumes_loaded_names_family_pool(self):
+        fam = [f"Fam{F._word('names_family_fixture', i, 10).capitalize()}" for i in range(250)]
+        world = self._world({"names_family": fam})
+        # a genuinely LOADED pool with namespaced identities (not an empty dict standing in for one)
+        self.assertEqual(len(world.pool_values["names_family"]), 250)
+        for vid, val in world.pool_values["names_family"].items():
+            self.assertEqual(vid, I.value_entry_id("names_family", val))
+        gen = G.generate(world)
+        benign = [r for r in gen["rows"] if r["meta"]["pair_role"] == "benign"]
+        self.assertTrue(benign, "expected benign rows drawing from names_family")
+        famset = set(fam)
+        drew = 0
+        for r in benign:
+            # value_entries record [pool_id, value_entry_id]; values record the drawn strings (parallel)
+            for (pool, vid), val in zip(r["meta"]["value_entries"], r["meta"]["values"]):
+                self.assertEqual(pool, "names_family")                          # recorded pool provenance
+                self.assertEqual(vid, I.value_entry_id("names_family", val))    # id is names_family-namespaced
+                self.assertIn(val, famset)                                      # value came from the loaded pool
+                drew += 1
+        self.assertGreater(drew, 0)
+        self.assertTrue(any(r["meta"]["disposition"] == "split" for r in benign), "pairs should complete")
+        # real-build/training gates stay blocked: D64_C clears (pool loaded) but everything else refuses
+        unmet = {u["code"] for u in G.real_build_preconditions(
+            world.gen_cfg, list(world.records.values()), world.pool_values)}
+        self.assertNotIn("D64_C_NAMES_FAMILY", unmet)
+        self.assertIn("REAL_SPLIT_NOT_AUTHORIZED", unmet)
+        self.assertIn("VALUE_NOT_RATIFIED", unmet)
+
+    def test_absent_names_family_refuses_without_silent_substitution(self):
+        # the template REQUIRES names_family; supplying a different pool must not be substituted for it
+        with self.assertRaises(S.StopBuild) as cm:
+            self._world({})
+        codes = {f["code"] for f in cm.exception.findings}
+        self.assertIn("POOL_UNAVAILABLE", codes)
+
+    def test_empty_names_family_stops_the_build(self):
+        with self.assertRaises(S.StopBuild) as cm:
+            self._world({"names_family": []})
+        codes = {f["code"] for f in cm.exception.findings}
+        self.assertTrue({"POOL_UNAVAILABLE", "POOL_TOO_SMALL"} & codes, codes)
+
+
 class PendingDependencies(unittest.TestCase):
     """Controls that CANNOT be validated with synthetic data — recorded as skips, never a synthetic PASS."""
 
@@ -582,8 +671,9 @@ class PendingDependencies(unittest.TestCase):
     def test_oracle_signature_calibration(self):
         pass
 
-    @unittest.skip("Needs names_family (#75, BLOCKED) and the real split preconditions (D64): no real split "
-                   "is authorized, so cross-split leakage on real identities is not verifiable here.")
+    @unittest.skip("Needs the real split preconditions (D64): names_family is built and available (#75), but no "
+                   "real split is authorized and its real-build precedence is unratified, so cross-split leakage on "
+                   "real identities is not verifiable here.")
     def test_real_split_leakage(self):
         pass
 

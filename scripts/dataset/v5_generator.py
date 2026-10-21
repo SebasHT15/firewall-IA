@@ -165,7 +165,9 @@ def real_build_preconditions(gen_cfg: dict, records, pools: dict, preregistratio
         unmet.append({"code": "D64_B_POST_FILTER_AUDIT",
                       "detail": f"{pending} attack record(s) not adjudicated (post-filter audit, final deny-list)"})
     if "names_family" not in pools:
-        unmet.append({"code": "D64_C_NAMES_FAMILY", "detail": "names_family BLOCKED (#75) and no approved configuration without it"})
+        unmet.append({"code": "D64_C_NAMES_FAMILY",
+                      "detail": "names_family is not among the loaded pools (#75): the pinned pool is built but not "
+                                "configured/loaded here, or a configuration without it is not yet owner-approved"})
     if not preregistration_sha256:
         unmet.append({"code": "PREREGISTRATION_MISSING",
                       "detail": "L, signatures, placement shares, thresholds, B and the per-file cap are not ratified"})
@@ -864,7 +866,9 @@ KNOWN_LIMITATIONS = [
     "realised post-generation shares (after abandons / shortfalls) are reported as a diagnostic, not re-gated. "
     "The enforced-cap choice (WARN vs BLOCK) and the WARN/BLOCK values stay PROPOSED (spec §11.2).",
     "Generator pools passwords, urls_public, urls_relative, rel_paths and addr_data have no real builder yet "
-    "(fixture stand-ins only); names_family is BLOCKED (#75).",
+    "(fixture stand-ins only). names_family is built (#75, pinned snapshot) and available in SLOT_POOLS, but its "
+    "real-build value precedence is owner-ratified (D64 §3) and no real split is authorized, so it is exercised "
+    "only via synthetic fixtures here.",
     "Token counts use the UTF-8 byte upper bound (<= 1 token per byte) unless the tokenizer counter is configured; "
     "the byte bound over-excludes, never under-excludes.",
     "Shortcut audits C-S1…C-S7 are reported as raw diagnostics only (thresholds PROPOSED, pilot).",
