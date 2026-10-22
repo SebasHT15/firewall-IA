@@ -415,6 +415,7 @@ class LabProfile:
     validate_inbound_headers: bool = True
     http2: bool = False
     observer: bool = True
+    framing: bool = False          # enable the shadow FRAMING observer (issue #68 Track B, v2 lab)
     listen_port: int = field(default_factory=free_port)
     _proc: Optional[subprocess.Popen] = None
     _logpath: Optional[str] = None
@@ -455,6 +456,10 @@ class LabProfile:
         e["WIRE_LAB_CLASSIFIER_URL"] = self.classifier_url
         e["WIRE_LAB_TIMEOUT"] = "3.0"
         e["WIRE_LAB_OBSERVER"] = "1" if self.observer else "0"
+        # Track B (v2): enable the shadow FRAMING observer on top of the canonical observer. The
+        # gateway's configure() hook then samples the EFFECTIVE profile and a FRAMING OBS line is
+        # logged beside each CANONICAL OBS line. Observe-only; no traffic effect.
+        e["WIRE_LAB_FRAMING"] = "1" if self.framing else "0"
         e["WIRE_LAB_OBSERVER_PY"] = VENV_PY
         e["WIRE_LAB_MAX_DECODED_BODY"] = str(1 << 20)
         e["WIRE_LAB_OBS_TIMEOUT"] = "0.5"
@@ -572,6 +577,16 @@ VECTORS: list = [
        b"GET /ok HTTP/1.1\r\nHost: sink.test\r\nX-Note: a\tb\r\n\r\n",
        "Header value containing HTAB. R4 VALID counterpart: HTAB is permitted in a field value.",
        "RFC 9110 §5.5.", "forward", "ACCEPT (HTAB is not R4)", "none relevant"),
+    _v("VALID-HTTP10", "VALID",
+       b"GET /ok HTTP/1.0\r\nHost: sink.test\r\n\r\n",
+       "Valid body-less GET on HTTP/1.0 (origin-form, IN adapter scope, canonicalizes OK+ACCEPT). The "
+       "D70 defect-A fix requires EXACTLY HTTP/1.1 for framing PROFILE_MATCHED, so this must now "
+       "surface as FRAMING OBS UNATTESTABLE / HTTP_VERSION_NOT_11 — never a positive, never the "
+       "UNAVAILABLE/HTTP_VERSION_OUT_OF_SCOPE path (that path is for HTTP/2+ which the adapter rejects "
+       "as unsupported_http_version). The HTTP/1.1 counterpart VALID-GET stays PROFILE_MATCHED.",
+       "RFC 9112 §2.3 HTTP-version; D70 defect-A (version boundary).", "forward",
+       "ACCEPT (HTTP/1.0 is in adapter scope; version_supported=True)",
+       "the 1.0 version token survives into the snapshot and is carried to evaluate()"),
 
     # ---- R1: conflicting / invalid framing (residual facts survive as parts) ----
     _v("R1-TECL", "R1",

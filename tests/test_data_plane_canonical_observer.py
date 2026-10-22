@@ -56,10 +56,26 @@ CANONICAL_LOGGER = "firewall.data_plane.canonical"
 
 
 # ── observer doubles ─────────────────────────────────────────────────────────
+class _StubCapture:
+    """A minimal stand-in for canonical_observer.Capture that the stubs hand from capture() to
+    run_captured(). It carries the request (so run_captured can run the deterministic behaviour) and
+    the profile/generation/form the gateway reads back for the framing line. The stubs never model a
+    worker reservation, so there is nothing to release."""
+    __slots__ = ("is_early", "form", "profile", "profile_generation", "req")
+
+    def __init__(self, req, profile, profile_generation):
+        self.is_early = True
+        self.form = None
+        self.profile = profile
+        self.profile_generation = profile_generation
+        self.req = req
+
+
 class StubObserver:
-    """A canonical observer that follows the gateway's observer protocol (observe / startup_summary /
-    prewarm / close) but answers deterministically, without a worker process. `behaviour(req)` returns
-    a CanonicalObservation or raises. `calls` counts how often observe ran."""
+    """A canonical observer that follows the gateway's observer protocol (capture / run_captured /
+    release_captured / observe / startup_summary / prewarm / close) but answers deterministically,
+    without a worker process. `behaviour(req)` returns a CanonicalObservation or raises. `calls`
+    counts how often the observation actually ran (run_captured), matching the old observe() count."""
 
     def __init__(self, behaviour=None):
         import logging
@@ -71,9 +87,20 @@ class StubObserver:
         self.closed = False
         self.prewarmed = False
 
-    async def observe(self, req):
+    # New protocol: synchronous capture at the boundary + async completion.
+    def capture(self, req, *, profile=None, profile_generation=None):
+        return _StubCapture(req, profile, profile_generation)
+
+    async def run_captured(self, capture):
         self.calls += 1
-        return self.behaviour(req)
+        return self.behaviour(capture.req)
+
+    def release_captured(self, capture):
+        pass
+
+    # Back-compat wrapper (not used by the gateway any more; kept for any direct caller).
+    async def observe(self, req):
+        return await self.run_captured(self.capture(req))
 
     def startup_summary(self):
         return self._logging.INFO, "canonical observer: stub (test)"
@@ -86,15 +113,15 @@ class StubObserver:
 
 
 class HangingObserver(StubObserver):
-    """observe() blocks on an asyncio.Event, so the background task is still pending when the request
-    has already been forwarded."""
+    """run_captured() blocks on an asyncio.Event, so the background completion task is still pending
+    when the request has already been forwarded. capture() stays synchronous and returns at once."""
 
     def __init__(self):
         super().__init__()
         self.release = asyncio.Event()
         self.entered = asyncio.Event()
 
-    async def observe(self, req):
+    async def run_captured(self, capture):
         self.calls += 1
         self.entered.set()
         await self.release.wait()

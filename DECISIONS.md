@@ -3230,6 +3230,168 @@ unchanged. D56–D68 stand. Nothing is superseded.
 synthetic** canonicalize duration (a data point, not a proven worst-case bound) that, with
 cancellability, justifies the separate process.
 
+## D70 — #68 second bounded slice: default-off per-request HTTP/1.1 framing OBSERVATION bound to the canonical snapshot
+
+- **Date:** 2026-10-21 (America/Costa_Rica)
+- **Status:** APPROVED (owner approval of 2026-10-21, given as the bounded implementation instruction
+  for this observe-only slice, with the owner's incorporated corrections). The slice is **non-enforcing**.
+- **Implementation:** DONE, **uncommitted** on `feat/http1-framing-attestation`; integrated
+  **default-off**; **no enforcement**. New module `data_plane/framing_evidence.py`; a synchronous
+  capture refactor in `data_plane/canonical_observer.py` (`capture`/`run_captured`/`release_captured`,
+  with `observe` kept as a back-compat wrapper); gateway wiring + `configure()` hook + a
+  `shadow_framing_observer` loader in `data_plane/data_plane.py`; a `shadow_framing_observer: false`
+  switch in `config.yaml`.
+
+**Decision.** The owner approves a second bounded slice of issue #68: a **per-request, observe-only**
+HTTP/1.1 framing OBSERVATION. V4 via `/classify` remains the only enforced decision; there is no new
+client-visible reject, no bypass, no Fast Path activation, no Model 2 / V5 runtime, and no production
+setting. It never sets `fast_path.FRAMING_VERIFIED` or changes `GatewayEvidence`.
+
+1. **Scope, reuse, one canonicalize.** The component reuses the D69 canonical observer's ONE bounded
+   immutable snapshot and ONE canonical result; it adds **no** second canonicalization and **no** second
+   body copy, and `canonical_request.py` gets **no** new framing rule. For each request that reaches the
+   hook it emits a closed-vocabulary `FRAMING OBS` line. Coverage is **admitted observations only**: a
+   parser rejection or reset before the addon has socket evidence and **no** fabricated in-hook record;
+   a pre-answered flow and a V4 `render_request` failure never reach observation. V4's D1 rendering, the
+   `/classify` schema, the one-classifier-call rule, the decision and forwarding are byte-for-byte
+   unchanged (acceptance tests, Track C).
+2. **Synchronous capture bound to one snapshot (owner correction).** The smallest bounded refactor
+   captures the admitted work at a defined post-V4 boundary: `capture()` samples the effective profile
+   and materializes the immutable snapshot **together, with no intervening await**, runs the cheap
+   disabled/BUSY/scope/body/admission/worker-availability gates **before** materialization, reserves
+   atomically, and releases on a scheduling/encoding failure or cancellation. All downstream evidence
+   and the canonicalization refer to that same snapshot. Decoding/canonicalization stay in the D69
+   worker and are **never awaited** by the request; `run_captured()` does the IPC only. Added
+   synchronous capture cost is measured **separately** from the background round trip (coordinator
+   measurement, steady-state synthetic: capture ≤ ~0.47 ms p95 / ~1.1 ms max at the 1 MiB cap; the
+   worker round trip, off the forwarding path, ~10 ms p50 at 1 MiB). The claim is "forwarding does not
+   await the worker result", **not** zero added latency. Classifier timing semantics are unchanged.
+3. **Effective-profile provenance and drift, not invented ingress history.** The tested profile is the
+   EFFECTIVE runtime (not config-file intent): mitmproxy 12.2.3; `validate_inbound_headers=true`; HTTP/2
+   disabled; `stream_large_bodies=None`; `body_size_limit=None`; reverse-proxy to a dynamic **loopback**
+   port (represented by a closed marker, never the literal port or an arbitrary destination);
+   `connection_strategy=lazy`. A monotonic **relevant-profile generation** (bumped from the `configure()`
+   hook) detects an A→B→A option change between a request's capture and its reply, which value equality
+   cannot. A profile sampled at snapshot time is evidence of runtime state at that boundary, **not**
+   historical proof of the parser configuration when the ingress bytes were processed; pre-capture
+   changes remain unobservable and are stated as such. Profile metadata never comes from a client header
+   or an untrusted flow flag; results bind to an internal non-content snapshot id and the captured
+   generation (a matched reply id alone is not wire identity), and no request-content hash is introduced.
+4. **Conservative, precisely named positive observation.** `framing_evidence.evaluate` is the ONLY
+   producer of `PROFILE_MATCHED`, and only for: the documented snapshot-time profile, HTTP/1.1
+   origin/asterisk scope, complete body, valid reply correlation, unchanged observed generation
+   (capture == reply) and a canonical `OK`+`ACCEPT` from that exact snapshot. Its meaning is ONLY
+   "profile and observed snapshot met the defined conditions"; it is **not** `FRAMING_VERIFIED`, not safe
+   to forward, not approved Fast Path eligibility, not upstream equivalence. Canonical status/outcome and
+   the framing reason are kept as separate dimensions: a canonical `REJECT` (status OK + outcome REJECT)
+   is residual-framing failure for `R1`/`R2` and is never collapsed into a worker-infrastructure failure;
+   a reject before R1/R2 (`R4`…`R8`), a worker timeout, BUSY/DROP, or a missing result does not prove
+   residual success and is `UNATTESTABLE`/`UNAVAILABLE`, never `PROFILE_MATCHED`. HTTP/1.0, HTTP/2/3,
+   absolute/authority/other targets, CONNECT, missing/streamed body, missing provenance, stale/
+   cross-request replies (observer `ipc_id_mismatch`→EXCEPTION), invalid profile and missing dependencies
+   cannot produce `PROFILE_MATCHED`; `b""` stays distinct from `None`. bare-LF MAY reach `PROFILE_MATCHED`
+   under these limited semantics yet stays normalized traffic with wire verification **unavailable**;
+   obsolete-line-folding's canonical `R4` surfaces as `UNATTESTABLE`/`CANONICAL_REJECT`.
+5. **Default-off; framing never enables canonicalization.** `GatewayEvidence.canonical()` stays `None`
+   and `GatewayEvidence.framing()` stays `UNAVAILABLE`; the Fast Path stays ineligible (logs CONTINUE)
+   and never logs `FAST_ALLOW`. When `shadow_framing_observer` is on without the canonical observer, every
+   hooked request logs `FRAMING OBS UNAVAILABLE … NO_CANONICAL_OBSERVER` and **no** worker is started. A
+   profile-sampling failure emits an explicit `UNAVAILABLE`/`PROFILE_FIELD_UNAVAILABLE` line (never a
+   silent skip) and never changes the response. Lab settings are D69's (submission/decoded cap
+   1,048,576 bytes; `token_budget`/`count_tokens`/`max_bytes_per_token` unset → canonical size
+   `UNCHECKED`, a valid lab state; admission bounds; P9 observation behaviour retained). Any framing or
+   observer failure is logged and dropped and never changes the response; logs carry closed codes,
+   approved non-content ids and numeric timings only (no target, query, header value, body, content hash
+   or exception message).
+
+**Not approved / still pending (not changed by D70).** A future per-request `FRAMING_VERIFIED` and the
+project-owned, tested wire-level framing control it would require; what exact properties the pinned
+parser guarantees and whether its tolerated bare-LF/obs-fold behaviour is acceptable; which hop is
+attested and how a forwarded (possibly reserialized) request is bound to the inspected snapshot; HTTP/2
+or HTTP/3 evidence; an active Fast Path policy/enforcement; final V5 token budget B and canonical
+`Limits`; production operational limits; the br/zstd deployment pin + wheel-hash decision; the
+P9 superset-vs-R3 choice for active use; Model 2 / V5 serving; a real split/dataset freeze/training;
+FINAL; SSRF restoration; Q4_K_M authority. Runtime framing stays UNAVAILABLE/UNVERIFIED. A matched lab
+profile is not proof of verified wire framing; a `PROFILE_MATCHED` must never become a global or
+per-request VERIFIED constant without a separate owner ruling.
+
+**Relationship to earlier entries.** Implements the second #68 slice on top of D69's canonical observer
+(reuses its snapshot, worker, separate-process bounds and lab caps) and applies D56/D57/D63 (the
+canonical contract and its P4/P9 conditioning), D43/D44 (shadow work strictly after the verdict; the
+feature extractor's D1 input is untouched and nothing is fed to the frozen Analyzer), and D33 (the
+worker uses the data-plane interpreter). Amends no frozen file; the frozen specs (`f1580634…`,
+`54514850…`) and the sealed r4 preregistration (`1039a3dd…`) are unchanged. D52 stays a proposal. D56–D69
+stand. Nothing is superseded.
+
+**Evidence.** `reports/v5/hybrid/framing-attestation/README.md` and `acceptance-review.md` (Track C
+preservation/privacy review); `reports/v5/canonical-request-v1/wire-evidence-v2/` (Track B real
+raw-socket lab: profile `is_tested_profile()`=true, gen 0; `wire_control_demonstrated`=true and
+`framing_control_demonstrated`=true via the `validate_inbound_headers` true/false drift; of 14 R1
+vectors 11×400 / 1 reset / 2 normalized-forward, not asserted as 14 HTTP rejects; obs-fold R4 →
+UNATTESTABLE, bare-LF → PROFILE_MATCHED-but-wire-unverified, absolute-form → UNAVAILABLE out-of-scope);
+`data_plane/framing_evidence.py`, `data_plane/canonical_observer.py`, `data_plane/data_plane.py`,
+`config.yaml`; focused tests (run per module to avoid a pre-existing cross-module mitmproxy
+logging-teardown artifact): `tests/test_framing_evidence.py` (38), `tests/test_canonical_observer.py`
+(31), `tests/test_canonical_adapter.py` (16), `tests/test_data_plane_canonical_observer.py` (21),
+`tests/test_data_plane_framing_observer.py` (29), `tests/test_data_plane_fast_path.py` (17),
+`tests/test_data_plane_shadow_integration.py` (2), `tests/test_wire_evidence_harness.py` (35) — 189 pass,
+0 fail, 0 skip. The known valid-obs-text V4 `UnicodeEncodeError` in `render_request` (503, zero
+classifier calls, framing never reached) is **preserved and disclosed, not fixed** here. The runtime
+generation-drift interleaving is a labelled unit simulation; the live lab cannot change an option in the
+sub-millisecond capture→reply window.
+
+### D70 — correction pass (2026-10-22; NO new approval, NO scope change)
+
+A focused correction pass repaired three independently reproduced defects WITHIN D70's existing
+observe-only, default-off boundaries (the D70 ruling above is unchanged; this records the corrections,
+not a new or widened approval). Each defect was reproduced with a failing test first, then fixed.
+
+- **A — HTTP/1.0 wrongly reached `PROFILE_MATCHED`.** `evaluate()` received no original version, and the
+  shared adapter admits HTTP/1.0 (which canonicalizes ACCEPT). Fix: the ORIGINAL received version is
+  carried on the same immutable `Capture` (never inferred from normalized canonical text) and `evaluate`
+  now REQUIRES `http_version` and admits a positive only for EXACTLY `HTTP/1.1`. Before: HTTP/1.0 OK+ACCEPT
+  → PROFILE_MATCHED. After: → `UNATTESTABLE`/`HTTP_VERSION_NOT_11` (new closed reason); HTTP/1.1 unchanged;
+  HTTP/2+ keep the UNAVAILABLE/HTTP_VERSION_OUT_OF_SCOPE path. HTTP/1.0 is NOT removed from the adapter.
+- **B — mode normalization accepted untested profiles and hid drift.** `_canon_mode`/loopback test ignored
+  transport and accepted a lexical `127.` prefix. Fix: validate reverse mode structure + transport (exactly
+  `http`) + address (loopback IP literal via `ipaddress`, or `localhost`; a DNS lookalike like
+  `127.synthetic.invalid` is rejected; no DNS/connect). The PUBLIC closed marker
+  (`reverse_proxy:loopback_dynamic_port`, logged) is separated from an INTERNAL `mode_fingerprint`
+  (concrete transport+host+port, never logged) used only for generation. Before: `https`/`http3`/DNS
+  lookalikes all `is_tested_profile()`=true, and HTTP→HTTPS→HTTP gave generations [0,0,0]. After: only
+  reverse+http+loopback-literal is tested, and HTTP→HTTPS→HTTP gives [0,1,2] (A→B→A detected); across-run
+  dynamic ports still share the tested class.
+- **C — reservation ownership (stuck reservation + stale release).** The boolean `_busy` was replaced by a
+  single-use reservation TOKEN owned by the admitted capture. `release_captured` is idempotent and
+  token-scoped (frees only its own active reservation; a stale/late handle is a no-op); `run_captured` is
+  single-use (a consumed capture returns `EXCEPTION detail="capture_consumed"`, no worker exchange). The
+  gateway adds a done-callback BACKSTOP (frees a reservation if the completion task is cancelled before it
+  first runs) and closes the un-awaited coroutine on a scheduling failure. Before: cancelling the scheduled
+  task before it ran left the observer wedged at BUSY, and an unconditional release could free a newer
+  reservation. After: neither can occur.
+
+Two integration repairs in the coordinator file `data_plane.py` are disclosed and attributed to the
+coordinator (not claimed as independent track work): **C1** — a profile-sampling failure now emits an
+explicit `UNAVAILABLE`/`PROFILE_FIELD_UNAVAILABLE` line instead of silently skipping it (never changing the
+response); and a **TypeError** in the framing-on-without-canonical-observer branch (it called `evaluate`
+without the new required `http_version`) now passes `http_version=None` and yields
+`UNAVAILABLE`/`NO_CANONICAL_OBSERVER`.
+
+**Evidence (corrected state).** `reports/v5/canonical-request-v1/wire-evidence-v2/corrected/` (the corrected
+raw-socket lab; wire-evidence-v1 AND the prior wire-evidence-v2 run preserved byte-for-byte, SHA-256
+compared; the corrected run records the HTTP/1.0 vector → UNATTESTABLE/HTTP_VERSION_NOT_11 beside the
+HTTP/1.1 positive, and `config_yaml_sha256`=`94adc604…` with a provenance note that the prior run's
+`23c1854…` differed only by the later coordinator comment-only label edit). Updated `acceptance-review.md`
+(8 gates + 3 defects PASS; D70 recorded as APPROVED, C1 as RESOLVED). Focused tests, run per module: 217
+pass, 0 fail, 0 skip (`test_framing_evidence` 43, `test_canonical_observer` 38, `test_canonical_adapter` 16,
+`test_data_plane_canonical_observer` 21, `test_data_plane_framing_observer` 40, `test_data_plane_fast_path`
+17, `test_data_plane_shadow_integration` 2, `test_wire_evidence_harness` 40). Capture overhead re-measured
+after the reservation-token change with no material difference: at the 1 MiB cap capture p95 ≈ 0.44 ms and
+max ≈ 1.0 ms (a tail sample 1.095 ms — NOT uniformly sub-millisecond), distinct from the ≈10 ms p50
+capture→reply round trip the request never awaits. The frozen hashes (`f1580634…`, `54514850…`,
+`1039a3dd…`) are unchanged. The known valid-obs-text V4 `UnicodeEncodeError` remains preserved and
+disclosed (503, zero classifier calls), not fixed.
+
 ---
 
 ## Decision index
@@ -3305,6 +3467,7 @@ cancellability, justifies the separate process.
 | D67 | V5 post-filter audit: AI-assisted third review (R3 = ChatGPT GPT-6) replaces the unavailable blind human review (disclosed post-hoc deviation, not equivalent); `V5-DATA-SPEC-r4` FROZEN (SHA-256 `54514850…`, from frozen r3 `f1580634…` via validated diff); criteria preregistered (`1039a3dd…`): INCORRECT ≤20% / U+I ≤35% / coverage 100% / 0 unresolved, agreement diagnostic-only, no small-n exception; SSRF NOT SUPPORTED (21/50 C1 fail); majority only with 3 labels else UNRESOLVED→owner; AI_AUDITED/PASS_AI_AUDITED≠VERIFIED; FINAL training BLOCKED | APPROVED | DONE (r4 frozen; prereg sealed; audit pending, R3 not run, #77) |
 | D68 | V5 `names_family` integration (DR-75): value precedence Option B `symbols>streets>names_family>names_given>prose_en` for the five examined pools only (redistributes 782 representatives; 84,252 kept / 849 excluded, coverage invariant; no security claim); dataset-source use of the pinned snapshot approved (not VERIFIED, no real build/freeze/training); ß/ss keeps the content-hash representative for the 2 internal groups with a ledger; no frozen spec / sealed prereg edited; future prereg must incorporate | APPROVED | DONE (status/tests, fixtures only; uncommitted; no real split, #75) |
 | D69 | #68 first bounded slice: default-off canonical-request/v1 shadow OBSERVATION in a SEPARATE worker process (data-plane interpreter, no ML), after the V4 verdict, never awaited; scoped D56 gateway import via the observer (feature extractor + V4 path stay contract-free; D1 unchanged); lab-only HTTP/1.1, submission/decoded cap 1,048,576 B, token_budget=None → size UNCHECKED (Fast Path stays ineligible, GatewayEvidence.canonical=None); P9 superset retained for observation only; REJECT = successful observation; separate process because canonicalize is not CPU-light (~28 ms/1 MiB). Not approved: B/production limits, br/zstd pins, framing VERIFIED, HTTP/2, Fast Path enforcement, Model 2/V5, real split/freeze/train, FINAL, SSRF, Q4_K_M | APPROVED | DONE (integrated default-off; uncommitted; no enforcement, #68) |
+| D70 | #68 second bounded slice: default-off per-request HTTP/1.1 framing OBSERVATION bound to the D69 canonical snapshot (one canonicalize, one body copy); synchronous `capture()` of profile+immutable snapshot at the post-V4 boundary + async `run_captured()` never awaited; conservative `PROFILE_MATCHED` only (tested effective profile + HTTP/1.1 origin/asterisk + complete body + valid correlation + unchanged relevant-profile generation + canonical OK+ACCEPT), else UNATTESTABLE/UNAVAILABLE; GatewayEvidence stays canonical=None/framing=UNAVAILABLE, no FRAMING_VERIFIED, no client reject. Correction pass (2026-10-22, no new approval) fixed 3 reproduced defects: HTTP/1.0 exclusion (version from the snapshot; new reason HTTP_VERSION_NOT_11), mode transport+address validation + public marker vs internal fingerprint (A→B→A drift), single-use token reservation (pre-start-cancel + stale-release). Not approved: framing VERIFIED + wire-level control, HTTP/2, Fast Path enforcement, B/`Limits`, production limits, Model 2/V5, FINAL/SSRF/Q4_K_M | APPROVED | DONE (integrated default-off; uncommitted; no enforcement, #68) |
 
 ---
 

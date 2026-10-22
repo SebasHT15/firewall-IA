@@ -59,7 +59,14 @@ def _build():
             max_decoded_body=int(os.environ.get("WIRE_LAB_MAX_DECODED_BODY", str(1 << 20))),
         )
         observer = dp.build_canonical_observer(cfg)
-    return dp.FirewallGateway(classifier_url, timeout, canonical_observer=observer)
+    # Track B (v2): when WIRE_LAB_FRAMING=1, construct the REAL gateway with the shadow FRAMING
+    # observer ON. mitmproxy then drives the gateway's own configure() hook (sampling the EFFECTIVE
+    # profile and establishing the relevant-profile generation baseline) and a FRAMING OBS line is
+    # logged beside each CANONICAL OBS line. If framing is on but there is NO canonical observer, the
+    # gateway logs FRAMING OBS UNAVAILABLE (NO_CANONICAL_OBSERVER) and starts no worker — by design.
+    framing = os.environ.get("WIRE_LAB_FRAMING") == "1"
+    return dp.FirewallGateway(classifier_url, timeout, canonical_observer=observer,
+                              framing_observer=framing)
 
 
 addons = [EffectiveOptions(), _build()]

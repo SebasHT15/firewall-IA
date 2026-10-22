@@ -74,3 +74,19 @@ data_plane:
   #   restart_backoff_seconds: 2           # minimum wait before replacing a killed/crashed worker
   #   max_consecutive_failures: 3          # then the observer gives up until the gateway restarts
   #   max_decoded_body: 1048576            # 1 MiB R8 decode cap (lab); token budget stays unset
+
+  # Issue #68 — per-request HTTP/1.1 framing OBSERVATION (Track A; D70; observe-only).
+  # (data_plane/framing_evidence.py). OFF unless set true; shown here deliberately NOT enabled. When
+  # on, each request that reaches the hook also gets a "FRAMING OBS" line stating whether the EFFECTIVE
+  # mitmproxy runtime profile was the tested one (mitmproxy 12.2.3, validate_inbound_headers=true,
+  # HTTP/2 off, reverse-proxy to a loopback port, connection_strategy=lazy) AND the canonical snapshot
+  # met the defined conditions (HTTP/1.1 origin/asterisk, complete body, valid correlation, unchanged
+  # relevant-profile generation, canonical ACCEPT) → PROFILE_MATCHED; anything else → UNATTESTABLE or
+  # UNAVAILABLE with a closed reason. It reuses the canonical observer's ONE bounded snapshot and ONE
+  # canonical result (no second canonicalization) and binds the profile to that same snapshot. It NEVER
+  # sets fast_path.FRAMING_VERIFIED, feeds the Fast Path, changes GatewayEvidence (framing stays
+  # UNAVAILABLE, canonical None), or issues any client-visible reject. PROFILE_MATCHED is NOT a wire
+  # VERIFIED, not safe-to-forward, not Fast Path eligibility. Requires the canonical observer above: if
+  # true while shadow_canonical_observer is off, every request logs FRAMING OBS UNAVAILABLE and NO
+  # worker is started (framing never implicitly enables canonicalization). Lab/observation only (D70).
+  shadow_framing_observer: false

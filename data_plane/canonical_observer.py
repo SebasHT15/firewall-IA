@@ -131,6 +131,13 @@ class FrameError(ValueError):
     """A malformed or over-long IPC frame. Always fatal to the worker (kill, no reuse)."""
 
 
+class _Reservation:
+    """A unique single-use token identifying one admitted capture's claim on the single in-flight
+    slot. Identity (not equality) is what matters: a release or a run only acts when its capture's
+    token IS the observer's currently-active reservation."""
+    __slots__ = ()
+
+
 # ── frame envelope ───────────────────────────────────────────────────────────
 def encode_frame(payload: bytes, max_bytes: int) -> bytes:
     if len(payload) > max_bytes:
@@ -301,6 +308,40 @@ def format_record(tag: str, obs: CanonicalObservation) -> str:
     return " ".join(parts)
 
 
+# ── the synchronous-capture handle ─────────────────────────────────────────────
+@dataclass
+class Capture:
+    """The result of the SYNCHRONOUS `capture()` boundary step. Either:
+
+      * EARLY (`is_early=True`): a cheap gate already decided the outcome (disabled/busy/out-of-scope/
+        body-unavailable/drop/unavailable/adapter-error). It carries a ready `CanonicalObservation`
+        and holds NO worker reservation; `run_captured` returns that observation immediately.
+      * ADMITTED (`is_early=False`): the request passed every gate, a single-use RESERVATION token
+        has been taken, and the immutable snapshot has been built once and encoded into `frame`.
+        `run_captured` performs the IPC exchange and releases the reservation (token-scoped) in its
+        finally.
+
+    `profile`, `profile_generation`, `form` and `http_version` are bound for the framing-observation
+    log line (the gateway reads them back); the observer itself never interprets
+    `profile`/`profile_generation`. `http_version` is the ORIGINAL received version, taken from the
+    SAME immutable snapshot (never inferred from normalized canonical text). `reservation` is the
+    token this admitted capture holds; `consumed` marks it spent (run once or released) so a repeated
+    run or a stale/late release is a safe no-op.
+    """
+    is_early: bool
+    form: Optional[str] = None
+    http_version: Optional[str] = None                    # ORIGINAL received version (snapshot-time)
+    profile: object = None
+    profile_generation: Optional[int] = None
+    observation: Optional[CanonicalObservation] = None    # early only
+    proc: object = None                                   # admitted only
+    snapshot_id: Optional[int] = None                     # admitted only
+    frame: Optional[bytes] = None                         # admitted only
+    started: Optional[float] = None                       # admitted only (perf_counter at capture)
+    reservation: object = None                            # admitted only: the single-use token
+    consumed: bool = False                                # True once run or released (idempotency)
+
+
 # ── worker environment / argv ─────────────────────────────────────────────────
 def worker_environment() -> dict:
     """What the worker gets: the PATH and a no-bytecode flag, nothing else (no proxy variables,
@@ -352,7 +393,10 @@ class ProcessCanonicalObserver:
         self._clock = clock
         self._proc: Optional[asyncio.subprocess.Process] = None
         self.worker_version: Optional[str] = None
-        self._busy = False
+        # Single-in-flight reservation: holds the active capture's unique token, or None when idle.
+        # Replaces the old boolean `_busy` so a release can be scoped to the exact token that owns the
+        # reservation (a stale/late release can never free a newer one).
+        self._reservation: Optional[_Reservation] = None
         self._start_task: Optional[asyncio.Task] = None
         self._failures = 0
         self._not_before = 0.0
@@ -362,6 +406,9 @@ class ProcessCanonicalObserver:
         self._next_id = 0
         self.spawn_count = 0
         self.kill_count = 0
+        # Background reap tasks for workers found dead during a synchronous capture() (see
+        # _schedule_reap): tracked so they are not garbage-collected mid-flight.
+        self._reap_tasks: set = set()
 
     # -- introspection ----------------------------------------------------------
     @property
@@ -531,88 +578,208 @@ class ProcessCanonicalObserver:
         proc = self._proc
         if proc is not None:
             await self._kill(proc)            # kill (idempotent) + reap + close transports + drop
+        # Drain any background reap tasks scheduled by capture() for earlier dead workers.
+        if self._reap_tasks:
+            for task in list(self._reap_tasks):
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+                except Exception:  # noqa: BLE001 — shutdown best-effort; _kill already guards
+                    pass
 
-    # -- one observation --------------------------------------------------------
-    async def observe(self, req) -> CanonicalObservation:
-        """Observe one request. Cheap gates run first so a closed/disabled/busy observer, an
-        out-of-scope or a body-unavailable request, and an oversize request are all decided WITHOUT
-        materializing the header tuple or serializing anything. The request never awaits this: the
-        gateway already runs it in a background task, so V4 responsiveness is unaffected."""
+    # -- synchronous worker reaping (no await) ----------------------------------
+    def _schedule_reap(self, proc) -> None:
+        """Reap a worker found dead during the SYNCHRONOUS capture() WITHOUT blocking the hook.
+
+        capture() cannot await, but a dead worker still needs its PID reaped and its pipe transports
+        closed (otherwise a `BaseSubprocessTransport.__del__: Event loop is closed` warning is
+        emitted at GC). We therefore fire-and-forget the existing `_kill` coroutine as a tracked
+        task when a loop is running. `_kill` is idempotent and only clears `self._proc` when it is
+        still this exact handle, so a restart that has already installed a NEW worker is never
+        disturbed. When there is NO running loop (e.g. a bare prewarm during setup), we kill the PID
+        synchronously and close the transports, deferring the actual wait()-reap to the next
+        aclose()/OS collection — exactly as close() documents."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            if proc.returncode is None:
+                try:
+                    proc.kill()
+                except ProcessLookupError:
+                    pass
+            self._close_transports(proc)
+            return
+        task = loop.create_task(self._kill(proc))
+        self._reap_tasks.add(task)
+        task.add_done_callback(self._reap_tasks.discard)
+
+    # -- reservation helpers (token-scoped, single-in-flight) -------------------
+    def _release_reservation(self, token) -> None:
+        """Clear the active reservation ONLY if `token` still owns it. A stale/late token (one a
+        newer reservation has already superseded) is a no-op, so it can never free a newer claim."""
+        if token is not None and self._reservation is token:
+            self._reservation = None
+
+    # -- synchronous capture + async run ----------------------------------------
+    def capture(self, req, *, profile=None, profile_generation=None) -> Capture:
+        """SYNCHRONOUS boundary step: run every cheap gate, take the single-use RESERVATION token iff
+        admitted, then build the ONE immutable snapshot and encode its frame — all without awaiting
+        and without raising. Any failure is guarded into an EARLY Capture carrying a ready
+        CanonicalObservation; only an ADMITTED Capture holds the reservation (released later by
+        run_captured's token-scoped finally, or by release_captured if it is never run).
+
+        The gates are, in order, exactly today's observe() steps: closed/permanent/busy; cheap
+        classify_raw; body-none; out-of-scope; cheap admit_raw; worker availability resolved WITHOUT
+        awaiting (a dead worker is reaped via _schedule_reap and a restart scheduled via the existing
+        non-awaiting _maybe_start). No header tuple or body copy is made on any cheap path; the single
+        body copy happens only in build_snapshot for an admitted request. `http_version` (the ORIGINAL
+        received version) is bound onto EVERY capture from the same classification, never inferred
+        from normalized canonical text."""
         started = time.perf_counter()
 
         def elapsed() -> float:
             return (time.perf_counter() - started) * 1000
 
-        # 1. Cheapest gates: no snapshot is built for a closed/disabled/busy observer.
-        if self._closed:
-            return CanonicalObservation(UNAVAILABLE, detail="worker_disabled", elapsed_ms=elapsed())
-        if self._permanent:
-            return CanonicalObservation(UNAVAILABLE, detail=self._permanent, elapsed_ms=elapsed())
-        if self._busy:   # no await between check and set: asyncio is single-threaded
-            return CanonicalObservation(BUSY, detail="in_flight", elapsed_ms=elapsed())
+        def early(obs: CanonicalObservation, form=None, version=None) -> Capture:
+            return Capture(is_early=True, form=form, http_version=version, profile=profile,
+                           profile_generation=profile_generation, observation=obs)
 
-        # 2. Cheap request classification (no header-tuple materialization, no body copy).
         try:
-            info = adapter.classify_raw(req)
-        except Exception as exc:  # noqa: BLE001 — type only, never a message
-            return CanonicalObservation(ADAPTER_ERROR, detail=f"classify:{type(exc).__name__}",
-                                        elapsed_ms=elapsed())
-        if info.body_is_none:
-            return CanonicalObservation(BODY_UNAVAILABLE, detail="raw_content_none",
-                                        target_form=info.form, elapsed_ms=elapsed())
-        if not info.in_scope:
-            return CanonicalObservation(OUT_OF_SCOPE, detail=info.scope_reason,
-                                        target_form=info.form, elapsed_ms=elapsed())
+            # 1. Cheapest gates: no snapshot for a closed/disabled/busy observer.
+            if self._closed:
+                return early(CanonicalObservation(UNAVAILABLE, detail="worker_disabled",
+                                                  elapsed_ms=elapsed()))
+            if self._permanent:
+                return early(CanonicalObservation(UNAVAILABLE, detail=self._permanent,
+                                                  elapsed_ms=elapsed()))
+            if self._reservation is not None:   # single in-flight: a reservation is already active
+                return early(CanonicalObservation(BUSY, detail="in_flight", elapsed_ms=elapsed()))
 
-        # 3. Cheap admission scan with early exit (never builds the adapter's header tuple).
-        try:
-            drop = adapter.admit_raw(req, self.caps, info)
-        except Exception as exc:  # noqa: BLE001
-            return CanonicalObservation(ADAPTER_ERROR, detail=f"admit:{type(exc).__name__}",
-                                        elapsed_ms=elapsed())
-        if drop is not None:
-            return CanonicalObservation(DROP, detail=drop, target_form=info.form,
-                                        elapsed_ms=elapsed())
+            # 2. Cheap request classification (no header-tuple materialization, no body copy).
+            try:
+                info = adapter.classify_raw(req)
+            except Exception as exc:  # noqa: BLE001 — type only, never a message
+                return early(CanonicalObservation(ADAPTER_ERROR,
+                                                  detail=f"classify:{type(exc).__name__}",
+                                                  elapsed_ms=elapsed()))
+            version = info.http_version          # ORIGINAL received version, from this classification
+            if info.body_is_none:
+                return early(CanonicalObservation(BODY_UNAVAILABLE, detail="raw_content_none",
+                                                  target_form=info.form, elapsed_ms=elapsed()),
+                             form=info.form, version=version)
+            if not info.in_scope:
+                return early(CanonicalObservation(OUT_OF_SCOPE, detail=info.scope_reason,
+                                                  target_form=info.form, elapsed_ms=elapsed()),
+                             form=info.form, version=version)
 
-        # 4. Worker availability (restart logic). Only ADMITTED work reaches here.
-        proc = self._proc
-        if proc is not None and proc.returncode is not None:
-            await self._kill(proc)
-            self._cause = "worker_restarting"
-            self._note_failure()
-            proc = None
-        if proc is None:
-            detail = self._current_unavailable()
-            self._maybe_start()
-            if self._start_task is not None and not self._start_task.done():
-                detail = "worker_starting"
-            return CanonicalObservation(UNAVAILABLE, detail=self._permanent or detail,
-                                        elapsed_ms=elapsed())
+            # 3. Cheap admission scan with early exit (never builds the adapter's header tuple).
+            try:
+                drop = adapter.admit_raw(req, self.caps, info)
+            except Exception as exc:  # noqa: BLE001
+                return early(CanonicalObservation(ADAPTER_ERROR, detail=f"admit:{type(exc).__name__}",
+                                                  elapsed_ms=elapsed()), form=info.form, version=version)
+            if drop is not None:
+                return early(CanonicalObservation(DROP, detail=drop, target_form=info.form,
+                                                  elapsed_ms=elapsed()), form=info.form, version=version)
 
-        # 5. Materialize the immutable, uniquely-correlated snapshot only now, and serialize it.
-        self._next_id += 1
-        snapshot_id = self._next_id
-        try:
-            snapshot = adapter.build_snapshot(req, snapshot_id)
-            payload = encode_snapshot(snapshot, self.max_decoded_body)
-        except Exception as exc:  # noqa: BLE001
-            return CanonicalObservation(ADAPTER_ERROR, detail=f"build:{type(exc).__name__}",
-                                        elapsed_ms=elapsed())
-        # Enforce the serialized-snapshot limit explicitly (not merely the larger frame envelope).
-        if len(payload) > self.caps.max_snapshot_bytes:
-            return CanonicalObservation(DROP, detail="snapshot_too_large", target_form=info.form,
-                                        elapsed_ms=elapsed())
-        try:
-            frame = encode_frame(payload, self.caps.max_frame_bytes)
-        except FrameError:
-            return CanonicalObservation(DROP, detail="snapshot_too_large", target_form=info.form,
-                                        elapsed_ms=elapsed())
+            # 4. Worker availability WITHOUT awaiting. Only ADMITTED work reaches here.
+            proc = self._proc
+            if proc is not None and proc.returncode is not None:
+                self._proc = None            # drop the handle first so a restart can install a new one
+                self._schedule_reap(proc)    # fire-and-forget reap: never blocks the hook
+                self._cause = "worker_restarting"
+                self._note_failure()
+                proc = None
+            if proc is None:
+                detail = self._current_unavailable()
+                self._maybe_start()          # non-awaiting: schedules the background start task
+                if self._start_task is not None and not self._start_task.done():
+                    detail = "worker_starting"
+                return early(CanonicalObservation(UNAVAILABLE, detail=self._permanent or detail,
+                                                  elapsed_ms=elapsed()), form=info.form, version=version)
 
-        self._busy = True
+            # 5. Take the single-use reservation iff admitted, THEN the one snapshot copy + encode.
+            token = _Reservation()
+            self._reservation = token
+            self._next_id += 1
+            snapshot_id = self._next_id
+            try:
+                snapshot = adapter.build_snapshot(req, snapshot_id)
+                payload = encode_snapshot(snapshot, self.max_decoded_body)
+            except Exception as exc:  # noqa: BLE001 — release the reservation we just took
+                self._release_reservation(token)
+                return early(CanonicalObservation(ADAPTER_ERROR, detail=f"build:{type(exc).__name__}",
+                                                  elapsed_ms=elapsed()), form=info.form, version=version)
+            # Enforce the serialized-snapshot limit explicitly (not merely the larger frame envelope).
+            if len(payload) > self.caps.max_snapshot_bytes:
+                self._release_reservation(token)
+                return early(CanonicalObservation(DROP, detail="snapshot_too_large",
+                                                  target_form=info.form, elapsed_ms=elapsed()),
+                             form=info.form, version=version)
+            try:
+                frame = encode_frame(payload, self.caps.max_frame_bytes)
+            except FrameError:
+                self._release_reservation(token)
+                return early(CanonicalObservation(DROP, detail="snapshot_too_large",
+                                                  target_form=info.form, elapsed_ms=elapsed()),
+                             form=info.form, version=version)
+
+            # ADMITTED: the reservation is held; run_captured will do the IPC and release the token.
+            return Capture(is_early=False, form=info.form, http_version=version, profile=profile,
+                           profile_generation=profile_generation, proc=proc,
+                           snapshot_id=snapshot_id, frame=frame, started=started, reservation=token)
+        except Exception as exc:  # noqa: BLE001 — capture() must NEVER raise into the hook
+            # The only reservation site is step 5, which has its own token-scoped release paths;
+            # reaching here means an unexpected fault before/around them, so no token is held.
+            return early(CanonicalObservation(ADAPTER_ERROR, detail=f"capture:{type(exc).__name__}",
+                                              elapsed_ms=elapsed()))
+
+    async def run_captured(self, capture: Capture) -> CanonicalObservation:
+        """Complete a Capture, SINGLE-USE. An EARLY capture returns its ready observation (nothing to
+        release). An already-consumed capture (run once, or released) returns a safe closed
+        `EXCEPTION capture_consumed` WITHOUT touching the worker or any state. Otherwise it marks the
+        capture consumed, performs the IPC exchange under the single whole-exchange deadline (SAME
+        timeout/cancel/broken-pipe/id-mismatch handling; an id mismatch stays `EXCEPTION
+        ipc_id_mismatch`, so a cross/late reply can never be attributed here), and in `finally`
+        releases the reservation TOKEN-SCOPED (only if this capture's token is still the active one)."""
+        if capture.is_early:
+            return capture.observation
+        if capture.consumed:
+            # Guards a double-run and a run after release: no worker exchange, no state change.
+            spent = ((time.perf_counter() - capture.started) * 1000
+                     if capture.started is not None else 0.0)
+            return CanonicalObservation(EXCEPTION, detail="capture_consumed", elapsed_ms=spent)
+        capture.consumed = True
         try:
-            return await self._exchange(proc, snapshot_id, frame, started)
+            return await self._exchange(capture.proc, capture.snapshot_id, capture.frame,
+                                        capture.started)
         finally:
-            self._busy = False
+            self._release_reservation(capture.reservation)
+
+    def release_captured(self, capture: Capture) -> None:
+        """Release the reservation held by an ADMITTED capture that will NOT be run (e.g. the gateway
+        could not schedule run_captured, or a task was cancelled BEFORE its coroutine first ran).
+        SYNCHRONOUS, never awaits, never raises. IDEMPOTENT and TOKEN-SCOPED: it frees the slot ONLY
+        when this capture's token still owns the active reservation, then marks the capture consumed.
+        A no-op for an early/`None`/already-consumed/stale (old-handle) capture — so a delayed
+        done-callback or an old handle can NEVER free a newer reservation. The worker was never
+        written to (capture only built/encoded the frame), so it stays in sync and is left running."""
+        try:
+            if capture is None or capture.is_early or capture.consumed:
+                return
+            self._release_reservation(capture.reservation)   # frees only if still the active token
+            capture.consumed = True                           # this handle is now spent
+        except Exception:  # noqa: BLE001 — must never raise into the hook
+            pass
+
+    # -- one observation (back-compat wrapper) ----------------------------------
+    async def observe(self, req) -> CanonicalObservation:
+        """Observe one request = capture() then run_captured(). Preserved so existing callers/tests
+        keep working; the gateway wiring uses capture()/run_captured() directly so the request never
+        awaits the completion. Reservation/BUSY semantics (no queue, single in-flight) are identical
+        end to end."""
+        return await self.run_captured(self.capture(req))
 
     async def _write_and_read(self, proc, frame: bytes) -> bytes:
         """Write the snapshot frame, drain it, then read exactly one reply frame. The caller wraps
@@ -636,8 +803,8 @@ class ProcessCanonicalObserver:
             return CanonicalObservation(TIMEOUT, detail="worker_killed", elapsed_ms=elapsed())
         except asyncio.CancelledError:
             # Cancelled mid-exchange: the worker may hold an undelivered reply and be
-            # desynchronised. Invalidate it (SIGKILL + reap) and NEVER reuse it; _busy is released
-            # by observe()'s finally. Then propagate the cancellation.
+            # desynchronised. Invalidate it (SIGKILL + reap) and NEVER reuse it; the reservation is
+            # released (token-scoped) by run_captured()'s finally. Then propagate the cancellation.
             await self._kill(proc)
             self._note_failure()
             raise

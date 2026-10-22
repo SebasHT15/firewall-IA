@@ -180,7 +180,7 @@ class TestLocalStatuses(ObserverTestCase):
 
     async def test_busy_when_one_is_in_flight(self):
         o = self.real()
-        o._busy = True                        # simulate an observation already running
+        o._reservation = obs_mod._Reservation()                        # simulate an observation already running
         result = await o.observe(req())
         self.assertEqual(result.status, obs_mod.BUSY)
 
@@ -272,7 +272,7 @@ class TestExchangeDeadline(ObserverTestCase):
                                          headers=[(b"Content-Type", b"text/plain")], content=big))
             self.assertEqual(result.status, obs_mod.TIMEOUT)
             self.assertEqual(result.detail, "worker_killed")
-            self.assertFalse(o._busy)         # released even though drain was blocked
+            self.assertIsNone(o._reservation)         # released even though drain was blocked
             self.assertIsNone(o.worker_pid)   # killed and reaped
             self.assertFalse(_pid_alive(pid))
         finally:
@@ -290,7 +290,7 @@ class TestExchangeDeadline(ObserverTestCase):
             task.cancel()
             with self.assertRaises(asyncio.CancelledError):
                 await task
-            self.assertFalse(o._busy)         # released on cancellation
+            self.assertIsNone(o._reservation)         # released on cancellation
             self.assertIsNone(o._proc)        # invalidated, never reused
             self.assertFalse(_pid_alive(pid))
         finally:
@@ -315,9 +315,9 @@ class TestCheapAdmission(ObserverTestCase):
 
         with patch.object(adapter, "build_snapshot", counting):
             o = self.real(caps=obs_mod.AdmissionCaps(max_body_bytes=8))
-            o._busy = True
+            o._reservation = obs_mod._Reservation()
             self.assertEqual((await o.observe(req())).status, obs_mod.BUSY)
-            o._busy = False
+            o._reservation = None
             self.assertEqual((await o.observe(req(authority=b"h.example:80"))).status,
                              obs_mod.OUT_OF_SCOPE)
             self.assertEqual((await o.observe(req(content=None))).status, obs_mod.BODY_UNAVAILABLE)
@@ -408,6 +408,216 @@ class TestLogLineSecrecy(ObserverTestCase):
                   req(path=b"/SECRETPATH", content=None)):                             # BODY_UNAVAILABLE
             result = await o.observe(r)
             self._assert_clean(obs_mod.format_record("tag00001", result))
+
+
+class TestCaptureRunSplit(ObserverTestCase):
+    """The capture()/run_captured() split: capture() is synchronous, never awaits, never raises,
+    takes the single-use reservation token iff admitted, binds profile/form/version, and builds
+    exactly one snapshot."""
+
+    async def test_capture_is_synchronous_and_binds_profile_and_form(self):
+        o = self.real()                                   # no worker needed: out-of-scope is a cheap gate
+        cap = o.capture(req(authority=b"h.example:80"), profile="P", profile_generation=7)
+        self.assertTrue(cap.is_early)
+        self.assertEqual(cap.observation.status, obs_mod.OUT_OF_SCOPE)
+        self.assertEqual(cap.form, adapter.FORM_ABSOLUTE)
+        self.assertEqual(cap.profile, "P")                # bound verbatim for the framing line
+        self.assertEqual(cap.profile_generation, 7)
+        self.assertEqual(o.spawn_count, 0)                # never reached the worker
+        # run_captured on an early capture just returns the ready observation (nothing to release).
+        self.assertEqual((await o.run_captured(cap)).status, obs_mod.OUT_OF_SCOPE)
+
+    async def test_capture_never_raises_on_a_bad_object(self):
+        o = self.real()
+        cap = o.capture(object())                         # not a mitmproxy request
+        self.assertTrue(cap.is_early)
+        self.assertEqual(cap.observation.status, obs_mod.ADAPTER_ERROR)
+        self.assertIsNone(o._reservation)                         # no reservation left behind
+
+    async def test_admitted_capture_reserves_busy_synchronously_then_releases(self):
+        o = await self.start(self.real())
+        cap = o.capture(req(method=b"POST", path=b"/x",
+                            headers=[(b"Content-Type", b"text/plain")], content=b"hi"),
+                        profile="P", profile_generation=3)
+        self.assertFalse(cap.is_early)                    # admitted
+        self.assertIsNotNone(o._reservation)                          # reserved WITHOUT any await
+        self.assertEqual(cap.form, adapter.FORM_ORIGIN)
+        self.assertEqual(cap.profile_generation, 3)
+        # A second capture, before run_captured, sees the single-in-flight reservation.
+        busy = o.capture(req())
+        self.assertTrue(busy.is_early)
+        self.assertEqual(busy.observation.status, obs_mod.BUSY)
+        # Completing the first exchange releases the reservation.
+        result = await o.run_captured(cap)
+        self.assertEqual(result.status, obs_mod.OK)
+        self.assertEqual(result.outcome, "ACCEPT")
+        self.assertIsNone(o._reservation)
+
+    async def test_capture_builds_exactly_one_snapshot_for_an_admitted_request(self):
+        calls = []
+        real_build = adapter.build_snapshot
+
+        def counting(r, sid):
+            calls.append(sid)
+            return real_build(r, sid)
+
+        with patch.object(adapter, "build_snapshot", counting):
+            o = await self.start(self.real())
+            cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+            await o.run_captured(cap)
+        self.assertEqual(len(calls), 1)                   # ONE body copy, in capture() only
+
+    async def test_capture_reaps_a_dead_worker_without_blocking_and_restarts(self):
+        o = await self.start(self.real(backoff=0.0))
+        pid = o.worker_pid
+        self.assertIsNotNone(pid)
+        os.kill(pid, 9)                                   # kill the worker out from under the observer
+        for _ in range(100):                              # let the loop record the child exit
+            if o._proc is None or o._proc.returncode is not None:
+                break
+            await asyncio.sleep(0.01)
+        cap = o.capture(req())                            # synchronous: must not block on the reap
+        self.assertTrue(cap.is_early)
+        self.assertEqual(cap.observation.status, obs_mod.UNAVAILABLE)
+        self.assertIsNone(o._proc)                        # handle dropped so a restart can install a new one
+        if o._start_task is not None:
+            await o._start_task                           # the background restart scheduled by capture()
+        self.assertGreaterEqual(o.spawn_count, 2)
+        self.assertFalse(_pid_alive(pid))                 # the dead worker was reaped by the fired task
+
+    async def test_release_captured_frees_an_unrun_admitted_reservation(self):
+        # If the gateway cannot schedule run_captured, the admitted capture's reservation must be
+        # released synchronously so the observer is not wedged at BUSY forever.
+        o = await self.start(self.real())
+        cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        self.assertFalse(cap.is_early)
+        self.assertIsNotNone(o._reservation)                          # reserved by capture()
+        o.release_captured(cap)                           # run_captured never scheduled
+        self.assertIsNone(o._reservation)                         # reservation released
+        # A subsequent capture is admitted again (not BUSY), proving the observer is not wedged.
+        again = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        self.assertFalse(again.is_early)
+        self.assertIsNotNone(o._reservation)
+        await o.run_captured(again)                        # drain for teardown
+        self.assertIsNone(o._reservation)
+
+    async def test_release_captured_is_noop_for_early_capture_and_idempotent(self):
+        o = self.real()
+        early = o.capture(req(authority=b"h.example:80"))  # OUT_OF_SCOPE, no reservation held
+        self.assertTrue(early.is_early)
+        o.release_captured(early)                          # no-op, must not raise
+        o.release_captured(None)                           # tolerates None
+        self.assertIsNone(o._reservation)
+
+    async def test_capture_binds_original_http_version_for_both_versions(self):
+        # The ORIGINAL received version is carried onto the capture from the same classification,
+        # for an admitted HTTP/1.1 request and an admitted HTTP/1.0 request alike.
+        o = await self.start(self.real())
+        c11 = o.capture(req(method=b"POST", path=b"/x", content=b"hi", http_version=b"HTTP/1.1"))
+        self.assertFalse(c11.is_early)
+        self.assertEqual(c11.http_version, "HTTP/1.1")
+        await o.run_captured(c11)
+        c10 = o.capture(req(method=b"POST", path=b"/x", content=b"hi", http_version=b"HTTP/1.0"))
+        self.assertFalse(c10.is_early)                    # HTTP/1.0 is in scope at the adapter
+        self.assertEqual(c10.http_version, "HTTP/1.0")
+        await o.run_captured(c10)
+
+    async def test_run_captured_is_single_use_repeated_run_is_capture_consumed(self):
+        o = await self.start(self.real())
+        cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        first = await o.run_captured(cap)
+        self.assertEqual(first.status, obs_mod.OK)
+        self.assertTrue(cap.consumed)
+        # A second run does NO worker exchange and no state change: a safe closed observation.
+        again = await o.run_captured(cap)
+        self.assertEqual(again.status, obs_mod.EXCEPTION)
+        self.assertEqual(again.detail, "capture_consumed")
+        self.assertIsNone(o._reservation)
+
+    async def test_run_after_release_is_capture_consumed_and_touches_no_worker(self):
+        o = await self.start(self.real())
+        cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        o.release_captured(cap)                            # released before ever running
+        self.assertTrue(cap.consumed)
+        result = await o.run_captured(cap)                 # must not reach the worker
+        self.assertEqual(result.status, obs_mod.EXCEPTION)
+        self.assertEqual(result.detail, "capture_consumed")
+
+    async def test_stale_release_does_not_free_a_newer_reservation(self):
+        # The reported bug: release A; capture B; release A again; capture C -> B and C both admitted.
+        # Token-scoping fixes it: the stale second release of A is a no-op, so B stays reserved and C
+        # is BUSY.
+        o = await self.start(self.real())
+        a = o.capture(req(method=b"POST", path=b"/x", content=b"a"))
+        o.release_captured(a)                              # frees A's token, A consumed
+        b = o.capture(req(method=b"POST", path=b"/x", content=b"b"))
+        self.assertFalse(b.is_early)                       # admitted, B's token active
+        o.release_captured(a)                              # stale repeat of A: MUST be a no-op
+        self.assertIsNotNone(o._reservation)               # B still holds the slot
+        c = o.capture(req(method=b"POST", path=b"/x", content=b"c"))
+        self.assertTrue(c.is_early)
+        self.assertEqual(c.observation.status, obs_mod.BUSY)
+        await o.run_captured(b)                            # drain B for teardown
+
+    async def test_late_release_of_an_old_unconsumed_handle_is_token_scoped(self):
+        # Pure-unit SIMULATION of a delayed done-callback: an OLD, not-yet-consumed capture handle
+        # whose token has already been superseded by a NEWER reservation must never free the newer
+        # one. We emulate "a newer reservation is active" by installing a fresh token.
+        o = await self.start(self.real())
+        a = o.capture(req(method=b"POST", path=b"/x", content=b"a"))
+        self.assertFalse(a.is_early)
+        newer = obs_mod._Reservation()
+        o._reservation = newer                             # emulate a newer reservation taking the slot
+        o.release_captured(a)                              # late callback for the OLD handle
+        self.assertIs(o._reservation, newer)               # the newer reservation is untouched
+        self.assertTrue(a.consumed)                        # the old handle is spent
+        o._reservation = None                              # cleanup for teardown
+
+    async def test_pre_start_cancellation_leaves_a_reservation_that_the_backstop_frees(self):
+        # Reproduces the stuck-reservation defect: a run_captured task cancelled BEFORE its coroutine
+        # first runs never enters its finally, so the reservation stays held. The gateway's backstop
+        # (a done-callback calling release_captured) is what frees it; here we invoke that backstop.
+        o = await self.start(self.real())
+        cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        self.assertIsNotNone(o._reservation)
+        task = asyncio.ensure_future(o.run_captured(cap))
+        task.cancel()                                      # cancel before the coroutine body runs
+        with self.assertRaises(asyncio.CancelledError):
+            await task
+        self.assertIsNotNone(o._reservation)               # the leak: still held (no finally ran)
+        self.assertFalse(cap.consumed)
+        o.release_captured(cap)                            # backstop: token-scoped, frees it
+        self.assertIsNone(o._reservation)
+        # The observer is not wedged: the next request is admitted and completes.
+        nxt = o.capture(req(method=b"POST", path=b"/x", content=b"ok"))
+        self.assertFalse(nxt.is_early)
+        self.assertEqual((await o.run_captured(nxt)).status, obs_mod.OK)
+
+    async def test_clean_shutdown_with_an_unrun_reservation(self):
+        o = await self.start(self.real())
+        pid = o.worker_pid
+        cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        self.assertFalse(cap.is_early)
+        await o.aclose()                                   # shut down while a reservation is held
+        self.assertFalse(_pid_alive(pid))
+        # After close, a further capture is an early UNAVAILABLE (never raises).
+        after = o.capture(req())
+        self.assertTrue(after.is_early)
+        self.assertEqual(after.observation.status, obs_mod.UNAVAILABLE)
+
+    async def test_capture_cost_is_small_for_an_admitted_request(self):
+        # Capture-cost note: capture() does all the synchronous hook work (gates + one snapshot copy
+        # + frame encode) and never awaits, so it is sub-millisecond for a tiny request on this
+        # machine. The bound here is deliberately generous (scheduler/VM tolerance); it documents the
+        # ORDER of magnitude, it is not a performance SLA.
+        import time as _t
+        o = await self.start(self.real())
+        t0 = _t.perf_counter()
+        cap = o.capture(req(method=b"POST", path=b"/x", content=b"hi"))
+        dt_ms = (_t.perf_counter() - t0) * 1000
+        self.assertFalse(cap.is_early)
+        self.assertLess(dt_ms, 50.0)                      # generous; typically < 1 ms
+        await o.run_captured(cap)                          # release the reservation for teardown
 
 
 def _pid_alive(pid):
