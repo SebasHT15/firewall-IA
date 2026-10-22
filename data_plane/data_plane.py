@@ -76,6 +76,16 @@ import request_features
 # imports the observer (which owns the one `canonical_request.canonicalize`); V4's D1 rendering and
 # the feature extractor stay contract-free. Importing it is cheap (stdlib until a body is decoded).
 import canonical_observer
+# Framing OBSERVATION (issue #68, Track A; D70). Pure, shadow/observe-only, default-off:
+# it classifies whether this request's runtime profile + canonical snapshot met the tested conditions
+# and logs a "FRAMING OBS" line. It NEVER sets fast_path.FRAMING_VERIFIED, feeds the Fast Path, or
+# changes GatewayEvidence; framing stays UNAVAILABLE and canonical None in the Fast Path path.
+import framing_evidence
+from mitmproxy import version as _mitmproxy_version
+
+# The EFFECTIVE mitmproxy version string, sampled once at load. The framing profile pins the tested
+# runtime (12.2.3); a different installed version makes the profile non-tested (never PROFILE_MATCHED).
+MITMPROXY_VERSION = _mitmproxy_version.VERSION
 
 log = logging.getLogger("firewall.data_plane")
 # A child logger, so feature lines can be filtered apart from decision lines.
@@ -84,6 +94,8 @@ shadow_log = logging.getLogger("firewall.data_plane.shadow")
 
 fastpath_log = logging.getLogger("firewall.data_plane.fastpath")
 canonical_log = logging.getLogger("firewall.data_plane.canonical")
+# Framing observation lines ("FRAMING OBS"), filterable apart from the canonical and decision lines.
+framing_log = logging.getLogger("firewall.data_plane.framing")
 # httpx logs every classifier call at INFO; the ALLOW/BLOCK line already covers it.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -212,6 +224,22 @@ def load_shadow_fast_path(path: str = CONFIG_PATH) -> tuple[bool, str | None]:
         raise ValueError("data_plane.fast_path_policy_file must be a string or null, "
                          f"got {policy_file!r}")
     return enabled, policy_file
+
+
+def load_shadow_framing_observer(path: str = CONFIG_PATH) -> bool:
+    """Return `data_plane.shadow_framing_observer` from config.yaml (default False when absent).
+
+    Framing OBSERVATION (issue #68, D70) rides on top of the canonical observer: it reuses
+    the one bounded snapshot and the one canonical result, and adds no second canonicalization. It is
+    observe-only and never enables enforcement. When this switch is true but the canonical observer is
+    OFF, the gateway reports framing UNAVAILABLE and does NOT start the canonical worker (framing never
+    implicitly enables canonicalization). The switch must be a YAML boolean; anything else raises."""
+    with open(path, encoding="utf-8") as f:
+        section = yaml.safe_load(f)["data_plane"]
+    enabled = section.get("shadow_framing_observer", False)
+    if not isinstance(enabled, bool):
+        raise ValueError(f"data_plane.shadow_framing_observer must be true or false, got {enabled!r}")
+    return enabled
 
 
 class CanonicalObserverConfig(NamedTuple):
@@ -485,7 +513,8 @@ class FirewallGateway:
                  shadow_fast_path: bool = False,
                  fast_path_policy_file: str | None = None,
                  fast_path_evidence: GatewayEvidence | None = None,
-                 canonical_observer=None) -> None:
+                 canonical_observer=None,
+                 framing_observer: bool = False) -> None:
         self.classifier_url = classifier_url
         self.timeout_seconds = timeout_seconds
         self.transport = transport  # None in production; tests pass an httpx.MockTransport
@@ -496,6 +525,16 @@ class FirewallGateway:
         # still returns canonical=None so the Fast Path stays ineligible (the observer→Fast Path
         # connection is deliberately deferred; see observe_canonical).
         self.canonical_observer = canonical_observer
+        # Framing OBSERVATION (issue #68, D70), observe-only and default-off. It reuses the
+        # canonical observer's one bounded snapshot and result; it never feeds the Fast Path or
+        # changes GatewayEvidence. When on without a canonical observer, it reports UNAVAILABLE and
+        # starts no worker (see enforce()).
+        self.framing_observer = framing_observer
+        # Monotonic relevant-profile generation. configure() bumps it whenever a framing-relevant
+        # mitmproxy option changes, so option drift (including A→B→A) between a request's capture and
+        # its worker reply is detectable; plain value equality against a single 'current' profile
+        # would miss a change-back.
+        self._relevant_profile_generation = framing_evidence.RelevantProfileGeneration()
         # Strong references: asyncio keeps only weak ones to running tasks.
         self._shadow_tasks: set[asyncio.Task] = set()
 
@@ -543,6 +582,20 @@ class FirewallGateway:
             canonical_log.log(level, "%s", message)
             observer.prewarm()   # starts the worker in the background; the request path never waits
 
+    def configure(self, updated) -> None:
+        """mitmproxy calls this on load and whenever options change. Keep the relevant-profile
+        generation current so the framing observer can detect option drift (including A→B→A) between a
+        request's capture and its worker reply. When framing observation is off there is nothing to
+        track. Sampling reads EFFECTIVE option values (not config-file intent) and never raises into
+        mitmproxy's configuration step."""
+        if not self.framing_observer:
+            return
+        try:
+            self._relevant_profile_generation.observe(
+                framing_evidence.sample_profile(ctx.options, MITMPROXY_VERSION))
+        except Exception:  # noqa: BLE001 — option sampling must never break configuration
+            pass
+
     async def request(self, flow: http.HTTPFlow) -> None:
         if flow.response is not None:
             # Already answered by mitmproxy itself (e.g. block_list, see done()):
@@ -589,9 +642,18 @@ class FirewallGateway:
         if self.shadow_analyzer is not None:
             self.spawn_shadow_analysis(tag, raw_request, verdict)
         if self.canonical_observer is not None:
-            # Same position and guarantees as the other observers: after the verdict, own log line,
-            # background task the request never awaits, no return value, no exception, V4 untouched.
-            self.spawn_canonical_observation(tag, req)
+            # Synchronous capture at THIS post-V4 boundary (the profile observation and the immutable
+            # snapshot are taken together, with no await between them), then the IPC completion runs in
+            # a background task the request never awaits. Same guarantees as the other observers: own
+            # log line, no return value, no exception, V4 untouched and not re-asked.
+            self.capture_and_schedule_observation(tag, req)
+        elif self.framing_observer:
+            # Framing observation is on but there is no canonical observer to produce a result: report
+            # UNAVAILABLE and start no worker (framing never implicitly enables canonicalization).
+            framing_log.info("%s", framing_evidence.format_record(
+                tag, framing_evidence.evaluate(
+                    profile=None, gen_at_capture=0, gen_at_reply=0, canonical_obs=None,
+                    form=None, http_version=None, canonical_available=False)))
 
         if verdict.decision == "ALLOW":
             log.info("[%s] ALLOW %s reason=%r (classifier %.0f ms)",
@@ -617,28 +679,91 @@ class FirewallGateway:
             shadow_log.warning("[%s] HYBRID SHADOW not started: %s; ignored, the request "
                                "continues unchanged", tag, type(exc).__name__)
 
-    def spawn_canonical_observation(self, tag: str, req: http.Request) -> None:
-        """Start the canonical observation in the background and return at once. Nothing here can
-        fail the request: scheduling errors are logged and dropped."""
+    def capture_and_schedule_observation(self, tag: str, req: http.Request) -> None:
+        """SYNCHRONOUS capture at the post-V4 boundary, then schedule the async completion. Nothing
+        here can fail the request: a reservation an admitted capture holds is released if scheduling
+        fails, and every error is logged and dropped. The effective runtime profile and the current
+        relevant-profile generation are sampled at the SAME boundary as the snapshot, with no await
+        between, so all downstream framing evidence refers to that one immutable snapshot. `profile`
+        is None when framing observation is off."""
+        profile = None
+        gen = self._relevant_profile_generation.generation
+        if self.framing_observer:
+            # When framing observation is on, ALWAYS produce a profile so a FRAMING OBS line is always
+            # emitted for a hooked request (never a silent skip), and a sampling failure never changes
+            # the response. sample_profile never raises by contract and maps a missing/unreadable option
+            # field to an explicit unavailable sentinel; a failure to even reach ctx.options (outside a
+            # running addon) passes options=None, which it turns into an all-unavailable profile. The
+            # defensive except guards only against a hostile/odd options object and still yields an
+            # all-unavailable profile → an explicit UNAVAILABLE/PROFILE_FIELD_UNAVAILABLE outcome, never
+            # a silent skip and never a changed response.
+            try:
+                options = ctx.options
+            except Exception:  # noqa: BLE001 — ctx may be unavailable outside a running addon
+                options = None
+            try:
+                profile = framing_evidence.sample_profile(options, MITMPROXY_VERSION)
+            except Exception:  # noqa: BLE001 — must never change the response; still emit a line
+                u = framing_evidence.UNAVAILABLE_FIELD
+                profile = framing_evidence.FramingProfile(u, u, u, u, u, u, u)
         try:
-            task = asyncio.get_running_loop().create_task(self.observe_canonical(tag, req))
-            self._shadow_tasks.add(task)
-            task.add_done_callback(self._shadow_tasks.discard)
-        except Exception as exc:  # noqa: BLE001
+            capture = self.canonical_observer.capture(req, profile=profile, profile_generation=gen)
+        except Exception as exc:  # noqa: BLE001 — capture() is guarded, but stay defensive
+            canonical_log.warning("[%s] CANONICAL OBS not captured: %s; ignored, the request "
+                                  "continues unchanged", tag, type(exc).__name__)
+            return
+        # Create the coroutine first so a scheduling failure can close it (no "never awaited" leak).
+        coro = self.complete_canonical_observation(tag, capture)
+        try:
+            task = asyncio.get_running_loop().create_task(coro)
+        except Exception as exc:  # noqa: BLE001 — scheduling failed: don't leak the coroutine or wedge
+            coro.close()
+            self.canonical_observer.release_captured(capture)
             canonical_log.warning("[%s] CANONICAL OBS not started: %s; ignored, the request "
                                   "continues unchanged", tag, type(exc).__name__)
+            return
+        self._shadow_tasks.add(task)
 
-    async def observe_canonical(self, tag: str, req: http.Request) -> None:
-        """Observe the request's canonical form and log it beside V4's decision. Returns nothing and
-        never raises, so no caller can act on it. The line carries closed codes and numbers only (no
-        target, query, header value, body or exception message). The observer result is NOT fed back
-        into GatewayEvidence: the Fast Path stays ineligible (canonical=None), by design (D69)."""
+        def _done(t: asyncio.Task) -> None:
+            # Backstop for a task cancelled BEFORE complete_canonical_observation first runs: there,
+            # run_captured never executes its finally, so release the reservation here. release_captured
+            # is idempotent and token-scoped, so on every normal / IPC-cancel path (where run_captured
+            # already released its own token) this is a no-op, and a late callback for an OLD capture can
+            # never free a NEWER reservation.
+            self._shadow_tasks.discard(t)
+            self.canonical_observer.release_captured(capture)
+
+        task.add_done_callback(_done)
+
+    async def complete_canonical_observation(self, tag: str, capture) -> None:
+        """Complete a captured observation and log it beside V4's decision. Returns nothing and never
+        raises, so no caller can act on it. The CANONICAL OBS line carries closed codes and numbers
+        only (no target, query, header value, body or exception message). When framing observation is
+        on, a FRAMING OBS line follows, bound to the SAME snapshot and the profile sampled at capture,
+        comparing the relevant-profile generation at capture with the one now. The observer result is
+        NOT fed back into GatewayEvidence: the Fast Path stays ineligible (canonical=None), by design
+        (D69). Framing observation NEVER sets fast_path.FRAMING_VERIFIED or changes GatewayEvidence."""
         try:
-            obs = await self.canonical_observer.observe(req)
+            obs = await self.canonical_observer.run_captured(capture)
             canonical_log.info("%s", canonical_observer.format_record(tag, obs))
         except Exception as exc:  # noqa: BLE001 — type only: a message could quote the request
             canonical_log.warning("[%s] CANONICAL OBS failed detail=internal:%s; ignored, the "
                                   "request continues unchanged", tag, type(exc).__name__)
+            return
+        if capture.profile is None:
+            return   # framing observation off for this request
+        try:
+            framing_obs = framing_evidence.evaluate(
+                profile=capture.profile,
+                gen_at_capture=capture.profile_generation,
+                gen_at_reply=self._relevant_profile_generation.generation,
+                canonical_obs=obs, form=capture.form,
+                http_version=capture.http_version,
+                canonical_available=(self.canonical_observer is not None))
+            framing_log.info("%s", framing_evidence.format_record(tag, framing_obs))
+        except Exception as exc:  # noqa: BLE001 — type only: a message could quote the request
+            framing_log.warning("[%s] FRAMING OBS failed detail=internal:%s; ignored, the request "
+                                "continues unchanged", tag, type(exc).__name__)
 
     def done(self) -> None:
         if self.shadow_analyzer is not None:
@@ -689,4 +814,5 @@ addons = [FirewallGateway(*load_config(), shadow_features=load_shadow_feature_ex
                           shadow_analyzer=build_shadow_analyzer(load_shadow_analyzer()),
                           shadow_fast_path=_SHADOW_FAST_PATH[0],
                           fast_path_policy_file=_SHADOW_FAST_PATH[1],
-                          canonical_observer=build_canonical_observer(load_canonical_observer()))]
+                          canonical_observer=build_canonical_observer(load_canonical_observer()),
+                          framing_observer=load_shadow_framing_observer())]

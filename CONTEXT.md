@@ -1,6 +1,48 @@
 # firewall-IA — Session Context for Claude Code
 
-## Current checkpoint — 2026-10-21 (#68 prep; read first; supersedes the batch checkpoints below)
+## Current checkpoint — 2026-10-21 (#68 framing-observation slice; read first; supersedes the checkpoints below)
+
+- **PR #85 is MERGED**: the #68 first bounded slice (D69 canonical observer) is now committed on
+  `develop` = `478524d` (no longer uncommitted). The D69 checkpoint below describes the time of its
+  recording; its "UNCOMMITTED" is historical.
+- Working branch now: **`feat/http1-framing-attestation`** (= `develop` = `478524d`, clean). One branch
+  in the main checkout; the four recovery worktrees and the two GitHub Desktop stashes are preserved.
+- **#68 SECOND bounded slice — per-request HTTP/1.1 framing OBSERVATION: APPROVED (D70) and IMPLEMENTED
+  default-off, UNCOMMITTED.** A new `data_plane/framing_evidence.py` adds an observe-only `FRAMING OBS`
+  line per hooked request. It REUSES the D69 observer's ONE bounded immutable snapshot and ONE canonical
+  result (no second canonicalize, no second body copy; `canonical_request.py` unchanged). The observer
+  gained a SYNCHRONOUS `capture()` (profile + immutable snapshot taken together at the post-V4 boundary,
+  no intervening await; gates+reservation before materialization; `release_captured` on scheduling
+  failure) + async `run_captured()` (IPC only, never awaited). `evaluate()` is the ONLY producer of
+  `PROFILE_MATCHED` (tested effective profile — mitmproxy 12.2.3, `validate_inbound_headers=true`, HTTP/2
+  off, reverse-proxy to a loopback port, `lazy` — AND HTTP/1.1 origin/asterisk AND complete body AND
+  valid correlation AND unchanged relevant-profile generation AND canonical OK+ACCEPT); everything else
+  is `UNATTESTABLE`/`UNAVAILABLE` with closed reasons. A monotonic generation (bumped from a `configure()`
+  hook) detects A→B→A option drift. `GatewayEvidence.canonical` stays `None`, `.framing` stays
+  `UNAVAILABLE`, Fast Path stays CONTINUE/ineligible; no `FRAMING_VERIFIED`, no client-visible reject.
+  Switch `shadow_framing_observer: false` (default-off); on without the canonical observer →
+  `FRAMING OBS UNAVAILABLE NO_CANONICAL_OBSERVER`, no worker started. Three real subagents (A component
+  + capture refactor, B wire/drift evidence → `wire-evidence-v2`, C preservation/privacy review +
+  `test_data_plane_framing_observer.py`); coordinator owns `data_plane.py`/`config.yaml`/D70/continuity.
+  Evidence: `reports/v5/hybrid/framing-attestation/` (README + acceptance-review) and
+  `reports/v5/canonical-request-v1/wire-evidence-v2/`. 189 focused tests pass (per module). Capture
+  overhead measured separately (sub-ms sync; worker round trip off the forwarding path). The known
+  valid-obs-text V4 `UnicodeEncodeError` is preserved+disclosed, not fixed. Still deferred: framing
+  VERIFIED + a project-owned wire-level control, HTTP/2, Fast Path enforcement, B/production limits,
+  br/zstd pins, P9 active-policy, Model 2/V5, real split/freeze/train, FINAL/SSRF/Q4_K_M.
+- **Correction pass 2026-10-22 (no new approval; within D70's boundaries — see the D70 correction addendum
+  in DECISIONS.md).** Three reproduced defects fixed: (A) HTTP/1.0 no longer `PROFILE_MATCHED` — the original
+  version is carried on the one snapshot and `evaluate` requires exactly HTTP/1.1 (new reason
+  `HTTP_VERSION_NOT_11`); (B) mode validation now checks transport+address (reverse+http+loopback-literal),
+  with a public marker vs an internal `mode_fingerprint` so HTTP→HTTPS→HTTP bumps the generation `[0,1,2]`;
+  (C) single-use token reservation + a gateway done-callback backstop fix the pre-start-cancel wedge and the
+  stale-release bug. Two coordinator repairs in `data_plane.py` disclosed: C1 (sampling failure now emits an
+  explicit UNAVAILABLE line, not a silent skip) and a TypeError in the no-canonical-observer branch. Evidence:
+  corrected lab `reports/v5/canonical-request-v1/wire-evidence-v2/corrected/` (v1 and the prior v2 preserved
+  byte-for-byte); **217 focused tests pass (per module)**; capture re-measured (p95 ≈0.44 ms, max ≈1.0 ms at
+  1 MiB — not uniformly sub-ms — distinct from the ≈10 ms round trip the request never awaits). Still UNCOMMITTED.
+
+## Current checkpoint — 2026-10-21 (#68 prep; superseded by the checkpoint above)
 
 - **PR #84 is MERGED** into `develop` at 2026-10-21T16:52:43Z (names_family/D68 commit `76f7ab0`); the
   names_family pool-integration batch below is therefore **no longer uncommitted** — it is merged.

@@ -1,0 +1,1934 @@
+{
+  "contract_level_residual": {
+    "cases": [
+      {
+        "case": "R1-TECL",
+        "outcome": "REJECT",
+        "reason": "framing-te-and-cl",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-DUPCL-EQ",
+        "outcome": "REJECT",
+        "reason": "framing-duplicate-cl",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-DUPCL-NE",
+        "outcome": "REJECT",
+        "reason": "framing-duplicate-cl",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-BADCL-HEX",
+        "outcome": "REJECT",
+        "reason": "framing-invalid-cl",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-BADCL-PLUS",
+        "outcome": "REJECT",
+        "reason": "framing-invalid-cl",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-CL-OWS-VALID",
+        "outcome": "ACCEPT",
+        "reason": null,
+        "reject": null,
+        "signals": [
+          "S-CT-ABSENT",
+          "S-MEDIA-UNSUPPORTED"
+        ]
+      },
+      {
+        "case": "R1-MULTITE",
+        "outcome": "REJECT",
+        "reason": "framing-multiple-te",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-TE-EMPTY",
+        "outcome": "REJECT",
+        "reason": "framing-te-empty",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-TE10",
+        "outcome": "REJECT",
+        "reason": "framing-te-on-http10",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R1-CHUNK-NONFINAL",
+        "outcome": "REJECT",
+        "reason": "framing-chunked-not-final",
+        "reject": "R1",
+        "signals": []
+      },
+      {
+        "case": "R2-TE-GZIP",
+        "outcome": "REJECT",
+        "reason": "transfer-coding-not-chunked",
+        "reject": "R2",
+        "signals": []
+      },
+      {
+        "case": "R4-OBSTEXT-VALID",
+        "outcome": "ACCEPT",
+        "reason": null,
+        "reject": null,
+        "signals": []
+      },
+      {
+        "case": "R4-HTAB-VALID",
+        "outcome": "ACCEPT",
+        "reason": null,
+        "reject": null,
+        "signals": []
+      },
+      {
+        "case": "R4-CRLF-REJECT",
+        "outcome": "REJECT",
+        "reason": "field-value-cr-lf-nul",
+        "reject": "R4",
+        "signals": []
+      }
+    ],
+    "note": "PARTS-LEVEL evidence of canonical_request.canonicalize() (NOT wire evidence); reproduced from the shared harness so v2 is self-contained."
+  },
+  "drift": {
+    "framing_control_demonstrated": true,
+    "interpretation": "vih=true: parser rejects TE+CL at the wire; the addon never runs so there is no in-hook CANONICAL/FRAMING record (socket evidence only; not fabricated). vih=false: the vector is forwarded, the addon runs, canonical REJECTs it R1 and framing is UNATTESTABLE (VALIDATE_INBOUND_HEADERS_OFF + PROFILE_NOT_TESTED [+ CANONICAL_REJECT]) \u2014 never PROFILE_MATCHED. The control changes both the wire outcome and the framing conclusion.",
+    "probe_vid": "R1-TECL",
+    "runs": {
+      "validate_inbound_headers=False": {
+        "addon_reached": true,
+        "canonical": {
+          "line": "CANONICAL OBS OK outcome=REJECT reject=R1 reason=framing-te-and-cl size=UNCHECKED transfer_encoding=chunked canon=0.035ms elapsed=0.530ms",
+          "outcome": "REJECT",
+          "reason": "framing-te-and-cl",
+          "reject": "R1",
+          "status": "OK",
+          "target_form": null
+        },
+        "client_status": 200,
+        "effective_options": {
+          "body_size_limit": "None",
+          "connection_strategy": "'lazy'",
+          "http2": "False",
+          "mode": "['reverse:http://127.0.0.1:40717']",
+          "present": true,
+          "stream_large_bodies": "None",
+          "validate_inbound_headers": "False"
+        },
+        "flow_tag": "1bbdb49c",
+        "framing": {
+          "canonical_outcome": "REJECT",
+          "canonical_status": "OK",
+          "gen": "0",
+          "line": "FRAMING OBS UNATTESTABLE reasons=VALIDATE_INBOUND_HEADERS_OFF,PROFILE_NOT_TESTED,CANONICAL_REJECT canonical_status=OK canonical_outcome=REJECT target_form=origin gen=0 elapsed=0.530ms",
+          "reasons": [
+            "VALIDATE_INBOUND_HEADERS_OFF",
+            "PROFILE_NOT_TESTED",
+            "CANONICAL_REJECT"
+          ],
+          "status": "UNATTESTABLE",
+          "target_form": "origin"
+        },
+        "observed_outcome": "NORMALIZED_FORWARD",
+        "parser_verdict": "NORMALIZED_FORWARD",
+        "upstream_delivered": true
+      },
+      "validate_inbound_headers=True": {
+        "addon_reached": false,
+        "canonical": null,
+        "client_status": 400,
+        "effective_options": {
+          "body_size_limit": "None",
+          "connection_strategy": "'lazy'",
+          "http2": "False",
+          "mode": "['reverse:http://127.0.0.1:40717']",
+          "present": true,
+          "stream_large_bodies": "None",
+          "validate_inbound_headers": "True"
+        },
+        "framing": null,
+        "observed_outcome": "PARSER_REJECT",
+        "parser_verdict": "REJECTED_400",
+        "upstream_delivered": false
+      }
+    },
+    "wire_control_demonstrated": true
+  },
+  "live_run": {
+    "failed_step": null,
+    "framing_observer": true,
+    "mitmdump_argv": [
+      "/home/sebas/Desktop/firewall-IA/.venv-dataplane/bin/mitmdump",
+      "--mode",
+      "reverse:http://127.0.0.1:40717",
+      "--listen-host",
+      "127.0.0.1",
+      "-p",
+      "46247",
+      "-s",
+      "/home/sebas/Desktop/firewall-IA/scripts/wire_evidence/lab_addon.py",
+      "--set",
+      "validate_inbound_headers=true",
+      "--set",
+      "http2=false",
+      "--set",
+      "connection_strategy=lazy",
+      "--set",
+      "termlog_verbosity=info",
+      "--set",
+      "flow_detail=0"
+    ],
+    "mitmdump_cmd": "/home/sebas/Desktop/firewall-IA/.venv-dataplane/bin/mitmdump --mode reverse:http://127.0.0.1:40717 --listen-host 127.0.0.1 -p 46247 -s /home/sebas/Desktop/firewall-IA/scripts/wire_evidence/lab_addon.py --set validate_inbound_headers=true --set http2=false --set connection_strategy=lazy --set termlog_verbosity=info --set flow_detail=0",
+    "ok": true,
+    "reason": null,
+    "report_dir": "/home/sebas/Desktop/firewall-IA/reports/v5/canonical-request-v1/wire-evidence-v2/corrected"
+  },
+  "metadata": {
+    "config_yaml_provenance": "The prior v2 run recorded config_yaml_sha256=23c1854\u2026 ; this corrected run records the CURRENT config.yaml SHA above. The only difference is a coordinator COMMENT-ONLY edit ('D70 PROPOSED' -> 'D70') made after the prior run; no runtime setting or gateway behaviour changed. The prior metadata is not overwritten.",
+    "config_yaml_sha256": "94adc6047383323ba3bb17df48241c32a7128d00ac99e54ec07424b1be6a3019",
+    "d70_status": "D70 APPROVED (was PROPOSED). This CORRECTED run is against the gateway after defects A (framing requires EXACTLY HTTP/1.1; HTTP/1.0 OK+ACCEPT -> UNATTESTABLE HTTP_VERSION_NOT_11), B (mode validation checks transport+address: reverse+http+loopback), and C (reservation ownership) were fixed. Observe-only / default-off invariants unchanged.",
+    "effective_options": {
+      "body_size_limit": "None",
+      "connection_strategy": "'lazy'",
+      "http2": "False",
+      "mode": "['reverse:http://127.0.0.1:40717']",
+      "present": true,
+      "stream_large_bodies": "None",
+      "validate_inbound_headers": "True"
+    },
+    "extends": "reports/v5/canonical-request-v1/wire-evidence-v1 (PRESERVED UNCHANGED) and the PRIOR reports/v5/canonical-request-v1/wire-evidence-v2 run (also PRESERVED; this corrected run is written to its own directory and does NOT rewrite prior hashes). v2 adds the shadow FRAMING observer on top of the canonical observer, five per-vector dimensions, the framing outcome under vih drift, and (corrected) the HTTP/1.0 vs HTTP/1.1 version boundary.",
+    "generated_at": "2026-10-22T10:32:48-0600",
+    "lab_profile": {
+      "canonical_observer": "canonical-request/v1 observer ENABLED via lab_addon (config.yaml / data_plane.py untouched)",
+      "caps": {
+        "max_body_bytes": 1048576,
+        "max_decoded_body": 1048576,
+        "token_budget": "UNSET (size stays UNCHECKED; Fast Path ineligible)"
+      },
+      "classifier": "local deterministic ALLOW stub",
+      "effective_options": {
+        "body_size_limit": "None",
+        "connection_strategy": "'lazy'",
+        "http2": "False",
+        "mode": "['reverse:http://127.0.0.1:40717']",
+        "present": true,
+        "stream_large_bodies": "None",
+        "validate_inbound_headers": "True"
+      },
+      "framing_observer": "shadow framing observer ENABLED (WIRE_LAB_FRAMING=1); the gateway's own configure() hook samples the EFFECTIVE profile and the FRAMING OBS line is logged beside each CANONICAL OBS line",
+      "note": "Evidence establishes behaviour of THIS tested profile only; runtime framing stays UNAVAILABLE/UNVERIFIED globally. PROFILE_MATCHED means only 'profile + observed snapshot met the defined conditions' \u2014 never VERIFIED / safe to forward / Fast-Path eligible / wire-equivalent.",
+      "profile_marker": "reverse_proxy:loopback_dynamic_port",
+      "proxy": "mitmdump reverse proxy -> local sink (dynamic loopback port)",
+      "requested_options": {
+        "connection_strategy": "lazy",
+        "flow_detail": "0",
+        "http2": "false",
+        "mode": "reverse:http://127.0.0.1:40717",
+        "stream_large_bodies": "<unset: mitmproxy default (never stream); buffers raw_content>",
+        "termlog_verbosity": "info",
+        "validate_inbound_headers": "true"
+      }
+    },
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python": "3.12.15",
+    "report": "wire-evidence-v2 (corrected)",
+    "source_provenance": {
+      "files": {
+        "data_plane/canonical_adapter.py": "923b9cc6896e619c0a52b7132fc622ae40d96405a48954201c7d317a76ba57b6",
+        "data_plane/canonical_observer.py": "f68e577f72daa80eb516aa14d988d9834e08e41d0f0eb1f700baa994c91e1d74",
+        "data_plane/canonical_request.py": "991c1a11ebdb0c22e6c05102ae9a0e1e9756247ec654ab874e2c78d92f1f58b4",
+        "data_plane/data_plane.py": "425e31bdd9d7fd611b8b25599a8a4670366b1f57e72b8893b5caba6f51a220c2",
+        "data_plane/framing_evidence.py": "8e60ca5700a09fab9925d0e37f6ce24fdf20044a1ded3f9746b7e054a50e60fd",
+        "scripts/wire_evidence/harness.py": "8bd1d84666ef01a29f4a227328ded4cd759a2970106c59d8b79e25c92d2fd1d1",
+        "scripts/wire_evidence/lab_addon.py": "9ff3f6c1afa0124ebf75916155c584ca544d4b34096c9acbc5a29cd99027eefb",
+        "scripts/wire_evidence/run_wire_evidence_v2.py": "0e332d184698945aaaae7f0c8be013705f37daecd68ccee9e309ea40cc68fc44"
+      },
+      "note": "SHA-256 of the implementation files used by this lab run (the corrected gateway sources + the lab harness). data_plane/* are the coordinator's/Track A's corrected files, imported by lab_addon.py and NEVER modified by this track."
+    },
+    "version_pins_note": "mitmproxy==12.2.3 is a PINNED data-plane dependency (requirements-data-plane.txt). Brotli and zstandard are reported as OBSERVED in .venv-dataplane (transitive deps); they are NOT ratified direct deployment pins. Version/profile claims derive from this runtime metadata, not asserted independently.",
+    "versions": {
+      "brotli": "1.2.0",
+      "mitmproxy": "12.2.3",
+      "zstandard": "0.25.0"
+    }
+  },
+  "wire_evidence": {
+    "classifier_url": "http://127.0.0.1:41875/classify",
+    "correlation": {
+      "addon_reaching_vectors": 14,
+      "assignments": [
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "18673471",
+          "vid": "VALID-GET"
+        },
+        {
+          "flow_method": "POST",
+          "method_matches": true,
+          "tag": "c4252b77",
+          "vid": "VALID-CL"
+        },
+        {
+          "flow_method": "POST",
+          "method_matches": true,
+          "tag": "0080b572",
+          "vid": "VALID-CL-OWS"
+        },
+        {
+          "flow_method": "POST",
+          "method_matches": true,
+          "tag": "3fcbda15",
+          "vid": "VALID-CHUNKED"
+        },
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "ded1623c",
+          "vid": "VALID-OBSTEXT"
+        },
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "b5a7a774",
+          "vid": "VALID-HTAB"
+        },
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "1e22ac19",
+          "vid": "VALID-HTTP10"
+        },
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "09820b9d",
+          "vid": "R1-OBSFOLD"
+        },
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "989dd2c6",
+          "vid": "R1-BARE-LF"
+        },
+        {
+          "flow_method": "GET",
+          "method_matches": true,
+          "tag": "963b6869",
+          "vid": "P4-ABSFORM"
+        },
+        {
+          "flow_method": "OPTIONS",
+          "method_matches": true,
+          "tag": "96b0fa0b",
+          "vid": "P4-ASTERISK"
+        },
+        {
+          "flow_method": "POST",
+          "method_matches": true,
+          "tag": "401f8657",
+          "vid": "P9-GZIP-2MEMBER"
+        },
+        {
+          "flow_method": "POST",
+          "method_matches": true,
+          "tag": "fbf3e160",
+          "vid": "P9-GZIP-NUL-MEMBER"
+        },
+        {
+          "flow_method": "POST",
+          "method_matches": true,
+          "tag": "41cdf20e",
+          "vid": "P9-GZIP-TRAILING"
+        }
+      ],
+      "assumed_warmup_flows": 1,
+      "count_skew": false,
+      "method_mismatches": [],
+      "total_flows": 15
+    },
+    "observer_evidence": {
+      "canonical_obs_count": 14,
+      "correlated": [
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.109ms elapsed=0.564ms",
+          "received": "GET /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.065ms elapsed=0.799ms",
+          "received": "GET /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.137ms elapsed=0.695ms",
+          "received": "POST /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.046ms elapsed=0.470ms",
+          "received": "POST /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED transfer_encoding=chunked decoded_body_bytes=5 canon=0.071ms elapsed=0.608ms",
+          "received": "POST /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.063ms elapsed=0.929ms",
+          "received": "GET /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.067ms elapsed=0.833ms",
+          "received": "GET /ok"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=REJECT reject=R4 reason=field-value-cr-lf-nul size=UNCHECKED canon=0.060ms elapsed=1.017ms",
+          "received": "GET /x"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.067ms elapsed=1.145ms",
+          "received": "GET /x"
+        },
+        {
+          "obs": "CANONICAL OBS OUT_OF_SCOPE target_form=absolute detail=absolute_form elapsed=0.025ms",
+          "received": "GET /abs-target"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=asterisk decoded_body_bytes=0 canon=0.083ms elapsed=0.880ms",
+          "received": "OPTIONS *"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.091ms elapsed=0.493ms",
+          "received": "POST /x"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.082ms elapsed=0.588ms",
+          "received": "POST /x"
+        },
+        {
+          "obs": "CANONICAL OBS OK outcome=REJECT reject=R3 reason=content-coding-decode-failure:gzip size=UNCHECKED target_form=origin content_codings=gzip canon=0.069ms elapsed=0.553ms",
+          "received": "POST /x"
+        }
+      ],
+      "decision_tally": {
+        "ALLOW": 14,
+        "BLOCK": 0,
+        "fail_closed": 1,
+        "received": 15
+      },
+      "outcome_tally": {
+        "outcome=ACCEPT": 11,
+        "outcome=REJECT": 2
+      },
+      "present": true,
+      "sample_lines": [
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.109ms elapsed=0.564ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.065ms elapsed=0.799ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.137ms elapsed=0.695ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.046ms elapsed=0.470ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED transfer_encoding=chunked decoded_body_bytes=5 canon=0.071ms elapsed=0.608ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.063ms elapsed=0.929ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.067ms elapsed=0.833ms",
+        "CANONICAL OBS OK outcome=REJECT reject=R4 reason=field-value-cr-lf-nul size=UNCHECKED canon=0.060ms elapsed=1.017ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.067ms elapsed=1.145ms",
+        "CANONICAL OBS OUT_OF_SCOPE target_form=absolute detail=absolute_form elapsed=0.025ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=asterisk decoded_body_bytes=0 canon=0.083ms elapsed=0.880ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.091ms elapsed=0.493ms",
+        "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.082ms elapsed=0.588ms",
+        "CANONICAL OBS OK outcome=REJECT reject=R3 reason=content-coding-decode-failure:gzip size=UNCHECKED target_form=origin content_codings=gzip canon=0.069ms elapsed=0.553ms"
+      ],
+      "status_tally": {
+        "OK": 13,
+        "OUT_OF_SCOPE": 1
+      },
+      "target_form_tally": {
+        "target_form=absolute": 1,
+        "target_form=asterisk": 1,
+        "target_form=origin": 11
+      }
+    },
+    "proxy_listen_port": 46247,
+    "results": [
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "18673471",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Well-formed body-less GET.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 10.23,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host"
+              ],
+              "request_line": "GET /ok HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.065ms elapsed=0.799ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.799ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9112 \u00a73.",
+        "sent_bytes": 37,
+        "vid": "VALID-GET"
+      },
+      {
+        "correlation": {
+          "flow_method": "POST",
+          "flow_tag": "c4252b77",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Single valid Content-Length with a matching 5-byte body.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 16.46,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": {
+              "byte_identical": true,
+              "sent_body_len": 5,
+              "sent_body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+              "upstream_body_len": 5,
+              "upstream_body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+            },
+            "upstream": {
+              "body_len": 5,
+              "body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+              "chunked": false,
+              "content_length_hdr": "5",
+              "header_names": [
+                "Host",
+                "Content-Length"
+              ],
+              "request_line": "POST /ok HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.137ms elapsed=0.695ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.695ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9112 \u00a76.",
+        "sent_bytes": 62,
+        "vid": "VALID-CL"
+      },
+      {
+        "correlation": {
+          "flow_method": "POST",
+          "flow_tag": "0080b572",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Legal OWS around the Content-Length value (`:  5 `) with a 5-byte body. MUST be treated as VALID, not as an invalid CL.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 11.43,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": {
+              "byte_identical": true,
+              "sent_body_len": 5,
+              "sent_body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+              "upstream_body_len": 5,
+              "upstream_body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+            },
+            "upstream": {
+              "body_len": 5,
+              "body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+              "chunked": false,
+              "content_length_hdr": "5",
+              "header_names": [
+                "Host",
+                "Content-Length"
+              ],
+              "request_line": "POST /ok HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.046ms elapsed=0.470ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.470ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT (canonicalize strips OWS before the digit check)",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9110 \u00a75.6.3 OWS around field values.",
+        "sent_bytes": 64,
+        "vid": "VALID-CL-OWS"
+      },
+      {
+        "correlation": {
+          "flow_method": "POST",
+          "flow_tag": "3fcbda15",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Valid single chunked body.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 9.01,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": {
+              "byte_identical": null,
+              "reason": "chunked: client body chunk-framed, sink de-chunked"
+            },
+            "upstream": {
+              "body_len": 5,
+              "body_sha256": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+              "chunked": true,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host",
+                "Transfer-Encoding"
+              ],
+              "request_line": "POST /ok HTTP/1.1",
+              "transfer_encoding_hdr": "chunked",
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED transfer_encoding=chunked decoded_body_bytes=5 canon=0.071ms elapsed=0.608ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.608ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT (parser de-chunks; body=b'hello' survives)",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9112 \u00a77.1.",
+        "sent_bytes": 81,
+        "vid": "VALID-CHUNKED"
+      },
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "ded1623c",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Header value carrying an obs-text octet (0xE9). R4 VALID counterpart: obs-text is permitted.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 5.83,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 503,
+            "client_status_line": "HTTP/1.1 503 Service Unavailable",
+            "client_timed_out": false,
+            "observed_outcome": "FAIL_CLOSED"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "ACCEPTED_THEN_GATEWAY_FAILCLOSED"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "ACCEPT (obs-text is not R4)",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9110 \u00a75.5 obs-text.",
+        "sent_bytes": 51,
+        "vid": "VALID-OBSTEXT"
+      },
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "b5a7a774",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Header value containing HTAB. R4 VALID counterpart: HTAB is permitted in a field value.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 19.07,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host",
+                "X-Note"
+              ],
+              "request_line": "GET /ok HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.063ms elapsed=0.929ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.929ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT (HTAB is not R4)",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9110 \u00a75.5.",
+        "sent_bytes": 50,
+        "vid": "VALID-HTAB"
+      },
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "1e22ac19",
+          "flow_target": "127.0.0.1:40717/ok",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Valid body-less GET on HTTP/1.0 (origin-form, IN adapter scope, canonicalizes OK+ACCEPT). The D70 defect-A fix requires EXACTLY HTTP/1.1 for framing PROFILE_MATCHED, so this must now surface as FRAMING OBS UNATTESTABLE / HTTP_VERSION_NOT_11 \u2014 never a positive, never the UNAVAILABLE/HTTP_VERSION_OUT_OF_SCOPE path (that path is for HTTP/2+ which the adapter rejects as unsupported_http_version). The HTTP/1.1 counterpart VALID-GET stays PROFILE_MATCHED.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 9.59,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host"
+              ],
+              "request_line": "GET /ok HTTP/1.0",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.067ms elapsed=0.833ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS UNATTESTABLE reasons=HTTP_VERSION_NOT_11 canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.833ms",
+            "reasons": [
+              "HTTP_VERSION_NOT_11"
+            ],
+            "status": "UNATTESTABLE",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT (HTTP/1.0 is in adapter scope; version_supported=True)",
+        "expected_parser": "forward",
+        "group": "VALID",
+        "justification": "RFC 9112 \u00a72.3 HTTP-version; D70 defect-A (version boundary).",
+        "sent_bytes": 37,
+        "vid": "VALID-HTTP10"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "Transfer-Encoding AND Content-Length together (classic TE.CL smuggling).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 1.81,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-te-and-cl",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.1: if both present, CL MUST be ignored; divergent front/back-end framing.",
+        "sent_bytes": 91,
+        "vid": "R1-TECL"
+      },
+      {
+        "counterpart": "VALID-CL",
+        "description": "Two Content-Length fields with equal values.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 1.27,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-duplicate-cl",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.3.4: multiple CL is invalid.",
+        "sent_bytes": 72,
+        "vid": "R1-DUPCL-EQ"
+      },
+      {
+        "counterpart": "VALID-CL",
+        "description": "Two Content-Length fields with DIFFERENT values (6 vs 5) \u2014 a request-smuggling primitive.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 1.26,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-duplicate-cl",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.3.4.",
+        "sent_bytes": 73,
+        "vid": "R1-DUPCL-NE"
+      },
+      {
+        "counterpart": "VALID-CL",
+        "description": "Non-digit Content-Length (`0x5`).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 1.33,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-invalid-cl",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.3: CL is 1*DIGIT.",
+        "sent_bytes": 55,
+        "vid": "R1-BADCL-HEX"
+      },
+      {
+        "counterpart": "VALID-CL",
+        "description": "Signed Content-Length (`+5`).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 1.46,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-invalid-cl",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.3: no sign permitted.",
+        "sent_bytes": 54,
+        "vid": "R1-BADCL-PLUS"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "Two separate Transfer-Encoding fields.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.0,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-multiple-te",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.1; multiple TE lines invite parser disagreement.",
+        "sent_bytes": 97,
+        "vid": "R1-MULTITE"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "Empty Transfer-Encoding value.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.89,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-te-empty",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.1: TE is a non-empty coding list.",
+        "sent_bytes": 55,
+        "vid": "R1-TE-EMPTY"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "Transfer-Encoding: chunked on an HTTP/1.0 request line.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.82,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-te-on-http10",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.1: chunked is undefined for HTTP/1.0; smuggling via downgrade.",
+        "sent_bytes": 72,
+        "vid": "R1-TE10"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "`chunked` is not the FINAL transfer coding (`chunked, gzip`).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.11,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-chunked-not-final",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.1: chunked MUST be final.",
+        "sent_bytes": 78,
+        "vid": "R1-CHUNK-NONFINAL"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "`chunked` applied twice.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.03,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R1 framing-chunked-not-final",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a76.1: chunked appears at most once, final.",
+        "sent_bytes": 81,
+        "vid": "R1-CHUNK-REPEAT"
+      },
+      {
+        "counterpart": "VALID-GET",
+        "description": "Whitespace BEFORE the header colon (`Host : s`).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.93,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "wire-only (never reaches canonicalize as a parts fact)",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a75.1: no whitespace between field-name and colon; a smuggling/desync primitive.",
+        "sent_bytes": 29,
+        "vid": "R1-WS-COLON"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "Malformed chunk size (`zz` is not hex).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.86,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": null,
+            "client_status_line": null,
+            "client_timed_out": false,
+            "observed_outcome": "CONN_RESET"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "CONN_RESET_NO_RESPONSE"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "wire-only (de-chunking happens in the parser, not in canonicalize)",
+        "expected_parser": "reject",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a77.1: chunk-size is 1*HEXDIG.",
+        "sent_bytes": 73,
+        "vid": "R1-BADCHUNK"
+      },
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "09820b9d",
+          "flow_target": "127.0.0.1:40717/x",
+          "method_matches": true
+        },
+        "counterpart": "VALID-GET",
+        "description": "Obsolete line folding (obs-fold) inside a header value.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 17.92,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host",
+                "X-Fold"
+              ],
+              "request_line": "GET /x HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=REJECT reject=R4 reason=field-value-cr-lf-nul size=UNCHECKED canon=0.060ms elapsed=1.017ms",
+            "outcome": "REJECT",
+            "reason": "field-value-cr-lf-nul",
+            "reject": "R4",
+            "status": "OK",
+            "target_form": null
+          },
+          "5_framing": {
+            "canonical_outcome": "REJECT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS UNATTESTABLE reasons=CANONICAL_REJECT canonical_status=OK canonical_outcome=REJECT target_form=origin gen=0 elapsed=1.017ms",
+            "reasons": [
+              "CANONICAL_REJECT"
+            ],
+            "status": "UNATTESTABLE",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "wire-only; IF unfolded into a value with CR/LF it would be R4, otherwise not a parts fact",
+        "expected_parser": "either",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a75.2: obs-fold is deprecated; MUST reject or unfold.",
+        "sent_bytes": 43,
+        "vid": "R1-OBSFOLD"
+      },
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "989dd2c6",
+          "flow_target": "127.0.0.1:40717/x",
+          "method_matches": true
+        },
+        "counterpart": "VALID-GET",
+        "description": "Bare LF line endings instead of CRLF in the head.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 18.14,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host"
+              ],
+              "request_line": "GET /x HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.067ms elapsed=1.145ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=1.145ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "wire-only (line-terminator handling is the parser's; not a parts fact)",
+        "expected_parser": "either",
+        "group": "R1",
+        "justification": "RFC 9112 \u00a72.2: recipients may reject bare LF; a desync primitive.",
+        "sent_bytes": 25,
+        "vid": "R1-BARE-LF"
+      },
+      {
+        "counterpart": "VALID-CHUNKED",
+        "description": "A lone non-chunked transfer coding (`Transfer-Encoding: gzip`).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 2.62,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "R2 transfer-coding-not-chunked",
+        "expected_parser": "either",
+        "group": "R2",
+        "justification": "RFC 9112 \u00a76.1 (server may answer 501); the classified content would differ from the executed content. This is R2, not R1.",
+        "sent_bytes": 59,
+        "vid": "R2-TE-GZIP"
+      },
+      {
+        "correlation": {
+          "flow_method": "GET",
+          "flow_tag": "963b6869",
+          "flow_target": "127.0.0.1:40717/abs-target",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Absolute-form request-target (proxy form).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 8.7,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host"
+              ],
+              "request_line": "GET http://sink.test/abs-target HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OUT_OF_SCOPE target_form=absolute detail=absolute_form elapsed=0.025ms",
+            "outcome": null,
+            "reason": null,
+            "reject": null,
+            "status": "OUT_OF_SCOPE",
+            "target_form": "absolute"
+          },
+          "5_framing": {
+            "canonical_outcome": null,
+            "canonical_status": "OUT_OF_SCOPE",
+            "gen": "0",
+            "line": "FRAMING OBS UNAVAILABLE reasons=TARGET_FORM_OUT_OF_SCOPE canonical_status=OUT_OF_SCOPE target_form=absolute gen=0 elapsed=0.025ms",
+            "reasons": [
+              "TARGET_FORM_OUT_OF_SCOPE"
+            ],
+            "status": "UNAVAILABLE",
+            "target_form": "absolute"
+          }
+        },
+        "expected_contract": "n/a (adapter: OUT_OF_SCOPE, never submitted)",
+        "expected_parser": "forward",
+        "group": "P4",
+        "justification": "RFC 9112 \u00a73.2.2. The adapter marks absolute-form OUT_OF_SCOPE (authority not faithfully recoverable from data.path); canonicalize is never run for it.",
+        "sent_bytes": 61,
+        "vid": "P4-ABSFORM"
+      },
+      {
+        "correlation": {
+          "flow_method": "OPTIONS",
+          "flow_tag": "96b0fa0b",
+          "flow_target": "*",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Asterisk-form (`OPTIONS *`).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 16.53,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": {
+              "body_len": 0,
+              "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+              "chunked": false,
+              "content_length_hdr": null,
+              "header_names": [
+                "Host"
+              ],
+              "request_line": "OPTIONS * HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=asterisk decoded_body_bytes=0 canon=0.083ms elapsed=0.880ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "asterisk"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=asterisk gen=0 elapsed=0.880ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "asterisk"
+          }
+        },
+        "expected_contract": "ACCEPT with target rendered `*` (in-scope form)",
+        "expected_parser": "forward",
+        "group": "P4",
+        "justification": "RFC 9112 \u00a73.2.4.",
+        "sent_bytes": 39,
+        "vid": "P4-ASTERISK"
+      },
+      {
+        "counterpart": null,
+        "description": "A target that is neither origin-, absolute-, asterisk- nor authority-form.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 1.01,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 400,
+            "client_status_line": "HTTP/1.1 400 Bad Request",
+            "client_timed_out": false,
+            "observed_outcome": "PARSER_REJECT"
+          },
+          "2_parser": {
+            "byte_identity": null,
+            "upstream": null,
+            "upstream_delivered": false,
+            "verdict": "REJECTED_400"
+          },
+          "3_reachability": {
+            "addon_reached": false,
+            "classifier_called": false,
+            "upstream_sink_reached": false
+          },
+          "4_canonical": null,
+          "5_framing": null
+        },
+        "expected_contract": "wire-only / CONDITIONED; adapter form classification depends on the parsed first_line_format",
+        "expected_parser": "either",
+        "group": "P4",
+        "justification": "RFC 9112 \u00a73.2: no other form is defined; P4 (D63) renders byte-preserved as target_form=other, CONDITIONED on integration showing it never reaches the model unnoticed.",
+        "sent_bytes": 44,
+        "vid": "P4-OTHER"
+      },
+      {
+        "correlation": {
+          "flow_method": "POST",
+          "flow_tag": "401f8657",
+          "flow_target": "127.0.0.1:40717/x",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "Two concatenated gzip members in the body (built at runtime).",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 8.23,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": {
+              "byte_identical": true,
+              "sent_body_len": 54,
+              "sent_body_sha256": "231a3201bba015da027cedd0135c8b04d5dc908a15123490b6ece3f8d0bf85ae",
+              "upstream_body_len": 54,
+              "upstream_body_sha256": "231a3201bba015da027cedd0135c8b04d5dc908a15123490b6ece3f8d0bf85ae"
+            },
+            "upstream": {
+              "body_len": 54,
+              "body_sha256": "231a3201bba015da027cedd0135c8b04d5dc908a15123490b6ece3f8d0bf85ae",
+              "chunked": false,
+              "content_length_hdr": "54",
+              "header_names": [
+                "Host",
+                "Content-Encoding",
+                "Content-Type",
+                "Content-Length"
+              ],
+              "request_line": "POST /x HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.091ms elapsed=0.493ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.493ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT (both members decoded) \u2014 superset behaviour, P9 CONDITIONED (owner choice open)",
+        "expected_parser": "forward",
+        "group": "P9",
+        "justification": "RFC 9110 \u00a78.4.1; canonicalize/CPython decode BOTH members (superset); mitmproxy's own decoder would stop at the first. The adapter forwards raw_content, so the wire body must be byte-preserved across the hop.",
+        "sent_bytes": 184,
+        "vid": "P9-GZIP-2MEMBER"
+      },
+      {
+        "correlation": {
+          "flow_method": "POST",
+          "flow_tag": "fbf3e160",
+          "flow_target": "127.0.0.1:40717/x",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "gzip member, NUL padding, second gzip member.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 10.68,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": {
+              "byte_identical": true,
+              "sent_body_len": 62,
+              "sent_body_sha256": "bcead04a1d18b303570300c628d5aa3373a77bb41ddbc6be7d6568e55f02e24c",
+              "upstream_body_len": 62,
+              "upstream_body_sha256": "bcead04a1d18b303570300c628d5aa3373a77bb41ddbc6be7d6568e55f02e24c"
+            },
+            "upstream": {
+              "body_len": 62,
+              "body_sha256": "bcead04a1d18b303570300c628d5aa3373a77bb41ddbc6be7d6568e55f02e24c",
+              "chunked": false,
+              "content_length_hdr": "62",
+              "header_names": [
+                "Host",
+                "Content-Encoding",
+                "Content-Type",
+                "Content-Length"
+              ],
+              "request_line": "POST /x HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.082ms elapsed=0.588ms",
+            "outcome": "ACCEPT",
+            "reason": null,
+            "reject": null,
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "ACCEPT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS PROFILE_MATCHED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.588ms",
+            "reasons": [],
+            "status": "PROFILE_MATCHED",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "ACCEPT (member-after-NUL decoded) \u2014 CONDITIONED",
+        "expected_parser": "forward",
+        "group": "P9",
+        "justification": "P9 differential: this module + CPython decode the member after NUL padding; five other backends stop at the first. CONDITIONED (owner choice: keep superset vs R3).",
+        "sent_bytes": 192,
+        "vid": "P9-GZIP-NUL-MEMBER"
+      },
+      {
+        "correlation": {
+          "flow_method": "POST",
+          "flow_tag": "41cdf20e",
+          "flow_target": "127.0.0.1:40717/x",
+          "method_matches": true
+        },
+        "counterpart": null,
+        "description": "gzip member followed by non-NUL trailing garbage.",
+        "dimensions": {
+          "1_client_outcome": {
+            "client_elapsed_ms": 8.04,
+            "client_error": null,
+            "client_reset": false,
+            "client_status": 200,
+            "client_status_line": "HTTP/1.1 200 OK",
+            "client_timed_out": false,
+            "observed_outcome": "NORMALIZED_FORWARD"
+          },
+          "2_parser": {
+            "byte_identity": {
+              "byte_identical": true,
+              "sent_body_len": 43,
+              "sent_body_sha256": "89e441db144e6cbd012add02e348325a51728f021a8488693cd39c9523d7eede",
+              "upstream_body_len": 43,
+              "upstream_body_sha256": "89e441db144e6cbd012add02e348325a51728f021a8488693cd39c9523d7eede"
+            },
+            "upstream": {
+              "body_len": 43,
+              "body_sha256": "89e441db144e6cbd012add02e348325a51728f021a8488693cd39c9523d7eede",
+              "chunked": false,
+              "content_length_hdr": "43",
+              "header_names": [
+                "Host",
+                "Content-Encoding",
+                "Content-Type",
+                "Content-Length"
+              ],
+              "request_line": "POST /x HTTP/1.1",
+              "transfer_encoding_hdr": null,
+              "truncated": false
+            },
+            "upstream_delivered": true,
+            "verdict": "NORMALIZED_FORWARD"
+          },
+          "3_reachability": {
+            "addon_reached": true,
+            "classifier_called": true,
+            "upstream_sink_reached": true
+          },
+          "4_canonical": {
+            "line": "CANONICAL OBS OK outcome=REJECT reject=R3 reason=content-coding-decode-failure:gzip size=UNCHECKED target_form=origin content_codings=gzip canon=0.069ms elapsed=0.553ms",
+            "outcome": "REJECT",
+            "reason": "content-coding-decode-failure:gzip",
+            "reject": "R3",
+            "status": "OK",
+            "target_form": "origin"
+          },
+          "5_framing": {
+            "canonical_outcome": "REJECT",
+            "canonical_status": "OK",
+            "gen": "0",
+            "line": "FRAMING OBS UNATTESTABLE reasons=CANONICAL_REJECT canonical_status=OK canonical_outcome=REJECT target_form=origin gen=0 elapsed=0.553ms",
+            "reasons": [
+              "CANONICAL_REJECT"
+            ],
+            "status": "UNATTESTABLE",
+            "target_form": "origin"
+          }
+        },
+        "expected_contract": "R3 content-coding-decode-failure:gzip (trailing data)",
+        "expected_parser": "forward",
+        "group": "P9",
+        "justification": "P9: trailing non-NUL data after a member is R3 in this module.",
+        "sent_bytes": 173,
+        "vid": "P9-GZIP-TRAILING"
+      }
+    ],
+    "shutdown_health": {
+      "close_running_child_process": false,
+      "del_runtimeerror": false,
+      "del_runtimeerror_gone": true,
+      "event_loop_is_closed": false,
+      "lines": [],
+      "other_tracebacks": 1,
+      "present": true
+    },
+    "sink_url": "http://127.0.0.1:40717",
+    "tallies": {
+      "canonical": {
+        "OK/ACCEPT": 10,
+        "OK/REJECT/R3": 1,
+        "OK/REJECT/R4": 1,
+        "OUT_OF_SCOPE": 1,
+        "none": 15
+      },
+      "client_outcome": {
+        "CONN_RESET": 1,
+        "FAIL_CLOSED": 1,
+        "NORMALIZED_FORWARD": 13,
+        "PARSER_REJECT": 13
+      },
+      "framing": {
+        "PROFILE_MATCHED": 9,
+        "UNATTESTABLE/CANONICAL_REJECT": 2,
+        "UNATTESTABLE/HTTP_VERSION_NOT_11": 1,
+        "UNAVAILABLE/TARGET_FORM_OUT_OF_SCOPE": 1,
+        "none": 15
+      },
+      "parser_verdict": {
+        "ACCEPTED_THEN_GATEWAY_FAILCLOSED": 1,
+        "CONN_RESET_NO_RESPONSE": 1,
+        "NORMALIZED_FORWARD": 13,
+        "REJECTED_400": 13
+      }
+    },
+    "total_classifier_hits": 14
+  }
+}
