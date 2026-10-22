@@ -3166,6 +3166,72 @@ Nothing is superseded.
 
 ---
 
+## D69 — #68 first bounded slice: default-off canonical-request/v1 shadow OBSERVATION in a separate worker process
+
+- **Date:** 2026-10-21 (America/Costa_Rica)
+- **Status:** APPROVED (owner approval of 2026-10-21 of the bounded observation slice in
+  `reports/v5/hybrid/gateway-prerequisites/README.md`, with the owner's incorporated corrections).
+- **Implementation:** DONE, **uncommitted** on `feat/hybrid-gateway-prerequisites`; integrated
+  **default-off**; **no enforcement**. New modules `data_plane/canonical_adapter.py`,
+  `canonical_worker.py`, `canonical_observer.py`; gateway wiring + config loader in
+  `data_plane/data_plane.py`; a commented-off `data_plane.shadow_canonical_observer` block in
+  `config.yaml`; the stage-1 import guard narrowed (not deleted) in `tests/test_canonical_request.py`.
+
+**Decision.** The owner approves a first bounded slice of issue #68: a **shadow, observe-only** canonical
+observer. V4 via `/classify` remains the only enforced decision; there is no new client-visible reject,
+no bypass, no Model 2 / V5 runtime.
+
+1. **Scope & authority.** Each request is mapped to a bounded immutable snapshot and canonicalized with
+   the one `canonical_request.canonicalize` (object identity with the generator, no duplicate logic),
+   **after** V4's verdict, in a background task the request never awaits. A `CANONICAL OBS` line logs
+   closed codes/sizes/timings only. V4's D1 text, the `/classify` schema, the one-classifier-call rule,
+   the decision and forwarding are byte-for-byte unchanged. The observer result is **not** fed into
+   `GatewayEvidence.canonical` (still `None`), so the Fast Path stays ineligible; the
+   observer→Fast-Path connection is deliberately deferred.
+2. **Separate worker process (mandatory).** Canonicalization is not CPU-light — a ~1 MiB body of empty
+   gzip members measured ~28 ms (vs ~0.01 ms trivial; 1 MiB identity ~9.5 ms). A thread timeout cannot
+   cancel a CPython computation, so the work runs in a separate process in the **data-plane**
+   interpreter (stdlib + the brotli/zstandard mitmproxy ships; no numpy/scikit-learn), bounded by a
+   deadline and, on overrun, SIGKILLed and reaped — modelled on `hybrid_shadow_process` without
+   adopting the Analyzer's operating values or altering it.
+3. **Scoped D56 gateway import.** The gateway may now import the canonical **observer** (which owns the
+   contract) for this observation; this approval includes that integration — it is not pending a second
+   D56 approval. The feature extractor (`request_features.py`) and the V4 inference path
+   (`control_plane/inference_core.py`) stay contract-free; `render_request` (D1) is unchanged.
+4. **Lab settings (approved for THIS experiment only).** HTTP/1.1-evidenced; observer body-submission
+   cap and `max_decoded_body` = 1,048,576 bytes; `token_budget=None`, `max_bytes_per_token=None`,
+   `count_tokens=None`, so canonical size is **UNCHECKED** (a valid lab state, not MALFORMED_CONFIG,
+   that keeps the Fast Path ineligible); whole-snapshot admission bounds (method/target length, header
+   count + aggregate bytes, body bytes, frame size); the conditioned P9 gzip/NUL superset decoding is
+   retained **for observation only**. A canonical REJECT is a successful observation (status OK +
+   outcome REJECT), separate from an infrastructure failure.
+
+**Not approved / still pending (not changed by D69).** Final V5 token constants (B, §11.2); production
+operational limits; the Brotli/zstandard deployment pin + wheel-hash decision (mitmproxy 12.2.3 is
+already pinned); a project-owned wire-level framing control and any `framing=VERIFIED`; the P9
+superset-vs-R3-reject choice for active use; HTTP/2 evidence; an active Fast Path policy/enforcement;
+Model 2 / V5 serving; a real split/dataset freeze/training; FINAL; SSRF restoration; Q4_K_M authority.
+Runtime framing stays UNAVAILABLE/UNVERIFIED. A future preregistration/production decision must ratify
+any production values; the lab values here are not operational defaults.
+
+**Relationship to earlier entries.** Implements the first #68 slice and **narrows** D56 for this scoped
+shadow observation only (the gateway kept V4's D1 rendering before; it now also observes, without
+changing it). Applies D56/D57/D63 (the canonical contract and its P4/P9 conditioning), D43/D44 (shadow
+work after the verdict; the feature extractor's D1 input is untouched and canonical features are never
+fed to the frozen Analyzer), D33 (the worker uses the data-plane interpreter), and the separate-process
+pattern proven for the Analyzer (D52 stays a proposal; D69 does not ratify it). Amends no frozen file;
+the frozen specs (`f1580634…`, `54514850…`) and the sealed r4 preregistration (`1039a3dd…`) are
+unchanged. D56–D68 stand. Nothing is superseded.
+
+**Evidence.** `reports/v5/hybrid/gateway-prerequisites/README.md`; `data_plane/canonical_adapter.py`,
+`canonical_worker.py`, `canonical_observer.py`; `tests/test_canonical_adapter.py` (16),
+`tests/test_canonical_observer.py` (23), the behavioural preservation/privacy tests
+(`tests/test_data_plane_canonical_observer.py`) and the wire-evidence harness; the ~28 ms **observed
+synthetic** canonicalize duration (a data point, not a proven worst-case bound) that, with
+cancellability, justifies the separate process.
+
+---
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |
@@ -3238,6 +3304,7 @@ Nothing is superseded.
 | D66 | V5 final third-party deny-list v2 (26 files; +`jsonp_endpoint.txt`, `Auth_Bypass.txt`, `Auth_Bypass2.txt` on content evidence), SHA-256 `3e557058…`; pool `ba385fa2…` 3,933 ACCEPTED (SQLi 759, XSS 337); XSS structural filters kept, false exclusions documented as coverage loss | APPROVED | DONE (working tree; pool rebuilt; no payload adjudicated, #77) |
 | D67 | V5 post-filter audit: AI-assisted third review (R3 = ChatGPT GPT-6) replaces the unavailable blind human review (disclosed post-hoc deviation, not equivalent); `V5-DATA-SPEC-r4` FROZEN (SHA-256 `54514850…`, from frozen r3 `f1580634…` via validated diff); criteria preregistered (`1039a3dd…`): INCORRECT ≤20% / U+I ≤35% / coverage 100% / 0 unresolved, agreement diagnostic-only, no small-n exception; SSRF NOT SUPPORTED (21/50 C1 fail); majority only with 3 labels else UNRESOLVED→owner; AI_AUDITED/PASS_AI_AUDITED≠VERIFIED; FINAL training BLOCKED | APPROVED | DONE (r4 frozen; prereg sealed; audit pending, R3 not run, #77) |
 | D68 | V5 `names_family` integration (DR-75): value precedence Option B `symbols>streets>names_family>names_given>prose_en` for the five examined pools only (redistributes 782 representatives; 84,252 kept / 849 excluded, coverage invariant; no security claim); dataset-source use of the pinned snapshot approved (not VERIFIED, no real build/freeze/training); ß/ss keeps the content-hash representative for the 2 internal groups with a ledger; no frozen spec / sealed prereg edited; future prereg must incorporate | APPROVED | DONE (status/tests, fixtures only; uncommitted; no real split, #75) |
+| D69 | #68 first bounded slice: default-off canonical-request/v1 shadow OBSERVATION in a SEPARATE worker process (data-plane interpreter, no ML), after the V4 verdict, never awaited; scoped D56 gateway import via the observer (feature extractor + V4 path stay contract-free; D1 unchanged); lab-only HTTP/1.1, submission/decoded cap 1,048,576 B, token_budget=None → size UNCHECKED (Fast Path stays ineligible, GatewayEvidence.canonical=None); P9 superset retained for observation only; REJECT = successful observation; separate process because canonicalize is not CPU-light (~28 ms/1 MiB). Not approved: B/production limits, br/zstd pins, framing VERIFIED, HTTP/2, Fast Path enforcement, Model 2/V5, real split/freeze/train, FINAL, SSRF, Q4_K_M | APPROVED | DONE (integrated default-off; uncommitted; no enforcement, #68) |
 
 ---
 

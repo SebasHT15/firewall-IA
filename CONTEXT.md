@@ -1,12 +1,36 @@
 # firewall-IA — Session Context for Claude Code
 
-## Current checkpoint — 2026-10-21 (read first; supersedes the 2026-10-20 status below)
+## Current checkpoint — 2026-10-21 (#68 prep; read first; supersedes the batch checkpoints below)
+
+- **PR #84 is MERGED** into `develop` at 2026-10-21T16:52:43Z (names_family/D68 commit `76f7ab0`); the
+  names_family pool-integration batch below is therefore **no longer uncommitted** — it is merged.
+- Working branch now: **`feat/hybrid-gateway-prerequisites`** (= `origin/develop` = `1d1ca60`, clean).
+  One branch in the main checkout; recovery worktrees and the two GitHub Desktop stashes preserved.
+- **#68 canonical gateway prerequisites — first bounded slice: APPROVED (D69) and IMPLEMENTED
+  default-off, UNCOMMITTED.** A default-off canonical **observation** runs each request through the one
+  `cr.canonicalize` in a SEPARATE worker process (data-plane interpreter, no ML) AFTER V4's verdict, in
+  a background task never awaited; logs a `CANONICAL OBS` line of closed codes only. New modules
+  `data_plane/canonical_{adapter,worker,observer}.py`; wired in `data_plane.py` + a commented-off
+  `config.yaml` block; the stage-1 D56 guard narrowed (not deleted). `Limits`/B stay unset
+  (`token_budget=None` → size UNCHECKED) and `GatewayEvidence.canonical` stays `None`, so the Fast Path
+  stays ineligible and V4 remains the only authority; no enforcement, no new client-visible reject.
+  Lab settings only (D69): submission/decoded cap 1,048,576 B, HTTP/1.1-evidenced; separate process
+  because canonicalize is not cheap (~28 ms on a 1 MiB gzip body). Package/acceptance:
+  `reports/v5/hybrid/gateway-prerequisites/README.md`. Three subagents (A modules, B wire evidence,
+  C preservation/privacy) implemented their dedicated files; the coordinator owns the gateway wiring,
+  D69 and continuity. Still deferred: B/production limits, br/zstd pins, framing VERIFIED, HTTP/2,
+  Fast Path enforcement, Model 2/V5.
+- Protected boundaries unchanged: no R3, no INTERNAL/External Test, no real split/freeze/train, no
+  FINAL/SSRF/Q4_K_M, frozen hashes intact. #68/#36/#38 stay open; #75 stays open (its executed real-build
+  evidence is #82 scope; implementing/testing a loader is distinct from running a real split).
+
+## Current checkpoint — 2026-10-21 (names_family batch; MERGED via PR #84)
 
 - **PR #79 is MERGED** into `develop` (merge commit `79a8a6a`; integrated branch head `b4ae109`).
   The 2026-10-20 checkpoint's "PR OPEN / verify before saying merged" is now resolved.
-- Working branch for this batch: **`feat/v5-pool-integration`**, based on `origin/develop` at the
-  merge. One branch in the main checkout; recovery worktrees untouched; two GitHub Desktop stashes
-  preserved. **All of this batch's changes are UNCOMMITTED; no new PR has been opened.**
+- Working branch for this batch was **`feat/v5-pool-integration`**. (Historical: during the batch its
+  changes were uncommitted; they were later committed and merged via **PR #84** — see the top checkpoint.)
+  Recovery worktrees untouched; two GitHub Desktop stashes preserved.
 - **`names_family` pool integration (I-14, #75) — implemented, uncommitted; three distinct states:**
   (a) *catalogue capability* — `names_family` listed in `SLOT_POOLS` (`v5_catalog.py`), an allow-list
   entry, not a precedence; (b) *demonstrated generator consumption (synthetic)* — a template slot with
@@ -21,7 +45,10 @@
   (not VERIFIED, no real build/freeze/training), ß/ss content-hash representatives kept for the 2
   internal groups. `REAL_VALUE_PRECEDENCE` updated. **#75 stays OPEN**: its policy items are ratified
   (D68); the remaining acceptance evidence is the *executed* real-build verification, which is **#82**
-  scope. This batch reads no protected data and does not access INTERNAL TEST. #82 (owner-gated) needs:
+  scope. This batch opens no INTERNAL TEST / External Test set and runs no real split (the full
+  `tests` discovery does exercise the existing V4 render-parity regression that reads
+  `datasets/v4_clean/eval.jsonl` — the existing D1 render-parity regression, not fitting/eval; disclosed,
+  not characterized as authorized or as (non-)contamination). #82 (owner-gated) needs:
   post-filter audit/adjudication (#77/R3); a real-data loader for `benign/names_family.jsonl` (reading +
   unit-testing it is distinct from a real split; **not implemented this pass**); the dataset
   preregistration incorporating D68 + the PENDING constants; every SPL/M/ENC gate **executed** on the

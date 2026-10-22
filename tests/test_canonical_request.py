@@ -697,12 +697,21 @@ class Isolation(unittest.TestCase):
         self.assertTrue(top <= set(sys.stdlib_module_names), top - set(sys.stdlib_module_names))
 
     def test_gateway_and_v4_untouched_by_contract(self):
-        # Stage 1 is NOT integrated: the gateway must not import the contract (D56).
-        for f in ("data_plane.py", "request_features.py"):
-            with open(os.path.join(DATA_PLANE_DIR, f), encoding="utf-8") as fh:
-                self.assertNotIn("canonical_request", fh.read(), f)
+        # D56 narrowed by D69: the gateway MAY now import the canonical OBSERVER for shadow
+        # observation (issue #68), but the contract must stay out of V4's decision path. The enduring
+        # protections: (a) the feature extractor (request_features.py) and (b) the V4 inference path
+        # (control_plane/inference_core.py) never import the contract; (c) the gateway reaches
+        # canonicalize ONLY through the observer module, never `import canonical_request` directly, so
+        # V4's D1 rendering is untouched. Behavioural off/on V4-equivalence is covered separately
+        # (tests/test_data_plane_canonical_observer.py). This assertion is narrowed, not deleted.
+        with open(os.path.join(DATA_PLANE_DIR, "request_features.py"), encoding="utf-8") as fh:
+            self.assertNotIn("canonical_request", fh.read(), "request_features.py")
         with open(os.path.join(REPO, "control_plane", "inference_core.py"), encoding="utf-8") as fh:
             self.assertNotIn("canonical_request", fh.read())
+        with open(os.path.join(DATA_PLANE_DIR, "data_plane.py"), encoding="utf-8") as fh:
+            src = fh.read()
+        self.assertIn("import canonical_observer", src)        # the approved shadow path (D69)
+        self.assertNotIn("import canonical_request", src)      # only the observer imports the contract
 
     def test_special_token_literals_are_content_not_rejected(self):
         # §5.4: literal `<s>…</s>` is legitimate content; the contract keeps it byte-exact.

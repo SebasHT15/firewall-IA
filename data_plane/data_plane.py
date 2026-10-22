@@ -72,6 +72,10 @@ import hybrid_shadow_process
 
 import fast_path
 import request_features
+# Canonical-request/v1 OBSERVER (issue #68, scope approved D69). Shadow/observe-only: the gateway
+# imports the observer (which owns the one `canonical_request.canonicalize`); V4's D1 rendering and
+# the feature extractor stay contract-free. Importing it is cheap (stdlib until a body is decoded).
+import canonical_observer
 
 log = logging.getLogger("firewall.data_plane")
 # A child logger, so feature lines can be filtered apart from decision lines.
@@ -79,6 +83,7 @@ features_log = logging.getLogger("firewall.data_plane.features")
 shadow_log = logging.getLogger("firewall.data_plane.shadow")
 
 fastpath_log = logging.getLogger("firewall.data_plane.fastpath")
+canonical_log = logging.getLogger("firewall.data_plane.canonical")
 # httpx logs every classifier call at INFO; the ALLOW/BLOCK line already covers it.
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
@@ -207,6 +212,73 @@ def load_shadow_fast_path(path: str = CONFIG_PATH) -> tuple[bool, str | None]:
         raise ValueError("data_plane.fast_path_policy_file must be a string or null, "
                          f"got {policy_file!r}")
     return enabled, policy_file
+
+
+class CanonicalObserverConfig(NamedTuple):
+    python: str                         # the data-plane interpreter (absolute); NOT the analyzer env
+    timeout_seconds: float
+    startup_timeout_seconds: float
+    restart_backoff_seconds: float
+    max_consecutive_failures: int
+    max_decoded_body: int
+
+
+_CANONICAL_OBSERVER_KEYS = ("enabled", "python", "timeout_seconds", "startup_timeout_seconds",
+                            "restart_backoff_seconds", "max_consecutive_failures", "max_decoded_body")
+
+
+def load_canonical_observer(path: str = CONFIG_PATH) -> Optional[CanonicalObserverConfig]:
+    """Return `data_plane.shadow_canonical_observer` from config.yaml, or None when off (issue #68,
+    scope approved D69).
+
+    Optional like the Analyzer switch: absent, or `enabled: false`, means off. When enabled every key
+    is required except `max_decoded_body` (defaults to the D69 lab cap). The worker runs under the
+    DATA-PLANE interpreter (stdlib + the brotli/zstandard mitmproxy already ships), NOT the analyzer
+    environment: it needs no numpy/scikit-learn. Anything invalid raises, like every gateway setting.
+    `token_budget` is deliberately not configurable here — it stays unset, so the canonical size is
+    UNCHECKED and the Fast Path stays ineligible (the V5 token budget B is PENDING, §11.2)."""
+    with open(path, encoding="utf-8") as f:
+        section = yaml.safe_load(f)["data_plane"]
+    value = section.get("shadow_canonical_observer")
+    if value is None:
+        return None
+    if not isinstance(value, dict) or not isinstance(value.get("enabled"), bool):
+        raise ValueError("data_plane.shadow_canonical_observer must be a mapping with a boolean "
+                         f"`enabled`, got {value!r}")
+    unknown = set(value) - set(_CANONICAL_OBSERVER_KEYS)
+    if unknown:
+        raise ValueError(f"data_plane.shadow_canonical_observer: unknown keys {sorted(unknown)}")
+    if not value["enabled"]:
+        return None
+    required = [k for k in _CANONICAL_OBSERVER_KEYS if k != "max_decoded_body"]
+    missing = [k for k in required if k not in value]
+    if missing:
+        raise ValueError(f"data_plane.shadow_canonical_observer: missing keys {missing}")
+
+    def number(key, minimum, inclusive=False):
+        v = value[key]
+        if isinstance(v, bool) or not isinstance(v, (int, float)) \
+                or not (v >= minimum if inclusive else v > minimum):
+            raise ValueError(f"data_plane.shadow_canonical_observer.{key} must be a number "
+                             f"{'>=' if inclusive else '>'} {minimum}, got {v!r}")
+        return float(v)
+
+    python = value["python"]
+    if not isinstance(python, str) or not python:
+        raise ValueError("data_plane.shadow_canonical_observer.python must be a non-empty string, "
+                         f"got {python!r}")
+    python = os.path.join(os.path.dirname(CONFIG_PATH), python)
+    failures = value["max_consecutive_failures"]
+    if isinstance(failures, bool) or not isinstance(failures, int) or failures < 1:
+        raise ValueError("data_plane.shadow_canonical_observer.max_consecutive_failures must be an "
+                         f"integer >= 1, got {failures!r}")
+    mdb = value.get("max_decoded_body", canonical_observer.LAB_MAX_DECODED_BODY)
+    if isinstance(mdb, bool) or not isinstance(mdb, int) or mdb <= 0:
+        raise ValueError("data_plane.shadow_canonical_observer.max_decoded_body must be a positive "
+                         f"int, got {mdb!r}")
+    return CanonicalObserverConfig(python, number("timeout_seconds", 0),
+                                   number("startup_timeout_seconds", 0),
+                                   number("restart_backoff_seconds", 0, inclusive=True), failures, mdb)
 
 
 # ── Request representation (D1) ────────────────────────────────────────────
@@ -412,12 +484,18 @@ class FirewallGateway:
                  shadow_analyzer=None,
                  shadow_fast_path: bool = False,
                  fast_path_policy_file: str | None = None,
-                 fast_path_evidence: GatewayEvidence | None = None) -> None:
+                 fast_path_evidence: GatewayEvidence | None = None,
+                 canonical_observer=None) -> None:
         self.classifier_url = classifier_url
         self.timeout_seconds = timeout_seconds
         self.transport = transport  # None in production; tests pass an httpx.MockTransport
         self.shadow_features = shadow_features
         self.shadow_analyzer = shadow_analyzer
+        # Canonical-request/v1 shadow observer (issue #68, D69), or None when off. Observe-only: it
+        # never affects V4's decision, is never awaited by the request path, and GatewayEvidence
+        # still returns canonical=None so the Fast Path stays ineligible (the observer→Fast Path
+        # connection is deliberately deferred; see observe_canonical).
+        self.canonical_observer = canonical_observer
         # Strong references: asyncio keeps only weak ones to running tasks.
         self._shadow_tasks: set[asyncio.Task] = set()
 
@@ -456,6 +534,14 @@ class FirewallGateway:
         if self.shadow_fast_path and self.fast_path_policy_problem:
             fastpath_log.warning("fast path policy not loaded (%s): every request will log "
                                  "CONTINUE", self.fast_path_policy_problem)
+
+        observer = self.canonical_observer
+        if observer is None:
+            canonical_log.info("canonical observer: off")
+        else:
+            level, message = observer.startup_summary()
+            canonical_log.log(level, "%s", message)
+            observer.prewarm()   # starts the worker in the background; the request path never waits
 
     async def request(self, flow: http.HTTPFlow) -> None:
         if flow.response is not None:
@@ -502,6 +588,10 @@ class FirewallGateway:
 
         if self.shadow_analyzer is not None:
             self.spawn_shadow_analysis(tag, raw_request, verdict)
+        if self.canonical_observer is not None:
+            # Same position and guarantees as the other observers: after the verdict, own log line,
+            # background task the request never awaits, no return value, no exception, V4 untouched.
+            self.spawn_canonical_observation(tag, req)
 
         if verdict.decision == "ALLOW":
             log.info("[%s] ALLOW %s reason=%r (classifier %.0f ms)",
@@ -527,9 +617,34 @@ class FirewallGateway:
             shadow_log.warning("[%s] HYBRID SHADOW not started: %s; ignored, the request "
                                "continues unchanged", tag, type(exc).__name__)
 
+    def spawn_canonical_observation(self, tag: str, req: http.Request) -> None:
+        """Start the canonical observation in the background and return at once. Nothing here can
+        fail the request: scheduling errors are logged and dropped."""
+        try:
+            task = asyncio.get_running_loop().create_task(self.observe_canonical(tag, req))
+            self._shadow_tasks.add(task)
+            task.add_done_callback(self._shadow_tasks.discard)
+        except Exception as exc:  # noqa: BLE001
+            canonical_log.warning("[%s] CANONICAL OBS not started: %s; ignored, the request "
+                                  "continues unchanged", tag, type(exc).__name__)
+
+    async def observe_canonical(self, tag: str, req: http.Request) -> None:
+        """Observe the request's canonical form and log it beside V4's decision. Returns nothing and
+        never raises, so no caller can act on it. The line carries closed codes and numbers only (no
+        target, query, header value, body or exception message). The observer result is NOT fed back
+        into GatewayEvidence: the Fast Path stays ineligible (canonical=None), by design (D69)."""
+        try:
+            obs = await self.canonical_observer.observe(req)
+            canonical_log.info("%s", canonical_observer.format_record(tag, obs))
+        except Exception as exc:  # noqa: BLE001 — type only: a message could quote the request
+            canonical_log.warning("[%s] CANONICAL OBS failed detail=internal:%s; ignored, the "
+                                  "request continues unchanged", tag, type(exc).__name__)
+
     def done(self) -> None:
         if self.shadow_analyzer is not None:
             self.shadow_analyzer.close()   # SIGKILLs a separate-process worker
+        if self.canonical_observer is not None:
+            self.canonical_observer.close()   # SIGKILLs the canonical worker
         # mitmdump reloads a script whenever its file changes. If the new version
         # fails to load, the proxy keeps running WITHOUT this addon and forwards
         # traffic unclassified (verified on 12.2.3). So if this addon is removed
@@ -557,8 +672,21 @@ def build_shadow_analyzer(config: Optional[ShadowAnalyzerConfig]):
         config.max_consecutive_failures)
 
 
+def build_canonical_observer(config: Optional[CanonicalObserverConfig]):
+    """The canonical observer for a configuration, or None when off. Nothing is loaded or started
+    here: the worker process starts in the background after the gateway is running, and a worker that
+    cannot start is a status in the observation lines (UNAVAILABLE), never a startup failure."""
+    if config is None:
+        return None
+    return canonical_observer.build_process_observer(
+        config.python, config.timeout_seconds, config.startup_timeout_seconds,
+        config.restart_backoff_seconds, config.max_consecutive_failures,
+        max_decoded_body=config.max_decoded_body)
+
+
 _SHADOW_FAST_PATH = load_shadow_fast_path()
 addons = [FirewallGateway(*load_config(), shadow_features=load_shadow_feature_extraction(),
                           shadow_analyzer=build_shadow_analyzer(load_shadow_analyzer()),
                           shadow_fast_path=_SHADOW_FAST_PATH[0],
-                          fast_path_policy_file=_SHADOW_FAST_PATH[1])]
+                          fast_path_policy_file=_SHADOW_FAST_PATH[1],
+                          canonical_observer=build_canonical_observer(load_canonical_observer()))]
