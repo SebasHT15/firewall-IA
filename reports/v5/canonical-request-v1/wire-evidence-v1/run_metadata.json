@@ -1,0 +1,46 @@
+{
+  "config_yaml_sha256": "1067068bf21764241892f4a42c512c52f34a881369f744a1cb54b8484d75d6aa",
+  "effective_options": {
+    "body_size_limit": "None",
+    "connection_strategy": "'lazy'",
+    "http2": "False",
+    "mode": "['reverse:http://127.0.0.1:34785']",
+    "present": true,
+    "stream_large_bodies": "None",
+    "validate_inbound_headers": "True"
+  },
+  "generated_at": "2026-10-21T17:07:04-0600",
+  "lab_profile": {
+    "classifier": "local deterministic ALLOW stub",
+    "effective_options": {
+      "body_size_limit": "None",
+      "connection_strategy": "'lazy'",
+      "http2": "False",
+      "mode": "['reverse:http://127.0.0.1:34785']",
+      "present": true,
+      "stream_large_bodies": "None",
+      "validate_inbound_headers": "True"
+    },
+    "note": "Evidence establishes behaviour of THIS tested profile only; runtime framing stays UNAVAILABLE/UNVERIFIED globally until a scoped control is implemented and approved. VERIFIED is NOT set globally.",
+    "observer": "canonical-request/v1 observer ENABLED via lab_addon (config.yaml untouched)",
+    "proxy": "mitmdump reverse proxy -> local sink",
+    "requested_options": {
+      "connection_strategy": "lazy",
+      "flow_detail": "0",
+      "http2": "false",
+      "mode": "reverse:http://127.0.0.1:34785",
+      "stream_large_bodies": "<unset: mitmproxy default (never stream); buffers raw_content>",
+      "termlog_verbosity": "info",
+      "validate_inbound_headers": "true"
+    }
+  },
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.12.15",
+  "supersedes": "An earlier run_metadata.json listed lab_profile.stream_large_bodies=0, which was INACCURATE: the launcher leaves stream_large_bodies UNSET. This fresh timestamped run records REQUESTED options (from argv) and EFFECTIVE options (read back from the running lab via lab_addon) separately. Prior raw per-vector results were not retro-edited; this is a new executed run.",
+  "version_pins_note": "mitmproxy==12.2.3 is a PINNED data-plane dependency (requirements-data-plane.txt). Brotli and zstandard are reported as OBSERVED in .venv-dataplane (transitive deps of mitmproxy); they are NOT ratified direct deployment pins here. Version/profile claims are derived from this runtime metadata, not asserted independently.",
+  "versions": {
+    "brotli": "1.2.0",
+    "mitmproxy": "12.2.3",
+    "zstandard": "0.25.0"
+  }
+}

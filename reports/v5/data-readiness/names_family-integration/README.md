@@ -1,7 +1,10 @@
 # V5 `names_family` pool integration (I-14, issue #75) — 2026-10-21
 
-Uncommitted work on branch `feat/v5-pool-integration` (based on `origin/develop` at the PR #79
-merge, `79a8a6a`). No commit, push, PR or issue closure was performed for this batch. This report
+> **Update:** this batch was committed and **merged via PR #84** into `develop`
+> (2026-10-21T16:52:43Z, `76f7ab0`); the "uncommitted" framing below describes its preparation state.
+
+Prepared on branch `feat/v5-pool-integration` (based on `origin/develop` at the PR #79 merge,
+`79a8a6a`). This report
 separates three distinct states — **catalogue capability**, **demonstrated generator consumption**
 (synthetic) and **pending real-data integration** — and records the **owner decisions** (DR-75,
 ratified as **D68** on 2026-10-21). It does not approve a dataset or authorize training, and it does

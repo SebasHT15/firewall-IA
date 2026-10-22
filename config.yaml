@@ -53,3 +53,24 @@ data_plane:
   # Owner-supplied policy file (JSON, schema fast-path-policy/v1), relative to the repository
   # root. null or absent: no policy, so the Fast Path can never log FAST_ALLOW.
   fast_path_policy_file: null
+
+  # Issue #68 — canonical-request/v1 OBSERVER in SHADOW mode, in a SEPARATE worker process
+  # (data_plane/canonical_observer.py + canonical_worker.py; scope approved D69). OFF unless enabled;
+  # shown commented out, deliberately NOT enabled. When on, each request is mapped to a bounded
+  # snapshot and canonicalized in a background worker AFTER V4's verdict; a "CANONICAL OBS" line logs
+  # the outcome (ACCEPT/REJECT/UNSUPPORTED), reject code, size state, target form and timings — closed
+  # codes only, never request text/target/query/header value/body. V4 stays the only decision; the
+  # Fast Path stays ineligible because no token budget is set (canonical size UNCHECKED; B is PENDING,
+  # §11.2). The worker runs under the DATA-PLANE interpreter (stdlib + the brotli/zstandard mitmproxy
+  # ships); it needs NO numpy/scikit-learn (unlike the Analyzer). All values below are LAB-ONLY
+  # settings for this observation experiment (D69), not production or ratified operational limits.
+  # shadow_canonical_observer:
+  #   enabled: true
+  #   python: .venv-dataplane/bin/python   # the gateway's own interpreter (data-plane venv)
+  #   timeout_seconds: 0.5                  # per observation; on expiry the worker is SIGKILLed + reaped
+  #                                         # (~30 ms is an observed synthetic duration, not a worst-case
+  #                                         # bound; see D69. Choose the real value from measurement.)
+  #   startup_timeout_seconds: 10          # worker start (import canonical_request + decoders)
+  #   restart_backoff_seconds: 2           # minimum wait before replacing a killed/crashed worker
+  #   max_consecutive_failures: 3          # then the observer gives up until the gateway restarts
+  #   max_decoded_body: 1048576            # 1 MiB R8 decode cap (lab); token budget stays unset
