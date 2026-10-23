@@ -259,16 +259,20 @@ def verify_read_artifacts(dataset_dir: str, manifest: dict) -> list:
     return diags
 
 
-def load_split(dataset_dir: str, split: str) -> tuple:
-    """Rows of TRAIN or VALIDATION, each {'text', 'output', 'meta'}; plus alignment diagnostics."""
-    if split not in READ_SPLITS:
-        raise PermissionError(f"{split} is never read by the trainer (single-run guard, spec §9)")
-    rows_path = os.path.join(dataset_dir, ROWS_FILE.format(split=split))
-    meta_path = os.path.join(dataset_dir, META_FILE.format(split=split))
-    with open(rows_path, encoding="utf-8") as fh:
-        rows = [json.loads(ln) for ln in fh if ln.strip()]
-    with open(meta_path, encoding="utf-8") as fh:
-        metas = [json.loads(ln) for ln in fh if ln.strip()]
+def _jsonl_records(text: str) -> list:
+    """Parse JSONL splitting on LF ONLY (accepting a trailing CR for CRLF). NOT `str.splitlines()`, which
+    also breaks on U+0085 / U+2028 / U+2029 — characters that are valid, unescaped, inside a JSON string
+    value, so splitlines() would wrongly cut a row in two. JSON strings never contain a literal LF/CR
+    (those must be escaped), so LF is the only true record separator."""
+    return [json.loads(line) for raw in text.split("\n") for line in (raw.rstrip("\r"),) if line.strip()]
+
+
+def parse_split(rows_text: str, meta_text: str, split: str) -> tuple:
+    """Pure parse of already-read TRAIN/VALIDATION rows+meta TEXT into rows (each {'text','output','meta'})
+    plus alignment diagnostics. No I/O: an integrity-checking caller passes the EXACT text whose bytes it
+    hashed, so the hashed bytes and the parsed bytes are the same (load_split reads then delegates here)."""
+    rows = _jsonl_records(rows_text)
+    metas = _jsonl_records(meta_text)
     diags, out = [], []
     if len(rows) != len(metas):
         diags.append(Diag("META_NOT_ALIGNED", f"{split}: {len(rows)} rows vs {len(metas)} meta lines"))
@@ -286,6 +290,19 @@ def load_split(dataset_dir: str, split: str) -> tuple:
             diags.append(Diag("ROW_OUTPUT_MISMATCH", f"{split}[{i}]: output differs from meta.output"))
         out.append({"text": r["text"], "output": r["output"], "meta": m, "index": i, "split": split})
     return out, diags
+
+
+def load_split(dataset_dir: str, split: str) -> tuple:
+    """Rows of TRAIN or VALIDATION, each {'text', 'output', 'meta'}; plus alignment diagnostics. Reads the
+    two files and delegates to the pure `parse_split`; only TRAIN/VALIDATION are ever read (single-run
+    guard, spec §9)."""
+    if split not in READ_SPLITS:
+        raise PermissionError(f"{split} is never read by the trainer (single-run guard, spec §9)")
+    with open(os.path.join(dataset_dir, ROWS_FILE.format(split=split)), encoding="utf-8") as fh:
+        rows_text = fh.read()
+    with open(os.path.join(dataset_dir, META_FILE.format(split=split)), encoding="utf-8") as fh:
+        meta_text = fh.read()
+    return parse_split(rows_text, meta_text, split)
 
 
 def check_rows(rows: list, vocabulary) -> list:

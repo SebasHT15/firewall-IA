@@ -1,0 +1,268 @@
+{
+  "cases": [
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "empty_get"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "encoded_query"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "form"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "json"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "utf8_body"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [
+        "S-BODY-UTF8"
+      ],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [
+        "body_length",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "non_ascii_count",
+        "longest_char_run",
+        "entropy_bits_per_char",
+        "backslash_count"
+      ],
+      "compared": true,
+      "d1_error": null,
+      "equal": false,
+      "fixture": "invalid_utf8"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "literal_escape"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "gzip_one"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [
+        "body_length",
+        "body_param_count",
+        "total_param_count",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "entropy_bits_per_char",
+        "ampersand_count",
+        "equals_count"
+      ],
+      "compared": true,
+      "d1_error": null,
+      "equal": false,
+      "fixture": "gzip_two"
+    },
+    {
+      "canonical_outcome": "REJECT",
+      "canonical_reject": "R3",
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": false,
+      "d1_error": null,
+      "equal": null,
+      "fixture": "gzip_invalid"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [
+        "S-CT-MISMATCH"
+      ],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "json_wrong_shape"
+    },
+    {
+      "canonical_outcome": "REJECT",
+      "canonical_reject": "R7",
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": false,
+      "d1_error": null,
+      "equal": null,
+      "fixture": "duplicate_content_type"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [
+        "S-ENC-MULTI"
+      ],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "double_encoding"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [
+        "S-TARGET-NONASCII"
+      ],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [
+        "query_length",
+        "alnum_ratio",
+        "symbol_count",
+        "symbol_ratio",
+        "non_ascii_count",
+        "longest_char_run",
+        "entropy_bits_per_char",
+        "backslash_count"
+      ],
+      "compared": true,
+      "d1_error": null,
+      "equal": false,
+      "fixture": "invalid_target_utf8"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "asterisk"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "http10"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "host_ua_a"
+    },
+    {
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "canonical_signals": [],
+      "canonical_size": "UNCHECKED",
+      "changed_fields": [],
+      "compared": true,
+      "d1_error": null,
+      "equal": true,
+      "fixture": "host_ua_b"
+    }
+  ],
+  "feature_count": 34,
+  "feature_schema": "request-features/v2",
+  "git_head": "478524d6fac8cce09efe4115b9b34bdd78258792",
+  "limitations": [
+    "No training data, labels, weights or protected evaluation read.",
+    "Parity does not establish C1 completeness or model quality.",
+    "No framing verification, deployment or training approval.",
+    "Lab decode cap; token budget unset, size UNCHECKED.",
+    "Dataset guard is not a sandbox against aliases or copied files."
+  ],
+  "mitmproxy": "12.2.3",
+  "python": "3.12.15",
+  "schema": "model2-c1-readiness/v1",
+  "scope": "synthetic-only, no fitting",
+  "source_sha256": {
+    "data_plane/canonical_adapter.py": "923b9cc6896e619c0a52b7132fc622ae40d96405a48954201c7d317a76ba57b6",
+    "data_plane/canonical_request.py": "991c1a11ebdb0c22e6c05102ae9a0e1e9756247ec654ab874e2c78d92f1f58b4",
+    "data_plane/data_plane.py": "032eb60c3e28666a33418b5e9ac5b593d511d5492f8ff86993bb1fc953e14c9e",
+    "data_plane/request_features.py": "de16da96c5da2cded632b5332db25edf696a816577cefcce0c354b05df4d3db5",
+    "scripts/model2/c1_readiness.py": "47259a34ce5b8c0b1b1d72e972e7af3a85a0d212d6053094d86311c056de94e8",
+    "scripts/model2/contracts.py": "78885adc21e8df1822f31cbff2e1f4a47b16bf3fa41e9bacb32bc45fa7c4b515",
+    "scripts/model2/evaluation.py": "fd28ea73d49de8500512414626c34b08b66b3ece861d35948fbeb1f8b43b14f6"
+  },
+  "summary": {
+    "canonical_rejected": 2,
+    "compared": 16,
+    "d1_errors": 0,
+    "different": 3,
+    "total": 18
+  }
+}
