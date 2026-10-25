@@ -58,8 +58,8 @@ def run(dataset: Path) -> dict:
     v5 = {}
     for split in SPLIT_ROLES:
         path = dataset / f"rows.{split}.jsonl"
-        rows = (json.loads(line) for line in path.open(encoding="utf-8") if line.strip())
-        exact = {row["text"] for row in rows}
+        with path.open(encoding="utf-8") as fh:
+            exact = {json.loads(line)["text"] for line in fh if line.strip()}
         v5[split] = (exact, {canonical_key(x) for x in exact})
     out = {"schema": "v5-protected-collision-counts/v1", "dataset_manifest_sha256": digest(dataset / "manifest.json"),
            "registry_sha256": digest(ROOT / "reports/v5/freeze-prep/consumed_sets.json"),
