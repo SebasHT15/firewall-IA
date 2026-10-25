@@ -168,8 +168,8 @@ def validate_config(cfg: Mapping) -> dict:
     cs = cfg["cluster_share"]
     if not isinstance(cs, Mapping) or set(cs) != {"warn", "block", "status"}:
         raise InvalidConfig("cluster_share must have warn, block, status")
-    if cs["status"] != "PROPOSED":
-        raise InvalidConfig("cluster_share.status must stay 'PROPOSED' until the preregistration (spec §11.2)")
+    if cs["status"] not in ("PROPOSED", "RATIFIED"):
+        raise InvalidConfig("cluster_share.status must be PROPOSED before preregistration or RATIFIED after it (spec §11.2)")
     if not all(isinstance(cs[k], str) and _DECIMAL.fullmatch(cs[k]) for k in ("warn", "block")):
         raise InvalidConfig("cluster_share warn/block must be decimal strings like '0.02'")
     if not 0 < Fraction(cs["warn"]) < Fraction(cs["block"]) < 1:

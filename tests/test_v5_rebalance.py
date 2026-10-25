@@ -20,6 +20,7 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(REPO, "scripts", "dataset"))
 
 import v5_rebalance as V9  # noqa: E402
+import v5_generator as G  # noqa: E402
 
 
 def cfg(cap="block", warn="0.02", block="0.05", rulings=(), it=100, rounds=4):
@@ -65,6 +66,18 @@ class NoOp(unittest.TestCase):
         self.assertEqual(adj, c)
         self.assertEqual({cl: v["class_before"] for cl, v in rep["splits"]["TRAIN"]["clusters"].items()},
                          {"a": "OK", "b": "OK", "c": "OK", "d": "OK"})
+
+    def test_owner_ruled_singleton_is_reported_but_does_not_trigger_rebalance(self):
+        gen = {"rows": [{"meta": {"disposition": "split", "split": "VALIDATION",
+                                  "struct_cluster_id": "only-path"}}]}
+        config = {"i9": cfg(cap="warn", warn="0.08", block="0.12",
+                             rulings={"only-path": "only held-out path structure"})}
+        config["i9"]["status"] = "RATIFIED"
+        report = G.realised_share_report(gen, config)
+        self.assertEqual(report["over_cap_clusters"]["VALIDATION"], [])
+        self.assertEqual(report["per_split"]["VALIDATION"]["clusters"]["only-path"]["class"], "BLOCK")
+        self.assertTrue(report["per_split"]["VALIDATION"]["clusters"]["only-path"]["owner_ruled"])
+        self.assertEqual(report["threshold_status"], "RATIFIED")
 
 
 class OneCluster(unittest.TestCase):
@@ -181,12 +194,19 @@ class InputValidation(unittest.TestCase):
     def test_config_refusals(self):
         bad = [cfg(warn="0.05", block="0.05"),          # warn not < block
                {**cfg(), "cap": "nope"},
-               {**cfg(), "status": "RATIFIED"},         # must stay PROPOSED
+               {**cfg(), "status": "UNKNOWN"},          # unknown status
                {**cfg(), "max_iterations": 0},
                {k: v for k, v in cfg().items() if k != "cap"}]   # missing key
         for b in bad:
             with self.assertRaises(V9.RebalanceConfigError):
                 V9.rebalance(cells({("T", "q"): {"a": {"X": 1}}}), b)
+
+    def test_ratified_status_is_parseable_without_changing_numeric_controls(self):
+        approved = {**cfg(), "status": "RATIFIED"}
+        self.assertEqual(V9.validate_i9_config(approved),approved)
+        # Parsing a status grants no cap exception: the same concentrated plan stops.
+        with self.assertRaises(V9.S.StopBuild):
+            V9.rebalance(cells({("T","q"):{"a":{"X":1}}}),approved)
 
     def test_cluster_spanning_two_carriers_is_refused(self):
         c = {("T", "a", "X"): {"carrier": "q", "pairs": 5}, ("T", "a", "Y"): {"carrier": "f", "pairs": 5}}
