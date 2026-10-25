@@ -35,6 +35,7 @@ import hashlib
 import json
 import os
 import sys
+from pathlib import Path
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -160,6 +161,7 @@ def dedup_loaded_pools(values: dict, split_cfg: dict) -> tuple:
     Pool manifests pin the unfiltered source values. The returned exclusion
     ledger explains every held value and is retained in pilot provenance.
     """
+    values, probe_overlap = exclude_probe_pool_overlap(values)
     entries = {pool: [{'value':value,
                        'value_entry_id':C.value_entry_id(pool,value),
                        'source_ref':pool} for value in vals]
@@ -169,7 +171,59 @@ def dedup_loaded_pools(values: dict, split_cfg: dict) -> tuple:
     kept={pool:[r['value'] for r in rows] for pool,rows in dedup['kept'].items()}
     if any(not rows for rows in kept.values()):
         raise PilotInputError('value equivalence dedup emptied a configured pool')
+    dedup['probe_overlap'] = probe_overlap
     return kept, dedup
+
+
+def exclude_probe_pool_overlap(values: dict) -> tuple:
+    """L8: remove elements present in either protected probe's published source pools.
+
+    Only counts and a digest of excluded V5 value-entry ids are emitted. Probe elements and
+    individual matches never enter the output or a training pool.
+    """
+    import unicodedata
+    evaluation = os.path.join(REPO_ROOT, 'scripts', 'evaluation')
+    if evaluation not in sys.path:
+        sys.path.insert(0, evaluation)
+    import minimal_pair_probe_cases as p1
+    import minimal_pair_probe_v2_cases as p2
+
+    def flatten(item):
+        if isinstance(item, str):
+            yield item
+        elif isinstance(item, (list, tuple, set)):
+            for child in item:
+                yield from flatten(child)
+        elif isinstance(item, dict):
+            for child in item.values():
+                yield from flatten(child)
+
+    norm = lambda s: unicodedata.normalize('NFC', s).casefold()
+    protected = {norm(s) for poolset in (p1.POOLS, p2.POOLS) for s in flatten(poolset)}
+    kept, excluded_ids, counts = {}, [], {}
+    for pool, elements in values.items():
+        accepted = []
+        removed = 0
+        for value in elements:
+            if norm(value) in protected:
+                removed += 1
+                excluded_ids.append(C.value_entry_id(pool, value))
+            else:
+                accepted.append(value)
+        if not accepted:
+            raise PilotInputError(f'L8 probe overlap emptied pool {pool}')
+        kept[pool] = accepted
+        counts[pool] = removed
+    report = {'check': 'L8', 'normalization': 'NFC+casefold',
+              'probe_source_sha256': {
+                  'v1': hashlib.sha256(Path(p1.__file__).read_bytes()).hexdigest(),
+                  'v2': hashlib.sha256(Path(p2.__file__).read_bytes()).hexdigest(),
+              },
+              'excluded_count_by_pool': dict(sorted(counts.items())),
+              'excluded_total': len(excluded_ids),
+              'excluded_ids_sha256': hashlib.sha256('\n'.join(sorted(excluded_ids)).encode()).hexdigest(),
+              'remaining_overlap': 0}
+    return kept, report
 
 
 # ───────────────────────────── attack records ─────────────────────────────
@@ -358,7 +412,8 @@ def prepare_authorized(pilot_dir, out_dir, *, attack_pool, benign_dir, authoriza
               'value_dedup':{'equivalence':value_dedup['equivalence'],
                              'groups':value_dedup['groups'],
                              'excluded_count':len(value_dedup['excluded']),
-                             'excluded_sha256':hashlib.sha256(json.dumps(value_dedup['excluded'],sort_keys=True,ensure_ascii=False).encode()).hexdigest()},
+                             'excluded_sha256':hashlib.sha256(json.dumps(value_dedup['excluded'],sort_keys=True,ensure_ascii=False).encode()).hexdigest(),
+                             'probe_overlap':value_dedup['probe_overlap']},
               'missing_inputs':[]}})
     # BUILT means the shared gate admitted this production-route build. Source
     # records never acquire fixture_synthetic/VERIFIED through this preparer.
