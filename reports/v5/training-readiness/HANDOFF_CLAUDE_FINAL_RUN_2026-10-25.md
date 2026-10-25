@@ -1,6 +1,6 @@
 # Handoff operativo a Claude Code — V5 + Model 2 FINAL
 
-Fecha: 2026-10-25. Repo: `/home/sebas/Desktop/firewall-IA`, rama `feat/hybrid-training-ready`, HEAD actual `d988501`. El usuario quiere **terminar los controles, congelar el dataset y recibir los comandos exactos para lanzar ambos entrenamientos**. No quiere comandos provisionales ni claims de protección en producción. Autorizó corregir fallos y ratificó el alcance de investigación D74 y los valores D75. No hay más votos LLM pendientes.
+Fecha: 2026-10-25. Repo: `/home/sebas/Desktop/firewall-IA`, rama `feat/hybrid-training-ready`, preparación v2 en `d988501`, handoff y precheck en `3fda72f`. El usuario quiere **terminar los controles, congelar el dataset y recibir los comandos exactos para lanzar ambos entrenamientos**. No quiere comandos provisionales ni claims de protección en producción. Autorizó corregir fallos y ratificó el alcance de investigación D74 y los valores D75. No hay más votos LLM pendientes.
 
 ## Estado verificado, sin reconstruir la historia
 
