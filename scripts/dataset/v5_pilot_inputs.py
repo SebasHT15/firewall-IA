@@ -154,6 +154,24 @@ def load_pool_values(pilot_dir: str, benign_dir=None) -> tuple:
     return values, provenance
 
 
+def dedup_loaded_pools(values: dict, split_cfg: dict) -> tuple:
+    """Apply the D-3 equivalence rule before assigning values to splits.
+
+    Pool manifests pin the unfiltered source values. The returned exclusion
+    ledger explains every held value and is retained in pilot provenance.
+    """
+    entries = {pool: [{'value':value,
+                       'value_entry_id':C.value_entry_id(pool,value),
+                       'source_ref':pool} for value in vals]
+               for pool,vals in values.items()}
+    dedup=I.dedup_value_pools(entries,split_cfg['value_pool_precedence'],
+                              split_cfg['value_equivalence_semantic_notes'])
+    kept={pool:[r['value'] for r in rows] for pool,rows in dedup['kept'].items()}
+    if any(not rows for rows in kept.values()):
+        raise PilotInputError('value equivalence dedup emptied a configured pool')
+    return kept, dedup
+
+
 # ───────────────────────────── attack records ─────────────────────────────
 def synthetic_attack_records(per_category: int = 60) -> list:
     """Clearly-marked `fixture_synthetic` attack markers (NO exploit content) for the pilot categories, so
@@ -322,6 +340,7 @@ def prepare_authorized(pilot_dir, out_dir, *, attack_pool, benign_dir, authoriza
     if set(categories) != set(PILOT_CATEGORIES):
         raise PilotInputError('generator config must retain the five-category planned pilot scope')
     pools, provenance = load_pool_values(pilot_dir,benign_dir)
+    pools, value_dedup = dedup_loaded_pools(pools,split)
     records, pool_sha = load_attack_records(attack_pool,with_sha=True)
     if auth.get('components') is not None:
         if pool_sha != auth.get('assembled_pool_sha256'):
@@ -336,6 +355,10 @@ def prepare_authorized(pilot_dir, out_dir, *, attack_pool, benign_dir, authoriza
         category_selection=list(categories),pool_values_list=pools,build_purpose=build_purpose,
         extra={'pilot_inputs':{'implementation_sha256':implementation_hashes(),'attack_source':source,'pool_provenance':provenance,
               'generator_config_file_sha256':cfg_sha,'split_config_file_sha256':split_sha,
+              'value_dedup':{'equivalence':value_dedup['equivalence'],
+                             'groups':value_dedup['groups'],
+                             'excluded_count':len(value_dedup['excluded']),
+                             'excluded_sha256':hashlib.sha256(json.dumps(value_dedup['excluded'],sort_keys=True,ensure_ascii=False).encode()).hexdigest()},
               'missing_inputs':[]}})
     # BUILT means the shared gate admitted this production-route build. Source
     # records never acquire fixture_synthetic/VERIFIED through this preparer.

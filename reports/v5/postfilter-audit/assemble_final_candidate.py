@@ -10,6 +10,7 @@ ROOT=Path('/home/sebas/Desktop/firewall-IA')
 sys.path.insert(0,str(ROOT/'scripts/dataset'))
 import v5_audit_evidence as AE
 import v5_component_binding as CB
+import v5_identities as I
 
 sha=lambda raw:hashlib.sha256(raw).hexdigest()
 components_path=ROOT/'reports/v5/postfilter-audit/final-component-bindings.json'
@@ -29,6 +30,9 @@ for component in components:
         if rid in selected:raise ValueError(f'overlapping authoritative record: {rid}')
         selected[rid]=(record,component['component_id'],category)
 assert len(selected)==1816
+held={rid:entry for rid,entry in selected.items()
+      if I.is_unobservable(I.payload_family_id(entry[0]['payload_wire']))}
+for rid in held:selected.pop(rid)
 rows=[selected[k][0] for k in sorted(selected)]
 check_rows=[{'meta':{'label':'BLOCK','attack_category':selected[r['record_id']][2],
                      'payload_record_id':r['record_id'],'payload_wire':r['payload_wire']}} for r in rows]
@@ -41,6 +45,10 @@ raw=''.join(json.dumps(r,ensure_ascii=False,sort_keys=True)+'\n' for r in rows).
 manifest={'schema':'v5-attack-pool-component-assembly/v1','status':'ADMITTED_CANDIDATE_NOT_FROZEN',
           'records':len(rows),'by_audit_category':dict(Counter(selected[r['record_id']][2] for r in rows)),
           'pool_sha256':sha(raw),'components_sha256':sha(components_path.read_bytes()),
+          'structurally_held_unobservable':[
+              {'record_id':rid,'family_key':I.payload_family_id(entry[0]['payload_wire']),
+               'reason':'SPL-9 four-gram representation has no observable token'}
+              for rid,entry in sorted(held.items())],
           'component_outcomes':resolved['merged_outcomes'],
           'combined_pool_pass':False,'training_authorized':False}
 (out/'manifest.json').write_text(json.dumps(manifest,sort_keys=True,ensure_ascii=False,indent=2)+'\n')
