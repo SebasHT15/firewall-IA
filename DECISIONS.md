@@ -3514,6 +3514,19 @@ the gates are satisfied.
 
 ---
 
+## D76 — C-S7 small-split research amendment for dataset v3
+
+Owner approval in this chat, 2026-10-25: “Sí, autorizar la enmienda propuesta
+(recomendado)”, responding to the exact proposal in
+`reports/v5/dataset-preregistration-v1/final-run-2026-10-25-v2/REJECTED_V2_CS7_AND_DECISION.md`.
+The C-S7 >3% value-element share remains BLOCKING in TRAIN. In VALIDATION and
+INTERNAL_TEST the same count and percentage are retained, but any excess is a
+documented WARN, not a freeze blocker, for this research dataset. This is a
+prospective change for a newly preregistered v3 build, prompted by the observed
+v2 C-S7 failure; v2 remains rejected. All other D75 and D74 controls stay in force.
+No model output had been viewed when this ruling was made. This decision does
+not itself freeze v3 or authorize training.
+
 ## Decision index
 
 | ID | Topic | Status | Implementation |

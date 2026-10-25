@@ -24,7 +24,7 @@ def count_lines(path: Path) -> int:
         return sum(1 for _ in fh)
 
 
-def check(dataset: Path, attack_pool: Path, collisions: Path) -> dict:
+def check(dataset: Path, attack_pool: Path, collisions: Path, cs7: Path | None = None) -> dict:
     manifest_path = dataset / 'manifest.json'
     m = json.loads(manifest_path.read_text())
     checks = {}
@@ -79,6 +79,12 @@ def check(dataset: Path, attack_pool: Path, collisions: Path) -> dict:
     balance = m['diagnostics']['class_balance_C-M3']
     checks['C-M3'] = {'ok': all(.48 <= float(x['block_share']) <= .52 for x in balance.values()),
                       'by_split': {k: v['block_share'] for k, v in sorted(balance.items())}}
+    if cs7 is not None:
+        s7 = json.loads(cs7.read_text())
+        checks['C-S7'] = {'ok': s7.get('blocking_pass') is True,
+                          'blocked_cells': sorted(k for k, v in s7.get('cells', {}).items()
+                                                  if v.get('status') == 'BLOCK'),
+                          'evidence_sha256': sha(cs7)}
     return {'schema': 'v5-freeze-precheck/v1', 'status': 'PARTIAL_PRE_FREEZE',
             'manifest_sha256': sha(manifest_path), 'checks': checks,
             'checks_run_pass': all(x['ok'] for x in checks.values()),
@@ -98,9 +104,10 @@ def main():
     p.add_argument('--dataset', type=Path, required=True)
     p.add_argument('--attack-pool', type=Path, required=True)
     p.add_argument('--collisions', type=Path, required=True)
+    p.add_argument('--cs7', type=Path)
     p.add_argument('--out', type=Path, required=True)
     a = p.parse_args()
-    r = check(a.dataset, a.attack_pool, a.collisions)
+    r = check(a.dataset, a.attack_pool, a.collisions, a.cs7)
     a.out.write_text(json.dumps(r, ensure_ascii=False, sort_keys=True, indent=2) + '\n')
     print(json.dumps({'checks_run_pass': r['checks_run_pass'], 'freeze_ready': r['freeze_ready'],
                       'manifest_sha256': r['manifest_sha256'], 'checks': len(r['checks'])}, sort_keys=True))
