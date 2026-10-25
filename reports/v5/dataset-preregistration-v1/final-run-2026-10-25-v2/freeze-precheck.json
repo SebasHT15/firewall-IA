@@ -1,0 +1,99 @@
+{
+  "checks": {
+    "A1_artifact_hashes": {
+      "checked": 14,
+      "failures": [],
+      "ok": true
+    },
+    "C-M3": {
+      "by_split": {
+        "INTERNAL_TEST": "0.5000",
+        "TRAIN": "0.5000",
+        "VALIDATION": "0.5000"
+      },
+      "ok": true
+    },
+    "L7": {
+      "ok": true,
+      "sets": 13,
+      "unchecked_nonblocking": [
+        "csic_database_csv"
+      ]
+    },
+    "L8": {
+      "excluded": 56,
+      "ok": true
+    },
+    "generator_gates": {
+      "ok": true,
+      "quota_shortfalls": 0
+    },
+    "i9": {
+      "ok": true,
+      "owner_rulings": 2
+    },
+    "over_limit": {
+      "max_share": 0.0025906735751295338,
+      "ok": true,
+      "threshold": 0.01
+    },
+    "row_meta_alignment": {
+      "ok": true,
+      "splits": []
+    },
+    "source_file_cap": {
+      "cap": 0.75,
+      "categories": {
+        "Command Injection": {
+          "max_file_rows": 22,
+          "max_file_share": 0.7096774193548387,
+          "rows": 31
+        },
+        "SQL Injection": {
+          "max_file_rows": 45,
+          "max_file_share": 0.6617647058823529,
+          "rows": 68
+        },
+        "Server Side Template Injection": {
+          "max_file_rows": 15,
+          "max_file_share": 0.25,
+          "rows": 60
+        },
+        "XSS Injection": {
+          "max_file_rows": 25,
+          "max_file_share": 0.43103448275862066,
+          "rows": 58
+        },
+        "path_file_access": {
+          "max_file_rows": 581,
+          "max_file_share": 0.36357947434292864,
+          "rows": 1598
+        }
+      },
+      "ok": true
+    },
+    "split_row_counts": {
+      "ok": true,
+      "rows": {
+        "INTERNAL_TEST": 40,
+        "TRAIN": 3080,
+        "VALIDATION": 40
+      }
+    }
+  },
+  "checks_run_pass": true,
+  "freeze_ready": false,
+  "manifest_sha256": "b873c3418d1c15437ee39c6ebce34a28f7cb0b506e672e830f0a4fa064e5c211",
+  "schema": "v5-freeze-precheck/v1",
+  "status": "PARTIAL_PRE_FREEZE",
+  "still_required": [
+    "A2 byte-identical regeneration in two fresh processes",
+    "A4 complete source provenance and licensing review",
+    "A5 mutation self-tests for every blocking checker",
+    "C-S1 through C-S7 full shortcut probes under D75 thresholds",
+    "L10/L11 warning counts and rulings",
+    "STAB-HELD independent generator, disjointness and seal",
+    "V5 tokenizer remeasurement and library pins",
+    "§11.3 freeze report and committed freeze record"
+  ]
+}
