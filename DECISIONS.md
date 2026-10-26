@@ -3606,6 +3606,8 @@ not itself freeze v3 or authorize training.
 | D73 | V5 recipe/cadence and two Model 2 LR candidates/C1/protocol ratified; calibration and Model 2 FINAL schema definitions active; exact dataset/run records still required; no category admission, parameters chosen, training or runtime activation | APPROVED | APPLIED (uncommitted) |
 | D74 | V5 research scope: four injection categories TRAIN-only/NOT_EVALUABLE; I-9 WARN 8%, BLOCK 12%, cap warn; only `path-media`/VALIDATION and `path-export`/INTERNAL_TEST excepted and disclosed | APPROVED | Pilot passed; full build/freeze/training not yet |
 | D75 | V5 remaining §11.2 values: quota 20, source cap 75%, L12/signatures, policy/catalogue, placement, §7 thresholds, I7 corpus 2500+byte sweep; D74 controls I-9 | APPROVED | Prereg/build/freeze pending evidence |
+| D76 | V5 C-S7 research amendment: >3% remains BLOCK in TRAIN; measured concentration in VALIDATION and INTERNAL_TEST is WARN only. Applies prospectively to v3; rejected v2 remains rejected | APPROVED | v3 built; C-S7 check passed under amended policy |
+| D77 | STAB-HELD v1 G1–G5 criteria exactly as `final-run-2026-10-25-v3/STAB_GATES_TO_RATIFY.md` (SHA-256 `ba5c58d3…`), linked to pretraining seal SHA-256 `34d02c69…`; owner ratified in chat on 2026-10-26 | APPROVED | Criteria fixed before model output; evaluation remains gated |
 
 ---
 

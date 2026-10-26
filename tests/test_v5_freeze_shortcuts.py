@@ -6,6 +6,7 @@ import unittest
 
 from scripts.dataset.v5_shortcut_checks import check as check_structure
 from scripts.dataset.v5_token_purity import check as check_tokens
+from scripts.dataset.v5_structure_probe import check as check_probe
 
 
 class FreezeShortcutMutationTest(unittest.TestCase):
@@ -44,6 +45,16 @@ class FreezeShortcutMutationTest(unittest.TestCase):
             r = check_tokens(root)
             self.assertFalse(r["blocking_pass"])
             self.assertGreater(r["splits"]["TRAIN"]["block_tokens"], 0)
+
+    def test_structure_probe_passes_clean_and_blocks_injected_label_feature(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self._dataset(root)
+            self.assertEqual(check_probe(root)["status"], "PASS")
+            self._dataset(root, leak_carrier=True)
+            result = check_probe(root)
+            self.assertEqual(result["status"], "BLOCK")
+            self.assertGreater(result["accuracy"], .65)
 
 
 if __name__ == "__main__":
