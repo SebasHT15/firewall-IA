@@ -17,6 +17,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from collections import Counter
 from fractions import Fraction
 
@@ -429,6 +430,44 @@ class ControlledErrors(unittest.TestCase):
         self.assertIn("PREREGISTRATION_MISSING", codes)
         self.assertIn("VALUE_NOT_RATIFIED", codes)
 
+    # ── effective validators (handoff 2026-10-23): the refusals are conditional, not fixed impossibilities ──
+    def test_authorization_is_an_effective_validator_not_an_unconditional_no(self):
+        world = F.build_world()
+        recs = list(world.records.values())
+        # a complete authorization record STILL refuses while no schema is ratified (refuse-by-default) ...
+        auth = {"scope": "REAL_BUILD", "authorized_by": "owner", "date": "2026-10-23", "owner_decision": "D-x"}
+        codes = {u["code"] for u in G.real_build_preconditions(world.gen_cfg, recs, world.pool_values,
+                                                               build_authorization=auth)}
+        self.assertIn("REAL_SPLIT_NOT_AUTHORIZED", codes)
+        # ... and once the owner ratifies a schema and supplies the bound record, THAT gate clears (effective).
+        with mock.patch.object(G, "REAL_BUILD_AUTH_SCHEMA", G.PROPOSED_REAL_BUILD_AUTH_SCHEMA):
+            ok = dict(auth, schema=G.PROPOSED_REAL_BUILD_AUTH_SCHEMA)
+            codes = {u["code"] for u in G.real_build_preconditions(world.gen_cfg, recs, world.pool_values,
+                                                                   build_authorization=ok)}
+            self.assertNotIn("REAL_SPLIT_NOT_AUTHORIZED", codes)
+            # an invalid record (wrong scope) is still refused — not skipped
+            bad = dict(ok, scope="EXPERIMENTAL")
+            codes = {u["code"] for u in G.real_build_preconditions(world.gen_cfg, recs, world.pool_values,
+                                                                   build_authorization=bad)}
+            self.assertIn("REAL_SPLIT_NOT_AUTHORIZED", codes)
+
+    def test_attack_eligibility_binds_to_sealed_category_outcomes(self):
+        world = F.build_world()
+        recs = list(world.records.values())
+        cats = {G._record_category(r) for r in recs} - {None}
+        self.assertTrue(cats)                                   # the fixture records carry a category
+        # every category PASS → the audit gate clears (records are not forced to VERIFIED)
+        passing = {c: G.OUTCOME_PASS for c in cats}
+        codes = {u["code"] for u in G.real_build_preconditions(world.gen_cfg, recs, world.pool_values,
+                                                               category_outcomes=passing)}
+        self.assertNotIn("D64_B_POST_FILTER_AUDIT", codes)
+        # a rejected category keeps its records out of the build (no rejected data advances it)
+        one = sorted(cats)[0]
+        mixed = dict(passing, **{one: "FAIL"})
+        unmet = G.real_build_preconditions(world.gen_cfg, recs, world.pool_values, category_outcomes=mixed)
+        d64 = [u for u in unmet if u["code"] == "D64_B_POST_FILTER_AUDIT"]
+        self.assertTrue(d64 and any(repr(one) in u["detail"] for u in d64))
+
 
 def _i9(enabled=True, **over):
     # cap="warn" is the literal D62 default (both bands reduce); tests set explicit TEST thresholds.
@@ -676,6 +715,83 @@ class PendingDependencies(unittest.TestCase):
                    "real identities is not verifiable here.")
     def test_real_split_leakage(self):
         pass
+
+
+class AuthorizedBuild(unittest.TestCase):
+    """The public authorized-build entry (#82 wiring). Real builds are refuse-by-default; the positive control
+    exercises capture → selection → generation → persistence on a SYNTHETIC world (preconditions mocked empty,
+    since they are tested separately). No real dataset is built."""
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.out = os.path.join(self.tmp, "out")
+        self.world = F.build_world()
+        self.cats = sorted({G._record_category(r) for r in self.world.records.values()} - {None})
+
+    def tearDown(self):
+        import shutil
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _auth(self, **over):
+        p = os.path.join(self.tmp, "auth.json")
+        rec = {"schema": G.PROPOSED_REAL_BUILD_AUTH_SCHEMA, "scope": "REAL_BUILD", "preregistration_sha256": "pre",
+               "authorized_by": "owner", "date": "2026-10-23", "owner_decision": "D-x"}
+        from tests.v5_audit_fixture import make_bundle
+        self.bundle=make_bundle(os.path.join(self.tmp,'evidence'),records=list(self.world.records.values()),
+                               outcomes={c:G.OUTCOME_PASS for c in self.cats})
+        rec['audit_evidence']=self.bundle
+        rec.update(over)
+        with open(p, "w", encoding="utf-8") as fh:
+            json.dump(rec, fh)
+        return p
+
+    def _exchange(self, outcomes=None, **over):
+        p=self.bundle['exchange']['path']
+        if outcomes is not None or over:
+            with open(p) as fh: rec=json.load(fh)
+            if outcomes is not None:rec['category_outcomes']=outcomes
+            rec.update(over)
+            with open(p,'w') as fh:json.dump(rec,fh)
+        return p
+
+    def test_missing_records_refuse_and_persist_nothing(self):
+        res = G.authorized_build(self.world, authorization_path=None, audit_exchange_path=None, out_dir=self.out,
+                                 pool_values_list=F.fixture_pool_value_lists())
+        self.assertEqual(res["status"], "REFUSED")
+        codes = {u["code"] for u in res["unmet"]}
+        self.assertIn("AUTHORIZATION_UNREADABLE", codes)
+        self.assertIn("AUDIT_EXCHANGE_UNREADABLE", codes)
+        self.assertFalse(os.path.exists(os.path.join(self.out, "manifest.json")))   # nothing written
+        self.assertTrue(res["pools_without_real_builder"])                          # real pools still missing
+
+    def test_refuse_by_default_even_with_complete_records(self):
+        res = G.authorized_build(self.world, authorization_path=self._auth(), audit_exchange_path=self._exchange(),
+                                 out_dir=self.out, preregistration_sha256="pre",
+                                 pool_values_list=F.fixture_pool_value_lists())
+        self.assertEqual(res["status"], "REFUSED")  # schema activation is not a dataset permission
+        self.assertIn("AUTHORIZATION_NOT_COMMITTED", {u["code"] for u in res["unmet"]})
+
+    def test_selected_category_must_be_admitted(self):
+        if not self.cats:
+            self.skipTest("fixture has no attack categories")
+        self._auth()
+        ex = self._exchange({**{c: G.OUTCOME_PASS for c in self.cats}, self.cats[0]: "FAIL"})
+        res = G.authorized_build(self.world, authorization_path=os.path.join(self.tmp,'auth.json'), audit_exchange_path=ex,
+                                 out_dir=self.out, category_selection=self.cats,
+                                 pool_values_list=F.fixture_pool_value_lists())
+        self.assertEqual(res["status"], "REFUSED")
+        self.assertIn("AUDIT_EXCHANGE_UNBOUND", {u["code"] for u in res["unmet"]})
+
+    def test_positive_control_builds_and_persists_on_synthetic_world(self):
+        # preconditions are tested elsewhere; here we verify the WIRING proceeds to generation + persistence.
+        with mock.patch.object(G, "real_build_preconditions", return_value=[]), mock.patch.object(G.AE,'is_committed',return_value=True):
+            res = G.authorized_build(self.world, authorization_path=self._auth(), audit_exchange_path=self._exchange(),
+                                     out_dir=self.out, preregistration_sha256="pre", category_selection=self.cats,
+                                     pool_values_list=F.fixture_pool_value_lists())
+        self.assertEqual(res["status"], "BUILT", res)
+        self.assertTrue(os.path.isfile(os.path.join(self.out, "manifest.json")))
+        self.assertEqual(res["source_report_sha256"], self.bundle['report']['sha256'])
+        self.assertEqual(res["category_selection"], self.cats)
 
 
 if __name__ == "__main__":

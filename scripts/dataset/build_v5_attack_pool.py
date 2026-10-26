@@ -355,8 +355,13 @@ def reason_string_of(category):
     return p4.HARDCODED_SHAPES[category][0]
 
 
-def process(cands, denied):
-    """Apply steps a-f to candidates (V4 order). Returns the list of records (ACCEPTED + EXCLUDED)."""
+def process(cands, denied, *, candidate_remediation=None):
+    """Apply steps a-f; the default approved build retains its existing behavior.
+
+    A separate proposal builder may supply candidate_remediation. The production
+    build() never supplies it. Its results require a new manifest/audit/approval;
+    they cannot replace the frozen pool or inherit its category outcomes.
+    """
     recs = []
     for c in cands:
         cat = c["category"]
@@ -368,6 +373,13 @@ def process(cands, denied):
                  structural_flags=[], native_forms=[], also_in_categories=[],
                  license=LICENSE_PROJECT if c["source_kind"] == "hardcoded" else LICENSE_PATT)
         recs.append(r)
+        # Proposal-only source-unit quarantine: never split an explicitly composite
+        # example into learned lines. The proposal builder preserves its whole block.
+        # Default approved extraction supplies neither this field nor the hook.
+        if candidate_remediation is not None and c.get("candidate_source_unit_quarantine"):
+            r.update(status=C.EXCLUDED, v4_filter_reason="not_applied_candidate_source_unit",
+                     exclusion_reason="candidate_source_unit:" + c["candidate_source_unit_quarantine"])
+            continue
         # a. V4 quality filter (PATT rows only; V4 did not filter the project-authored lists)
         if c["source_kind"] == "hardcoded":
             payload, reason = c["raw"], "not_applied_project_authored"
@@ -391,6 +403,22 @@ def process(cands, denied):
             r.update(status=C.EXCLUDED, exclusion_reason="third_party_file",
                      denylist_reason=denied[c["source_file"]]["reason"])
             continue
+        # Explicit proposal-only hook BEFORE structural filtering and deduplication.
+        # This prevents an excluded candidate's duplicate from bypassing the rule,
+        # and ensures transformed values receive freshly computed family fields.
+        if candidate_remediation is not None:
+            proposal = candidate_remediation(work, cat, c["source_kind"])
+            if proposal["review_reasons"]:
+                r["candidate_review_reasons"] = list(proposal["review_reasons"])
+            if proposal["exclude_reasons"]:
+                _fill(r, work)
+                r["candidate_exclusion_reasons"] = list(proposal["exclude_reasons"])
+                r.update(status=C.EXCLUDED,
+                         exclusion_reason="candidate_remediation:" + proposal["exclude_reasons"][0])
+                continue
+            if proposal["transform"]:
+                work = proposal["transformed"]
+                r["transform"] = proposal["transform"]
         # d. negative structural filters (SSTI: strip trailing documentation comments first)
         if cat == SSTI and "trailing_doc_comment" in audit.structural_flags(work, cat):
             stripped = strip_doc_comment(work)

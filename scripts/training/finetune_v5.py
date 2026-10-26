@@ -42,6 +42,9 @@ import v5_tokenization as T  # noqa: E402
 DEFAULT_RECIPE = os.path.join(HERE, "v5_training_recipe_v1.json")
 LIBS = ("torch", "transformers", "trl", "peft", "bitsandbytes", "datasets", "accelerate")
 CODE_FILES = (os.path.join(HERE, "finetune_v5.py"), os.path.join(HERE, "v5_train_data.py"),
+              os.path.join(D.REPO_ROOT, "scripts", "dataset", "v5_audit_evidence.py"),
+              os.path.join(D.REPO_ROOT, "scripts", "dataset", "v5_row_contract.py"),
+              os.path.join(D.REPO_ROOT, "scripts", "dataset", "v5_pools_common.py"),
               os.path.join(D.REPO_ROOT, "control_plane", "v5_tokenization.py"),
               os.path.join(D.REPO_ROOT, "control_plane", "v5_output_contract.py"))
 
@@ -87,6 +90,9 @@ def parse_args(argv=None):
     ap.add_argument("--dataset-prereg", default=None, help="FINAL: committed dataset preregistration file")
     ap.add_argument("--freeze-record", default=None, help="FINAL: committed v5-dataset-freeze-record/v1 JSON")
     ap.add_argument("--training-prereg", default=None, help="FINAL: committed v5-training-preregistration/v1 JSON")
+    ap.add_argument("--ai-audit-authorization", default=None,
+                    help="FINAL, ai_audited datasets only (PROPOSED): committed owner authorization record, separate from "
+                         "the other FINAL records; refused while no schema is ratified")
     ap.add_argument("--gate-only", action="store_true", help="run the gates and the tokenization checks, load no model")
     ap.add_argument("--max-steps", type=int, default=None, help="SMOKE only; capped by recipe smoke.max_steps_hard_cap")
     return ap.parse_args(argv)
@@ -100,6 +106,12 @@ def main(argv=None) -> int:
     recipe, recipe_sha = D.load_recipe(args.recipe)
     manifest_sha_short = "nomanifest"
     mpath = os.path.join(args.dataset, "manifest.json")
+    try:
+        D.C.assert_not_protected(args.dataset)
+        D.C.assert_not_protected(mpath)
+    except SystemExit as e:
+        print(str(e),file=sys.stderr)
+        return 3
     if os.path.isfile(mpath):
         manifest_sha_short = D.sha256_file(mpath)[:12]
     run_id = args.run_id or f"{dt.datetime.now(dt.timezone.utc).strftime('%Y%m%dT%H%M%SZ')}-{manifest_sha_short}"
@@ -130,6 +142,7 @@ def main(argv=None) -> int:
         prep = D.prepare(mode, args.dataset, out_dir, recipe, recipe_sha, authorization=args.authorization,
                          dataset_prereg=args.dataset_prereg, freeze_record=args.freeze_record,
                          training_prereg=args.training_prereg, installed_versions=versions, git=git,
+                         ai_audit_authorization=args.ai_audit_authorization,
                          code_paths=CODE_FILES + (os.path.abspath(args.recipe),))
     except D.GateRefused as e:
         print(str(e), file=sys.stderr, flush=True)
@@ -169,6 +182,14 @@ def main(argv=None) -> int:
     print(f"      overhead={contract.overhead} label_budget={contract.label_budget} B={contract.B} "
           f"(template max {contract.template_max_B}); examples train={len(train_ex)} val={len(val_ex)}; "
           f"max seq {lens[-1]} ≤ {contract.max_length}; 0 rejected, 0 truncated", flush=True)
+    if mode != D.SMOKE:
+        # Fix and RECORD the effective schedule (from the eligible TRAIN count) before any training, so even a
+        # small dataset evaluates + checkpoints. Available in gate_record.json too (gate-only).
+        record["schedule"] = compute_schedule(recipe, len(train_ex))
+        print(f"      schedule: {record['schedule']['total_optimizer_steps']} steps "
+              f"({record['schedule']['steps_per_epoch']}/epoch × {record['schedule']['num_train_epochs']}), "
+              f"eval+save every {record['schedule']['effective_eval_steps']} "
+              f"(~{record['schedule']['expected_evaluations']} evals)", flush=True)
     if args.gate_only:
         record["outcome"] = "GATES_AND_TOKENIZATION_PASSED_NO_TRAINING"
         if args.report_dir:
@@ -184,6 +205,40 @@ def _count(it) -> dict:
     for x in it:
         out[x] = out.get(x, 0) + 1
     return dict(sorted(out.items()))
+
+
+DESIRED_EVALS = 4   # aim for ~4 evaluations+checkpoints across an epoch-based run
+
+
+def compute_schedule(recipe, train_rows, num_devices=1) -> dict:
+    """Effective training SCHEDULE derived DETERMINISTICALLY from the ratified recipe optimization block and
+    the frozen TRAIN size — epochs/batch/accumulation stay the recipe's; only the eval/save/logging CADENCE is
+    derived so that even a small dataset actually evaluates and checkpoints. `eval_steps == save_steps` (HF
+    requires it for `load_best_model_at_end`). This is RECORDED (run_record/gate_record), never a silent edit
+    of the recipe. `train_rows` is the count of ELIGIBLE TRAIN examples (what the gates admitted)."""
+    opt = recipe["optimization"]
+    per_dev = int(opt["per_device_train_batch_size"])
+    accum = int(opt["gradient_accumulation_steps"])
+    epochs = int(opt["num_train_epochs"])
+    effective_batch = per_dev * accum * max(1, int(num_devices))
+    steps_per_epoch = max(1, math.ceil(max(0, int(train_rows)) / effective_batch))
+    total_steps = steps_per_epoch * epochs
+    recipe_eval = int(opt.get("eval_steps", 0) or 0)
+    recipe_log = int(opt.get("logging_steps", 0) or 0)
+    eff = max(1, total_steps // DESIRED_EVALS)
+    if recipe_eval:
+        eff = min(eff, recipe_eval)
+    eff = max(1, min(eff, total_steps))                    # at least one eval+save, never past the run end
+    eff_log = max(1, min(recipe_log or eff, eff))
+    return {"train_rows_eligible": int(train_rows), "num_devices": int(num_devices),
+            "per_device_train_batch_size": per_dev, "gradient_accumulation_steps": accum,
+            "effective_batch": effective_batch, "num_train_epochs": epochs,
+            "steps_per_epoch": steps_per_epoch, "total_optimizer_steps": total_steps,
+            "recipe_eval_steps": recipe_eval, "effective_eval_steps": eff, "effective_save_steps": eff,
+            "effective_logging_steps": eff_log, "expected_evaluations": total_steps // eff,
+            "derivation": (f"effective_eval=save = max(1, min(recipe_eval_steps, total_steps // {DESIRED_EVALS})); "
+                           "epochs/batch/accum from the ratified recipe; eval==save for load_best_model_at_end; "
+                           "recorded before training, not a silent recipe change")}
 
 
 def train_and_verify(args, mode, recipe, prep, tok, contract, train_ex, val_ex, out_dir, record, t0) -> int:
@@ -241,6 +296,13 @@ def train_and_verify(args, mode, recipe, prep, tok, contract, train_ex, val_ex, 
                    gradient_accumulation_steps=sm["gradient_accumulation_steps"], learning_rate=sm["learning_rate"],
                    warmup_ratio=sm["warmup_ratio"], eval_steps=sm["eval_steps"], save_steps=sm["save_steps"],
                    logging_steps=sm["logging_steps"], save_total_limit=sm["save_total_limit"])
+    else:
+        # Apply the effective schedule recorded before training (eval==save so it actually checkpoints even on
+        # a small dataset); epochs/batch/accum/lr stay the ratified recipe's.
+        sch = record.get("schedule") or compute_schedule(recipe, len(train_ex))
+        record["schedule"] = sch
+        opt.update(eval_steps=sch["effective_eval_steps"], save_steps=sch["effective_save_steps"],
+                   logging_steps=sch["effective_logging_steps"])
     ckpt_dir = os.path.join(out_dir, "checkpoints")
     cfg = SFTConfig(output_dir=ckpt_dir, eval_strategy="steps", save_strategy="steps", report_to="none",
                     seed=seed, data_seed=recipe["seed"]["data_seed"], max_length=contract.max_length,
