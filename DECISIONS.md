@@ -3646,3 +3646,24 @@ The v4 preregistration/build authorization use D78 and must be committed before 
 Freeze and the two model authorizations are recorded separately only after factual acceptance, with
 this exact owner instruction as their authorization evidence. D73's PR-to-develop condition remains;
 all actual training remains unstarted and is left for the owner's launch commands after gate-only PASS.
+
+
+## D79 — dataset v4 research freeze (A)
+
+Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
+
+Implements the owner instruction quoted in D78 after measured acceptance. Dataset manifest c2e9c2f50f56c059ce82945384858802357be88d899dc2710e20edd06a2b72df; acceptance.json and A2-regeneration.json pass. The five r4 §11.3 items are hash-bound in final-run-2026-10-26-v4/freeze-record.json. The manifest remains REAL and the separate record is FROZEN. All D60/D67/D74/D76, provenance, L10, concentration and STAB limitations in DATASET_FREEZE_REPORT.md persist. This records a research dataset freeze, not production validation or a model result.
+
+
+## D80 — V5 ai-audited FINAL readiness authorization (B)
+
+Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
+
+Separately implements the owner-directed readiness step B enumerated before the instruction quoted in D78. Allows the hash-bound V5 FINAL run on frozen v4 with the D73-ratified recipe/preregistration. The disclosed AI_AUDITED basis is acknowledged as not human validation; four injection categories remain NOT_EVALUABLE. The separate ai-audit authorization is committed and bound to the freeze record. No Model2 authorization, operating threshold or runtime activation follows from B. The agent stops at gate-only; actual training is left to the owner launch command.
+
+
+## D81 — Model2 FINAL_OFFLINE readiness authorization (C)
+
+Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
+
+Separately implements owner-directed step C under the same D78 instruction. Authorizes the baseline34 and target-path-neutralized32 candidates independently, with exact recipe/C1/selection/dataset/source/library pins. Fit on TRAIN, compare on VALIDATION, preserve identity groups; C1 extensions metadata-only, C2 absent, no operating threshold or deployed winner. The shared reader requires the separately bound ai-audit authorization. The agent stops at gate-only; no fitting occurs in this task. D73 PR-to-develop remains a precondition before actual training.

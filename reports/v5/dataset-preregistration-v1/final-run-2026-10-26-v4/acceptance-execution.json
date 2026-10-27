@@ -1,0 +1,116 @@
+[
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_protected_collision_check.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/protected-collision-counts.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"blocking_pass\": true, \"entries\": 13, \"unchecked\": 1}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_cs7_check.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--preregistration",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/preregistration.json",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/cs7-counts.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"blocked_cells\": [], \"blocking_pass\": true}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_shortcut_checks.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/shortcut-partial.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"blocking_pass_for_checks_run\": true, \"pending\": [\"C-S3\", \"C-S4\"]}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_token_purity.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/token-purity.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"blocked_splits\": [], \"blocking_pass\": true}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_structure_probe.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/structure-probe.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"accuracy\": 0.5, \"status\": \"PASS\"}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_novelty_ancestry.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--attack-pool",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/hygiene_inputs_2026-10-26-v4/attack_pool.jsonl",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/novelty-ancestry.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"L10_warn_splits\": [\"VALIDATION\", \"INTERNAL_TEST\"], \"L11_unique_hit_records\": 0}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "reports/v5/freeze-prep-claude-2026-10-26/h1_identity_secrets_scan.py",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/h1-identity-secrets.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"H1_pass_on_v3\": true, \"rows_scanned\": 3160, \"errors\": []}\n"
+  },
+  {
+    "command": [
+      "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "-B",
+      "scripts/dataset/v5_freeze_precheck.py",
+      "--dataset",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+      "--attack-pool",
+      "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/hygiene_inputs_2026-10-26-v4/attack_pool.jsonl",
+      "--collisions",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/protected-collision-counts.json",
+      "--cs7",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/cs7-counts.json",
+      "--out",
+      "/home/sebas/Desktop/firewall-IA/reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/freeze-precheck.json"
+    ],
+    "exit_code": 0,
+    "stderr": "",
+    "stdout": "{\"checks\": 11, \"checks_run_pass\": true, \"freeze_ready\": false, \"manifest_sha256\": \"c2e9c2f50f56c059ce82945384858802357be88d899dc2710e20edd06a2b72df\"}\n"
+  }
+]
