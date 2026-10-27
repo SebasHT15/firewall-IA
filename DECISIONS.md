@@ -3620,3 +3620,29 @@ Recorded here so they are not silently resolved by implementation.
 - Confirmation of the D8 core scope, particularly whether physical embedded deployment (D10)
   is required for the grade or is acceptable as documented future work.
 - Whether the conventional rule-based comparison (D9) is ultimately required.
+
+
+## D78 — owner-directed completion of training readiness; prospective H1 source hygiene v4
+
+Owner instruction in the current local chat, 2026-10-26 (Costa Rica):
+“resuelve todas esas puntuaciones directo, sin fallos, al final quiero leer que ambos modelos estan listos para entrenar”.
+This responds to the enumerated remaining steps: resolve H1 with a successor, validate its inputs/records,
+complete the separate freeze/V5/Model2 records, commit evidence, meet D73's PR condition, and pass gate-only.
+It authorizes carrying out those readiness steps; it does not instruct the agent to start either training.
+No cryptographic signature, human payload validation, model outcome or performance is attributed.
+
+Implement a prospective v4 source subset under the unchanged r4/D74/D75/D76 values and split rules.
+Remove H1-disallowed source records before generation; preserve every retained attack record byte-for-byte,
+and require the existing per-component verifier to prove its admission in its own audited pool. No new
+payload is invented or normalized and no category PASS is transferred to changed content. Remove the
+symbols value containing the identified brand; preserve original pools and datasets. Exact source
+exclusions, parent hashes and new pins are in final-run-2026-10-26-v4/source-hygiene-ledger.json.
+The 12 attack records and one symbols value are excluded by the preregistered source-hygiene rule;
+this is source filtering before a new build, not tuning using protected/model outputs. Earlier v3 remains
+preserved with the H1 finding; its old freeze proposal is not approved. The prior single bracketed
+PATT marker disposition remains limited and does not waive real-host hygiene.
+
+The v4 preregistration/build authorization use D78 and must be committed before building.
+Freeze and the two model authorizations are recorded separately only after factual acceptance, with
+this exact owner instruction as their authorization evidence. D73's PR-to-develop condition remains;
+all actual training remains unstarted and is left for the owner's launch commands after gate-only PASS.

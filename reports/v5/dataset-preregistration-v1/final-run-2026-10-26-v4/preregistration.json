@@ -1,0 +1,149 @@
+{
+  "correction": {
+    "owner_ruling": "D78",
+    "parent_manifest_sha256": "7c1ebb9a98fa437c1a1be6839cfe1b2e9b31cac247b8a6ec4d08dc12d5ae8d16",
+    "reason": "Prospective H1 source hygiene subset; prior dataset preserved; no model output viewed",
+    "source_hygiene_ledger_sha256": "91812e9f488ad69fd9d2a91e9fb19c246a6ce4bb03aa53fda9dfc602e1e130ee"
+  },
+  "limitations": [
+    "Four injection categories are TRAIN-only and not evaluable under D60.",
+    "VALIDATION and INTERNAL_TEST each contain one path_file_access cluster with a D74 exception.",
+    "No per-category held-out performance claim for CmdI, SQLi, SSTI or XSS.",
+    "D76: C-S7 concentration in protected small splits is reported as WARN only."
+  ],
+  "owner_decisions": [
+    "D71",
+    "D74",
+    "D75",
+    "D76",
+    "D78"
+  ],
+  "pilot_evidence": {
+    "gates_ok": true,
+    "manifest_sha256": "373f341fd90555592e8a1372d60504556af50ce24800e8f4495677d301c72166",
+    "measurement_sha256": "db7e64c40ba1d7bd8e1838534b64d27c6ac62bc650bd86d09eae06e9d3013cda"
+  },
+  "purpose": "EXPERIMENTAL_RESEARCH_TRAINING",
+  "ratified": {
+    "acceptance_thresholds": {
+      "C-M3": {
+        "block_outside": [
+          "0.45",
+          "0.55"
+        ],
+        "pass_block_share": [
+          "0.48",
+          "0.52"
+        ]
+      },
+      "C-S1": {
+        "block_accuracy_gte": "0.80",
+        "block_margin_gte": "0.10"
+      },
+      "C-S2": {
+        "block_purity_gte": "0.99",
+        "min_coverage": "0.01"
+      },
+      "C-S3": {
+        "block_purity_gte": "0.95",
+        "min_coverage": "0.01",
+        "warn_purity_gte": "0.80"
+      },
+      "C-S4": {
+        "block_accuracy_gt": "0.65",
+        "warn_accuracy_gt": "0.55"
+      },
+      "C-S6": {
+        "block_ratio_lt": "0.50",
+        "pass_ratio_gte": "0.80"
+      },
+      "C-S7": {
+        "INTERNAL_TEST": "WARN_ONLY_REPORT_EXCESS",
+        "TRAIN": "BLOCK_ABOVE_0.03",
+        "VALIDATION": "WARN_ONLY_REPORT_EXCESS",
+        "block_element_share_gt": "0.03",
+        "owner_ruling": "D76",
+        "warn_element_share_gt": "0.01"
+      },
+      "C3": {
+        "provider_share_warn_outside": [
+          "0.20",
+          "0.80"
+        ]
+      },
+      "L10": {
+        "novelty_warning_share_gt": "0.50"
+      },
+      "L7_L8_L9": {
+        "blocking_overlap_max": 0
+      },
+      "post_filter_audit": {
+        "coverage": "1.00",
+        "incorrect_wilson95_upper_max": "0.20",
+        "uncertain_plus_incorrect_wilson95_upper_max": "0.35",
+        "unresolved_gate_items_max": 0
+      }
+    },
+    "attack_pool_sha256": "b8800ccd469d9f15bdb3e2a524fa41ec70efd2f83fd40f8900949cca86dd4751",
+    "benign_manifest_sha256": "c970a45c018812bc4d9fb8754de279a45cf33fd7c6e3239909559ec0a233edc2",
+    "benign_oracle": {
+      "L": 12,
+      "signatures_sha256": "162670025d6fbb812716e2ca3818ea93e24e49277d4c3138223d61431a6ff40b"
+    },
+    "category_evaluability": {
+      "Command Injection": "NOT_EVALUABLE_TRAIN_ONLY",
+      "SQL Injection": "NOT_EVALUABLE_TRAIN_ONLY",
+      "Server Side Template Injection": "NOT_EVALUABLE_TRAIN_ONLY",
+      "XSS Injection": "NOT_EVALUABLE_TRAIN_ONLY",
+      "path_file_access": "EVALUABLE"
+    },
+    "cluster_share": {
+      "block": "0.12",
+      "cap": "warn",
+      "owner_rulings": {
+        "path-export": "D74: sole path_file_access structure in INTERNAL_TEST; 100% concentration disclosed",
+        "path-media": "D74: sole path_file_access structure in VALIDATION; 100% concentration disclosed"
+      },
+      "warn": "0.08"
+    },
+    "component_bindings_sha256": "c6267416d0dd288241ce71729b37965cb41e1a39bc87f6a8d8fbc9030daeb3ea",
+    "denylist_sha256": "3e5570580a10319fc03ca622c034786a384a3ea6dddaf95bfeb413cf3fc7dd7e",
+    "generator_config_file_sha256": "4391c0bac09a4b61d9f71ae3e5b3929c29c5b7126af0a2ba2267041df3fac387",
+    "generator_config_sha256": "6b842b7dad48011f2b90b18975c907cf6903412bf536060d92902dbe68f46087",
+    "i7": {
+      "random_cases": 2500,
+      "seed": 20261013,
+      "single_byte_sweep": 256,
+      "test_source_sha256": "36da6dc8efdb2e87f423880dfb3c297fc422d44ac85489b4bde1e8d2358b313f"
+    },
+    "over_limit_stop_share_by_category_class": "0.01",
+    "pilot_pairs_per_cluster_category": 2,
+    "placement_weights": {
+      "embedded": 1,
+      "prefix": 1,
+      "replace": 3,
+      "suffix": 1
+    },
+    "policy_table_sha256": "a881df75cc31ad8e93688c073127027cb824dff45f659caa042b454074306a22",
+    "quota_pairs_per_cluster_category": 20,
+    "source_file_cap": "0.75",
+    "split_config_file_sha256": "1d7daf991567194e9243dbf24c1f27eaeffa30f154e4ead7b13e4a335c6b6fe2",
+    "split_config_sha256": "d778c36d895ff07d89cfb205c2f9f350530088fda72fe759f8b61790b41f65aa",
+    "template_catalog_sha256": "26cd2c1342e42044aa21aa65ac452cf59597fd8cb06d1f3a6bfd81a87c73d7de",
+    "template_id": "V5_CANDIDATE_TEMPLATE",
+    "token_budget": {
+      "B": 415,
+      "label_budget": 13,
+      "margin": 8,
+      "max_length": 512,
+      "template_overhead": 76,
+      "v5_tokenizer_remeasurement_required_before_final_training": true
+    },
+    "vocabulary_id": "PILOT_VOCABULARY"
+  },
+  "schema": "v5-dataset-preregistration/v1",
+  "spec": "V5-DATA-SPEC-r4",
+  "status": "RATIFIED",
+  "training_authorized": false,
+  "version": "v5-dataset-v4"
+}
