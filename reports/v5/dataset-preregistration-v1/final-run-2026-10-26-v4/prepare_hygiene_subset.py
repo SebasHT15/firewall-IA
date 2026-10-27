@@ -44,10 +44,23 @@ save(S/'benign/manifest.json',m)
 ledger={'schema':'v5-hygiene-source-subset/v1','owner_decision':'D78','parent_attack_sha256':sha(source),'attack_pool_sha256':sha(S/'attack_pool.jsonl'),'kept_attack_records':len(kept),'excluded_attacks':excluded,'excluded_symbols':symbol_excluded,'benign_manifest_sha256':sha(S/'benign/manifest.json'),'policy':'prospective source-only hygiene filtering before v4; no model outputs; no threshold changes; component membership required for every retained attack','unchanged_retained_attack_bytes':True,'old_dataset_untouched':True}
 save(D/'source-hygiene-ledger.json',ledger)
 for name in ['generator-config.json','split-config.json']:(D/name).write_bytes((old/name).read_bytes())
+sys.path.insert(0,str(R/'scripts/dataset'))
+import v5_identities as I,v5_split as SP
+cfg=json.loads((D/'split-config.json').read_text())
+known={I._family_key(json.loads(line)['payload_wire']) for line in kept}
+changed=[];projected=[]
+for group in cfg['family_merges']:
+ remaining=[x for x in group if x in known]
+ if len(remaining)>1:projected.append(remaining)
+ if remaining!=group:changed.append({'removed_absent_ids':[x for x in group if x not in known],'survivors':remaining})
+cfg['family_merges']=projected;save(D/'split-config.json',cfg)
+ledger['merge_projection']={'method':'project old equivalence classes onto surviving source family IDs; preserve all remaining group relations','changed_groups':changed}
+save(D/'source-hygiene-ledger.json',ledger)
 pr=json.loads((old/'preregistration.json').read_text());pr.update(version='v5-dataset-v4',training_authorized=False)
 pr['owner_decisions'].append('D78');pr['correction']={'owner_ruling':'D78','reason':'Prospective H1 source hygiene subset; prior dataset preserved; no model output viewed','parent_manifest_sha256':'7c1ebb9a98fa437c1a1be6839cfe1b2e9b31cac247b8a6ec4d08dc12d5ae8d16','source_hygiene_ledger_sha256':sha(D/'source-hygiene-ledger.json')}
+pr['ratified']['split_config_file_sha256']=sha(D/'split-config.json');pr['ratified']['split_config_sha256']=SP.config_sha256(cfg)
 pr['ratified']['attack_pool_sha256']=sha(S/'attack_pool.jsonl');pr['ratified']['benign_manifest_sha256']=sha(S/'benign/manifest.json')
 prsha=save(D/'preregistration.json',pr)
-a=json.loads((old/'build-authorization.json').read_text());a.update(assembled_pool_sha256=sha(S/'attack_pool.jsonl'),preregistration_sha256=prsha,owner_decision='D78; owner instruction to resolve all readiness points; source hygiene subset',date='2026-10-26')
+a=json.loads((old/'build-authorization.json').read_text());a.update(split_config_sha256=SP.config_sha256(cfg),assembled_pool_sha256=sha(S/'attack_pool.jsonl'),preregistration_sha256=prsha,owner_decision='D78; owner instruction to resolve all readiness points; source hygiene subset',date='2026-10-26')
 save(D/'build-authorization.json',a)
 print(json.dumps({'attack_kept':len(kept),'attack_excluded':len(excluded),'symbols_excluded':len(symbol_excluded),'preregistration':prsha,'source_inputs':str(S)}))
