@@ -21,8 +21,8 @@ After generation the build gates run: M-1…M-8, C-M2 pair integrity, ENC-1 / EN
 stage-3 SPL-3…SPL-9 gates on the generated rows, plus reported (PROPOSED-threshold) diagnostics:
 class balance, carrier symmetry, ENC-4 encoding features, over-limit shares, cluster shares.
 
-Only `mode = "fixture"` builds. `mode = "real"` checks the D64 conditions for a real split and stops:
-no real split, dataset or training run is authorized.
+Fixture builds are synthetic. Real builds require the D72-ratified #80 contract,
+committed authorization, admitted category evidence and effective preconditions.
 """
 from __future__ import annotations
 
@@ -32,13 +32,17 @@ import os
 import re
 import sys
 from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(HERE))
 if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
+import v5_row_contract as RC
+import v5_pilot_authorization as PA
+import v5_audit_evidence as AE
+import v5_component_binding as CB
 import v5_catalog as K  # noqa: E402
 import v5_identities as I  # noqa: E402
 import v5_labels as L  # noqa: E402
@@ -56,7 +60,7 @@ GENERATOR_VERSION = "v5-generator/0.1"
 PLACEMENT_MODES = ("replace", "prefix", "suffix", "embedded")
 VALUE_STATUSES = ("PROPOSED", "PENDING", "FIXTURE", "RATIFIED")
 COUNTERS = ("utf8_bytes_upper_bound", "tokenizer")
-CODE_FILES = ("v5_catalog.py", "v5_render.py", "v5_labels.py", "v5_oracle.py", "v5_generator.py",
+CODE_FILES = ("v5_pilot_authorization.py", "v5_rebalance.py", "v5_row_contract.py", "v5_audit_evidence.py", "v5_catalog.py", "v5_render.py", "v5_labels.py", "v5_oracle.py", "v5_generator.py",
               "v5_fixture.py", "v5_identities.py", "v5_split.py", "v5_split_checks.py", "v5_pools_common.py")
 DATA_FILES = (os.path.join("v5_templates", "catalog_v1.json"), os.path.join("v5_templates", "field_names_v1.json"),
               os.path.join("v5_policy", "policy_table_v1.json"), os.path.join("v5_policy", "oracle_signatures_v1.json"))
@@ -156,14 +160,89 @@ def config_sha256(cfg: dict) -> str:
 
 
 # ───────────────────────────── real-build preconditions (D64) ─────────────────────────────
-def real_build_preconditions(gen_cfg: dict, records, pools: dict, preregistration_sha256: str | None = None) -> list:
-    """Every unmet condition for a real build. Today all of these are unmet by design."""
-    unmet = [{"code": "REAL_SPLIT_NOT_AUTHORIZED",
-              "detail": "the owner has not authorized a real split, the dataset freeze or training (stage-4 brief)"}]
-    pending = sum(1 for r in records if r.get("label_status") != C.LABEL_VERIFIED)
-    if pending:
+# Audit category outcome that admits a category's records (mirror of v5_train_data.OUTCOME_PASS / #80).
+OUTCOME_PASS = "PASS_AI_AUDITED"
+# D72 ratifies this REAL_BUILD schema definition; a complete committed record
+# bound to actual evidence/preregistration is still required for every build.
+PROPOSED_REAL_BUILD_AUTH_SCHEMA = "v5-real-build-authorization/v1-PROPOSED"
+REAL_BUILD_AUTH_SCHEMA = PROPOSED_REAL_BUILD_AUTH_SCHEMA  # D72; records remain separately required
+
+
+def _record_category(r: dict):
+    """The audit category of a stage-2 attack record, from the first present of the known keys. The R3
+    outcomes use the original categories (`path_file_access` unites traversal/file inclusion)."""
+    for k in ("attack_category", "category", "dedup_scope"):
+        v = r.get(k)
+        if isinstance(v, str) and v:
+            return v
+    return None
+
+
+def _check_real_build_authorization(auth, preregistration_sha256) -> list:
+    """EFFECTIVE validator for the owner's real-build authorization (replaces the old unconditional refusal).
+    `auth` is the parsed committed authorization record (a dict), supplied by the real-build caller — never
+    invented here. Refused by default until the owner ratifies a schema (REAL_BUILD_AUTH_SCHEMA)."""
+    code, d = "REAL_SPLIT_NOT_AUTHORIZED", []
+    if REAL_BUILD_AUTH_SCHEMA is None:
+        d.append({"code": code, "detail": "no ratified real-build authorization schema exists; a real split/build/"
+                  "freeze/training is refused until the owner ratifies one (holds even if a record is supplied)"})
+    if not isinstance(auth, dict):
+        return d + [{"code": code, "detail": "a real build requires an owner authorization record (none supplied)"}]
+    if REAL_BUILD_AUTH_SCHEMA is not None and auth.get("schema") != REAL_BUILD_AUTH_SCHEMA:
+        d.append({"code": code, "detail": f"schema {auth.get('schema')!r} != {REAL_BUILD_AUTH_SCHEMA!r}"})
+    if auth.get("scope") != "REAL_BUILD":
+        d.append({"code": code, "detail": f"scope {auth.get('scope')!r}; must be 'REAL_BUILD'"})
+    if preregistration_sha256 and auth.get("preregistration_sha256") != preregistration_sha256:
+        d.append({"code": code, "detail": "authorization is not bound to this preregistration (preregistration_sha256)"})
+    for k in ("authorized_by", "date", "owner_decision"):
+        if not str(auth.get(k, "")).strip():
+            d.append({"code": code, "detail": f"field {k!r} is empty"})
+    return d
+
+
+def real_build_preconditions(gen_cfg: dict, records, pools: dict, preregistration_sha256: str | None = None, *,
+                             build_authorization=None, category_outcomes=None,
+                             build_purpose="REAL_BUILD", split_cfg=None) -> list:
+    """Every unmet condition for a real build, as EFFECTIVE validators bound to concrete artifacts/decisions —
+    never an unconditional refusal, never a boolean that skips controls. A real build is permitted only when
+    this returns empty. Nothing here invents the authorization, the preregistration or the audit outcomes:
+    the caller supplies them and they are validated.
+
+    Attack-record eligibility (replaces the old 'VERIFIED for every attack', which is impossible under an
+    ai_audit provenance that never confers VERIFIED): a record is eligible when its CATEGORY passed the
+    post-filter audit (`category_outcomes[category] == PASS_AI_AUDITED`). A category that did not pass makes
+    its records ineligible — they are not forced to VERIFIED and none is silently admitted. With no outcomes
+    supplied, eligibility cannot be established and the build is refused."""
+    unmet = []
+    if gen_cfg.get('mode') != 'real':
+        unmet.append({'code':'REAL_BUILD_MODE_REQUIRED','detail':'REAL_BUILD authorization cannot turn a fixture world into real data'})
+    if gen_cfg.get('attack_label_basis') != 'post_filter_audit':
+        unmet.append({'code':'REAL_BUILD_BASIS_REQUIRED','detail':'real attack rows require post_filter_audit basis'})
+    # (A) owner authorization — EFFECTIVE check bound to a committed record (was an unconditional refusal).
+    if build_purpose == 'REAL_BUILD':
+        unmet += _check_real_build_authorization(build_authorization, preregistration_sha256)
+    elif build_purpose == 'PILOT_BUILD':
+        unmet += PA.check(build_authorization,generator_sha=config_sha256(gen_cfg),
+                          split_sha=S.config_sha256(split_cfg) if split_cfg else None,
+                          preregistration_sha=preregistration_sha256,generator_config=gen_cfg)
+    else:
+        unmet.append({'code':'BUILD_PURPOSE_UNKNOWN','detail':'unknown build purpose'})
+    # (B) attack-record eligibility from the SEALED post-filter audit outcomes (was 'VERIFIED for all').
+    outcomes = category_outcomes if isinstance(category_outcomes, dict) else None
+    if outcomes is None:
         unmet.append({"code": "D64_B_POST_FILTER_AUDIT",
-                      "detail": f"{pending} attack record(s) not adjudicated (post-filter audit, final deny-list)"})
+                      "detail": "no post-filter category outcomes supplied: attack-record eligibility cannot be established "
+                                "(the sealed R3 category_outcomes must admit each record's category)"})
+    else:
+        not_admitted = {}
+        for r in records:
+            cat = _record_category(r)
+            if outcomes.get(cat) != OUTCOME_PASS:
+                not_admitted[cat] = outcomes.get(cat)
+        for cat, got in sorted(not_admitted.items(), key=lambda kv: str(kv[0])):
+            unmet.append({"code": "D64_B_POST_FILTER_AUDIT",
+                          "detail": f"category {cat!r}: outcome {got!r}; only {OUTCOME_PASS!r} admits its records "
+                                    "(rejected categories must not advance the build)"})
     if "names_family" not in pools:
         unmet.append({"code": "D64_C_NAMES_FAMILY",
                       "detail": "names_family is not among the loaded pools (#75): the pinned pool is built but not "
@@ -172,7 +251,8 @@ def real_build_preconditions(gen_cfg: dict, records, pools: dict, preregistratio
         unmet.append({"code": "PREREGISTRATION_MISSING",
                       "detail": "L, signatures, placement shares, thresholds, B and the per-file cap are not ratified"})
     for k, st in sorted(gen_cfg.get("_statuses", {}).items()):
-        if st != "RATIFIED":
+        allowed = ('PROPOSED','PENDING','RATIFIED') if build_purpose == 'PILOT_BUILD' else ('RATIFIED',)
+        if st not in allowed:
             unmet.append({"code": "VALUE_NOT_RATIFIED", "detail": f"{k}: {st}"})
     # A real build must use the literal D62 §4.6 step-5 reading: WARN is the enforceable reduction
     # trigger. cap="block" would make only the BLOCK band reduce (D65 interpretation), which is not
@@ -200,6 +280,7 @@ class World:
     basis: L.AttackBasis
     limits: object                # canonical_request.Limits
     count_tokens: object
+    row_contract: str | None = None
 
 
 def slug(category: str) -> str:
@@ -400,6 +481,8 @@ def build_pair(world: World, split: str, part: S.Partition, index: AttackIndex, 
                     payload_length_bin=b if is_twin else None,
                     signals=list(can.signals), canonical_outcome=can.outcome,
                     leaf_spans={k: list(v) for k, v in sorted(can.leaf_spans.items())})
+        if world.row_contract == RC.SCHEMA and label == L.BLOCK:
+            meta['label_status_basis'] = lab.label_status_basis or ('policy_defined' if status == L.POLICY_DEFINED else None)
         if can.text is not None:
             meta.update(text_sha256=hashlib.sha256(can.text.encode()).hexdigest(),
                         text_bytes=len(can.text.encode()), tokens=world.count_tokens(can.text),
@@ -525,6 +608,7 @@ def realised_share_report(gen: dict, cfg) -> dict:
     for m in admitted:
         per[m["split"]][m["struct_cluster_id"]] += 1
     out, worst = {}, {}
+    rulings = set(i9["owner_rulings"])
     for split in S.SPLITS:
         total = sum(per[split].values())
         clusters = {}
@@ -532,13 +616,15 @@ def realised_share_report(gen: dict, cfg) -> dict:
         for cl, n in sorted(per[split].items()):
             share = Fraction(n, total) if total else Fraction(0)
             klass = V9.classify(share, warn, block)
-            clusters[cl] = {"rows": n, "split_rows": total, "share": f"{float(share):.6f}", "class": klass}
-            if (i9["cap"] == "warn" and klass in ("WARN", "BLOCK")) or (i9["cap"] == "block" and klass == "BLOCK"):
+            clusters[cl] = {"rows": n, "split_rows": total, "share": f"{float(share):.6f}",
+                            "class": klass, "owner_ruled": cl in rulings}
+            if cl not in rulings and ((i9["cap"] == "warn" and klass in ("WARN", "BLOCK"))
+                                   or (i9["cap"] == "block" and klass == "BLOCK")):
                 over.append(cl)
         out[split] = {"split_rows": total, "clusters": clusters, "over_cap": over}
         worst[split] = over
     return {"per_split": out, "over_cap_clusters": worst, "cap": i9["cap"], "cap_share": cap,
-            "threshold_status": "PROPOSED"}
+            "threshold_status": i9["status"]}
 
 
 def generate_balanced(world: World) -> dict:
@@ -573,8 +659,13 @@ def generate_balanced(world: World) -> dict:
             record["outcome"] = "converged"
             rounds.append(record)
             gen["i9_report"] = {"enabled": True, "cap": i9["cap"], "cap_share": shares["cap_share"],
-                                "threshold_status": "PROPOSED", "rounds": rounds,
-                                "owner_rulings_applied": [], "converged": True}
+                                "threshold_status": i9["status"], "rounds": rounds,
+                                "owner_rulings_applied": [
+                                    {"split": split, "cluster": cl, "justification": i9["owner_rulings"][cl]}
+                                    for split, split_report in sorted(shares["per_split"].items())
+                                    for cl, entry in sorted(split_report["clusters"].items())
+                                    if entry["owner_ruled"] and entry["class"] != "OK"],
+                                "converged": True}
             return gen
         # rebalance the quota plan on the realised counts (may raise StopBuild: impossible / needs ruling)
         adjusted, rep = V9.rebalance(realised, i9)
@@ -772,9 +863,9 @@ def run_gates(world: World, gen: dict, pool_values_list: dict) -> dict:
     split_meta = [r["meta"] for r in rows if r["meta"]["disposition"] == "split"]
     slice_meta = [r["meta"] for r in rows if r["meta"]["disposition"] == "slice"]
     all_meta = [r["meta"] for r in rows]
-    m_split = L.check_m_invariants(split_meta, world.policy, split_rows=True)
-    m_slice = L.check_m_invariants(slice_meta, world.policy, split_rows=False)
-    m_all = L.check_m_invariants(all_meta, world.policy, split_rows=True)
+    m_split = L.check_m_invariants(split_meta, world.policy, split_rows=True,row_contract=world.row_contract)
+    m_slice = L.check_m_invariants(slice_meta, world.policy, split_rows=False,row_contract=world.row_contract)
+    m_all = L.check_m_invariants(all_meta, world.policy, split_rows=True,row_contract=world.row_contract)
     m_all_ok = all(m_all[k]["ok"] for k in ("M-1", "M-2", "M-3", "M-5", "M-6", "M-7"))
     spl = SC.run_gates(world.assignment, gate_rows_for_spl(rows), pool_values_list,
                        list(world.records.values()))
@@ -854,25 +945,29 @@ def build_manifest(world: World, gen: dict, gates: dict, artifacts: list, assign
         "gates": gates, "diagnostics": diagnostics(rows, world.split_cfg),
         "code_fingerprint": code, "environment": C.environment(),
         "artifacts": sorted(artifacts, key=lambda a: a["path"]),
-        "known_limitations": KNOWN_LIMITATIONS, **extra,
+        "known_limitations": known_limitations(world), **extra,
     }
 
 
-KNOWN_LIMITATIONS = [
-    "Fixture only: synthetic pools and synthetic attack records; real pools are never assigned to splits here.",
-    "Placement shares, length bins, quotas, encoder-profile weights, L, oracle signatures, B and the policy lists "
-    "are PROPOSED / PENDING configuration; none is ratified.",
-    "Step-5 cluster-share rebalancing (I-9, v5_rebalance) acts on PLANNED pairs before generation; the "
-    "realised post-generation shares (after abandons / shortfalls) are reported as a diagnostic, not re-gated. "
-    "The enforced-cap choice (WARN vs BLOCK) and the WARN/BLOCK values stay PROPOSED (spec §11.2).",
-    "Generator pools passwords, urls_public, urls_relative, rel_paths and addr_data have no real builder yet "
-    "(fixture stand-ins only). names_family is built (#75, pinned snapshot) and available in SLOT_POOLS, but its "
-    "real-build value precedence is owner-ratified (D64 §3) and no real split is authorized, so it is exercised "
-    "only via synthetic fixtures here.",
-    "Token counts use the UTF-8 byte upper bound (<= 1 token per byte) unless the tokenizer counter is configured; "
-    "the byte bound over-excludes, never under-excludes.",
-    "Shortcut audits C-S1…C-S7 are reported as raw diagnostics only (thresholds PROPOSED, pilot).",
-]
+def known_limitations(world: World) -> list[str]:
+    """Describe this build's actual scope; never label a source-backed build as a fixture."""
+    notes = []
+    if world.gen_cfg["mode"] == "fixture":
+        notes.append("Synthetic fixture pools and attack records; no real-data claim.")
+    else:
+        notes.append("Attack labels are AI-audited training references, not independently VERIFIED labels.")
+        for cat, row in sorted(world.assignment.evaluability.items()):
+            if row["flag"] != S.EVALUABLE and cat in world.gen_cfg["trained_categories"]["categories"]:
+                notes.append(f"{cat}: TRAIN-only / NOT_EVALUABLE under D60; no per-category held-out claim.")
+    pending = sorted(k for k, status in world.gen_cfg.get("_statuses", {}).items() if status != "RATIFIED")
+    if pending:
+        notes.append(f"Configuration values not yet ratified: {', '.join(pending)}.")
+    if not world.gen_cfg["i9"]["enabled"]:
+        notes.append("I-9 realised cluster-share rebalancing disabled; shares are diagnostic only.")
+    if world.gen_cfg["token_budget"]["counter"] == "utf8_bytes_upper_bound":
+        notes.append("Token counts use the conservative UTF-8 byte upper bound, which can over-exclude rows.")
+    notes.append("C-S1–C-S7 shortcut results are diagnostics unless separately checked under ratified thresholds.")
+    return notes
 
 
 def utf8_bytes_upper_bound(text: str) -> int:
@@ -886,3 +981,163 @@ def tokenizer_counter(tok, template):
     import v5_tokenization as T
     overhead = T.template_overhead(tok, template)
     return lambda text: len(T.encode_prompt(tok, template, text)) - overhead
+
+
+# ───────────────────────────── public authorized-build entry (#82) ─────────────────────────────
+R3_EXCHANGE_SCHEMA = "v5-r3-category-outcomes-exchange/v1"
+# Generator pools that still have no REAL builder (fixture stand-ins only); names_family IS built (#75).
+REAL_POOLS_WITHOUT_BUILDER = ("passwords", "urls_public", "urls_relative", "rel_paths", "addr_data")
+
+
+def _capture_json(path):
+    """Read a JSON record's bytes ONCE: returns (sha256, obj, err). The same bytes are used to verify and to
+    decide; a later check never re-reads the file."""
+    if not path:
+        return None, None, "not provided"
+    try:
+        C.assert_not_protected(path)
+        with open(path, "rb") as fh:
+            raw = fh.read()
+    except (OSError, SystemExit) as e:
+        return None, None, f"{path}: {type(e).__name__}"
+    sha = hashlib.sha256(raw).hexdigest()
+    try:
+        return sha, json.loads(raw), None
+    except ValueError as e:
+        return sha, None, f"{path}: {e}"
+
+
+def missing_real_pools(pools) -> list:
+    """Pools the candidate config needs for a real build that have NO real builder yet (fixture stand-ins
+    only). names_family is built (#75) and so is not listed when loaded."""
+    return [p for p in REAL_POOLS_WITHOUT_BUILDER if p not in pools]
+
+
+def authorized_build(world: World, *, authorization_path, audit_exchange_path, out_dir,
+                     preregistration_sha256=None, category_selection=None, pool_values_list=None,
+                     extra=None, build_purpose="REAL_BUILD") -> dict:
+    """Public authorized-build entry — wires `real_build_preconditions` into a production flow (there was no
+    production caller before, only tests). It:
+      1. CAPTURES the owner authorization and the SEALED R3 audit exchange ONCE each (same bytes verify+decide);
+      2. verifies pinned exchange/report/state/pool bytes and derives category outcomes from the report;
+      3. requires EXPLICIT category selection equal to the effective world configuration; each must be
+         admitted, i.e. PASS_AI_AUDITED — no rejected category advances the build);
+      4. runs `real_build_preconditions` (authorization + eligibility + ratification + names_family + i9);
+      5. ONLY if every precondition clears, GENERATES and PERSISTS (generate_balanced → run_gates → write_outputs).
+    Refuse-by-default: while `REAL_BUILD_AUTH_SCHEMA` is None no real build proceeds, whatever is supplied.
+    Returns {"status":"REFUSED","unmet":[...], …} (nothing written) or {"status":"BUILT", …}. It does NOT
+    build real datasets while no schema is ratified; the positive control exercises the wiring on a SYNTHETIC
+    world. Real pools still missing are reported in every result (`pools_without_real_builder`)."""
+    unmet = []
+    auth_sha, auth, auth_err = _capture_json(authorization_path)
+    if auth_err:
+        unmet.append({"code": "AUTHORIZATION_UNREADABLE", "detail": auth_err})
+    elif not AE.is_committed(authorization_path):
+        unmet.append({"code":"AUTHORIZATION_NOT_COMMITTED","detail":"build authorization must be committed and unchanged"})
+    exch_sha, exch, exch_err = _capture_json(audit_exchange_path)
+    outcomes = None
+    evidence = None
+    audit_components_meta = None
+    if isinstance(auth, dict) and auth.get("components") is not None:
+        # Component-evidence contract: each world attack record is admitted ONLY by the component that owns its
+        # pool AND declares its category. No single pool, no combined PASS. `merged_outcomes` is category->status
+        # with each category owned by exactly one component; it drives selection/preconditions/basis just like
+        # the legacy single map, but every category traces to its own component's audit.
+        rows = [{"meta": {"label": "BLOCK",
+                          "attack_category": _record_category(r),
+                          "payload_record_id": r.get("record_id"),
+                          "payload_wire": r.get("payload_wire")}}
+                for r in world.records.values()]
+        try:
+            resolved = CB.resolve_components(rows, auth["components"], committed_checker=AE.is_committed)
+            unmet += [{"code": c, "detail": d} for c, d in resolved["diags"]]
+            outcomes = resolved["merged_outcomes"]
+            audit_components_meta = resolved["components_meta"]
+        except (OSError, ValueError, TypeError) as e:
+            unmet.append({"code": "AUDIT_COMPONENT_EVIDENCE", "detail": str(e)})
+    elif exch_err:
+        unmet.append({"code": "AUDIT_EXCHANGE_UNREADABLE", "detail": exch_err})
+    elif not isinstance(auth, dict):
+        unmet.append({"code":"AUDIT_EXCHANGE_UNBOUND", "detail":"authorization must pin audit evidence"})
+    else:
+        try:
+            evidence = AE.verify(auth.get('audit_evidence'), records=list(world.records.values()),
+                                 captured_exchange=(exch_sha, exch), committed_checker=AE.is_committed)
+            outcomes = evidence['category_outcomes']
+        except (OSError, ValueError, TypeError) as e:
+            unmet.append({"code":"AUDIT_EXCHANGE_UNBOUND", "detail":str(e)})
+
+    trained = list((world.gen_cfg.get("trained_categories") or {}).get("categories", []))
+    selection = category_selection
+    if (type(selection) is not list or not selection or any(type(c) is not str or not c for c in selection)
+            or len(set(selection)) != len(selection)):
+        unmet.append({"code":"CATEGORY_SELECTION_INVALID", "detail":"explicit non-empty unique category list required"})
+        selection = []
+    # A world already contains its assignment, families and quotas. Reject a mismatched
+    # selection rather than silently generating under a different configuration.
+    if set(selection) != set(trained):
+        unmet.append({"code":"CATEGORY_SELECTION_NOT_IN_CONFIG", "detail":"selection must match the effective world's trained_categories; rebuild the world for a subset"})
+    if outcomes is not None:
+        not_pass = sorted(c for c in selection if outcomes.get(c) != OUTCOME_PASS)
+        if not_pass:
+            unmet.append({"code": "CATEGORY_SELECTION_NOT_ADMITTED",
+                          "detail": f"selected categories without PASS_AI_AUDITED: {not_pass}"})
+
+    unmet += real_build_preconditions(world.gen_cfg, list(world.records.values()), world.pool_values,
+                                      preregistration_sha256=preregistration_sha256,
+                                      build_authorization=auth, category_outcomes=outcomes,
+                                      build_purpose=build_purpose,split_cfg=world.split_cfg)
+
+    meta = {"authorization_sha256": auth_sha, "audit_exchange_sha256": exch_sha,
+            "source_report_sha256": exch.get("source_report_sha256") if isinstance(exch, dict) else None,
+            "category_selection": sorted(selection), "build_purpose":build_purpose,
+            "audit_components": audit_components_meta,   # links each component's pool+outcomes; no joint PASS
+            "pools_without_real_builder": missing_real_pools(world.pool_values),
+            "pools_loaded": sorted(world.pool_values.keys())}
+    if unmet:
+        return {"status": "REFUSED", "unmet": unmet, **meta}
+
+    # Configure the proposed r4 emitter on a copy; the caller's World stays intact.
+    if world.gen_cfg.get('mode') == 'real':
+        training_dir = os.path.join(REPO_ROOT,'scripts','training')
+        if training_dir not in sys.path:sys.path.insert(0,training_dir)
+        import v5_train_data as TD
+        spec = auth.get('dataset_spec')
+        problems = []
+        if spec not in TD.SUPPORTED_SPECS or 'ai_audited' not in TD.SPEC_AUDIT_TYPES.get(spec,()):
+            problems.append({'code':'BUILD_AI_SPEC_NOT_ACTIVE','detail':'dataset_spec is not active for ai_audited data'})
+        if auth.get('row_contract') != RC.SCHEMA or RC.TRAINING_REFERENCE not in TD.AI_AUDIT_ROW_STATUS_ALLOWED:
+            problems.append({'code':'BUILD_AI_ROW_CONTRACT_NOT_ACTIVE','detail':'training-reference row contract is not ratified/authorized'})
+        if problems:return {'status':'REFUSED','unmet':problems,**meta}
+        passed = frozenset(c for c,o in outcomes.items() if o == OUTCOME_PASS)
+        world = replace(world,basis=L.AttackBasis('post_filter_audit',passed,'ai_audited',RC.SCHEMA),row_contract=RC.SCHEMA)
+    # Authorized and eligible → generate + persist.
+    gen = generate_balanced(world)
+    if world.gen_cfg.get('mode') == 'real':
+        # Validate the emitted provenance before persistence. Audit results do
+        # not confer VERIFIED; policy-labelled rows keep their existing policy IDs.
+        training_dir = os.path.join(REPO_ROOT,'scripts','training')
+        if training_dir not in sys.path:sys.path.insert(0,training_dir)
+        import v5_train_data as TD
+        problems = []
+        rows = [{'split':r['meta']['split'],'index':i,'meta':r['meta']} for i,r in enumerate(gen['rows'])]
+        problems += [{'code':d.code,'detail':d.detail} for d in TD.check_audit_rows(rows,'ai_audited')]
+        if problems:
+            return {'status':'REFUSED','unmet':problems,**meta}
+    gates = run_gates(world, gen, pool_values_list if pool_values_list is not None else world.pool_values)
+    if gates.get('ok') is not True:
+        return {"status":"REFUSED", "unmet":[{"code":"BUILD_GATES_FAILED","detail":"generated rows did not pass all gates"}], "gates":gates, **meta}
+    audit_extra = {**(extra or {}), "authorized_build":meta, "audit_type":"ai_audited" if world.gen_cfg.get('mode') == 'real' else None,
+                   "spec":auth.get('dataset_spec') if world.gen_cfg.get('mode') == 'real' else S.SPEC_ID,
+                   "fixture":world.gen_cfg.get('mode') == 'fixture',
+                   "row_contract":world.row_contract,
+                   "attack_pool_sha256": (evidence['pool_sha256'] if evidence else
+                                          auth.get('assembled_pool_sha256') if audit_components_meta is not None else None),
+                   "audit_components": audit_components_meta,
+                   "audit_evidence": (auth.get('audit_evidence') if audit_components_meta is None else None),
+                   "preregistration_sha256":preregistration_sha256}
+    audit_extra['build_purpose'] = build_purpose
+    if build_purpose == 'PILOT_BUILD':
+        audit_extra.update(status='PROVISIONAL_PILOT',calibration_only=True,training_authorized=False)
+    wr = write_outputs(world, gen, gates, out_dir, audit_extra)
+    return {"status": "BUILT", "gates_ok": gates.get("ok"), **wr, **meta}

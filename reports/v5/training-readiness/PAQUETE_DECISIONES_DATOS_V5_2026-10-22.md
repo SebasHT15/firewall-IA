@@ -7,6 +7,13 @@ fuentes. **No re-inventaria** el pipeline; **no inventa umbrales de riesgo**; no
 readquiere pools; no activa r4 ni EXPERIMENTAL por inferencia. La reconciliación fue fast-forward,
 sin commit nuevo; el owner conserva commit/PR/merge. V4 conserva autoridad.
 
+> **ACTUALIZACIÓN (2026-10-23b) — ver `ENTREGA_DATOS_V5_IMPLEMENTACION_2026-10-23b.md`.** El orden de
+> esta tabla ("R3 posterior al piloto; 3 ratificaciones como desbloqueo suficiente") quedó
+> desactualizado: **R3 ya corrió** y de las **6 categorías de ataque** del vocabulario ratificado, **2
+> (path_traversal + file_inclusion) las cubre `path_file_access` (PASS)** y **4 familias siguen pendientes**
+> (SQLi, XSS, Command Injection, SSTI), de modo que D71 (plantilla+vocabulario+B) **no basta** para el
+> piloto. El consumo FINAL y el flujo de build tenían implementación pendiente, ya implementada en ese lote.
+
 **Corrección central de esta revisión (feedback owner):** *ausencia de ratificación ≠ ausencia de
 implementación o de evidencia candidata.* B=415, `template_overhead`=76 y `label_budget`=13 **ya están
 medidos** como **candidatos** sobre el tokenizer base TinyLlama; existen dos corridas SMOKE

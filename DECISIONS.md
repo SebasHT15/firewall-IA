@@ -3392,7 +3392,140 @@ capture→reply round trip the request never awaits. The frozen hashes (`f158063
 `1039a3dd…`) are unchanged. The known valid-obs-text V4 `UnicodeEncodeError` remains preserved and
 disclosed (503, zero classifier calls), not fixed.
 
+## D71 — V5 template, vocabulary and token budget ratified (partial dataset-value preregistration)
+
+Owner ratification, 2026-10-23. Ratifies three V5-DATA-SPEC §11.2 values: the prompt template
+`V5_CANDIDATE_TEMPLATE`, the output vocabulary `PILOT_VOCABULARY` (alt B, pilot #70), and the token budget
+`B = 415` (= max_length 512 − template_overhead 76 − label_budget 13 − margin 8; max_length and margin
+ratified as the components of B). The candidate measurements are from the base TinyLlama tokenizer
+(`reports/v5/canonical-request-v1/tokenization_measurements.md`), re-verified on the V5 tokenizer artifact
+when it exists (a measurement, not a re-decision). Recorded as a PARTIAL preregistration in
+`reports/v5/dataset-preregistration-v1/README.md`.
+
+Mechanism: the recipe sections `template`/`vocabulary`/`token_budget` are set RATIFIED in
+`scripts/training/v5_training_recipe_v1.json` (gate F7 no longer flags them). The recipe's other sections
+(base_model/loss/lora/optimization/seed/library_pins) stay PROPOSED, so `recipe.status` stays PROPOSED and
+FINAL remains blocked on them.
+
+Not approved by D71: the remaining §11.2 values (cluster-share WARN/BLOCK, OVER_LIMIT, acceptance
+thresholds, category distribution, §4.3 host/scheme/form + navigation lexicon, benign-oracle L, placement
+shares, per-file cap, deny-list, pilot size), which stay PENDING the pilot; r4 activation (`SUPPORTED_SPECS`
+keeps r3 only); the ai-audit authorization schema (`AI_AUDIT_AUTH_SCHEMA` stays None); any real
+build/split/freeze/train, EXPERIMENTAL run, FINAL, or runtime activation. V4 keeps authority.
+
+
+## D72 — #80 row-contract addendum, r4 activation and authorization schemas ratified
+
+Owner ratification in this chat, 2026-10-23: “Sí, ratificar y aplicar #80 (recomendado)”,
+responding to the concrete §1 of `reports/v5/training-readiness/DECISIONES_CONCRETAS_ENTRENAMIENTO_2026-10-23h.md`.
+
+Ratifies `v5-training-reference-contract/v1-PROPOSED`: generic AI-audited attack references carry
+`label=BLOCK`, `label_status=TRAINING_REFERENCE`, `label_status_basis=ai_audit`,
+`label_rule=ATTACK_POOL_LEAF`, `policy_id=null`; the manifest states `audit_type=ai_audited`
+and binds `row_contract` to that identifier. This is an explicit addendum to the frozen M-1 status
+set. M-3 and existing policy semantics remain unchanged. Category PASS_AI_AUDITED remains distinct
+from a row status. AI audit never establishes VERIFIED.
+
+Activates r4 alongside r3 in SUPPORTED_SPECS and permits only TRAINING_REFERENCE for ai_audit-based
+rows. Ratifies the existing schema definitions `v5-real-build-authorization/v1-PROPOSED` and
+`v5-ai-audit-training-authorization/v1-PROPOSED`; their literal identifiers retain the historical
+PROPOSED suffix for compatibility. Every concrete permission still requires its own complete,
+committed, hash-bound owner record. No such record is signed by this decision.
+
+Not authorized here: category readmission or new review runs; dataset build/split/freeze/pilot;
+Model 2 contract/recipe/authorization; remaining V5 recipe sections; training; runtime activation.
+D71 and all frozen reports/spec bytes remain unchanged. Implementation and synthetic evidence
+are in the #80 emitter and pilot integration reports; no real training is claimed.
+
+
+## D73 — V5/Model 2 recipes, C1 protocol and calibration/Model 2 schema definitions ratified
+
+Owner ratification in this chat, 2026-10-24: “Sí, ratificar y aplicar el bloque (recomendado)”,
+referring to `reports/v5/training-readiness/RATIFICACION_RECETAS_Y_CONTRATOS_2026-10-24.md` sections A/B/C.
+
+Ratifies the remaining V5 recipe sections (base model, completion loss, LoRA, optimization, seeds and
+library pins) with the exact recorded values. Evaluation/save values are caps; for the intended single
+GPU, compute_schedule derives total steps from eligible TRAIN rows, batch/accumulation and epochs,
+then eval/save=max(1,min(200,total_steps//4)), with logging capped accordingly. The actual cadence
+is recorded before fitting. No empty/ineligible dataset is authorized by this schedule.
+
+Ratifies the two existing Model 2 logistic candidates (baseline34 and target-path-neutralized32),
+the exact C1 training-input contract and Claude's MODEL2_RECETAS_PROPUESTA_2026-10-24.md as their
+candidate-comparison protocol: fit transformations/weights on TRAIN, use the same VALIDATION, preserve
+identity groups, retain both candidates without selecting an operating threshold or deploying a winner.
+C1 extensions remain metadata-only; C2 is absent. No false-block budget is invented.
+
+Ratifies model2-final-training-authorization/v1-PROPOSED and activates FINAL_AUTH_SCHEMA. Ratifies
+v5-pilot-build-authorization/v1-PROPOSED: exact generator/split/preregistration pins; 10% quota derived
+from an explicitly authorized full quota; provisional final-value statuses preserved. Outputs are
+PROVISIONAL_PILOT and cannot feed EXPERIMENTAL or FINAL trainers. Full-build ratification checks remain.
+
+These decisions approve definitions, recipes and the protocol, not individual records. Dataset
+permissions remain unsigned; sources still need actual admission evidence. This does not choose pilot
+parameters, sign a pilot or training run, admit categories, commit/push/merge, train models or activate
+runtime. D71/D72 and frozen D67 evidence remain unchanged. PR to develop remains before actual training.
+
+## D74 — V5 research scope and I-9 values after the source-backed pilot
+
+Owner ratification in this chat, 2026-10-25: “Sí, ratifico ese alcance (recomendado)”, in reply to
+the concrete proposal in `reports/v5/dataset-preregistration-v1/final-run-2026-10-25/DECISION_SCOPE_I9.md`.
+The owner specified this is research rather than production.
+
+The current admitted pool keeps the five generator categories (`path_file_access`, SQLi, XSS,
+Command Injection, SSTI), with six final output reasons because path traversal and file inclusion
+are separate output reasons within `path_file_access`. D60/D62 are unchanged. The four injection
+categories have 25/44/57/54 independent families after SPL-9 merges and are TRAIN-only,
+`NOT_EVALUABLE`. They may contribute to experimental research training, but no per-category
+held-out performance or demonstrated-protection claim is allowed for them. Only
+`path_file_access` is evaluable in this dataset version. The freeze report must state this.
+
+For the full build, I-9 WARN is **8%**, BLOCK **12%**, with `cap=warn`. This is an explicit
+pilot-grounded relaxation of the proposed 2%/5%, not a change to the frozen D60/D62 split or
+identity rules. Exactly two owner exceptions are authorized: `path-media` in VALIDATION and
+`path-export` in INTERNAL_TEST. Each is the only available `path_file_access` cluster in its
+split, so its observed share is 100%; the exception and its concentration remain visible in the
+manifest and freeze report. No blanket exception is authorized. Any other unredistributable
+over-cap cluster stops the build.
+
+The source-backed pilot r2 passed its implemented gates and the full-quota I-9 plan is feasible
+with these two exceptions. This ratification does not assert that the unimplemented §7 checks
+passed, freeze the dataset, select a model, authorize an operating threshold or activate the
+gateway. The remaining §11.2 values and the individual build/training records are separate.
+
+## D75 — remaining V5 dataset §11.2 values ratified after pilot
+
+Owner ratification in this chat, 2026-10-25: “Sí, ratificar esos valores (recomendado)”,
+referring to `reports/v5/dataset-preregistration-v1/final-run-2026-10-25/VALUES_TO_RATIFY.md`.
+This fixes the full quota at 20 pairs per cell (pilot 2), source-file share cap 75%, benign-oracle
+`L=12` and the pilot's breakout signatures, placement weights 3:1:1:1, the exact policy lists and
+41-template catalogue, and the §7 thresholds listed in that document. The deterministic I7 corpus
+is 2500 seeded cases (seed 20261013) plus the complete 256-byte per-field sweep. D74 separately
+fixes I-9 at WARN 8%/BLOCK 12% and the two named exceptions. D71's B=415 remains.
+
+The owner ratified the exact semantic contents of the pre-ratification files. Only their status
+metadata changed to identify D75: catalogue SHA-256 `db5ba69b…` → `26cd2c13…`, oracle signatures
+`5775dc11…` → `16267002…`, policy table `b4c3e7a9…` → `a881df75…`. The lists, signatures and templates
+themselves were not edited. The approved denylist remains `3e557058…`.
+
+Ratification fixes values before the full build; it is **not** evidence that unimplemented checks
+passed or that STAB-HELD is sealed. Dataset freeze and final Model 2/V5 permissions still need
+their concrete evidence records and the user-facing launch commands should only be issued once
+the gates are satisfied.
+
 ---
+
+## D76 — C-S7 small-split research amendment for dataset v3
+
+Owner approval in this chat, 2026-10-25: “Sí, autorizar la enmienda propuesta
+(recomendado)”, responding to the exact proposal in
+`reports/v5/dataset-preregistration-v1/final-run-2026-10-25-v2/REJECTED_V2_CS7_AND_DECISION.md`.
+The C-S7 >3% value-element share remains BLOCKING in TRAIN. In VALIDATION and
+INTERNAL_TEST the same count and percentage are retained, but any excess is a
+documented WARN, not a freeze blocker, for this research dataset. This is a
+prospective change for a newly preregistered v3 build, prompted by the observed
+v2 C-S7 failure; v2 remains rejected. All other D75 and D74 controls stay in force.
+No model output had been viewed when this ruling was made. This decision does
+not itself freeze v3 or authorize training.
 
 ## Decision index
 
@@ -3468,6 +3601,13 @@ disclosed (503, zero classifier calls), not fixed.
 | D68 | V5 `names_family` integration (DR-75): value precedence Option B `symbols>streets>names_family>names_given>prose_en` for the five examined pools only (redistributes 782 representatives; 84,252 kept / 849 excluded, coverage invariant; no security claim); dataset-source use of the pinned snapshot approved (not VERIFIED, no real build/freeze/training); ß/ss keeps the content-hash representative for the 2 internal groups with a ledger; no frozen spec / sealed prereg edited; future prereg must incorporate | APPROVED | DONE (status/tests, fixtures only; uncommitted; no real split, #75) |
 | D69 | #68 first bounded slice: default-off canonical-request/v1 shadow OBSERVATION in a SEPARATE worker process (data-plane interpreter, no ML), after the V4 verdict, never awaited; scoped D56 gateway import via the observer (feature extractor + V4 path stay contract-free; D1 unchanged); lab-only HTTP/1.1, submission/decoded cap 1,048,576 B, token_budget=None → size UNCHECKED (Fast Path stays ineligible, GatewayEvidence.canonical=None); P9 superset retained for observation only; REJECT = successful observation; separate process because canonicalize is not CPU-light (~28 ms/1 MiB). Not approved: B/production limits, br/zstd pins, framing VERIFIED, HTTP/2, Fast Path enforcement, Model 2/V5, real split/freeze/train, FINAL, SSRF, Q4_K_M | APPROVED | DONE (integrated default-off; uncommitted; no enforcement, #68) |
 | D70 | #68 second bounded slice: default-off per-request HTTP/1.1 framing OBSERVATION bound to the D69 canonical snapshot (one canonicalize, one body copy); synchronous `capture()` of profile+immutable snapshot at the post-V4 boundary + async `run_captured()` never awaited; conservative `PROFILE_MATCHED` only (tested effective profile + HTTP/1.1 origin/asterisk + complete body + valid correlation + unchanged relevant-profile generation + canonical OK+ACCEPT), else UNATTESTABLE/UNAVAILABLE; GatewayEvidence stays canonical=None/framing=UNAVAILABLE, no FRAMING_VERIFIED, no client reject. Correction pass (2026-10-22, no new approval) fixed 3 reproduced defects: HTTP/1.0 exclusion (version from the snapshot; new reason HTTP_VERSION_NOT_11), mode transport+address validation + public marker vs internal fingerprint (A→B→A drift), single-use token reservation (pre-start-cancel + stale-release). Not approved: framing VERIFIED + wire-level control, HTTP/2, Fast Path enforcement, B/`Limits`, production limits, Model 2/V5, FINAL/SSRF/Q4_K_M | APPROVED | DONE (integrated default-off; uncommitted; no enforcement, #68) |
+| D71 | V5 §11.2 values ratified (partial prereg): prompt template `V5_CANDIDATE_TEMPLATE`, vocabulary `PILOT_VOCABULARY` (alt B), token budget `B=415` (=512−76−13−8); candidate measured on the base tokenizer, re-verified on the V5 tokenizer before FINAL; recipe `template`/`vocabulary`/`token_budget` set RATIFIED, other sections stay PROPOSED (recipe/FINAL still blocked); cluster-share + other §11.2 PENDING the pilot; r4/auth-schema/build/train NOT changed | APPROVED | PARTIAL (recipe statuses + `dataset-preregistration-v1` partial; uncommitted; no build/train, #82) |
+| D72 | #80 row-contract addendum ratified: TRAINING_REFERENCE + ai_audit, explicit M-1 extension, M-3 preserved; r4 support and REAL_BUILD/AI FINAL authorization schema definitions active; literal PROPOSED ids retained; no category/dataset permission, review run or training authorized | APPROVED | APPLIED (uncommitted; individual records still required) |
+| D73 | V5 recipe/cadence and two Model 2 LR candidates/C1/protocol ratified; calibration and Model 2 FINAL schema definitions active; exact dataset/run records still required; no category admission, parameters chosen, training or runtime activation | APPROVED | APPLIED (uncommitted) |
+| D74 | V5 research scope: four injection categories TRAIN-only/NOT_EVALUABLE; I-9 WARN 8%, BLOCK 12%, cap warn; only `path-media`/VALIDATION and `path-export`/INTERNAL_TEST excepted and disclosed | APPROVED | Pilot passed; full build/freeze/training not yet |
+| D75 | V5 remaining §11.2 values: quota 20, source cap 75%, L12/signatures, policy/catalogue, placement, §7 thresholds, I7 corpus 2500+byte sweep; D74 controls I-9 | APPROVED | Prereg/build/freeze pending evidence |
+| D76 | V5 C-S7 research amendment: >3% remains BLOCK in TRAIN; measured concentration in VALIDATION and INTERNAL_TEST is WARN only. Applies prospectively to v3; rejected v2 remains rejected | APPROVED | v3 built; C-S7 check passed under amended policy |
+| D77 | STAB-HELD v1 G1–G5 criteria exactly as `final-run-2026-10-25-v3/STAB_GATES_TO_RATIFY.md` (SHA-256 `ba5c58d3…`), linked to pretraining seal SHA-256 `34d02c69…`; owner ratified in chat on 2026-10-26 | APPROVED | Criteria fixed before model output; evaluation remains gated |
 
 ---
 
@@ -3480,3 +3620,50 @@ Recorded here so they are not silently resolved by implementation.
 - Confirmation of the D8 core scope, particularly whether physical embedded deployment (D10)
   is required for the grade or is acceptable as documented future work.
 - Whether the conventional rule-based comparison (D9) is ultimately required.
+
+
+## D78 — owner-directed completion of training readiness; prospective H1 source hygiene v4
+
+Owner instruction in the current local chat, 2026-10-26 (Costa Rica):
+“resuelve todas esas puntuaciones directo, sin fallos, al final quiero leer que ambos modelos estan listos para entrenar”.
+This responds to the enumerated remaining steps: resolve H1 with a successor, validate its inputs/records,
+complete the separate freeze/V5/Model2 records, commit evidence, meet D73's PR condition, and pass gate-only.
+It authorizes carrying out those readiness steps; it does not instruct the agent to start either training.
+No cryptographic signature, human payload validation, model outcome or performance is attributed.
+
+Implement a prospective v4 source subset under the unchanged r4/D74/D75/D76 values and split rules.
+Remove H1-disallowed source records before generation; preserve every retained attack record byte-for-byte,
+and require the existing per-component verifier to prove its admission in its own audited pool. No new
+payload is invented or normalized and no category PASS is transferred to changed content. Remove the
+symbols value containing the identified brand; preserve original pools and datasets. Exact source
+exclusions, parent hashes and new pins are in final-run-2026-10-26-v4/source-hygiene-ledger.json.
+The 12 attack records and one symbols value are excluded by the preregistered source-hygiene rule;
+this is source filtering before a new build, not tuning using protected/model outputs. Earlier v3 remains
+preserved with the H1 finding; its old freeze proposal is not approved. The prior single bracketed
+PATT marker disposition remains limited and does not waive real-host hygiene.
+
+The v4 preregistration/build authorization use D78 and must be committed before building.
+Freeze and the two model authorizations are recorded separately only after factual acceptance, with
+this exact owner instruction as their authorization evidence. D73's PR-to-develop condition remains;
+all actual training remains unstarted and is left for the owner's launch commands after gate-only PASS.
+
+
+## D79 — dataset v4 research freeze (A)
+
+Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
+
+Implements the owner instruction quoted in D78 after measured acceptance. Dataset manifest c2e9c2f50f56c059ce82945384858802357be88d899dc2710e20edd06a2b72df; acceptance.json and A2-regeneration.json pass. The five r4 §11.3 items are hash-bound in final-run-2026-10-26-v4/freeze-record.json. The manifest remains REAL and the separate record is FROZEN. All D60/D67/D74/D76, provenance, L10, concentration and STAB limitations in DATASET_FREEZE_REPORT.md persist. This records a research dataset freeze, not production validation or a model result.
+
+
+## D80 — V5 ai-audited FINAL readiness authorization (B)
+
+Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
+
+Separately implements the owner-directed readiness step B enumerated before the instruction quoted in D78. Allows the hash-bound V5 FINAL run on frozen v4 with the D73-ratified recipe/preregistration. The disclosed AI_AUDITED basis is acknowledged as not human validation; four injection categories remain NOT_EVALUABLE. The separate ai-audit authorization is committed and bound to the freeze record. No Model2 authorization, operating threshold or runtime activation follows from B. The agent stops at gate-only; actual training is left to the owner launch command.
+
+
+## D81 — Model2 FINAL_OFFLINE readiness authorization (C)
+
+Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
+
+Separately implements owner-directed step C under the same D78 instruction. Authorizes the baseline34 and target-path-neutralized32 candidates independently, with exact recipe/C1/selection/dataset/source/library pins. Fit on TRAIN, compare on VALIDATION, preserve identity groups; C1 extensions metadata-only, C2 absent, no operating threshold or deployed winner. The shared reader requires the separately bound ai-audit authorization. The agent stops at gate-only; no fitting occurs in this task. D73 PR-to-develop remains a precondition before actual training.

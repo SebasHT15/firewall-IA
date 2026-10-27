@@ -1,0 +1,154 @@
+{
+  "code_sha256": {
+    "control_plane/v5_output_contract.py": "1ac325e0a2257f5644f6e3735016611a08176f43a8c09b594080bce7e8478f8f",
+    "control_plane/v5_tokenization.py": "35cf0d79d2bee4899f684f9f14c6d909f267568d75ed48751b22762defc60d49",
+    "scripts/dataset/v5_audit_evidence.py": "74b350add745601a2951f836e53fe9e09ded96abd14208c852953f3f3f38ae65",
+    "scripts/dataset/v5_pools_common.py": "c9a684515e2106e8596da503b1919ce05b9a3e4064cd86d4b823fdadd73b89ed",
+    "scripts/dataset/v5_row_contract.py": "fa9565dc331f20f37c47edc586d696b72983e33bb64a0b4b69dc785f6789ff7a",
+    "scripts/training/finetune_v5.py": "f596e4628225a1757fc849e44064d827b7734f73e9fce3cc65ae652dc8192239",
+    "scripts/training/v5_train_data.py": "c8af21646d65d5dc02d4eee841fc0ab2ba3ac6a7899b9afaa34da476223a72bc"
+  },
+  "dataset_dir": "/home/sebas/Desktop/firewall-IA/datasets/v5_sources/final_source_2026-10-26-v4",
+  "evidence_class": "FINAL — gated V5 fine-tune",
+  "examples": {
+    "completion_tokens": [
+      9,
+      10,
+      12,
+      13
+    ],
+    "content_tokens_max": 318,
+    "loss_on": "completion",
+    "outputs_train": {
+      "ALLOW | Normal HTTP request with no attack patterns detected.": 1540,
+      "BLOCK | Command injection payload detected.": 300,
+      "BLOCK | Cross-site scripting payload detected.": 380,
+      "BLOCK | File inclusion attack detected.": 92,
+      "BLOCK | Path traversal attack detected.": 8,
+      "BLOCK | SQL injection payload detected.": 380,
+      "BLOCK | Server-side template injection payload detected.": 380
+    },
+    "rejected": 0,
+    "seq_len_max": 406,
+    "seq_len_median": 138,
+    "train": 3080,
+    "truncated": 0,
+    "validation": 40
+  },
+  "gates": {
+    "ai_audit_authorization_supplied": true,
+    "artifacts_verified": [
+      {
+        "bytes": 627261,
+        "path": "rows.TRAIN.jsonl",
+        "sha256": "809ce774cf8d20b4243fcda47d587252d0aa07e4b3e5a6c4619fa222a8fbe745"
+      },
+      {
+        "bytes": 4993417,
+        "path": "rows.TRAIN.meta.jsonl",
+        "sha256": "994d3a8cfc7c9c640c502c674ea62583e33cbe5e37175ac19aec9971b8de8072"
+      },
+      {
+        "bytes": 5163,
+        "path": "rows.VALIDATION.jsonl",
+        "sha256": "92d8f9e57731127fd4cecd0f79484190b5c5898ea8a9841f89d0e5f86b84c47d"
+      },
+      {
+        "bytes": 58220,
+        "path": "rows.VALIDATION.meta.jsonl",
+        "sha256": "eb00faab2eaf23a1671fae44013e289c1a3d727c54a5f24b0629706b19b47f36"
+      }
+    ],
+    "attack_label_basis": "post_filter_audit",
+    "audit_type": "ai_audited",
+    "identity_keys_checked_disjoint": [
+      "text_sha256",
+      "pair_id",
+      "payload_family_id",
+      "payload_record_id",
+      "struct_cluster_id",
+      "template_id",
+      "value_entries"
+    ],
+    "manifest_sha256": "c2e9c2f50f56c059ce82945384858802357be88d899dc2710e20edd06a2b72df",
+    "manifest_status": "REAL",
+    "passed": true,
+    "rows": {
+      "TRAIN": 3080,
+      "VALIDATION": 40
+    },
+    "spec": "V5-DATA-SPEC-r4",
+    "splits_never_opened": [
+      "INTERNAL_TEST",
+      "E6_RESERVE",
+      "slices.*"
+    ],
+    "value_statuses": {
+      "encoder_profiles": "RATIFIED",
+      "i9": "RATIFIED",
+      "length_bins": "RATIFIED",
+      "oracle": "RATIFIED",
+      "placement_shares": "RATIFIED",
+      "quota": "RATIFIED",
+      "token_budget": "RATIFIED",
+      "trained_categories": "RATIFIED"
+    }
+  },
+  "git": {
+    "branch": "feat/hybrid-training-ready",
+    "clean": true,
+    "commit": "90d63dac10bf10f8b0a90f343dffcf456106a310",
+    "tracked_dirty_files": []
+  },
+  "host": {
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "python_executable": "/usr/bin/python3.12"
+  },
+  "library_versions": {
+    "accelerate": "1.13.0",
+    "bitsandbytes": "0.49.2",
+    "datasets": "4.8.5",
+    "peft": "0.19.1",
+    "python": "3.12.16",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0",
+    "trl": "1.4.0"
+  },
+  "mode": "FINAL",
+  "outcome": "GATES_AND_TOKENIZATION_PASSED_NO_TRAINING",
+  "output_dir": "model-output-v5/final/gate-ready-v4",
+  "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+  "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+  "recipe_status": "RATIFIED",
+  "recipe_unratified_sections": [],
+  "run_id": "gate-ready-v4",
+  "schedule": {
+    "derivation": "effective_eval=save = max(1, min(recipe_eval_steps, total_steps // 4)); epochs/batch/accum from the ratified recipe; eval==save for load_best_model_at_end; recorded before training, not a silent recipe change",
+    "effective_batch": 32,
+    "effective_eval_steps": 97,
+    "effective_logging_steps": 50,
+    "effective_save_steps": 97,
+    "expected_evaluations": 4,
+    "gradient_accumulation_steps": 8,
+    "num_devices": 1,
+    "num_train_epochs": 4,
+    "per_device_train_batch_size": 4,
+    "recipe_eval_steps": 200,
+    "steps_per_epoch": 97,
+    "total_optimizer_steps": 388,
+    "train_rows_eligible": 3080
+  },
+  "schema": "v5-training-run-record/v1",
+  "started_utc": "2026-10-27T01:26:29+00:00",
+  "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+  "token_contract": {
+    "B": 415,
+    "bos_id": 1,
+    "eos_id": 2,
+    "label_budget": 13,
+    "margin": 8,
+    "max_length": 512,
+    "overhead": 76,
+    "template_max_B": 415
+  }
+}

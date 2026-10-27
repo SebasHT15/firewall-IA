@@ -52,6 +52,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import audit_v5_attack_pool as PRE  # noqa: E402  (pre-filter helpers, reused, not re-implemented)
 import v5_pools_common as C  # noqa: E402
+import v5_audit_evidence as AE  # noqa: E402
 
 SCHEMA = "v5-postfilter-audit/v1"
 DEFAULT_ATTACK_DIR = os.path.join(C.DEFAULT_OUT_DIR, "attack")
@@ -146,14 +147,18 @@ def load_pool(attack_dir: str, denylist: str | None = None, require_approved: bo
     C.assert_not_protected(attack_dir)
     pool_path = os.path.join(attack_dir, "attack_pool.jsonl")
     man_path = os.path.join(attack_dir, "manifest.json")
-    with open(man_path, encoding="utf-8") as fh:
-        man = json.load(fh)
+    C.assert_not_protected(man_path)
+    C.assert_not_protected(pool_path)
+    with open(man_path,'rb') as fh:man_raw=fh.read()
+    man = json.loads(man_raw)
     art = {a["path"]: a for a in man["artifacts"]}.get("attack_pool.jsonl")
-    pool_sha = C.sha256_file(pool_path)
+    with open(pool_path,'rb') as fh:pool_raw=fh.read()
+    pool_sha = C.sha256_bytes(pool_raw)
     if not art or art["sha256"] != pool_sha:
         raise AuditError("REFUSED: attack_pool.jsonl does not match the sha256 recorded in its manifest")
     md = man["denylist"]
     dl_path = denylist or os.path.join(C.REPO_ROOT, md["path"])
+    C.assert_not_protected(dl_path)
     doc, denied, dl_sha = B.load_denylist(dl_path)
     if dl_sha != md["sha256"]:
         raise AuditError(f"REFUSED: deny-list {dl_path} is not the one the pool was built with (sha256 differs)")
@@ -162,7 +167,7 @@ def load_pool(attack_dir: str, denylist: str | None = None, require_approved: bo
     if require_approved and doc["status"] != "APPROVED":
         raise AuditError("REFUSED: the post-filter audit consumes only a pool built with an APPROVED deny-list "
                          f"(current status {doc['status']}); use `plan` for counts")
-    records = C.read_jsonl(pool_path)
+    records = [json.loads(line) for line in pool_raw.split(b'\n') if line.strip()]
     if len(records) != art["records"]:
         raise AuditError("REFUSED: record count differs from the manifest")
     bad = [r.get("record_id") for r in records
@@ -177,7 +182,7 @@ def load_pool(attack_dir: str, denylist: str | None = None, require_approved: bo
         raise AuditError("REFUSED: pool mixes synthetic fixture records and real records")
     return {"records": records, "mode": FIXTURE if synth == {True} else REAL,
             "pool": {"path": os.path.relpath(pool_path, C.REPO_ROOT), "sha256": pool_sha, "records": len(records)},
-            "manifest_sha256": C.sha256_file(man_path),
+            "manifest_sha256": C.sha256_bytes(man_raw),
             "denylist": {"path": md["path"], "sha256": dl_sha, "status": doc["status"],
                          "approval": doc.get("approval"), "denied_files": len(denied)}}
 
@@ -223,7 +228,7 @@ def _round_states(out_root: str) -> dict:
 
 
 def check_round(out_root: str, k: int, seed: str, pool_sha: str, filter_change_doc: str | None,
-                params=PARAMS) -> list | None:
+                params=PARAMS, *, prior_r4_binding=None, categories=None) -> list | None:
     """Enforce §7: a new seed; round 1 first; at most one re-audit, only after a documented filter change, on a
     changed pool and for the categories that FAILED round 1. Returns the categories to audit (None = all)."""
     if not seed or not seed.strip():
@@ -237,15 +242,38 @@ def check_round(out_root: str, k: int, seed: str, pool_sha: str, filter_change_d
     if seed in used or human_seed(seed) in used:
         raise AuditError("REFUSED: seed already used by an earlier audit; §7 requires a new seed")
     if k == 1:
+        if prior_r4_binding is not None or categories is not None:
+            raise AuditError('REFUSED: continuation evidence/categories require round 2')
         return None
     prev = states.get(k - 1)
     rep_path = os.path.join(round_dir(out_root, k - 1), "report.json")
     if prev is None or not os.path.isfile(rep_path):
         raise AuditError(f"REFUSED: round {k} needs round {k - 1} sampled and reported")
+    if filter_change_doc:
+        C.assert_not_protected(filter_change_doc)
     if not (filter_change_doc and os.path.isfile(filter_change_doc) and os.path.getsize(filter_change_doc) > 0):
         raise AuditError("REFUSED: a re-audit needs --filter-change-doc documenting the filter change")
     if prev["pool"]["sha256"] == pool_sha:
         raise AuditError("REFUSED: the pool is unchanged since the previous round; a re-audit follows a filter change")
+    if prior_r4_binding is not None:
+        try:
+            evidence = AE.verify(prior_r4_binding)
+        except (OSError,ValueError,TypeError) as exc:
+            raise AuditError(f'REFUSED: invalid prior r4 evidence: {exc}') from exc
+        state_path = os.path.join(round_dir(out_root,k-1),'audit_state.json')
+        if (evidence['sha256']['state'] != C.sha256_file(state_path)
+                or evidence['pool_sha256'] != prev['pool']['sha256']):
+            raise AuditError('REFUSED: r4 evidence is not bound to this round history')
+        if (not isinstance(categories,list) or not categories
+                or any(not isinstance(c,str) or not c for c in categories)
+                or len(set(categories)) != len(categories)):
+            raise AuditError('REFUSED: explicit nonempty unique continuation categories required')
+        allowed = {'FAIL','INSUFFICIENT_EVIDENCE'}
+        if any(evidence['category_outcomes'].get(c) not in allowed for c in categories):
+            raise AuditError('REFUSED: continuation categories must have FAIL/INSUFFICIENT_EVIDENCE in authoritative r4')
+        return sorted(categories)
+    if categories is not None:
+        raise AuditError('REFUSED: explicit category selection needs bound r4 evidence')
     failed = sorted(c for c, v in _read_json(rep_path)["categories"].items() if v["status"] == FAIL)
     if not failed:
         raise AuditError("REFUSED: no category FAILED the previous round; nothing to re-audit")
@@ -286,7 +314,9 @@ def draw(records: list, seed: str, k: int, categories: list | None = None, param
 
 
 def write_round(out_root: str, k: int, seed: str, pool: dict, sample: list, human: list,
-                categories: list | None, filter_change_doc: str | None, params=PARAMS) -> str:
+                categories: list | None, filter_change_doc: str | None, params=PARAMS, *, prior_r4_binding=None) -> str:
+    if prior_r4_binding is not None and len(sample)>200:
+        raise AuditError('REFUSED: this r4 continuation requires an explicitly fixed R3 population; frame exceeds 200')
     d = round_dir(out_root, k)
     os.makedirs(os.path.join(d, "human_review"))          # fails if it exists: a round is never redrawn
     sample_info = C.write_jsonl(os.path.join(d, "sample.jsonl"), sample, key=lambda r: r["sample_id"])
@@ -316,6 +346,16 @@ def write_round(out_root: str, k: int, seed: str, pool: dict, sample: list, huma
                    "category NUL record_id); human subsample drawn from the sample with human_seed before any "
                    "annotation exists"),
     ])
+    if prior_r4_binding is not None:
+        state['review_method'] = 'D67_R4_AI_ONLY_CONTINUATION'
+        state['r3_preselected_sample'] = {'path':'sample.jsonl','sha256':sample_info['sha256'],
+            'rows':len(sample),'rule':'entire continuation frame (at most 200), fixed before annotations'}
+        prereg = os.path.join(C.REPO_ROOT,'reports','v5','postfilter-audit','preregistration','v5-postfilter-prereg-r4.json')
+        state['r4_preregistration'] = {'path':os.path.relpath(prereg,C.REPO_ROOT),'sha256':C.sha256_file(prereg)}
+        state['human_validation_performed'] = False
+        state['legacy_human_sample_is_not_r3_selection'] = True
+        state['prior_r4_evidence'] = prior_r4_binding
+        state['continuation_scope'] = 'documented filter correction; no category results inherited'
     C.write_json(os.path.join(d, "audit_state.json"), state)
     return d
 
@@ -477,6 +517,8 @@ def category_gate(sample_cat: list, human_cat: list, a1: dict | None, a2: dict |
 def report(out_root: str, k: int, params=None) -> dict:
     d = round_dir(out_root, k)
     state = _read_json(os.path.join(d, "audit_state.json"))
+    if state.get("review_method") == "D67_R4_AI_ONLY_CONTINUATION" or state.get("prior_r4_evidence"):
+        raise AuditError("REFUSED: r4 continuation requires adjudicate_v5_r4_continuation.py; legacy human-review report is inapplicable")
     params = params or state["params"]
     sample = C.read_jsonl(os.path.join(d, "sample.jsonl"))
     if C.sha256_file(os.path.join(d, "sample.jsonl")) != state["sample"]["sha256"]:
@@ -561,11 +603,18 @@ def cmd_plan(a) -> int:
 
 def cmd_sample(a) -> int:
     pool = load_pool(a.attack_dir, a.denylist, require_approved=True)
-    cats = check_round(a.out_root, a.round, a.seed, pool["pool"]["sha256"], a.filter_change_doc)
-    sample, human = draw(pool["records"], a.seed, a.round, cats)
-    d = write_round(a.out_root, a.round, a.seed, pool, sample, human, cats, a.filter_change_doc)
-    print(json.dumps({"round_dir": os.path.relpath(d, C.REPO_ROOT), "mode": pool["mode"], "sample": len(sample),
-                      "human": len(human)}, indent=2))
+    binding = None
+    if a.prior_r4_evidence:
+        C.assert_not_protected(a.prior_r4_evidence)
+        doc = _read_json(a.prior_r4_evidence)
+        binding = doc.get('binding',doc)
+    cats = check_round(a.out_root,a.round,a.seed,pool['pool']['sha256'],a.filter_change_doc,
+                       prior_r4_binding=binding,categories=a.category)
+    sample, human = draw(pool['records'],a.seed,a.round,cats)
+    d = write_round(a.out_root,a.round,a.seed,pool,sample,human,cats,a.filter_change_doc,
+                    prior_r4_binding=binding)
+    print(json.dumps({'round_dir':os.path.relpath(d,C.REPO_ROOT),'mode':pool['mode'],
+                      'sample':len(sample),'human':len(human)},indent=2))
     return 0
 
 
@@ -907,6 +956,8 @@ def build_parser() -> argparse.ArgumentParser:
         if name == "sample":
             sp.add_argument("--seed", required=True, help="a NEW seed (never used by an earlier audit)")
             sp.add_argument("--filter-change-doc", default=None, help="required for the re-audit (round 2)")
+            sp.add_argument('--prior-r4-evidence',default=None,help='pinned authoritative R3 evidence binding for round-2 continuation')
+            sp.add_argument('--category',action='append',default=None,help='explicit continuation category; requires prior r4 evidence')
         if name == "adjudication-workbook":
             sp.add_argument("--part", type=int, choices=(1, 2), required=True,
                             help="1: outside the blind human subsample; 2: inside it (only after the human review)")

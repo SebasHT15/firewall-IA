@@ -35,6 +35,7 @@ for p in (HERE, os.path.join(REPO_ROOT, "control_plane")):
     if p not in sys.path:
         sys.path.insert(0, p)
 
+import v5_row_contract as RC
 import v5_catalog as K  # noqa: E402
 import v5_output_contract as OC  # noqa: E402  (ALLOW string and V4/D47 BLOCK strings: read only)
 
@@ -313,6 +314,7 @@ class LeafLabel:
     attack_category: str | None = None
     reason: str | None = None
     detail: str = ""
+    label_status_basis: str | None = None
 
 
 @dataclass(frozen=True)
@@ -322,6 +324,8 @@ class AttackBasis:
     `synthetic: true` (never a real payload)."""
     mode: str
     categories_passed: frozenset = frozenset()
+    audit_type: str | None = None
+    row_contract: str | None = None
 
     def check(self, record: dict, category: str) -> None:
         if self.mode == "fixture_synthetic":
@@ -391,6 +395,11 @@ def label_attack_leaf(record: dict, category: str, slot_type: str, logical: str,
     reason = record.get("reason_string")
     if reason not in BLOCK_REASONS:
         raise LabelError(f"record {record.get('record_id')}: reason {reason!r} is not a V4/D47 string (M-7)")
+    if basis.audit_type == 'ai_audited':
+        if basis.row_contract != RC.SCHEMA:
+            raise LabelBlocked('AI attack references require the explicit training-reference contract')
+        return LeafLabel(BLOCK,RC.TRAINING_REFERENCE,RULE_ATTACK,attack_category=category,
+                         reason=reason,label_status_basis='ai_audit')
     return LeafLabel(BLOCK, VERIFIED, RULE_ATTACK, attack_category=category, reason=reason)
 
 
@@ -430,13 +439,13 @@ def output_string(row_label: LeafLabel) -> str | None:
 
 
 # ───────────────────────────── M-1 … M-10 on generated row metadata ─────────────────────────────
-def check_m_invariants(rows: list, table: PolicyTable, split_rows: bool) -> dict:
+def check_m_invariants(rows: list, table: PolicyTable, split_rows: bool, *, row_contract=None) -> dict:
     """rows: row metadata dicts. `split_rows`: the rows are a TRAIN / VALIDATION / INTERNAL TEST file
     (M-4: no EXCLUDED row) rather than a slice file (only AMBIGUOUS / INSUFFICIENT_CONTEXT)."""
     bad = Counter()
     for r in rows:
         st, ex, pid = r.get("label_status"), r.get("exclusion_reason"), r.get("policy_id")
-        if st not in LABEL_STATUSES:
+        if st not in LABEL_STATUSES and not RC.is_reference(r,contract=row_contract):
             bad["M-1"] += 1
         if (ex is not None) != (st == EXCLUDED) or (ex is not None and ex not in EXCLUSION_REASONS):
             bad["M-2"] += 1

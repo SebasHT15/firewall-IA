@@ -103,6 +103,8 @@ def assert_not_protected(path):
         bad.append("reports/external")
     if base == "eval.jsonl" or any("internal_test" in x or "internal-test" in x for x in parts):
         bad.append("eval / internal test")
+    if any('e6_reserve' in x or 'e6-reserve' in x or 'stab-held' in x or 'stab_held' in x for x in parts):
+        bad.append('reserved / STAB-held material')
     if any("csic" in x for x in parts):
         bad.append("CSIC (never TRAIN, D58)")
     if "v4_clean" in parts:

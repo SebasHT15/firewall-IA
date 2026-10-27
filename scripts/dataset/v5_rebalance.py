@@ -89,8 +89,8 @@ def validate_i9_config(cfg) -> dict:
         raise RebalanceConfigError("i9.owner_rulings must map each ruled cluster id to a non-empty justification: "
                                    "an exception for an obligatory-concept cluster needs a specific owner decision "
                                    "(§4.6); no blanket or unjustified exceptions")
-    if cfg["status"] != "PROPOSED":
-        raise RebalanceConfigError("i9.status must stay 'PROPOSED' until the preregistration (spec §11.2)")
+    if cfg["status"] not in ("PROPOSED", "RATIFIED"):
+        raise RebalanceConfigError("i9.status must be PROPOSED or RATIFIED; real-build authorization is checked separately")
     return dict(cfg)
 
 
