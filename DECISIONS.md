@@ -3667,3 +3667,32 @@ Separately implements the owner-directed readiness step B enumerated before the 
 Owner authorization evidence: the exact current-chat instruction recorded in D78, 2026-10-26 (Costa Rica). These are separate implementation records of that direction, not invented additional quotes, signatures or decisions by another person.
 
 Separately implements owner-directed step C under the same D78 instruction. Authorizes the baseline34 and target-path-neutralized32 candidates independently, with exact recipe/C1/selection/dataset/source/library pins. Fit on TRAIN, compare on VALIDATION, preserve identity groups; C1 extensions metadata-only, C2 absent, no operating threshold or deployed winner. The shared reader requires the separately bound ai-audit authorization. The agent stops at gate-only; no fitting occurs in this task. D73 PR-to-develop remains a precondition before actual training.
+
+## D82 — Model 2 numerical convergence budget after the owner-run failure
+
+Owner go-ahead in the current local chat, 2026-10-26 (Costa Rica):
+“ok, demosle a ver, ya puedo entrenar model 2?”
+This follows the disclosed failure at max_iter=500 and the concrete proposed amendment to
+5000 iterations for both candidates. This entry implements that go-ahead as the bounded numerical
+repair needed to resume Model 2, not as a new model-selection or operating-policy decision.
+No additional owner quotation or signature is attributed.
+
+The owner's baseline34 FINAL attempt reached 500 iterations with ConvergenceWarning and produced
+no model artifact. Preserve that failed attempt and the original D73/D81 records. StandardScaler
+was already fit on TRAIN. One ephemeral numerical diagnostic, using the proposed 5000 cap fixed
+before fitting, converged at 825 iterations for baseline34 and 478 for target-path-neutralized32,
+with finite coefficients and no convergence warnings. The authorized shared reader opened TRAIN
+and VALIDATION; the diagnostic fitted only TRAIN, did not predict/score/select on VALIDATION, and
+discarded its weights. No protected cases were opened and no FINAL artifact was produced.
+
+Change only max_iter from 500 to 5000 in two successor recipes. Preserve C=1, lbfgs, tol=1e-6,
+seed=0, scaling, features, labels, input data, split groups and absent C2/operating threshold.
+ConvergenceWarning remains an error; a larger budget does not grant permission to keep a failed
+fit. This is a disclosed numerical amendment after a training failure, not a change chosen using
+validation quality. Original recipes, protocol, authorizations and V5 records remain unchanged.
+
+Successor recipes/protocol, separate refreshed FINAL_OFFLINE_MODEL2 authorizations, diagnostic
+record and owner launcher are in reports/v5/model2-convergence-recovery-2026-10-26/. Bind the
+unchanged v4 freeze/preregistration/ai-audit evidence and current source/library pins; commit the
+successors and pass both actual FINAL gates before returning the launch command. The owner
+launches training. No dataset rebuild, V5 retraining, production activation or winner selection.
