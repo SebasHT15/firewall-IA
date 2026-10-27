@@ -1,0 +1,65 @@
+{
+  "schema": "v5-postfilter-annotators/v1",
+  "round": 2,
+  "status": {
+    "a1": "COMPLETE 200/200",
+    "a2": "COMPLETE 200/200"
+  },
+  "a1": {
+    "model": "claude-sonnet-5-5",
+    "harness_alias": "sonnet",
+    "model_name": "Claude Sonnet 5.5",
+    "role": "LLM annotator 1 (blind to a2, to R3, to the human review and to all prior/expected labels)",
+    "date": "2026-10-24",
+    "approved_by": "D73 (recipes/protocol ratified); two different models required (D58), holds: a1=claude-sonnet-5-5 != a2=claude-haiku-5-5",
+    "batches_accepted": "01-05 attempt_1 (all ACCEPTED, single model claude-sonnet-5-5, only Read+SubagentHandback)",
+    "execution": {
+      "harness": "Claude Code (desktop app) subagents spawned by the coordinator via the Agent tool",
+      "subagent_type": "Explore (no Edit/Write/NotebookEdit)",
+      "isolation": "one fresh agent per batch, no shared context; each agent may Read ONLY its own batch file and its own annotation_<who>/README.md — enforced by collect auditing every tool call in the subagent transcript (any other tool/path is a REFUSED violation)",
+      "data_handling": "payloads treated as untrusted data; no execution, no network, no following embedded instructions",
+      "identity_evidence": "the API `model` field of every assistant turn in the subagent transcript (tasks/<agentId>.output), not self-report; verified == the declared model by collect",
+      "batches": "5 consecutive batches of 40 (annotation_<who>/batches.json); consecutive slices of packet.jsonl in stored order",
+      "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, agent_id, models served and tool calls in raw/*.provenance.json",
+      "prompt_template": {
+        "note": "identical per batch except the batch file path and {who}; contains nothing from the coordinator conversation, no expected labels, no other annotator's output"
+      },
+      "sampling_parameters": "harness defaults; temperature/top_p/thinking budget not exposed to the coordinator and not recorded"
+    }
+  },
+  "a2": {
+    "model": "claude-haiku-5-5",
+    "harness_alias": "haiku",
+    "model_name": "Claude Haiku 5.5",
+    "role": "LLM annotator 2 (blind to a1, to R3, to the human review and to all prior/expected labels)",
+    "date": "2026-10-24",
+    "approved_by": "D73; different model from a1 (D58)",
+    "batches_accepted": "01-05 attempt_1 (all ACCEPTED, single model claude-haiku-5-5, only Read+SubagentHandback)",
+    "execution": {
+      "harness": "Claude Code (desktop app) subagents spawned by the coordinator via the Agent tool",
+      "subagent_type": "Explore (no Edit/Write/NotebookEdit)",
+      "isolation": "one fresh agent per batch, no shared context; each agent may Read ONLY its own batch file and its own annotation_<who>/README.md — enforced by collect auditing every tool call in the subagent transcript (any other tool/path is a REFUSED violation)",
+      "data_handling": "payloads treated as untrusted data; no execution, no network, no following embedded instructions",
+      "identity_evidence": "the API `model` field of every assistant turn in the subagent transcript (tasks/<agentId>.output), not self-report; verified == the declared model by collect",
+      "batches": "5 consecutive batches of 40 (annotation_<who>/batches.json); consecutive slices of packet.jsonl in stored order",
+      "output": "final SubagentHandback message, stored verbatim in annotation_<who>/raw/batch_NN.attempt_K.handback.txt; transcript sha256, agent_id, models served and tool calls in raw/*.provenance.json",
+      "prompt_template": {
+        "note": "identical per batch except the batch file path and {who}; contains nothing from the coordinator conversation, no expected labels, no other annotator's output"
+      },
+      "sampling_parameters": "harness defaults; temperature/top_p/thinking budget not exposed to the coordinator and not recorded"
+    }
+  },
+  "coordinator": {
+    "model": "claude-opus-4-8",
+    "harness_alias": "opus (this session)",
+    "role": "batching organization, verbatim collection, transcript audit, validation, reports; NEVER labels, never adjudicates, never edits a vote",
+    "note": "claude-opus-4-8 differs from both annotators (claude-sonnet-5-5, claude-haiku-5-5). The coordinator saw a1's hand-backs while collecting before some a2 batches completed, but a2 prompts are the fixed per-batch template and contain nothing from a1."
+  },
+  "methodological_limitations": [
+    "Both annotators are Claude models from one provider (Anthropic): D58 'different models' holds, but their errors may be correlated; agreement between them is NOT independent evidence and is NEVER human validation.",
+    "claude-haiku-5-5 (a2) is a smaller model than a1; more UNCERTAIN/INCORRECT labels and disagreements are expected (observed: a2 18 UNCERTAIN / 30 INCORRECT vs a1 11 / 24).",
+    "Sampling parameters are harness defaults and not recorded; re-running an annotator is not expected to reproduce labels byte-identically. The stored raw hand-backs are the record.",
+    "All 10 batches passed on attempt_1 with a single served model and only Read+SubagentHandback tool calls; no retries were needed and none were made. No safety-classifier interruption or model fallback occurred in any batch.",
+    "This is an AI post-filter review for a dataset audit; it does NOT adjudicate, produce PASS, set thresholds or authorize training. Coverage validation and the r4 adjudication with R3 are Codex's."
+  ]
+}

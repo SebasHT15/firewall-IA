@@ -1,0 +1,82 @@
+{
+  "schema": "v5-source-readmission-preparation/v1-PROPOSED",
+  "status": "PREPARED_NOT_ADMITTED",
+  "training_authorized": false,
+  "sample_drawn": false,
+  "audit_results_transferred": false,
+  "candidate_manifest_sha256": "597285cdaf961cb74c7c373bd4f4948742fcff8e8f338e023b3fa35c4a162c1f",
+  "candidate_pool_sha256": "8383c00e670e8d6700f1d50bc8609511ff38022ee41458d5929c62fdd01958e5",
+  "baseline_sha256": {
+    "exchange": "7549e7adf47ec0ad25a1b6147e61c191a9064c270e583de31f9d124dce230b46",
+    "report": "e41114dc44a72b51971afef9f1c8e0b25137cd90ca1050dd612925b140585d5e",
+    "state": "33924212d3dc06d645bbef27b6fedda9e18d09f76b1b7f9cac289d511a3d2def",
+    "pool_manifest": "12887aa6c1a4505be563c1b30b56f347ac371b94779ae3b1014badcabd9aa5d1",
+    "pool": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21"
+  },
+  "candidate_rows": 3875,
+  "categories": {
+    "Command Injection": {
+      "previous_outcome": "INSUFFICIENT_EVIDENCE",
+      "old_rows": 422,
+      "candidate_rows": 415,
+      "record_ids_added": 0,
+      "record_ids_removed": 7,
+      "common_ids_with_changed_immutable_fields": 0,
+      "candidate_training_eligible": false,
+      "new_outcome": null,
+      "continuation_requires_evidence": true
+    },
+    "SQL Injection": {
+      "previous_outcome": "FAIL",
+      "old_rows": 759,
+      "candidate_rows": 727,
+      "record_ids_added": 5,
+      "record_ids_removed": 37,
+      "common_ids_with_changed_immutable_fields": 0,
+      "candidate_training_eligible": false,
+      "new_outcome": null,
+      "continuation_requires_evidence": true
+    },
+    "Server Side Template Injection": {
+      "previous_outcome": "FAIL",
+      "old_rows": 334,
+      "candidate_rows": 309,
+      "record_ids_added": 0,
+      "record_ids_removed": 25,
+      "common_ids_with_changed_immutable_fields": 6,
+      "candidate_training_eligible": false,
+      "new_outcome": null,
+      "continuation_requires_evidence": true
+    },
+    "XSS Injection": {
+      "previous_outcome": "INSUFFICIENT_EVIDENCE",
+      "old_rows": 337,
+      "candidate_rows": 343,
+      "record_ids_added": 125,
+      "record_ids_removed": 119,
+      "common_ids_with_changed_immutable_fields": 0,
+      "candidate_training_eligible": false,
+      "new_outcome": null,
+      "continuation_requires_evidence": true
+    }
+  },
+  "out_of_scope_continuity": {
+    "records": 2081,
+    "immutable_fields_equal": true,
+    "full_records_equal": 2079,
+    "fields_checked": [
+      "payload_wire",
+      "dedup_scope",
+      "category_v4",
+      "source_file",
+      "payload_raw"
+    ]
+  },
+  "remaining_actions": [
+    "Record acceptance of the documented source/filter change.",
+    "Use the existing r4 one-reaudit limit and a fresh seed; do not reset history or redraw.",
+    "Readmission requires new category evidence; continuity alone grants no PASS."
+  ],
+  "legacy_executor_gap": "audit_v5_postfilter.check_round reads the legacy round report and selects FAIL only; this preparation does not execute or amend it.",
+  "implementation_sha256": "5e8dc34f7a9a2cdb0c672d46db888b69d236c03937731c8ab27a5d0189d4fa6f"
+}

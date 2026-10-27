@@ -1,0 +1,87 @@
+{
+  "_STATUS": "PROPOSED — NOT SEALED/SIGNED/EXECUTED. Reproducible correction + fixed sample; awaits one owner authorization.",
+  "schema": "v5-source-census-preregistration/sqli-v2-PROPOSED",
+  "direction": "a-i (new population, fresh blind review; census v1 16 votes NOT reused)",
+  "option": "B — documented source/filter correction applied in a reproducible extraction stage BEFORE any vote",
+  "execution_authorized": false,
+  "training_authorized": false,
+  "criteria_r4_unchanged": {
+    "C1": {
+      "metric": "Wilson 95% upper of adjudicated INCORRECT",
+      "limit": 0.2,
+      "comparator": "<="
+    },
+    "C2": {
+      "metric": "Wilson 95% upper of adjudicated UNCERTAIN+INCORRECT",
+      "limit": 0.35,
+      "comparator": "<="
+    },
+    "coverage": 1.0,
+    "unresolved_gate_relevant_max": 0,
+    "wilson_z": 1.96
+  },
+  "correction_stage": {
+    "procedure": "reports/v5/postfilter-audit/sqli-v2-correction/apply_correction.py",
+    "command": "python3 -I reports/v5/postfilter-audit/sqli-v2-correction/apply_correction.py",
+    "input_pool": "datasets/v5_sources/attack/attack_pool.jsonl",
+    "input_pool_sha256": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21",
+    "general_defect_classes": {
+      "C1_cli_argument": "CLI invocations (sqlmap --flag=...), not SQL payloads",
+      "C2_placeholder_token": "bracketed sqlmap vocabulary token ([SLEEPTIME]/[RANDNUM]/[RANDSTR]/[INFERENCE]/[BOOLEAN_QUERY]/...)",
+      "C3_placeholder_literal": "'your ... here' / 'C:\\\\path\\\\to' / 'path/to' / bare 'blah'",
+      "C4_source_code": "defensive/source code ($_GET/$_POST, check_addslashes, function()",
+      "C5_doc_token": "bare ALL-CAPS single token or tool prompt ('MariaDB [dummydb]>')"
+    },
+    "kept": "ordinary T-SQL bracket identifiers ([users],[TESTING],[dummydb]) are KEPT (not in the sqlmap vocabulary)",
+    "uniform": "classes are structural and applied to all 759 accepted SQLi; NO PF2 vote used to pick units",
+    "accepted_before": 759,
+    "removed": 33,
+    "corrected": 726,
+    "removed_by_class": {
+      "C2_placeholder_token": 9,
+      "C3_placeholder_literal": 7,
+      "C5_doc_token": 9,
+      "C4_source_code": 2,
+      "C1_cli_argument": 6
+    },
+    "corrected_pool": "reports/v5/postfilter-audit/sqli-v2-correction/sqli_corrected_pool.jsonl",
+    "corrected_pool_sha256": "2db4db956c43992d809a40f6c798e369fee4f6452eab9aeb61d8dded16ad0748",
+    "diff": "reports/v5/postfilter-audit/sqli-v2-correction/removed_diff.json",
+    "pf2_incorrect": "all 6 PF2 SQLi INCORRECT are removed as a consequence of the general classes (not selected by id)"
+  },
+  "sample_fixed_a_priori": {
+    "file": "reports/v5/postfilter-audit/sqli-v2-correction/sample_n50.jsonl",
+    "manifest": "reports/v5/postfilter-audit/sqli-v2-correction/sample_n50.manifest.json",
+    "n": 50,
+    "seed": "v5-sqli-v2-corrected-2026-10-25",
+    "method": "stratified by source_file; within file rank by sha256(seed NUL source_file NUL record_id); largest-remainder proportional allocation",
+    "sample_sha256": "164ad50b133b5ba815abf2b05d9cb1f5f635df0d31d6af2ae1c32322972cc0d3",
+    "allocation_by_file": {
+      "SQL Injection/Intruder/Generic_UnionSelect.txt": 23,
+      "SQL Injection/MySQL Injection.md": 8,
+      "SQL Injection/MSSQL Injection.md": 6,
+      "SQL Injection/Intruder/Generic_ErrorBased.txt": 4,
+      "SQL Injection/PostgreSQL Injection.md": 3,
+      "SQL Injection/README.md": 3,
+      "SQL Injection/OracleSQL Injection.md": 2,
+      "SQL Injection/SQLite Injection.md": 1
+    },
+    "recorded_before_votes": true,
+    "note": "IDs + SHA recorded now, before any reviewer is called; seed is a fixed string, not chosen by any result"
+  },
+  "reviewers_D67": {
+    "a1": "gpt-6.1-sol",
+    "a2": "gpt-6-astra",
+    "r3": "gpt-6-sol",
+    "procedure": "fresh blind sessions per batch, no fork; adjudication frozen r4; R3 blind; Codex-approved routes (not Claude)",
+    "exception": "D67 AI-only; requires an owner execution-authorization bound to this prereg sha + the fixed sample sha"
+  },
+  "relation_to_v1": {
+    "v1_sealed": true,
+    "v1_votes_reused": false,
+    "payload_overlap": "10 of 16 v1 payloads present in the source pool; re-drawn units reviewed fresh"
+  },
+  "preserved": "All prior evidence (census v1, PF2, prior scans) preserved and untouched.",
+  "no_pass_promise": "The audit may still return NOT_SUPPORTED; no PASS is implied.",
+  "owner_decision_required": "Sign ONE execution-authorization for ONE C-R6 campaign over this corrected pool and fixed sample. Independent of the 12 SSTI/XSS handbacks 06-09."
+}
