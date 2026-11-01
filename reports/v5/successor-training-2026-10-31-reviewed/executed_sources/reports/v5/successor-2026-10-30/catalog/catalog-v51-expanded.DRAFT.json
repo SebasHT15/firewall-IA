@@ -1,0 +1,2074 @@
+{
+  "schema": "v5-template-catalog/v1",
+  "status": "PROPOSED_SUCCESSOR_NOT_OWNER_RATIFIED",
+  "note": "Original templates preserved; 39 new typed URL structures for source-independent successor splits. Structures do not count as independent attack sources. No field-name-based label rule added.",
+  "templates": [
+    {
+      "name": "path-static-a",
+      "cluster": "path-static",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "static",
+        "assets",
+        {
+          "type": "path_file"
+        }
+      ]
+    },
+    {
+      "name": "path-static-b",
+      "cluster": "path-static",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "static",
+        "v",
+        {
+          "type": "int"
+        },
+        "assets",
+        {
+          "type": "path_file"
+        }
+      ]
+    },
+    {
+      "name": "path-docs-a",
+      "cluster": "path-docs",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "docs",
+        "download",
+        {
+          "type": "path_file"
+        }
+      ]
+    },
+    {
+      "name": "path-people-a",
+      "cluster": "path-people",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "people",
+        {
+          "type": "free_string",
+          "pools": [
+            "names_given",
+            "symbols"
+          ]
+        },
+        "profile"
+      ]
+    },
+    {
+      "name": "path-people-b",
+      "cluster": "path-people",
+      "carrier": "path",
+      "method": "DELETE",
+      "path": [
+        "people",
+        {
+          "type": "free_string",
+          "pools": [
+            "names_given",
+            "symbols"
+          ]
+        },
+        "sessions",
+        {
+          "type": "token"
+        }
+      ]
+    },
+    {
+      "name": "path-wiki-a",
+      "cluster": "path-wiki",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "wiki",
+        "page",
+        {
+          "type": "free_string",
+          "pools": [
+            "names_given",
+            "streets",
+            "symbols"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "path-media-a",
+      "cluster": "path-media",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "media",
+        {
+          "type": "int"
+        },
+        "files",
+        {
+          "type": "path_file"
+        }
+      ]
+    },
+    {
+      "name": "path-tags-a",
+      "cluster": "path-tags",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "blog",
+        "tags",
+        {
+          "type": "free_string",
+          "pools": [
+            "names_given",
+            "symbols",
+            "streets"
+          ]
+        },
+        "posts"
+      ]
+    },
+    {
+      "name": "path-export-a",
+      "cluster": "path-export",
+      "carrier": "path",
+      "method": "GET",
+      "path": [
+        "reports",
+        "export",
+        {
+          "type": "token"
+        },
+        {
+          "type": "path_file"
+        }
+      ]
+    },
+    {
+      "name": "q-search-a",
+      "cluster": "q-search",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "search"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "q-search-b",
+      "cluster": "q-search",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "search"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "enum",
+          "names": "enum",
+          "choices": [
+            "asc",
+            "desc"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "q-catalog-a",
+      "cluster": "q-catalog",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "shop",
+        "products"
+      ],
+      "fields": [
+        {
+          "type": "enum",
+          "names": "enum",
+          "choices": [
+            "books",
+            "garden",
+            "toys",
+            "tools"
+          ]
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "q-share-a",
+      "cluster": "q-share",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "share",
+        "preview"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        }
+      ]
+    },
+    {
+      "name": "q-login-a",
+      "cluster": "q-login",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "account",
+        "login"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        }
+      ]
+    },
+    {
+      "name": "q-files-a",
+      "cluster": "q-files",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "files",
+        "view"
+      ],
+      "fields": [
+        {
+          "type": "path_file",
+          "names": "path"
+        },
+        {
+          "type": "enum",
+          "names": "enum",
+          "choices": [
+            "en",
+            "es",
+            "fr",
+            "de"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "q-geo-a",
+      "cluster": "q-geo",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "maps",
+        "lookup"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "q-events-a",
+      "cluster": "q-events",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "events",
+        "calendar",
+        {
+          "type": "int"
+        }
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "enum",
+          "names": "enum",
+          "choices": [
+            "ics",
+            "csv",
+            "json"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "q-feed-a",
+      "cluster": "q-feed",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "feeds",
+        "import"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "enum",
+          "names": "enum",
+          "choices": [
+            "rss",
+            "atom"
+          ]
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "f-contact-a",
+      "cluster": "f-contact",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "contact"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        }
+      ]
+    },
+    {
+      "name": "f-signup-a",
+      "cluster": "f-signup",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "account",
+        "register"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        }
+      ]
+    },
+    {
+      "name": "f-address-a",
+      "cluster": "f-address",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "checkout",
+        "shipping"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "enum",
+          "names": "enum",
+          "choices": [
+            "CR",
+            "US",
+            "DE",
+            "FR",
+            "JP"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "f-comment-a",
+      "cluster": "f-comment",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "blog",
+        "posts",
+        {
+          "type": "int"
+        },
+        "comments"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        }
+      ]
+    },
+    {
+      "name": "f-webhook-a",
+      "cluster": "f-webhook",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "settings",
+        "integrations"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "f-import-a",
+      "cluster": "f-import",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "library",
+        "import"
+      ],
+      "fields": [
+        {
+          "type": "path_file",
+          "names": "path"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        }
+      ]
+    },
+    {
+      "name": "f-login-a",
+      "cluster": "f-login",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "session"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        }
+      ]
+    },
+    {
+      "name": "f-login-b",
+      "cluster": "f-login",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "session"
+      ],
+      "fields": [
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "free_string",
+          "names": "text"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "j-profile-a",
+      "cluster": "j-profile",
+      "carrier": "json",
+      "method": "PATCH",
+      "path": [
+        "api",
+        "v2",
+        "profile"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "json_leaf",
+                "names": "text"
+              },
+              {
+                "type": "json_leaf",
+                "names": "text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-profile-b",
+      "cluster": "j-profile",
+      "carrier": "json",
+      "method": "PATCH",
+      "path": [
+        "api",
+        "v2",
+        "profile"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "json_leaf",
+                "names": "text"
+              },
+              {
+                "type": "json_leaf",
+                "names": "text"
+              }
+            ]
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-order-a",
+      "cluster": "j-order",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "orders"
+      ],
+      "json": {
+        "object": [
+          {
+            "names": "object",
+            "array": [
+              {
+                "object": [
+                  {
+                    "type": "token",
+                    "names": "token"
+                  },
+                  {
+                    "type": "int",
+                    "names": "int"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-search-a",
+      "cluster": "j-search",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "search",
+        "advanced"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "enum",
+                "names": "enum",
+                "choices": [
+                  "en",
+                  "es",
+                  "pt"
+                ]
+              },
+              {
+                "type": "int",
+                "names": "int"
+              }
+            ]
+          },
+          {
+            "type": "int",
+            "names": "int"
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-message-a",
+      "cluster": "j-message",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "chat",
+        "rooms",
+        {
+          "type": "int"
+        },
+        "messages"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "type": "int",
+            "names": "int"
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-webhook-a",
+      "cluster": "j-webhook",
+      "carrier": "json",
+      "method": "PUT",
+      "path": [
+        "hooks",
+        {
+          "type": "token"
+        }
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "names": "object",
+            "array": [
+              {
+                "type": "enum",
+                "choices": [
+                  "created",
+                  "updated",
+                  "deleted"
+                ]
+              },
+              {
+                "type": "enum",
+                "choices": [
+                  "created",
+                  "updated",
+                  "deleted"
+                ]
+              }
+            ]
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-document-a",
+      "cluster": "j-document",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "documents",
+        "render"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "path_file",
+            "names": "path"
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "json_leaf",
+                "names": "text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-review-a",
+      "cluster": "j-review",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "products",
+        {
+          "type": "int"
+        },
+        "reviews"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "type": "json_leaf",
+            "names": "text"
+          },
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "json_leaf",
+                "names": "text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "j-batch-a",
+      "cluster": "j-batch",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "contacts",
+        "batch"
+      ],
+      "json": {
+        "array": [
+          {
+            "object": [
+              {
+                "type": "json_leaf",
+                "names": "text"
+              },
+              {
+                "type": "json_leaf",
+                "names": "text"
+              }
+            ]
+          },
+          {
+            "object": [
+              {
+                "type": "json_leaf",
+                "names": "text"
+              },
+              {
+                "type": "json_leaf",
+                "names": "text"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "t-notes-a",
+      "cluster": "t-notes",
+      "carrier": "text",
+      "method": "POST",
+      "path": [
+        "notes"
+      ],
+      "text": {
+        "type": "free_string"
+      }
+    },
+    {
+      "name": "t-feedback-a",
+      "cluster": "t-feedback",
+      "carrier": "text",
+      "method": "POST",
+      "path": [
+        "feedback",
+        {
+          "type": "token"
+        }
+      ],
+      "text": {
+        "type": "free_string"
+      }
+    },
+    {
+      "name": "t-paste-a",
+      "cluster": "t-paste",
+      "carrier": "text",
+      "method": "PUT",
+      "path": [
+        "paste",
+        {
+          "type": "int"
+        },
+        "raw"
+      ],
+      "text": {
+        "type": "free_string"
+      }
+    },
+    {
+      "name": "t-status-a",
+      "cluster": "t-status",
+      "carrier": "text",
+      "method": "POST",
+      "path": [
+        "users",
+        {
+          "type": "int"
+        },
+        "status"
+      ],
+      "text": {
+        "type": "free_string"
+      }
+    },
+    {
+      "name": "t-translate-a",
+      "cluster": "t-translate",
+      "carrier": "text",
+      "method": "POST",
+      "path": [
+        "translate",
+        "text"
+      ],
+      "text": {
+        "type": "free_string"
+      }
+    },
+    {
+      "name": "t-ticket-a",
+      "cluster": "t-ticket",
+      "carrier": "text",
+      "method": "POST",
+      "path": [
+        "support",
+        "tickets",
+        {
+          "type": "int"
+        },
+        "reply"
+      ],
+      "text": {
+        "type": "free_string"
+      }
+    },
+    {
+      "name": "v51-remote-thumbnail",
+      "cluster": "v51-remote-thumbnail",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "resolver",
+        "v2",
+        "thumbnail"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "v51-feed-inspection",
+      "cluster": "v51-feed-inspection",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "integrations",
+        "feeds",
+        "inspect"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "v51-source-task",
+      "cluster": "v51-source-task",
+      "carrier": "query",
+      "method": "DELETE",
+      "path": [
+        "jobs",
+        "imports",
+        "source"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        }
+      ]
+    },
+    {
+      "name": "v51-remote-media",
+      "cluster": "v51-remote-media",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "media",
+        "remote",
+        "retrieve"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "v51-catalog-connect",
+      "cluster": "v51-catalog-connect",
+      "carrier": "form",
+      "method": "PUT",
+      "path": [
+        "connectors",
+        "catalog",
+        "register"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "v51-channel-address",
+      "cluster": "v51-channel-address",
+      "carrier": "form",
+      "method": "PATCH",
+      "path": [
+        "subscriptions",
+        "channel",
+        "configure"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        }
+      ]
+    },
+    {
+      "name": "v51-asset-inspection",
+      "cluster": "v51-asset-inspection",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "rendering",
+        "assets",
+        "inspect"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-automation-hook",
+      "cluster": "v51-automation-hook",
+      "carrier": "json",
+      "method": "PUT",
+      "path": [
+        "automations",
+        "tasks",
+        "register"
+      ],
+      "json": {
+        "object": [
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "url",
+                "names": "url"
+              },
+              {
+                "type": "token",
+                "names": "token"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-export-target",
+      "cluster": "v51-export-target",
+      "carrier": "json",
+      "method": "PATCH",
+      "path": [
+        "reports",
+        "export",
+        "schedule"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "names": "object",
+            "object": [
+              {
+                "type": "url",
+                "names": "url"
+              },
+              {
+                "type": "number",
+                "names": "number"
+              },
+              {
+                "type": "bool",
+                "names": "bool"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-image-preview",
+      "cluster": "v51-image-preview",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "pictures",
+        "proxy",
+        "preview"
+      ],
+      "fields": [
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        }
+      ]
+    },
+    {
+      "name": "v51-feed-refresh",
+      "cluster": "v51-feed-refresh",
+      "carrier": "query",
+      "method": "DELETE",
+      "path": [
+        "syndication",
+        "refresh",
+        "pending"
+      ],
+      "fields": [
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "v51-document-source",
+      "cluster": "v51-document-source",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "documents",
+        "ingest",
+        "source"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "v51-avatar-origin",
+      "cluster": "v51-avatar-origin",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "avatars",
+        "import",
+        "origin"
+      ],
+      "fields": [
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "v51-translation-resource",
+      "cluster": "v51-translation-resource",
+      "carrier": "query",
+      "method": "DELETE",
+      "path": [
+        "translations",
+        "fetch",
+        "resource"
+      ],
+      "fields": [
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        }
+      ]
+    },
+    {
+      "name": "v51-archive-location",
+      "cluster": "v51-archive-location",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "archives",
+        "remote",
+        "location"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "v51-link-inspection",
+      "cluster": "v51-link-inspection",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "links",
+        "security",
+        "inspection"
+      ],
+      "fields": [
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        }
+      ]
+    },
+    {
+      "name": "v51-calendar-fetch",
+      "cluster": "v51-calendar-fetch",
+      "carrier": "query",
+      "method": "DELETE",
+      "path": [
+        "calendars",
+        "sync",
+        "fetch"
+      ],
+      "fields": [
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "v51-video-cover",
+      "cluster": "v51-video-cover",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "videos",
+        "poster",
+        "cover"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        }
+      ]
+    },
+    {
+      "name": "v51-document-link",
+      "cluster": "v51-document-link",
+      "carrier": "query",
+      "method": "GET",
+      "path": [
+        "attachments",
+        "resolve",
+        "link"
+      ],
+      "fields": [
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "v51-capture-resource",
+      "cluster": "v51-capture-resource",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "screenshots",
+        "capture",
+        "resource"
+      ],
+      "fields": [
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        }
+      ]
+    },
+    {
+      "name": "v51-import-address",
+      "cluster": "v51-import-address",
+      "carrier": "form",
+      "method": "PUT",
+      "path": [
+        "inventories",
+        "batch",
+        "address"
+      ],
+      "fields": [
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "v51-notify-endpoint",
+      "cluster": "v51-notify-endpoint",
+      "carrier": "form",
+      "method": "PATCH",
+      "path": [
+        "notifications",
+        "transport",
+        "endpoint"
+      ],
+      "fields": [
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "v51-syndicate-content",
+      "cluster": "v51-syndicate-content",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "articles",
+        "syndicate",
+        "content"
+      ],
+      "fields": [
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        }
+      ]
+    },
+    {
+      "name": "v51-verify-callback",
+      "cluster": "v51-verify-callback",
+      "carrier": "form",
+      "method": "PUT",
+      "path": [
+        "callbacks",
+        "verify",
+        "destination"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        }
+      ]
+    },
+    {
+      "name": "v51-mirror-package",
+      "cluster": "v51-mirror-package",
+      "carrier": "form",
+      "method": "PATCH",
+      "path": [
+        "packages",
+        "mirror",
+        "registry"
+      ],
+      "fields": [
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        }
+      ]
+    },
+    {
+      "name": "v51-fetch-transcript",
+      "cluster": "v51-fetch-transcript",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "transcripts",
+        "download",
+        "asset"
+      ],
+      "fields": [
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "v51-subscribe-stream",
+      "cluster": "v51-subscribe-stream",
+      "carrier": "form",
+      "method": "PUT",
+      "path": [
+        "streams",
+        "subscribe",
+        "channel"
+      ],
+      "fields": [
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        }
+      ]
+    },
+    {
+      "name": "v51-render-page",
+      "cluster": "v51-render-page",
+      "carrier": "form",
+      "method": "PATCH",
+      "path": [
+        "pages",
+        "render",
+        "snapshot"
+      ],
+      "fields": [
+        {
+          "type": "number",
+          "names": "number"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "token",
+          "names": "token"
+        }
+      ]
+    },
+    {
+      "name": "v51-attach-source",
+      "cluster": "v51-attach-source",
+      "carrier": "form",
+      "method": "POST",
+      "path": [
+        "records",
+        "attach",
+        "source"
+      ],
+      "fields": [
+        {
+          "type": "token",
+          "names": "token"
+        },
+        {
+          "type": "int",
+          "names": "int"
+        },
+        {
+          "type": "bool",
+          "names": "bool"
+        },
+        {
+          "type": "url",
+          "names": "url"
+        },
+        {
+          "type": "number",
+          "names": "number"
+        }
+      ]
+    },
+    {
+      "name": "v51-embed-image",
+      "cluster": "v51-embed-image",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "embeds",
+        "images",
+        "submit"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-import-table",
+      "cluster": "v51-import-table",
+      "carrier": "json",
+      "method": "PUT",
+      "path": [
+        "tables",
+        "transfer",
+        "import"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "bool",
+            "names": "bool"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "int",
+            "names": "int"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-check-webhook",
+      "cluster": "v51-check-webhook",
+      "carrier": "json",
+      "method": "PATCH",
+      "path": [
+        "webhooks",
+        "destinations",
+        "check"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "token",
+            "names": "token"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "number",
+            "names": "number"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-refresh-index",
+      "cluster": "v51-refresh-index",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "indexes",
+        "content",
+        "refresh"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "number",
+            "names": "number"
+          },
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-configure-feed",
+      "cluster": "v51-configure-feed",
+      "carrier": "json",
+      "method": "PUT",
+      "path": [
+        "feeds",
+        "polling",
+        "settings"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          },
+          {
+            "type": "token",
+            "names": "token"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-schedule-capture",
+      "cluster": "v51-schedule-capture",
+      "carrier": "json",
+      "method": "PATCH",
+      "path": [
+        "captures",
+        "schedule",
+        "entry"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "number",
+            "names": "number"
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          },
+          {
+            "type": "int",
+            "names": "int"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-register-asset",
+      "cluster": "v51-register-asset",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "assets",
+        "registry",
+        "entry"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "bool",
+            "names": "bool"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "token",
+            "names": "token"
+          },
+          {
+            "type": "number",
+            "names": "number"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-update-origin",
+      "cluster": "v51-update-origin",
+      "carrier": "json",
+      "method": "PUT",
+      "path": [
+        "origins",
+        "routing",
+        "update"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "type": "token",
+            "names": "token"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-create-render-job",
+      "cluster": "v51-create-render-job",
+      "carrier": "json",
+      "method": "PATCH",
+      "path": [
+        "renderers",
+        "queue",
+        "job"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "number",
+            "names": "number"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          },
+          {
+            "type": "token",
+            "names": "token"
+          }
+        ]
+      }
+    },
+    {
+      "name": "v51-resolve-remote-data",
+      "cluster": "v51-resolve-remote-data",
+      "carrier": "json",
+      "method": "POST",
+      "path": [
+        "datasets",
+        "remote",
+        "resolve"
+      ],
+      "json": {
+        "object": [
+          {
+            "type": "token",
+            "names": "token"
+          },
+          {
+            "type": "int",
+            "names": "int"
+          },
+          {
+            "type": "bool",
+            "names": "bool"
+          },
+          {
+            "type": "url",
+            "names": "url"
+          },
+          {
+            "type": "number",
+            "names": "number"
+          }
+        ]
+      }
+    }
+  ]
+}

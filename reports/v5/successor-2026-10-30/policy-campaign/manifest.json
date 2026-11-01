@@ -1,0 +1,62 @@
+{
+  "schema": "v51-policy-review-campaign/v1",
+  "status": "PROVISIONAL_REVIEW_CORPUS_NOT_AUTHORIZED_FOR_TRAINING",
+  "source": "Project-authored cases derived from existing policy, not copied historical eval rows",
+  "policy_sha256": "a881df75cc31ad8e93688c073127027cb824dff45f659caa042b454074306a22",
+  "builder_sha256": "318aad734d2be1819a242076f62b43e749657c37e6e3c1937500ed1747ac5635",
+  "artifacts": [
+    {
+      "split": "TRAIN_CANDIDATE",
+      "rows": 360,
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-policy-campaign/TRAIN_CANDIDATE.jsonl",
+      "sha256": "a66c09bd8fdecfe7a081687c7aedc914fd699daa7aefaa517b547adceadc62ad"
+    },
+    {
+      "split": "VALIDATION_CANDIDATE",
+      "rows": 360,
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-policy-campaign/VALIDATION_CANDIDATE.jsonl",
+      "sha256": "4cf95b36c6f7907fa7f9ea206763c1be0ff3f3f7af0795df099939af08c21ce2"
+    },
+    {
+      "split": "RESERVE_CANDIDATE",
+      "rows": 288,
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-policy-campaign/RESERVE_CANDIDATE.jsonl",
+      "sha256": "4346ea426c2310e64fa862f681723c7f1c1164ec0679c9b1da517869d867d262"
+    }
+  ],
+  "rows": 1008,
+  "class_counts": {
+    "BLOCK": 504,
+    "ALLOW": 504
+  },
+  "mechanism_groups": 14,
+  "carrier_counts": {
+    "query": 336,
+    "form": 336,
+    "json": 336
+  },
+  "category_counts": {
+    "Server Side Request Forgery": 396,
+    "Open Redirect": 108
+  },
+  "checks": {
+    "exact_value_roundtrip": true,
+    "canonical_text_disjoint_splits": true,
+    "mechanism_groups_disjoint_splits": true,
+    "equal_byte_length_pairs": true
+  },
+  "unexecuted_gates": [
+    "H1 and full identity/shortcut audits",
+    "tokenizer B/EOS/special-id audit",
+    "original SPL-3...9 family/template/value-entry checks",
+    "category evidence/row-contract integration and source admission",
+    "owner-bound committed experimental or FINAL authorization"
+  ],
+  "reservation": "RESERVE_CANDIDATE is now sealed before training. Do not inspect or score reserve cases for development.",
+  "limitations": [
+    "Artificial mechanism corpus, not representative production traffic",
+    "Mechanism groups are not claimed independent attack families",
+    "Must mix with eligible original category data to avoid narrowing coverage",
+    "Policy labels are context-dependent and are not human-validated security ground truth"
+  ]
+}

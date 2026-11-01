@@ -1,0 +1,1327 @@
+{
+  "L_levels": [
+    {
+      "L1_correct": true,
+      "L1_decision": "ALLOW",
+      "L2_conformant": true,
+      "L3_outcome": "benign_delivered",
+      "case": "benign GET delivered",
+      "deciding_stage": "v5",
+      "reference": "ALLOW"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "BLOCK",
+      "L2_conformant": true,
+      "L3_outcome": "attack_not_delivered",
+      "case": "V5 block not delivered",
+      "deciding_stage": "v5",
+      "reference": "BLOCK"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "BLOCK",
+      "L2_conformant": true,
+      "L3_outcome": "attack_not_delivered",
+      "case": "real Model 2 early block, no V5 call",
+      "deciding_stage": "model2",
+      "reference": "BLOCK"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "ALLOW",
+      "L2_conformant": true,
+      "L3_outcome": "benign_delivered",
+      "case": "Fast Path fixture applied, no model call",
+      "deciding_stage": "fast_path",
+      "reference": "ALLOW"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "BLOCK",
+      "L2_conformant": true,
+      "L3_outcome": "attack_not_delivered",
+      "case": "evil split across segments is decided on the whole request",
+      "deciding_stage": "v5",
+      "reference": "BLOCK"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "BLOCK",
+      "L2_conformant": true,
+      "L3_outcome": "attack_not_delivered",
+      "case": "body carrying a whole request is one message, decided with its body",
+      "deciding_stage": "v5",
+      "reference": "BLOCK"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "ALLOW",
+      "L2_conformant": true,
+      "L3_outcome": "benign_delivered",
+      "case": "V5 allows",
+      "deciding_stage": "v5",
+      "reference": "ALLOW"
+    },
+    {
+      "L1_correct": true,
+      "L1_decision": "BLOCK",
+      "L2_conformant": true,
+      "L3_outcome": "attack_not_delivered",
+      "case": "V5 blocks",
+      "deciding_stage": "v5",
+      "reference": "BLOCK"
+    },
+    {
+      "L1_correct": false,
+      "L1_decision": "ALLOW",
+      "L2_conformant": true,
+      "L3_outcome": "attack_delivered",
+      "case": "no Model 2 stage: V5 decides the traversal too",
+      "deciding_stage": "v5",
+      "reference": "BLOCK"
+    }
+  ],
+  "L_levels_note": "L1 here compares a label with a double's fixed rule (and the real Model 2 on CPU), so it validates accounting, not quality. L3 attack_delivered means received by an inert sink; exploitation is not observed.",
+  "checks": [
+    {
+      "check": "benign GET delivered",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 block not delivered",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_block",
+        "stage": "v5",
+        "statuses": [
+          403
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "real Model 2 early block, no V5 call",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "model2_block",
+        "stage": "model2",
+        "statuses": [
+          403
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "Fast Path fixture applied, no model call",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "fast_path",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "Content-Length request split every 5 bytes",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "split inside CRLF of the head",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "chunked request, segments across chunk boundaries",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "chunked delivered as what was decided",
+      "group": "framing",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "evil split across segments is decided on the whole request",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_block",
+        "stage": "v5",
+        "statuses": [
+          403
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "body carrying a whole request is one message, decided with its body",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_block",
+        "stage": "v5",
+        "statuses": [
+          403
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "two pipelined requests: benign delivered, evil not",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": "v5_block",
+        "stage": "v5",
+        "statuses": [
+          200,
+          403
+        ],
+        "v5_calls": 2
+      },
+      "passed": true
+    },
+    {
+      "check": "Expect: 100-continue, body after the interim response",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          100,
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "two Host headers are ambiguous",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "scope_host_count",
+        "stage": "framing",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "TE and CL together",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": null,
+        "stage": "before_addon",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "duplicate Content-Length",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": null,
+        "stage": "before_addon",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "obfuscated Transfer-Encoding",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": null,
+        "stage": "before_addon",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "obsolete line folding refused by the strict parser",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "wire_obsolete-line-folding",
+        "stage": "framing",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "bare-LF request is decided and delivered in its normalized form",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "bare LF cannot hide a TE header behind a value",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": null,
+        "stage": "before_addon",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "HTTP/1.0 outside the scope",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "scope_http_version",
+        "stage": "framing",
+        "statuses": [
+          505
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "absolute-form outside the scope",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "scope_target_form",
+        "stage": "framing",
+        "statuses": [
+          501
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "asterisk-form outside the scope",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "scope_target_form",
+        "stage": "framing",
+        "statuses": [
+          501
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "WebSocket upgrade outside the scope",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "scope_upgrade",
+        "stage": "framing",
+        "statuses": [
+          501
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "h2c upgrade header is stripped by mitmproxy before the decision, delivered as decided",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "HTTP/2 prior knowledge never delivered",
+      "group": "framing",
+      "observed": {
+        "statuses": [
+          null
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "TLS on the cleartext listener never delivered",
+      "group": "framing",
+      "observed": {
+        "statuses": [
+          null
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "body over the mitmproxy limit",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": null,
+        "stage": "before_addon",
+        "statuses": [
+          413
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "body over the received-body bound is refused before canonicalization",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "canonical_drop",
+        "stage": "canonical",
+        "statuses": [
+          413
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "text over the token budget is rejected, never truncated",
+      "group": "framing",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "canonical_REJECT",
+        "stage": "protocol",
+        "statuses": [
+          400
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "direct connection to the guard is refused, nothing delivered",
+      "group": "framing",
+      "observed": {
+        "statuses": [
+          502
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "no ticket left behind",
+      "group": "framing",
+      "observed": {
+        "tickets": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "guard rejection counted",
+      "group": "framing",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "records and gateway log carry no target, query or body",
+      "group": "framing",
+      "observed": {
+        "hits": []
+      },
+      "passed": true
+    },
+    {
+      "check": "changed after the decision: not delivered, 502",
+      "group": "after_hook_mutation",
+      "observed": {
+        "statuses": [
+          502
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "guard recorded the mismatch",
+      "group": "after_hook_mutation",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "V5 invalid output denies, nothing delivered",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_invalid",
+        "stage": "v5",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 HTTP 500 denies, nothing delivered",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_error",
+        "stage": "v5",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 saturated 503 denies, nothing delivered",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_error",
+        "stage": "v5",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 malformed reply denies, nothing delivered",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_error",
+        "stage": "v5",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 timeout denies, nothing delivered",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_error",
+        "stage": "v5",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 recovered: benign delivered again",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 worker killed: request defers to V5",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 failure recorded as non-OK, V5 decided",
+      "group": "failures",
+      "observed": {
+        "model2": {
+          "decision": null,
+          "detail": "Model2Unavailable",
+          "status": "error"
+        }
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 worker restarted: early block is back",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "model2_block",
+        "stage": "model2",
+        "statuses": [
+          403
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 serving another recipe stops readiness",
+      "group": "failures",
+      "observed": {
+        "detail": {
+          "cascade_problems": [
+            "v5_recipe_sha256_mismatch"
+          ],
+          "degraded": [],
+          "effective_mode": "CASCADE_ACTIVE",
+          "mode": "CASCADE_ACTIVE",
+          "ready": false
+        }
+      },
+      "passed": true
+    },
+    {
+      "check": "not ready: fail-closed, nothing delivered",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "not_ready",
+        "stage": "readiness",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "contract restored: serving again",
+      "group": "failures",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "ACTIVE decides",
+      "group": "return_to_v4",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "sentinel: V4 decides and the request is delivered through the guard",
+      "group": "return_to_v4",
+      "observed": {
+        "status": "V4_ONLY",
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 block applied during the return",
+      "group": "return_to_v4",
+      "observed": {
+        "statuses": [
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "readiness follows V4 during the return",
+      "group": "return_to_v4",
+      "observed": {
+        "body": "{\"cascade_problems\": [], \"degraded\": [], \"effective_mode\": \"V4_ONLY\", \"mode\": \"CASCADE_ACTIVE\", \"ready\": true, \"v4_ready\": true}\n"
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 failing during the return stays fail-closed",
+      "group": "return_to_v4",
+      "observed": {
+        "statuses": [
+          503
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "sentinel removed: ACTIVE decides again",
+      "group": "return_to_v4",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "restart with V4_ONLY: V4 decides, no V5 call, no cascade runtime",
+      "group": "return_to_v4",
+      "observed": {
+        "statuses": [
+          200,
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 normal: b'GET /catalog/widgets HTT'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 normal: b'GET /search?q=evil HTTP/'",
+      "group": "observe",
+      "observed": {
+        "delivered": 0,
+        "statuses": [
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 normal: b'GET /download?file=..%2f'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 normal: b'GET /healthz HTTP/1.1\\r\\nH'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 error500: b'GET /catalog/widgets HTT'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 error500: b'GET /search?q=evil HTTP/'",
+      "group": "observe",
+      "observed": {
+        "delivered": 0,
+        "statuses": [
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 error500: b'GET /download?file=..%2f'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 error500: b'GET /healthz HTTP/1.1\\r\\nH'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 hang: b'GET /catalog/widgets HTT'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 hang: b'GET /search?q=evil HTTP/'",
+      "group": "observe",
+      "observed": {
+        "delivered": 0,
+        "statuses": [
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 hang: b'GET /download?file=..%2f'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 hang: b'GET /healthz HTTP/1.1\\r\\nH'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 invalid: b'GET /catalog/widgets HTT'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 invalid: b'GET /search?q=evil HTTP/'",
+      "group": "observe",
+      "observed": {
+        "delivered": 0,
+        "statuses": [
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 invalid: b'GET /download?file=..%2f'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 action unchanged with V5 invalid: b'GET /healthz HTTP/1.1\\r\\nH'",
+      "group": "observe",
+      "observed": {
+        "delivered": 1,
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "cascade recorded beside V4 (real Model 2 would block what V4 double allows)",
+      "group": "observe",
+      "observed": {
+        "computed": 14
+      },
+      "passed": true
+    },
+    {
+      "check": "hypothetical FAST_ALLOW recorded, not applied",
+      "group": "observe",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "hypothetical permit audited as not applied",
+      "group": "observe",
+      "observed": {
+        "audits": 2
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 worker killed: V4 action unchanged",
+      "group": "observe",
+      "observed": {
+        "statuses": [
+          200
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "direct path: the guard is not listening in OBSERVE",
+      "group": "observe",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "unusable manifest: observation off and reported, V4 serves",
+      "group": "observe",
+      "observed": {
+        "body": "{\"cascade_problems\": [\"manifest_unusable\"], \"degraded\": [], \"effective_mode\": \"CASCADE_OBSERVE\", \"mode\": \"CASCADE_OBSERVE\", \"ready\": true, \"v4_ready\": true}\n",
+        "ready": 200,
+        "statuses": [
+          200,
+          403
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 allows",
+      "group": "v5_only",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 blocks",
+      "group": "v5_only",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_block",
+        "stage": "v5",
+        "statuses": [
+          403
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "no Model 2 stage: V5 decides the traversal too",
+      "group": "v5_only",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 and Fast Path not consulted",
+      "group": "v5_only",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "V5 invalid denies",
+      "group": "v5_only",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 0,
+        "reason": "v5_invalid",
+        "stage": "v5",
+        "statuses": [
+          503
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "permit applied",
+      "group": "fast_path_audit",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "fast_path",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "sampled permit audited, V5 agrees",
+      "group": "fast_path_audit",
+      "observed": {
+        "rows": [
+          {
+            "applied": true,
+            "audit_ms": 2.4840850001055514,
+            "auditor_status": "ok",
+            "contract": "fast-path-audit/v1",
+            "correlation_id": "f674fbe8bc93",
+            "kind": "fast_path_audit",
+            "policy_id": "cascade-lab-synthetic-app-v1",
+            "policy_sha256": "f72128a50454f1fffd1c3dda82c8a2fa929751f640754b6e6522a3119c0591be",
+            "policy_status": "PROPOSED",
+            "queue_wait_ms": 1.2200609999126755,
+            "retroactive_effect": "none",
+            "rule_id": "healthz",
+            "salt_id": "5a804399db86",
+            "sample_bucket": 0.5579887603618472,
+            "sample_rate": 1.0,
+            "sampled": true,
+            "status": "AUDITED",
+            "verdict": "AGREE"
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "auditor says BLOCK: the permit stays applied",
+      "group": "fast_path_audit",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "fast_path",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "disagreement recorded, no retroactive effect",
+      "group": "fast_path_audit",
+      "observed": {
+        "rows": [
+          {
+            "applied": true,
+            "audit_ms": 3.1877429992164252,
+            "auditor_status": "ok",
+            "contract": "fast-path-audit/v1",
+            "correlation_id": "35b2da26bd86",
+            "kind": "fast_path_audit",
+            "policy_id": "cascade-lab-synthetic-app-v1",
+            "policy_sha256": "f72128a50454f1fffd1c3dda82c8a2fa929751f640754b6e6522a3119c0591be",
+            "policy_status": "PROPOSED",
+            "queue_wait_ms": 1.063561000592017,
+            "retroactive_effect": "none",
+            "rule_id": "healthz",
+            "salt_id": "5a804399db86",
+            "sample_bucket": 0.4408628421780311,
+            "sample_rate": 1.0,
+            "sampled": true,
+            "status": "AUDITED",
+            "verdict": "DISAGREE"
+          }
+        ]
+      },
+      "passed": true
+    },
+    {
+      "check": "the next permit is still decided by the policy",
+      "group": "fast_path_audit",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "fast_path",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "auditor timeout never delays or denies the permit",
+      "group": "fast_path_audit",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "fast_path",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "audit timeout recorded",
+      "group": "fast_path_audit",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "every permit ended in exactly one audit record",
+      "group": "fast_path_audit",
+      "observed": {
+        "rows": 4
+      },
+      "passed": true
+    },
+    {
+      "check": "serving before shutdown",
+      "group": "shutdown",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "clean exit on SIGTERM",
+      "group": "shutdown",
+      "observed": {
+        "code": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "no worker left behind",
+      "group": "shutdown",
+      "observed": {
+        "leftovers": []
+      },
+      "passed": true
+    },
+    {
+      "check": "unusable manifest in an authoritative mode: the gateway does not run",
+      "group": "shutdown",
+      "observed": {
+        "code": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "burst over the bounds: every request answered, excess fail-closed",
+      "group": "saturation",
+      "observed": {
+        "delivered": 2,
+        "refused": 10,
+        "served": 2
+      },
+      "passed": true
+    },
+    {
+      "check": "saturation counted",
+      "group": "saturation",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "recovers after the burst",
+      "group": "saturation",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "statuses": [
+          200
+        ],
+        "v5_calls": 1
+      },
+      "passed": true
+    }
+  ],
+  "duration_s": 21.097299575805664,
+  "failed": 0,
+  "groups": [
+    "framing",
+    "after_hook_mutation",
+    "failures",
+    "return_to_v4",
+    "observe",
+    "v5_only",
+    "fast_path_audit",
+    "shutdown",
+    "saturation"
+  ],
+  "passed": 96,
+  "schema": "firewall-gateway-live-check/v1",
+  "scope": "DOUBLES unless real_models ran; V4/V5 answers are a fixed rule; mechanism evidence, not detection evidence",
+  "started_utc": 1793410497.373405,
+  "total": 96,
+  "v4_real": false,
+  "v5_real": false
+}

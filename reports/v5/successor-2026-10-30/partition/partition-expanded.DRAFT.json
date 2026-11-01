@@ -1,0 +1,311 @@
+{
+  "schema": "v51-source-partition-proposal/v1",
+  "status": "DRAFT_NOT_STAGE4_OR_TRAINING_AUTHORIZATION",
+  "seed": 20261030,
+  "source_registry_sha256": "8443bde3dd75dadef84f6a9600b5cf068e273f3acfb562631e91a0fbf2ed4a95",
+  "original_TRAIN_meta_sha256": "994d3a8cfc7c9c640c502c674ea62583e33cbe5e37175ac19aec9971b8de8072",
+  "original_TRAIN_rows": 3080,
+  "original_TRAIN_family_keys": 159,
+  "selected_new_values": 122,
+  "new_component_groups": 40,
+  "new_groups_anchored_to_old_TRAIN": 0,
+  "artifacts": [
+    {
+      "split": "TRAIN_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/TRAIN_CANDIDATE.source.jsonl",
+      "sha256": "4137f8a6901a0a1cfad152dc0ea252fc3fa9bd94a947d02b0628aa4c3494af1a",
+      "source_rows": 86,
+      "components": 18,
+      "categories": {
+        "Server Side Request Forgery": 64,
+        "Open Redirect": 22
+      }
+    },
+    {
+      "split": "VALIDATION_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/VALIDATION_CANDIDATE.source.jsonl",
+      "sha256": "5e51632ff5645be94a65192511b3503c7d2f14a333da5250f9a6295fab76ed0f",
+      "source_rows": 18,
+      "components": 15,
+      "categories": {
+        "Server Side Request Forgery": 16,
+        "Open Redirect": 2
+      }
+    },
+    {
+      "split": "RESERVE_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/RESERVE_CANDIDATE.source.jsonl",
+      "sha256": "2691d905af1d2636c035b27fe38c4b700326c3514e70568644ebd3a3fccf2f3a",
+      "source_rows": 18,
+      "components": 7,
+      "categories": {
+        "Server Side Request Forgery": 15,
+        "Open Redirect": 3
+      }
+    }
+  ],
+  "new_template_assignments": {
+    "320b817407a8ef2d243aa53c0cda1cae905ae823c96428f6c0d3700be4bc5d91": {
+      "name": "v51-remote-thumbnail",
+      "cluster": "v51-remote-thumbnail",
+      "carrier": "query",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "bb5f3a2d73fb1e0cd2a80140bf5d86a9cbcffc5eec266527ecb6145638309547": {
+      "name": "v51-feed-inspection",
+      "cluster": "v51-feed-inspection",
+      "carrier": "query",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "869894be9520dbb671ae1dcf74d838c94f9b8358673aeef76a8b30d24070020f": {
+      "name": "v51-source-task",
+      "cluster": "v51-source-task",
+      "carrier": "query",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "24f6eb31a7f7c8263f094d35d58a9a8a1a7c0d03b1a3e2d12a165673b523dc54": {
+      "name": "v51-remote-media",
+      "cluster": "v51-remote-media",
+      "carrier": "form",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "2eebed13fdac096c6ccc821f1f0378568aabab899f78960dac28ed9d18cce0e2": {
+      "name": "v51-catalog-connect",
+      "cluster": "v51-catalog-connect",
+      "carrier": "form",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "37b49ca1463ce205ee2f486cf82485b7cfcf2f4b643a2e363deebbbb1d0632fe": {
+      "name": "v51-channel-address",
+      "cluster": "v51-channel-address",
+      "carrier": "form",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "02104eef43bf29d0ef4aafa11903b775ad023f0c3b7ce546a636b1cd96f5e7ca": {
+      "name": "v51-asset-inspection",
+      "cluster": "v51-asset-inspection",
+      "carrier": "json",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "c50993273e563b3d9798700f66c58c423fbe905fd23fd3c400ff4728664a5cb4": {
+      "name": "v51-automation-hook",
+      "cluster": "v51-automation-hook",
+      "carrier": "json",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "49c0a6938408b5b1faa113741e40cfb509d98d1d2584359ba1d0546708c42811": {
+      "name": "v51-export-target",
+      "cluster": "v51-export-target",
+      "carrier": "json",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "c5f3ac5d293227a3849a9f526217dbb521b3c98d99440e48a8928abbe919797c": {
+      "name": "v51-image-preview",
+      "cluster": "v51-image-preview",
+      "carrier": "query",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "48caca859453a38a15c9728a9c60635289dd3750d35db4cb0e397c426d7bf21f": {
+      "name": "v51-feed-refresh",
+      "cluster": "v51-feed-refresh",
+      "carrier": "query",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "f7cef781b59d438356c6927626ec67181f4ef69b7e1112cbb86367ca12b32cd2": {
+      "name": "v51-document-source",
+      "cluster": "v51-document-source",
+      "carrier": "query",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "47db1414c5797e1631ca203c7efacd25706ffb357431fa9eab3362e39f71f176": {
+      "name": "v51-avatar-origin",
+      "cluster": "v51-avatar-origin",
+      "carrier": "query",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "f5c1a60e1c171ba27b85b1f87cb8cbebb9a47cf0c772296fb0d4c358ab687ab9": {
+      "name": "v51-translation-resource",
+      "cluster": "v51-translation-resource",
+      "carrier": "query",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "ec9d21a2e58dceaa6e818b85cfd4c0794bb9107b60e1b6e8b53aa1bd3e21aeec": {
+      "name": "v51-archive-location",
+      "cluster": "v51-archive-location",
+      "carrier": "query",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "5f64d700158a41226fdaa05009abf7b3bb067a80208f17d4fe8b8176e0edca44": {
+      "name": "v51-link-inspection",
+      "cluster": "v51-link-inspection",
+      "carrier": "query",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "7136033f230818b59c362b594609d883613e7511adb495ff4d71dcafd3be3f61": {
+      "name": "v51-calendar-fetch",
+      "cluster": "v51-calendar-fetch",
+      "carrier": "query",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "db0db6f23a996083cbd748590fdcc823c97758d80c088047a9e5ec28d3654934": {
+      "name": "v51-video-cover",
+      "cluster": "v51-video-cover",
+      "carrier": "query",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "7e3d74802a97ccc445b6cb126869cb563c0aaf0933281641583f54c4104fe204": {
+      "name": "v51-document-link",
+      "cluster": "v51-document-link",
+      "carrier": "query",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "36036d4fb633bdb7f11587a8bc6cb0ab7332d44800e7b3392f3d1e38b5dd60f0": {
+      "name": "v51-capture-resource",
+      "cluster": "v51-capture-resource",
+      "carrier": "form",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "4868fdd816c89c29c1833dd7fe04a64a71cd4c8dfb980cd56073946e045145dd": {
+      "name": "v51-import-address",
+      "cluster": "v51-import-address",
+      "carrier": "form",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "71eae118d9e44dac9889040e85944aa00811da019d99ebf41f4b34a65ff8e303": {
+      "name": "v51-notify-endpoint",
+      "cluster": "v51-notify-endpoint",
+      "carrier": "form",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "3d82a475b3873343191435ee4351e98bc53433aa1ff4468c0c89ea46e58d2dee": {
+      "name": "v51-syndicate-content",
+      "cluster": "v51-syndicate-content",
+      "carrier": "form",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "3f2303eaf134947831b37b65e2e476ca110e58d8426597fa6a23b0899581e735": {
+      "name": "v51-verify-callback",
+      "cluster": "v51-verify-callback",
+      "carrier": "form",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "5acbfbe6af42e2643c0e8e6980f2e17d8722e97e2a97e742f9492e3e4bc566fc": {
+      "name": "v51-mirror-package",
+      "cluster": "v51-mirror-package",
+      "carrier": "form",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "57e3580844f7eb051bfb78ad203f610a0caa101dbe421ee68e5f7d9299e1f14b": {
+      "name": "v51-fetch-transcript",
+      "cluster": "v51-fetch-transcript",
+      "carrier": "form",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "b4a38e24ada772fc19104601900c4bffb380d80e1addbd89606341fddc04db06": {
+      "name": "v51-subscribe-stream",
+      "cluster": "v51-subscribe-stream",
+      "carrier": "form",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "3671790120a3dfbc9904f5e7102e397a5aedf04c42a9f53b49662ab6afbffceb": {
+      "name": "v51-render-page",
+      "cluster": "v51-render-page",
+      "carrier": "form",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "d40c62d21f8d9c331756e2c19f2f7d7e2b67fb6d4dbda579013737485411ce83": {
+      "name": "v51-attach-source",
+      "cluster": "v51-attach-source",
+      "carrier": "form",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "f0a94bea0bccc3f2bc6150a41c81a938ba349b325a4c3f413b2cad4b8b14ce80": {
+      "name": "v51-embed-image",
+      "cluster": "v51-embed-image",
+      "carrier": "json",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "30ea287d8bba0c784765ee24f84acac4ae5099df5eac8c5886a0c6568d42d9fa": {
+      "name": "v51-import-table",
+      "cluster": "v51-import-table",
+      "carrier": "json",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "2a4f8ad68446a90cd56dd5e79f4421c3c66073b3388736e4b72cb3610d4484e8": {
+      "name": "v51-check-webhook",
+      "cluster": "v51-check-webhook",
+      "carrier": "json",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "5b1f8af88bad838a5ac88eabcca317c8115d01d28af02f1552d61b149ecc989f": {
+      "name": "v51-refresh-index",
+      "cluster": "v51-refresh-index",
+      "carrier": "json",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "bf83f98e47ed35e72653fe70c1e4eae214e0a4e42fc8607ccba1cd7f73b54d57": {
+      "name": "v51-configure-feed",
+      "cluster": "v51-configure-feed",
+      "carrier": "json",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "a16a9fed2597198dbb38bd3d624d783c17e2ed0c8cf40f3ad88094c4cb42406a": {
+      "name": "v51-schedule-capture",
+      "cluster": "v51-schedule-capture",
+      "carrier": "json",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "49e071a234dedd1523a5340a9a11f5827a56169e4067d401ffbe6c8bbd4ec919": {
+      "name": "v51-register-asset",
+      "cluster": "v51-register-asset",
+      "carrier": "json",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "60593e0c5d2717ab96ca55cf08a4f434440d9fd800d7f7f61631f8399487a14e": {
+      "name": "v51-update-origin",
+      "cluster": "v51-update-origin",
+      "carrier": "json",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "b59e52d6c9176efd943f0f3ab867f9687c5bebc1863ff982b14e926e3f2ea556": {
+      "name": "v51-create-render-job",
+      "cluster": "v51-create-render-job",
+      "carrier": "json",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "6c3c99d0b0534fb8f5caff47710f98127cf8da8b4e7681d0cc9615e8af68a135": {
+      "name": "v51-resolve-remote-data",
+      "cluster": "v51-resolve-remote-data",
+      "carrier": "json",
+      "split": "RESERVE_CANDIDATE"
+    }
+  },
+  "checks": {
+    "original_TRAIN_preserved": true,
+    "old_VALIDATION_not_reused_for_training": true,
+    "source_family_disjoint": true,
+    "original_4gram_near_duplicate_pairs_across_splits": 0,
+    "template_IDs_new_vs_old_TRAIN_disjoint": true
+  },
+  "limitations": [
+    "Anchoring currently uses original TRAIN row family IDs; pre-merge/value-entry full checks still required in final stage-4 binding",
+    "Diagnostic holdouts have few components; no D18/D77 or rare-FPR accreditation",
+    "Original old protected sets are unopened; new RESERVE_CANDIDATE now sealed before training/inference",
+    "No final rows generated, no trained successor and no approved source/recipe/auth record"
+  ],
+  "remaining": [
+    "Stage-4 row/meta generation with actual shared encoding",
+    "Full SPL/template/value/pair/shortcut/H1 checks",
+    "Contract-bound source/owner admission and commit before training"
+  ],
+  "parent_partition_sha256": "c2ca39a28e3af71fe74f9b3f0afa8499c1ec7ed9ddaf3a6ac0483cc7aa53cae9",
+  "catalog_path": "/home/sebas/Desktop/firewall-IA/reports/v5/successor-2026-10-30/catalog/catalog-v51-expanded.DRAFT.json",
+  "catalog_sha256": "650714f3fea202dfefeddc79bc0ef3bb81e42a13f28f4c9eac022c94d1ffdfe4",
+  "expanded_template_counts": {
+    "TRAIN_CANDIDATE": 13,
+    "VALIDATION_CANDIDATE": 13,
+    "RESERVE_CANDIDATE": 13
+  },
+  "source_assignments_changed": false,
+  "reserve_source_file_reopened": false
+}

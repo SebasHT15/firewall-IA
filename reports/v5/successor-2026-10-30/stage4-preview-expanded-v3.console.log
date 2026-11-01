@@ -1,0 +1,133 @@
+{
+  "schema": "v51-stage4-engineering-preview/v1",
+  "status": "PREVIEW_NOT_ADMITTED_FOR_TRAINING",
+  "source_partition_sha256": "0e1957c0e120b4b674fd23d84616324b070cd7f14ea75b1afc8fcfd99f12cb15",
+  "builder_sha256": "87c48617b185e446ea1c407d4aa354c891bce4ce2e6a17dd6b8aa15e9018119a",
+  "recipe_sha256": "11858e609a909f0e5aef38c35c8638e08b2d8e12c84f0d491c22e8c0642aaf51",
+  "catalog_sha256": "650714f3fea202dfefeddc79bc0ef3bb81e42a13f28f4c9eac022c94d1ffdfe4",
+  "artifacts": [
+    {
+      "split": "TRAIN_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-stage4-preview-expanded-v3-20261031/TRAIN_CANDIDATE.preview.jsonl",
+      "sha256": "dc673c76a688020ec04fcafe5a3ce018dcd1b893658412f45e9405af7f67a1bc",
+      "rows": 2086,
+      "cluster_count": 13,
+      "largest_cluster_share": 0.07766059443911794
+    },
+    {
+      "split": "VALIDATION_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-stage4-preview-expanded-v3-20261031/VALIDATION_CANDIDATE.preview.jsonl",
+      "sha256": "5c28438abbf7fe53dfa6ed9cd98879f9f19eb22942e5a167f3d276a85d4ab885",
+      "rows": 2080,
+      "cluster_count": 13,
+      "largest_cluster_share": 0.07692307692307693
+    }
+  ],
+  "source_coverage": {
+    "TRAIN_CANDIDATE": {
+      "available": 86,
+      "used": 86,
+      "unused_record_ids": [],
+      "families_available": 50,
+      "families_used": 50,
+      "components_available": 18,
+      "components_used": 18
+    },
+    "VALIDATION_CANDIDATE": {
+      "available": 18,
+      "used": 18,
+      "unused_record_ids": [],
+      "families_available": 18,
+      "families_used": 18,
+      "components_available": 15,
+      "components_used": 15
+    }
+  },
+  "checks": [
+    {
+      "check": "C-M2",
+      "ok": true,
+      "pairs": 2083,
+      "violations": 0,
+      "examples": []
+    },
+    {
+      "check": "ENC-1/ENC-3/ENC-6",
+      "ok": true,
+      "enc1_pre_encoded_not_verbatim": 0,
+      "enc3_non_native_held_out_rows": 0
+    },
+    {
+      "check": "ENC-7",
+      "ok": true,
+      "enc3_fired": true,
+      "enc4_feature_moved": true
+    },
+    {
+      "M-1": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-2": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-3": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-4": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-5": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-6": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-7": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-8": {
+        "ok": true,
+        "offenders": {},
+        "violations": 0
+      },
+      "policy_table_sha256": "a881df75cc31ad8e93688c073127027cb824dff45f659caa042b454074306a22",
+      "rows": 4166,
+      "ok": true
+    }
+  ],
+  "shortfalls": [],
+  "attempts": {
+    "complete": 2082,
+    "incomplete": 644,
+    "complete_pair_rejected_duplicate_text": 2,
+    "source_coverage_attempts": 432,
+    "source_coverage_pairs_added": 3
+  },
+  "public_path_source_guard": {
+    "method": "conservative exclusion against entire public source category; no protected rows opened",
+    "source_pool_sha256": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21",
+    "public_path_records": 1598,
+    "public_path_family_keys": 1464,
+    "new_family_keys": 68,
+    "exact_overlap": 0,
+    "near_pairs_across_sources": 0,
+    "unobservable_old_keys": 0,
+    "unobservable_new_keys": 0,
+    "protected_rows_opened": false
+  },
+  "reserve_opened": false,
+  "training_authorized": false,
+  "original_TRAIN_rows_preserved": 3080,
+  "limitations": [
+    "I9 must also be checked on the combined original-plus-augmentation dataset",
+    "Full SPL/value/shortcut/H1 and owner source admission pending",
+    "Not a replacement for original category TRAIN; no model trained or selected"
+  ]
+}

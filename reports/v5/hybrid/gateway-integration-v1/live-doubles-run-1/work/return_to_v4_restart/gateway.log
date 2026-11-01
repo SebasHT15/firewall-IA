@@ -1,0 +1,22 @@
+[19:35:07.693] Loading script /home/sebas/Desktop/firewall-IA/data_plane/cascade_addon.py
+[19:35:07.747] reverse proxy to http://127.0.0.1:58175 listening at 127.0.0.1:50093.
+[19:35:07.747][127.0.0.1:43666] client connect
+[19:35:07.748] data plane ready: classifier=http://127.0.0.1:45565/classify timeout=1.0s policy=fail-closed
+[19:35:07.748] feature extraction: shadow (logged only, never used for decisions)
+[19:35:07.748] hybrid shadow analyzer: off
+[19:35:07.748] fast path: off
+[19:35:07.748] canonical observer: off
+[19:35:07.748] cascade: off (V4 path only)
+[19:35:07.772][127.0.0.1:43666] client disconnect
+[19:35:08.204][127.0.0.1:43676] client connect
+[19:35:08.206] [3c2368df] received GET shop.local:58175/catalog/widgets (body 0 bytes)
+[19:35:08.233] [3c2368df] FEATURE EXTRACTION (shadow) 0.063 ms request-features/v2 method=GET content_type='' body_format=none len=16/0/0 params=0/0 repeated=0 pct_encoded=0 symbols=2 (0.125) non_ascii=0 entropy=3.500
+[19:35:08.233] [3c2368df] ALLOW GET shop.local:58175/catalog/widgets reason=None (classifier 27 ms)
+[19:35:08.234][127.0.0.1:43676] server connect 127.0.0.1:58175
+[19:35:08.235][127.0.0.1:43676] client disconnect
+[19:35:08.235][127.0.0.1:43676] server disconnect 127.0.0.1:58175
+[19:35:08.235][127.0.0.1:43680] client connect
+[19:35:08.236] [795696e8] received GET shop.local:58175/search (body 0 bytes)
+[19:35:08.240] [795696e8] FEATURE EXTRACTION (shadow) 0.035 ms request-features/v2 method=GET content_type='' body_format=none len=7/6/0 params=1/0 repeated=0 pct_encoded=0 symbols=2 (0.154) non_ascii=0 entropy=3.547
+[19:35:08.240] [795696e8] BLOCK GET shop.local:58175/search reason=None (classifier 5 ms)
+[19:35:08.241][127.0.0.1:43680] client disconnect

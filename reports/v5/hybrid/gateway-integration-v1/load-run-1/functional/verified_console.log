@@ -1,0 +1,86 @@
+=== active_routes
+[PASS] active_routes: ready against the real V5 contract 
+[PASS] active_routes: V5 route: forwarded on a real ALLOW 
+[PASS] active_routes: V5 route: denied on a real BLOCK 
+[PASS] active_routes: Model 2 route: early BLOCK, no V5 call 
+[PASS] active_routes: Model 2 policy stays LAB_EXPERIMENTAL in the record 
+[PASS] active_routes: Fast Path fixture route: no synchronous model call 
+[PASS] active_routes: real V5 audited the fixture permit, no retroactive effect 
+[PASS] active_routes: canonical reject: protocol answer, no model 
+[PASS] active_routes: out of scope: HTTP/1.0 
+[PASS] active_routes: ambiguous framing stopped before the addon 
+[PASS] active_routes: Model 2 worker killed: defers to the real V5 
+[PASS] active_routes: Model 2 worker restarted: early BLOCK again 
+[PASS] active_routes: return to V4: real V4 decides, real V5 not called 
+[PASS] active_routes: readiness follows V4 during the return 
+[PASS] active_routes: authority back to the cascade 
+[PASS] active_routes: no sentinel of these requests in records or log 
+[PASS] active_routes: real V5 timeout denies 
+=== real_contract
+[PASS] real_contract: another recipe: not ready, fail-closed 
+[PASS] real_contract: another adapter: not ready, fail-closed 
+[PASS] real_contract: another runtime profile: not ready, fail-closed 
+[PASS] real_contract: another vocabulary: not ready, fail-closed 
+[PASS] real_contract: a manifest that names no runtime profile: not ready, fail-closed 
+=== observe
+[PASS] observe: benign: V4 decides, cascade recorded beside it 
+[PASS] observe: v5_blocked: V4 decides, cascade recorded beside it 
+[PASS] observe: traversal: V4 decides, cascade recorded beside it 
+[PASS] observe: Model 2 worker killed: V4 action unchanged 
+[PASS] observe: real V5 timeout in the cascade: V4 action unchanged, DENY only recorded 
+=== v5_only
+[PASS] v5_only: real V5 allows 
+[PASS] v5_only: real V5 blocks 
+[PASS] v5_only: no Model 2 and no Fast Path consulted 
+=== v4_only
+[PASS] v4_only: benign: real V4 decides, V5 not called, no runtime 
+[PASS] v4_only: v5_blocked: real V4 decides, V5 not called, no runtime 
+=== population V4_ONLY
+  V4_ONLY: 50/434
+  V4_ONLY: 100/434
+  V4_ONLY: 150/434
+  V4_ONLY: 200/434
+  V4_ONLY: 250/434
+  V4_ONLY: 300/434
+  V4_ONLY: 350/434
+  V4_ONLY: 400/434
+[PASS] population_V4_ONLY: every case answered 
+[PASS] population_V4_ONLY: L2 conformant on every case 
+[PASS] population_V4_ONLY: V5 never called 
+=== population V5_ONLY
+  V5_ONLY: 50/434
+  V5_ONLY: 100/434
+  V5_ONLY: 150/434
+  V5_ONLY: 200/434
+  V5_ONLY: 250/434
+  V5_ONLY: 300/434
+  V5_ONLY: 350/434
+  V5_ONLY: 400/434
+[PASS] population_V5_ONLY: every case answered 
+[PASS] population_V5_ONLY: L2 conformant on every case 
+[PASS] population_V5_ONLY: V4 never called 
+=== population CASCADE_OBSERVE
+  CASCADE_OBSERVE: 50/434
+  CASCADE_OBSERVE: 100/434
+  CASCADE_OBSERVE: 150/434
+  CASCADE_OBSERVE: 200/434
+  CASCADE_OBSERVE: 250/434
+  CASCADE_OBSERVE: 300/434
+  CASCADE_OBSERVE: 350/434
+  CASCADE_OBSERVE: 400/434
+[PASS] population_CASCADE_OBSERVE: every case answered 
+[PASS] population_CASCADE_OBSERVE: L2 conformant on every case 
+[PASS] population_CASCADE_OBSERVE: every case observed 
+=== population CASCADE_ACTIVE
+  CASCADE_ACTIVE: 50/434
+  CASCADE_ACTIVE: 100/434
+  CASCADE_ACTIVE: 150/434
+  CASCADE_ACTIVE: 200/434
+  CASCADE_ACTIVE: 250/434
+  CASCADE_ACTIVE: 300/434
+  CASCADE_ACTIVE: 350/434
+  CASCADE_ACTIVE: 400/434
+[PASS] population_CASCADE_ACTIVE: every case answered 
+[PASS] population_CASCADE_ACTIVE: L2 conformant on every case 
+[PASS] population_CASCADE_ACTIVE: V4 never called, V5 only on deferred requests 
+TOTAL 44/44 passed

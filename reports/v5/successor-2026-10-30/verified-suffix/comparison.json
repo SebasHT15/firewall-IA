@@ -1,0 +1,134 @@
+{
+  "schema": "v51-verified-suffix-comparison/v1",
+  "status": "EXPERIMENTAL_DEV_NOT_PRODUCTION_VALIDATION",
+  "date_local": "2026-10-31",
+  "timezone": "America/Costa_Rica",
+  "runs": [
+    {
+      "run": "full-1",
+      "latency": {
+        "native": {
+          "n": 95,
+          "p50_ms": 217.04174600017723,
+          "p95_ms": 237.2050730009505,
+          "p99_ms": 240.08477699680952
+        },
+        "verified": {
+          "n": 95,
+          "p50_ms": 92.53413300029933,
+          "p95_ms": 95.30751400234294,
+          "p99_ms": 101.0841099996469
+        }
+      },
+      "paired_mismatches": 0,
+      "reference_mismatches": 0,
+      "native_drift": 0
+    },
+    {
+      "run": "benchmark-2",
+      "latency": {
+        "native": {
+          "n": 95,
+          "p50_ms": 216.99176100082695,
+          "p95_ms": 239.51128699991386,
+          "p99_ms": 244.78153599920915
+        },
+        "native_inference_mode": {
+          "n": 95,
+          "p50_ms": 204.23892599865212,
+          "p95_ms": 226.1676370035275,
+          "p99_ms": 280.378160001419
+        },
+        "verified": {
+          "n": 95,
+          "p50_ms": 92.7855100017041,
+          "p95_ms": 96.21119599978556,
+          "p99_ms": 99.8435760011489
+        }
+      },
+      "paired_mismatches": 0,
+      "reference_mismatches": 0,
+      "native_drift": 0
+    },
+    {
+      "run": "benchmark-3",
+      "latency": {
+        "native": {
+          "n": 95,
+          "p50_ms": 224.2864229992847,
+          "p95_ms": 251.76726700010477,
+          "p99_ms": 267.4158330009959
+        },
+        "native_inference_mode": {
+          "n": 95,
+          "p50_ms": 210.89957100048196,
+          "p95_ms": 235.44226299782167,
+          "p99_ms": 260.13203999900725
+        },
+        "verified": {
+          "n": 95,
+          "p50_ms": 95.15126399855944,
+          "p95_ms": 99.89682599916705,
+          "p99_ms": 101.26595299880137
+        }
+      },
+      "paired_mismatches": 0,
+      "reference_mismatches": 0,
+      "native_drift": 0
+    }
+  ],
+  "pooled": {
+    "native": {
+      "n": 285,
+      "unique_inputs": 95,
+      "p50_ms": 217.9657410015352,
+      "p95_ms": 244.78153599920915,
+      "p99_ms": 255.25850700068986
+    },
+    "verified": {
+      "n": 285,
+      "unique_inputs": 95,
+      "p50_ms": 93.14544699736871,
+      "p95_ms": 98.12449200035189,
+      "p99_ms": 101.0841099996469
+    },
+    "native_inference_mode": {
+      "n": 190,
+      "unique_inputs": 95,
+      "p50_ms": 205.5713369991281,
+      "p95_ms": 233.37993499808363,
+      "p99_ms": 260.13203999900725
+    }
+  },
+  "quality": {
+    "cases": 1012,
+    "output_mismatches": [],
+    "suffix_success": 1007,
+    "native_fallback": 3,
+    "content_rejects": 2
+  },
+  "HTTP": {
+    "native_cases": 95,
+    "verified_cases": 1012,
+    "native_pipeline_p95_ms": 241.3824030008982,
+    "verified_pipeline_p95_ms": 97.56260400172323,
+    "native_client_p95_ms": 242.6077019990771,
+    "verified_client_p95_ms": 98.71496200139518,
+    "relative_pipeline_reduction": 0.5958172476998658,
+    "mismatch_ids": [],
+    "services_stopped": true
+  },
+  "post_HTTP_change": {
+    "description": "Only four optional decoder telemetry response fields added afterwards, tested with doubles; benchmark source snapshots preserved.",
+    "API_sha256_at_HTTP": "0fb59537f5b98a3d42d6da97cb925d50a68d8b1bd637485e0b8c26a5f639e0ed",
+    "API_sha256_current": "d00383f6c1f99f6420c1cae4c375c8f86ec63e7a3ef56aadbe2acb02972d17f2"
+  },
+  "limits": [
+    "95 distinct timing requests repeated across three fresh processes, not 285 independent cases",
+    "Quality equality on DEV does not prove equality for every possible input or production security",
+    "Comparison is against NF4 without double quantization, which already differs once from the default on 434 authored cases",
+    "No clock locking/thermal attribution or sustained-load/cascade performance claim",
+    "Native fallback is deliberately retained and may cost more than the original path",
+    "Profile is explicitly experimental; default serving configuration unchanged"
+  ]
+}

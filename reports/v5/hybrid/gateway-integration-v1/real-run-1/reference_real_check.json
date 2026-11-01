@@ -1,0 +1,962 @@
+{
+  "checks": [
+    {
+      "check": "ready against the real V5 contract",
+      "group": "active_routes",
+      "observed": {
+        "detail": {
+          "cascade_problems": [],
+          "degraded": [],
+          "effective_mode": "CASCADE_ACTIVE",
+          "mode": "CASCADE_ACTIVE",
+          "ready": true
+        }
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 route: forwarded on a real ALLOW",
+      "group": "active_routes",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "status": 200,
+        "v4_calls": 0,
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 route: denied on a real BLOCK",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": "v5_block",
+        "stage": "v5",
+        "status": 403,
+        "v4_calls": 0,
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 route: early BLOCK, no V5 call",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": "model2_block",
+        "stage": "model2",
+        "status": 403,
+        "v4_calls": 0,
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 policy stays LAB_EXPERIMENTAL in the record",
+      "group": "active_routes",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "Fast Path fixture route: no synchronous model call",
+      "group": "active_routes",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "fast_path",
+        "status": 200,
+        "v4_calls": 0,
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "real V5 audited the fixture permit, no retroactive effect",
+      "group": "active_routes",
+      "observed": {
+        "verdict": "AGREE"
+      },
+      "passed": true
+    },
+    {
+      "check": "canonical reject: protocol answer, no model",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": "canonical_REJECT",
+        "stage": "protocol",
+        "status": 400,
+        "v4_calls": 0,
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "out of scope: HTTP/1.0",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": "scope_http_version",
+        "stage": "framing",
+        "status": 505,
+        "v4_calls": 0,
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "ambiguous framing stopped before the addon",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": null,
+        "stage": "none",
+        "status": 400,
+        "v4_calls": 0,
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 worker killed: defers to the real V5",
+      "group": "active_routes",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "status": 200,
+        "v4_calls": 0,
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 worker restarted: early BLOCK again",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": "model2_block",
+        "stage": "model2",
+        "status": 403,
+        "v4_calls": 0,
+        "v5_calls": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "return to V4: real V4 decides, real V5 not called",
+      "group": "active_routes",
+      "observed": {
+        "effective": "V4_ONLY",
+        "status": 200
+      },
+      "passed": true
+    },
+    {
+      "check": "readiness follows V4 during the return",
+      "group": "active_routes",
+      "observed": {
+        "body": "{\"cascade_problems\": [], \"degraded\": [], \"effective_mode\": \"V4_ONLY\", \"mode\": \"CASCADE_ACTIVE\", \"ready\": true, \"v4_ready\": true}\n"
+      },
+      "passed": true
+    },
+    {
+      "check": "authority back to the cascade",
+      "group": "active_routes",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "status": 200,
+        "v4_calls": 0,
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "no sentinel of these requests in records or log",
+      "group": "active_routes",
+      "observed": {
+        "hits": []
+      },
+      "passed": true
+    },
+    {
+      "check": "real V5 timeout denies",
+      "group": "active_routes",
+      "observed": {
+        "delivered": 0,
+        "reason": "v5_error",
+        "stage": "v5",
+        "status": 503
+      },
+      "passed": true
+    },
+    {
+      "check": "another recipe: not ready, fail-closed",
+      "group": "real_contract",
+      "observed": {
+        "problems": [
+          "v5_recipe_sha256_mismatch",
+          "model2_not_started"
+        ],
+        "status": 503
+      },
+      "passed": true
+    },
+    {
+      "check": "another adapter: not ready, fail-closed",
+      "group": "real_contract",
+      "observed": {
+        "problems": [
+          "v5_adapter_mismatch",
+          "model2_not_started"
+        ],
+        "status": 503
+      },
+      "passed": true
+    },
+    {
+      "check": "another runtime profile: not ready, fail-closed",
+      "group": "real_contract",
+      "observed": {
+        "problems": [
+          "v5_runtime_profile_mismatch",
+          "model2_not_started"
+        ],
+        "status": 503
+      },
+      "passed": true
+    },
+    {
+      "check": "another vocabulary: not ready, fail-closed",
+      "group": "real_contract",
+      "observed": {
+        "problems": [
+          "v5_vocabulary_mismatch",
+          "model2_not_started"
+        ],
+        "status": 503
+      },
+      "passed": true
+    },
+    {
+      "check": "benign: V4 decides, cascade recorded beside it",
+      "group": "observe",
+      "observed": {
+        "cascade": "FORWARD",
+        "cascade_stage": "v5",
+        "delivered": 1,
+        "status": 200,
+        "v4": "FORWARD"
+      },
+      "passed": true
+    },
+    {
+      "check": "v5_blocked: V4 decides, cascade recorded beside it",
+      "group": "observe",
+      "observed": {
+        "cascade": "DENY",
+        "cascade_stage": "v5",
+        "delivered": 0,
+        "status": 403,
+        "v4": "DENY"
+      },
+      "passed": true
+    },
+    {
+      "check": "traversal: V4 decides, cascade recorded beside it",
+      "group": "observe",
+      "observed": {
+        "cascade": "DENY",
+        "cascade_stage": "model2",
+        "delivered": 0,
+        "status": 403,
+        "v4": "DENY"
+      },
+      "passed": true
+    },
+    {
+      "check": "Model 2 worker killed: V4 action unchanged",
+      "group": "observe",
+      "observed": {
+        "status": 200
+      },
+      "passed": true
+    },
+    {
+      "check": "real V5 timeout in the cascade: V4 action unchanged, DENY only recorded",
+      "group": "observe",
+      "observed": {
+        "cascade": "DENY",
+        "status": 200
+      },
+      "passed": true
+    },
+    {
+      "check": "real V5 allows",
+      "group": "v5_only",
+      "observed": {
+        "decided_equals_delivered": true,
+        "delivered": 1,
+        "reason": null,
+        "stage": "v5",
+        "status": 200,
+        "v4_calls": 0,
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "real V5 blocks",
+      "group": "v5_only",
+      "observed": {
+        "delivered": 0,
+        "reason": "v5_block",
+        "stage": "v5",
+        "status": 403,
+        "v4_calls": 0,
+        "v5_calls": 1
+      },
+      "passed": true
+    },
+    {
+      "check": "no Model 2 and no Fast Path consulted",
+      "group": "v5_only",
+      "observed": {
+        "status": 403
+      },
+      "passed": true
+    },
+    {
+      "check": "benign: real V4 decides, V5 not called, no runtime",
+      "group": "v4_only",
+      "observed": {
+        "delivered": 1,
+        "status": 200
+      },
+      "passed": true
+    },
+    {
+      "check": "v5_blocked: real V4 decides, V5 not called, no runtime",
+      "group": "v4_only",
+      "observed": {
+        "delivered": 0,
+        "status": 403
+      },
+      "passed": true
+    },
+    {
+      "check": "every case answered",
+      "group": "population_V4_ONLY",
+      "observed": {
+        "cases": 434,
+        "no_response": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "L2 conformant on every case",
+      "group": "population_V4_ONLY",
+      "observed": {
+        "cases": 434,
+        "conformant": 434
+      },
+      "passed": true
+    },
+    {
+      "check": "V5 never called",
+      "group": "population_V4_ONLY",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "every case answered",
+      "group": "population_V5_ONLY",
+      "observed": {
+        "cases": 434,
+        "no_response": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "L2 conformant on every case",
+      "group": "population_V5_ONLY",
+      "observed": {
+        "cases": 434,
+        "conformant": 434
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 never called",
+      "group": "population_V5_ONLY",
+      "observed": {},
+      "passed": true
+    },
+    {
+      "check": "every case answered",
+      "group": "population_CASCADE_OBSERVE",
+      "observed": {
+        "cases": 434,
+        "no_response": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "L2 conformant on every case",
+      "group": "population_CASCADE_OBSERVE",
+      "observed": {
+        "cases": 434,
+        "conformant": 434
+      },
+      "passed": true
+    },
+    {
+      "check": "every case observed",
+      "group": "population_CASCADE_OBSERVE",
+      "observed": {
+        "observations": {
+          "computed": 434
+        }
+      },
+      "passed": true
+    },
+    {
+      "check": "every case answered",
+      "group": "population_CASCADE_ACTIVE",
+      "observed": {
+        "cases": 434,
+        "no_response": 0
+      },
+      "passed": true
+    },
+    {
+      "check": "L2 conformant on every case",
+      "group": "population_CASCADE_ACTIVE",
+      "observed": {
+        "cases": 434,
+        "conformant": 434
+      },
+      "passed": true
+    },
+    {
+      "check": "V4 never called, V5 only on deferred requests",
+      "group": "population_CASCADE_ACTIVE",
+      "observed": {
+        "routes": {
+          "model2": 52,
+          "v5": 382
+        },
+        "v5_calls": 382
+      },
+      "passed": true
+    }
+  ],
+  "duration_s": 595.5091626644135,
+  "failed": 0,
+  "label": "reference",
+  "passed": 43,
+  "population": {
+    "CASCADE_ACTIVE": {
+      "L1_agrees_with_reference": 394,
+      "L2_conformant": 434,
+      "L3_outcomes": {
+        "reference_allow_delivered": 220,
+        "reference_allow_not_delivered": 1,
+        "reference_block_delivered": 39,
+        "reference_block_not_delivered": 174
+      },
+      "by_family": {
+        "benign_probe": {
+          "ALLOW": 19,
+          "BLOCK": 1
+        },
+        "benign_twin": {
+          "ALLOW": 201
+        },
+        "command_injection": {
+          "ALLOW": 1,
+          "BLOCK": 33
+        },
+        "csrf": {
+          "ALLOW": 4
+        },
+        "jwt": {
+          "ALLOW": 6
+        },
+        "open_redirect": {
+          "ALLOW": 2,
+          "BLOCK": 6
+        },
+        "other_attack": {
+          "BLOCK": 12
+        },
+        "path_file_access": {
+          "BLOCK": 35
+        },
+        "sql_injection": {
+          "ALLOW": 2,
+          "BLOCK": 34
+        },
+        "ssrf": {
+          "ALLOW": 24,
+          "BLOCK": 10
+        },
+        "ssti": {
+          "BLOCK": 10
+        },
+        "xss": {
+          "BLOCK": 34
+        }
+      },
+      "by_reference_kind": {
+        "authored_attempt_needs_state_context": {
+          "ALLOW": 10,
+          "reference_block_delivered": 10
+        },
+        "authored_benign": {
+          "ALLOW": 220,
+          "BLOCK": 1,
+          "reference_allow_delivered": 220,
+          "reference_allow_not_delivered": 1
+        },
+        "authored_constructed_attempt": {
+          "ALLOW": 29,
+          "BLOCK": 174,
+          "reference_block_delivered": 29,
+          "reference_block_not_delivered": 174
+        }
+      },
+      "cascade_routes": {
+        "model2": 52,
+        "v5": 382
+      },
+      "cases": 434,
+      "duration_s": 121.45792961120605,
+      "final_status": {
+        "canonical_workers": {
+          "disabled": 0,
+          "free": 2,
+          "ready": 2,
+          "workers": 2
+        },
+        "contract": "firewall-cascade-gateway/v1",
+        "deployment_profile": "lab",
+        "effective_mode": "CASCADE_ACTIVE",
+        "egress_guard": true,
+        "fast_path_activation": "disabled",
+        "fast_path_policy_status": null,
+        "framing_contract": "gateway-framing/v1",
+        "manifest_id": "dev-fixture-v5-final-v4-baseline34",
+        "manifest_sha256": "628c0f3347ab01aade2b25626d83b28bd80a0c63e936f11f0ed7c70ba38db071",
+        "manifest_status": "EXPERIMENTAL",
+        "mode": "CASCADE_ACTIVE",
+        "model2_policy_status": "LAB_EXPERIMENTAL",
+        "model2_worker": {
+          "detail": null,
+          "failures": 0,
+          "state": "READY"
+        },
+        "tickets": 0,
+        "tickets_expired": 0,
+        "token_budget_B": 415,
+        "verified_evidence": false
+      },
+      "http_statuses": {
+        "200": 259,
+        "403": 174,
+        "503": 1
+      },
+      "mode": "CASCADE_ACTIVE",
+      "no_response": 0,
+      "observations": {
+        "None": 434
+      },
+      "out_of_vocabulary_families": [
+        "ssrf",
+        "open_redirect",
+        "jwt",
+        "csrf",
+        "other_attack"
+      ],
+      "real_v4_calls": 0,
+      "real_v5_calls": 382,
+      "reasons": {
+        "None": 259,
+        "model2_block": 52,
+        "v5_block": 122,
+        "v5_invalid": 1
+      },
+      "routes": {
+        "model2": 52,
+        "v5": 382
+      }
+    },
+    "CASCADE_OBSERVE": {
+      "L1_agrees_with_reference": 359,
+      "L2_conformant": 434,
+      "L3_outcomes": {
+        "reference_allow_delivered": 153,
+        "reference_allow_not_delivered": 68,
+        "reference_block_delivered": 7,
+        "reference_block_not_delivered": 206
+      },
+      "by_family": {
+        "benign_probe": {
+          "ALLOW": 11,
+          "BLOCK": 9
+        },
+        "benign_twin": {
+          "ALLOW": 142,
+          "BLOCK": 59
+        },
+        "command_injection": {
+          "BLOCK": 34
+        },
+        "csrf": {
+          "ALLOW": 2,
+          "BLOCK": 2
+        },
+        "jwt": {
+          "ALLOW": 5,
+          "BLOCK": 1
+        },
+        "open_redirect": {
+          "BLOCK": 8
+        },
+        "other_attack": {
+          "BLOCK": 12
+        },
+        "path_file_access": {
+          "BLOCK": 35
+        },
+        "sql_injection": {
+          "BLOCK": 36
+        },
+        "ssrf": {
+          "BLOCK": 34
+        },
+        "ssti": {
+          "BLOCK": 10
+        },
+        "xss": {
+          "BLOCK": 34
+        }
+      },
+      "by_reference_kind": {
+        "authored_attempt_needs_state_context": {
+          "ALLOW": 7,
+          "BLOCK": 3,
+          "reference_block_delivered": 7,
+          "reference_block_not_delivered": 3
+        },
+        "authored_benign": {
+          "ALLOW": 153,
+          "BLOCK": 68,
+          "reference_allow_delivered": 153,
+          "reference_allow_not_delivered": 68
+        },
+        "authored_constructed_attempt": {
+          "BLOCK": 203,
+          "reference_block_not_delivered": 203
+        }
+      },
+      "cascade_routes": {
+        "model2": 51,
+        "v5": 383
+      },
+      "cases": 434,
+      "duration_s": 221.09695672988892,
+      "final_status": {
+        "canonical_workers": {
+          "disabled": 0,
+          "free": 2,
+          "ready": 2,
+          "workers": 2
+        },
+        "contract": "firewall-cascade-gateway/v1",
+        "deployment_profile": "lab",
+        "effective_mode": "CASCADE_OBSERVE",
+        "egress_guard": false,
+        "fast_path_activation": "disabled",
+        "fast_path_policy_status": null,
+        "framing_contract": "gateway-framing/v1",
+        "manifest_id": "dev-fixture-v5-final-v4-baseline34",
+        "manifest_sha256": "628c0f3347ab01aade2b25626d83b28bd80a0c63e936f11f0ed7c70ba38db071",
+        "manifest_status": "EXPERIMENTAL",
+        "mode": "CASCADE_OBSERVE",
+        "model2_policy_status": "LAB_EXPERIMENTAL",
+        "model2_worker": {
+          "detail": null,
+          "failures": 0,
+          "state": "READY"
+        },
+        "tickets": 0,
+        "tickets_expired": 0,
+        "token_budget_B": 415,
+        "verified_evidence": false
+      },
+      "http_statuses": {
+        "200": 160,
+        "403": 274
+      },
+      "mode": "CASCADE_OBSERVE",
+      "no_response": 0,
+      "observations": {
+        "computed": 434
+      },
+      "out_of_vocabulary_families": [
+        "ssrf",
+        "open_redirect",
+        "jwt",
+        "csrf",
+        "other_attack"
+      ],
+      "real_v4_calls": 434,
+      "real_v5_calls": 383,
+      "reasons": {
+        "None": 160,
+        "v4_block": 274
+      },
+      "routes": {
+        "v4": 434
+      }
+    },
+    "V4_ONLY": {
+      "L1_agrees_with_reference": 359,
+      "L2_conformant": 434,
+      "L3_outcomes": {
+        "reference_allow_delivered": 153,
+        "reference_allow_not_delivered": 68,
+        "reference_block_delivered": 7,
+        "reference_block_not_delivered": 206
+      },
+      "by_family": {
+        "benign_probe": {
+          "ALLOW": 11,
+          "BLOCK": 9
+        },
+        "benign_twin": {
+          "ALLOW": 142,
+          "BLOCK": 59
+        },
+        "command_injection": {
+          "BLOCK": 34
+        },
+        "csrf": {
+          "ALLOW": 2,
+          "BLOCK": 2
+        },
+        "jwt": {
+          "ALLOW": 5,
+          "BLOCK": 1
+        },
+        "open_redirect": {
+          "BLOCK": 8
+        },
+        "other_attack": {
+          "BLOCK": 12
+        },
+        "path_file_access": {
+          "BLOCK": 35
+        },
+        "sql_injection": {
+          "BLOCK": 36
+        },
+        "ssrf": {
+          "BLOCK": 34
+        },
+        "ssti": {
+          "BLOCK": 10
+        },
+        "xss": {
+          "BLOCK": 34
+        }
+      },
+      "by_reference_kind": {
+        "authored_attempt_needs_state_context": {
+          "ALLOW": 7,
+          "BLOCK": 3,
+          "reference_block_delivered": 7,
+          "reference_block_not_delivered": 3
+        },
+        "authored_benign": {
+          "ALLOW": 153,
+          "BLOCK": 68,
+          "reference_allow_delivered": 153,
+          "reference_allow_not_delivered": 68
+        },
+        "authored_constructed_attempt": {
+          "BLOCK": 203,
+          "reference_block_not_delivered": 203
+        }
+      },
+      "cascade_routes": {
+        "None": 434
+      },
+      "cases": 434,
+      "duration_s": 106.11578488349915,
+      "final_status": null,
+      "http_statuses": {
+        "200": 160,
+        "403": 274
+      },
+      "mode": "V4_ONLY",
+      "no_response": 0,
+      "observations": {
+        "None": 434
+      },
+      "out_of_vocabulary_families": [
+        "ssrf",
+        "open_redirect",
+        "jwt",
+        "csrf",
+        "other_attack"
+      ],
+      "real_v4_calls": 434,
+      "real_v5_calls": 0,
+      "reasons": {
+        "None": 434
+      },
+      "routes": {
+        "v4": 434
+      }
+    },
+    "V5_ONLY": {
+      "L1_agrees_with_reference": 394,
+      "L2_conformant": 434,
+      "L3_outcomes": {
+        "reference_allow_delivered": 221,
+        "reference_block_delivered": 40,
+        "reference_block_not_delivered": 173
+      },
+      "by_family": {
+        "benign_probe": {
+          "ALLOW": 20
+        },
+        "benign_twin": {
+          "ALLOW": 201
+        },
+        "command_injection": {
+          "ALLOW": 2,
+          "BLOCK": 32
+        },
+        "csrf": {
+          "ALLOW": 4
+        },
+        "jwt": {
+          "ALLOW": 6
+        },
+        "open_redirect": {
+          "ALLOW": 2,
+          "BLOCK": 6
+        },
+        "other_attack": {
+          "BLOCK": 12
+        },
+        "path_file_access": {
+          "BLOCK": 35
+        },
+        "sql_injection": {
+          "ALLOW": 2,
+          "BLOCK": 34
+        },
+        "ssrf": {
+          "ALLOW": 24,
+          "BLOCK": 10
+        },
+        "ssti": {
+          "BLOCK": 10
+        },
+        "xss": {
+          "BLOCK": 34
+        }
+      },
+      "by_reference_kind": {
+        "authored_attempt_needs_state_context": {
+          "ALLOW": 10,
+          "reference_block_delivered": 10
+        },
+        "authored_benign": {
+          "ALLOW": 221,
+          "reference_allow_delivered": 221
+        },
+        "authored_constructed_attempt": {
+          "ALLOW": 30,
+          "BLOCK": 173,
+          "reference_block_delivered": 30,
+          "reference_block_not_delivered": 173
+        }
+      },
+      "cascade_routes": {
+        "v5": 434
+      },
+      "cases": 434,
+      "duration_s": 129.64053511619568,
+      "final_status": {
+        "canonical_workers": {
+          "disabled": 0,
+          "free": 2,
+          "ready": 2,
+          "workers": 2
+        },
+        "contract": "firewall-cascade-gateway/v1",
+        "deployment_profile": "lab",
+        "effective_mode": "V5_ONLY",
+        "egress_guard": true,
+        "fast_path_activation": "disabled",
+        "fast_path_policy_status": null,
+        "framing_contract": "gateway-framing/v1",
+        "manifest_id": "dev-fixture-v5-final-v4-baseline34",
+        "manifest_sha256": "628c0f3347ab01aade2b25626d83b28bd80a0c63e936f11f0ed7c70ba38db071",
+        "manifest_status": "EXPERIMENTAL",
+        "mode": "V5_ONLY",
+        "model2_policy_status": "LAB_EXPERIMENTAL",
+        "model2_worker": null,
+        "tickets": 0,
+        "tickets_expired": 0,
+        "token_budget_B": 415,
+        "verified_evidence": false
+      },
+      "http_statuses": {
+        "200": 261,
+        "403": 172,
+        "503": 1
+      },
+      "mode": "V5_ONLY",
+      "no_response": 0,
+      "observations": {
+        "None": 434
+      },
+      "out_of_vocabulary_families": [
+        "ssrf",
+        "open_redirect",
+        "jwt",
+        "csrf",
+        "other_attack"
+      ],
+      "real_v4_calls": 0,
+      "real_v5_calls": 434,
+      "reasons": {
+        "None": 261,
+        "v5_block": 172,
+        "v5_invalid": 1
+      },
+      "routes": {
+        "v5": 434
+      }
+    }
+  },
+  "reference_note": "References are authored expectations, not confirmed attacks. JWT/CSRF need state. L3 delivery to an inert sink is not exploitation.",
+  "schema": "firewall-gateway-real-check/v1",
+  "scope": "REAL V4 and V5 on DEV; both loaded on one GPU, so no time here is a benchmark. Reverse proxy, HTTP/1.1 cleartext. Not a deployment, D70, P9/R3, Fast Path or threshold approval.",
+  "started_utc": 1793411308.9334893,
+  "total": 43
+}

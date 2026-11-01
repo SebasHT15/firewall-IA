@@ -1,0 +1,126 @@
+{
+  "schema": "v51-stage4-engineering-preview/v1",
+  "status": "PREVIEW_NOT_ADMITTED_FOR_TRAINING",
+  "source_partition_sha256": "0e1957c0e120b4b674fd23d84616324b070cd7f14ea75b1afc8fcfd99f12cb15",
+  "builder_sha256": "a04729fd64747d6f0b35a80e155549a9a54e071b2784c1a0b9c2b7c2190c80bb",
+  "recipe_sha256": "11858e609a909f0e5aef38c35c8638e08b2d8e12c84f0d491c22e8c0642aaf51",
+  "catalog_sha256": "650714f3fea202dfefeddc79bc0ef3bb81e42a13f28f4c9eac022c94d1ffdfe4",
+  "artifacts": [
+    {
+      "split": "TRAIN_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-stage4-preview-expanded-20261031/TRAIN_CANDIDATE.preview.jsonl",
+      "sha256": "18cae950f1fe78d4406806b4f46ad4a3c46fc862cfb46fb62403501c327f8b32",
+      "rows": 2080,
+      "cluster_count": 13,
+      "largest_cluster_share": 0.07692307692307693
+    },
+    {
+      "split": "VALIDATION_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-stage4-preview-expanded-20261031/VALIDATION_CANDIDATE.preview.jsonl",
+      "sha256": "798f1eb931444beb33f43d8215f583089ce5e3e77775e3c151ef9e65e0c6f079",
+      "rows": 2080,
+      "cluster_count": 13,
+      "largest_cluster_share": 0.07692307692307693
+    }
+  ],
+  "source_coverage": {
+    "TRAIN_CANDIDATE": {
+      "available": 86,
+      "used": 83,
+      "unused_record_ids": [
+        "42f0322d93eeb7fababdb8e1f60674d53ffe8c9bcaa6633fd95c950e703d7f06",
+        "9ef66466ad415e5421905b17d37296a84f66a96cf45902e8fc5687b77fb0e2ba",
+        "a2a25615956f12432f5de42ff83ab43b6a30e218016013d8c6641ab634d1005d"
+      ]
+    },
+    "VALIDATION_CANDIDATE": {
+      "available": 18,
+      "used": 18,
+      "unused_record_ids": []
+    }
+  },
+  "checks": [
+    {
+      "check": "C-M2",
+      "ok": true,
+      "pairs": 2080,
+      "violations": 0,
+      "examples": []
+    },
+    {
+      "check": "ENC-1/ENC-3/ENC-6",
+      "ok": true,
+      "enc1_pre_encoded_not_verbatim": 0,
+      "enc3_non_native_held_out_rows": 0
+    },
+    {
+      "check": "ENC-7",
+      "ok": true,
+      "enc3_fired": true,
+      "enc4_feature_moved": true
+    },
+    {
+      "M-1": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-2": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-3": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-4": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-5": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-6": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-7": {
+        "ok": true,
+        "violations": 0
+      },
+      "M-8": {
+        "ok": true,
+        "offenders": {},
+        "violations": 0
+      },
+      "policy_table_sha256": "a881df75cc31ad8e93688c073127027cb824dff45f659caa042b454074306a22",
+      "rows": 4160,
+      "ok": true
+    }
+  ],
+  "shortfalls": [],
+  "attempts": {
+    "complete": 2080,
+    "incomplete": 644
+  },
+  "public_path_source_guard": {
+    "method": "conservative exclusion against entire public source category; no protected rows opened",
+    "source_pool_sha256": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21",
+    "public_path_records": 1598,
+    "public_path_family_keys": 1464,
+    "new_family_keys": 68,
+    "exact_overlap": 0,
+    "near_pairs_across_sources": 0,
+    "unobservable_old_keys": 0,
+    "unobservable_new_keys": 0,
+    "protected_rows_opened": false
+  },
+  "reserve_opened": false,
+  "training_authorized": false,
+  "original_TRAIN_rows_preserved": 3080,
+  "limitations": [
+    "I9 must also be checked on the combined original-plus-augmentation dataset",
+    "Full SPL/value/shortcut/H1 and owner source admission pending",
+    "Not a replacement for original category TRAIN; no model trained or selected"
+  ]
+}

@@ -1,0 +1,103 @@
+# firewall-IA — cascade gateway configuration (schema firewall-cascade-gateway-config/v1).
+#
+# EXAMPLE FOR THE LAB PROFILE. Every value here is a starting point for development, not a measured
+# or ratified operating value. Nothing reads this file unless FIREWALL_CASCADE_CONFIG points at it,
+# which `scripts/gateway_ops/launch.py --config` does. `data_plane/data_plane.py` keeps ignoring it.
+#
+# Every key is required and an unknown key is an error: no operating value has a hidden default.
+# Check it offline, without touching a model or the GPU:
+#   .venv-dataplane/bin/python scripts/gateway_ops/launch.py --config config.cascade.example.yaml --check
+# See docs/cascade_gateway.md.
+
+cascade_gateway:
+  schema: firewall-cascade-gateway-config/v1
+
+  # V4_ONLY | V5_ONLY | CASCADE_OBSERVE | CASCADE_ACTIVE
+  mode: CASCADE_OBSERVE
+
+  # lab: experimental policies may run. production: authoritative modes need approval records.
+  deployment_profile: lab
+
+  # What is served: V5 identity, Model 2 artifact and policy, B, canonical limits. Delivered with
+  # each candidate; never hard-coded here. Write the current development fixture with
+  #   .venv-dataplane/bin/python scripts/gateway_ops/make_dev_manifest.py --out <file>
+  manifest: reports/v5/hybrid/gateway-integration-v1/manifests/dev_fixture_baseline34.json
+
+  listen: {host: 127.0.0.1, port: 8080}
+
+  # V4 decides in V4_ONLY, in CASCADE_OBSERVE and during a return to V4.
+  v4: {url: "http://127.0.0.1:8000", timeout_seconds: 3.0}
+  v5: {url: "http://127.0.0.1:8001", timeout_seconds: 3.0}
+
+  # Runs in the analyzer environment: verifying the FINAL artifact needs numpy/scikit-learn.
+  # Any failure defers the request to V5.
+  model2:
+    python: .venv-analyzer/bin/python
+    timeout_seconds: 0.5
+    startup_timeout_seconds: 30
+    restart_backoff_seconds: 2
+    max_consecutive_failures: 3
+
+  # Workers of the one canonicalize. A failure denies in an authoritative mode.
+  canonical:
+    workers: 2
+    max_received_body: 19920        # must not exceed the manifest's max_decoded_body
+    max_text_bytes: 262144
+    worker:
+      python: .venv-dataplane/bin/python
+      timeout_seconds: 0.5
+      startup_timeout_seconds: 10
+      restart_backoff_seconds: 2
+      max_consecutive_failures: 3
+
+  admission:
+    max_inflight: 8                 # decisions at once
+    max_waiting: 16                 # beyond this, 503 at once
+    max_wait_seconds: 2.0
+    decision_deadline_seconds: 5.0  # must exceed the V5 and Model 2 timeouts together
+    observe_max_pending: 16         # observations beyond this are dropped and counted
+
+  framing:
+    contract: gateway-framing/v1
+    body_size_limit: 64k            # mitmproxy's own limit, before anything is buffered further
+    # Per-request FramingEvidence(VERIFIED) from the egress binding. D70 keeps VERIFIED pending an
+    # owner ruling outside the lab: production needs owner_ruling_ref.
+    verified_evidence: false
+    owner_ruling_ref: null
+    egress_guard:
+      listen_port: 8081             # loopback; the reverse-mode target when the cascade decides
+      upstream_host: 127.0.0.1      # the protected application
+      upstream_port: 9000
+      ticket_ttl_seconds: 10
+      max_tickets: 1024
+      idle_timeout_seconds: 60
+
+  fast_path:
+    # disabled | experimental_fixture (lab only) | production (needs an APPROVED policy and the
+    # application's contract). No real application contract exists yet, so this stays disabled.
+    activation: disabled
+    policy_file: null
+    policy_sha256: null
+    application_contract_ref: null
+    audit:
+      sample_rate: 0.1
+      sample_salt: change-me-per-deployment
+      queue_size: 64
+      max_queue_bytes: 1048576
+      workers: 1
+      timeout_seconds: 5
+      max_abandoned: 4
+      shutdown_drain_seconds: 2
+
+  observability:
+    decision_log: reports/v5/hybrid/gateway-integration-v1/runtime/decisions.jsonl
+    max_log_bytes: 67108864
+    max_log_files: 4
+    log_queue_size: 4096
+    admin_port: 8090                # loopback: /healthz /readyz /status /metrics
+    log_wire_sha256: false          # lab evidence only
+
+  # While this file exists, V4 decides every request. Create it to return to V4 without a restart.
+  rollback_file: reports/v5/hybrid/gateway-integration-v1/runtime/RETURN_TO_V4
+
+  probe_interval_seconds: 2

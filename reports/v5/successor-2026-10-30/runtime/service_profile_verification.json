@@ -1,0 +1,281 @@
+{
+  "passed": 3,
+  "profiles": [
+    {
+      "config": "default",
+      "health": {
+        "status": "ok",
+        "model_loaded": true,
+        "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v5/final/v5-final-v4-20261027T022649Z/adapter",
+        "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "load_s": 4.1208391199998005,
+        "max_inflight": 8,
+        "runtime_profile": null,
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": true,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": null
+        }
+      },
+      "contract": {
+        "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+        "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "base_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+        "vocabulary": [
+          "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "BLOCK | SQL injection payload detected.",
+          "BLOCK | Cross-site scripting payload detected.",
+          "BLOCK | Path traversal attack detected.",
+          "BLOCK | File inclusion attack detected.",
+          "BLOCK | Command injection payload detected.",
+          "BLOCK | Server-side template injection payload detected."
+        ],
+        "max_length": 512,
+        "token_budget_B": 415,
+        "label_budget": 13,
+        "overhead": 76,
+        "margin": 8,
+        "max_new_tokens": 17,
+        "bos_id": 1,
+        "eos_id": 2,
+        "runtime_profile": null,
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": true,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": null
+        }
+      },
+      "classifications": [
+        {
+          "status": "ok",
+          "decision": "ALLOW",
+          "reason": "Normal HTTP request with no attack patterns detected.",
+          "invalid_reason": null,
+          "generate_ms": 499.34579500040854,
+          "pipeline_ms": 505.19016300040676,
+          "generated_tokens": 13,
+          "prompt_tokens": 88,
+          "ended_with_eos": true,
+          "queue_wait_ms": 0.008115000127872918,
+          "service_ms": 505.2994789994045
+        },
+        {
+          "status": "ok",
+          "decision": "BLOCK",
+          "reason": "SQL injection payload detected.",
+          "invalid_reason": null,
+          "generate_ms": 193.4147119991394,
+          "pipeline_ms": 194.0677210004651,
+          "generated_tokens": 9,
+          "prompt_tokens": 134,
+          "ended_with_eos": true,
+          "queue_wait_ms": 0.0020080005924683064,
+          "service_ms": 194.15571500030637
+        }
+      ]
+    },
+    {
+      "config": "nf4",
+      "health": {
+        "status": "ok",
+        "model_loaded": true,
+        "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v5/final/v5-final-v4-20261027T022649Z/adapter",
+        "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "load_s": 3.9515546650000033,
+        "max_inflight": 8,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v1",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30",
+          "sha256": "2974296b292d6f9404baebc0c4e39cc651f678d2077262648f96bf95fef24e5d",
+          "status": "EXPERIMENTAL",
+          "precision": "nf4",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": false,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30"
+        }
+      },
+      "contract": {
+        "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+        "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "base_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+        "vocabulary": [
+          "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "BLOCK | SQL injection payload detected.",
+          "BLOCK | Cross-site scripting payload detected.",
+          "BLOCK | Path traversal attack detected.",
+          "BLOCK | File inclusion attack detected.",
+          "BLOCK | Command injection payload detected.",
+          "BLOCK | Server-side template injection payload detected."
+        ],
+        "max_length": 512,
+        "token_budget_B": 415,
+        "label_budget": 13,
+        "overhead": 76,
+        "margin": 8,
+        "max_new_tokens": 17,
+        "bos_id": 1,
+        "eos_id": 2,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v1",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30",
+          "sha256": "2974296b292d6f9404baebc0c4e39cc651f678d2077262648f96bf95fef24e5d",
+          "status": "EXPERIMENTAL",
+          "precision": "nf4",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": false,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30"
+        }
+      },
+      "classifications": [
+        {
+          "status": "ok",
+          "decision": "ALLOW",
+          "reason": "Normal HTTP request with no attack patterns detected.",
+          "invalid_reason": null,
+          "generate_ms": 455.6593249999423,
+          "pipeline_ms": 459.760866000579,
+          "generated_tokens": 13,
+          "prompt_tokens": 88,
+          "ended_with_eos": true,
+          "queue_wait_ms": 0.004771999556396622,
+          "service_ms": 459.8531550000189
+        },
+        {
+          "status": "ok",
+          "decision": "BLOCK",
+          "reason": "SQL injection payload detected.",
+          "invalid_reason": null,
+          "generate_ms": 164.32179499952326,
+          "pipeline_ms": 165.04722199988464,
+          "generated_tokens": 9,
+          "prompt_tokens": 134,
+          "ended_with_eos": true,
+          "queue_wait_ms": 0.0025079998522414826,
+          "service_ms": 165.13839199978975
+        }
+      ]
+    },
+    {
+      "config": "bf16",
+      "health": {
+        "status": "ok",
+        "model_loaded": true,
+        "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v5/final/v5-final-v4-20261027T022649Z/adapter",
+        "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "load_s": 4.027406981999775,
+        "max_inflight": 8,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v1",
+          "profile_id": "v5-bf16-runtime-dev-2026-10-30",
+          "sha256": "2b33ca807b4cd39c020d0cbd2f7aadc320aa64252c3e6d85704356fc46c414a9",
+          "status": "EXPERIMENTAL",
+          "precision": "bf16",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": false,
+          "double_quant": null,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-bf16-runtime-dev-2026-10-30"
+        }
+      },
+      "contract": {
+        "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+        "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "base_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+        "vocabulary": [
+          "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "BLOCK | SQL injection payload detected.",
+          "BLOCK | Cross-site scripting payload detected.",
+          "BLOCK | Path traversal attack detected.",
+          "BLOCK | File inclusion attack detected.",
+          "BLOCK | Command injection payload detected.",
+          "BLOCK | Server-side template injection payload detected."
+        ],
+        "max_length": 512,
+        "token_budget_B": 415,
+        "label_budget": 13,
+        "overhead": 76,
+        "margin": 8,
+        "max_new_tokens": 17,
+        "bos_id": 1,
+        "eos_id": 2,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v1",
+          "profile_id": "v5-bf16-runtime-dev-2026-10-30",
+          "sha256": "2b33ca807b4cd39c020d0cbd2f7aadc320aa64252c3e6d85704356fc46c414a9",
+          "status": "EXPERIMENTAL",
+          "precision": "bf16",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": false,
+          "double_quant": null,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-bf16-runtime-dev-2026-10-30"
+        }
+      },
+      "classifications": [
+        {
+          "status": "ok",
+          "decision": "ALLOW",
+          "reason": "Normal HTTP request with no attack patterns detected.",
+          "invalid_reason": null,
+          "generate_ms": 400.0641339998765,
+          "pipeline_ms": 402.9862190000131,
+          "generated_tokens": 13,
+          "prompt_tokens": 88,
+          "ended_with_eos": true,
+          "queue_wait_ms": 0.004786999852512963,
+          "service_ms": 403.1177309998384
+        },
+        {
+          "status": "ok",
+          "decision": "BLOCK",
+          "reason": "SQL injection payload detected.",
+          "invalid_reason": null,
+          "generate_ms": 118.10097900070105,
+          "pipeline_ms": 118.7772439998298,
+          "generated_tokens": 9,
+          "prompt_tokens": 134,
+          "ended_with_eos": true,
+          "queue_wait_ms": 0.008364000677829608,
+          "service_ms": 118.88025500047661
+        }
+      ]
+    }
+  ]
+}

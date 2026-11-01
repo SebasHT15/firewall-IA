@@ -1,0 +1,33 @@
+{
+  "deployment_profile": "lab",
+  "detail": "manifest.model2: artifact bytes do not match artifact_sha256",
+  "framing_contract": "gateway-framing/v1",
+  "manifest": null,
+  "mode": "CASCADE_OBSERVE",
+  "problems": [
+    "manifest_unusable"
+  ]
+}
+[20:35:06.994] Loading script /home/sebas/Desktop/firewall-IA/data_plane/cascade_addon.py
+[20:35:07.044] cascade observation disabled: manifest.model2: artifact bytes do not match artifact_sha256
+[20:35:07.050] reverse proxy to http://127.0.0.1:44903 listening at 127.0.0.1:52867.
+[20:35:07.050][127.0.0.1:42708] client connect
+[20:35:07.050] data plane ready: classifier=http://127.0.0.1:60233/classify timeout=1.0s policy=fail-closed
+[20:35:07.050] feature extraction: shadow (logged only, never used for decisions)
+[20:35:07.050] hybrid shadow analyzer: off
+[20:35:07.050] fast path: off
+[20:35:07.050] canonical observer: off
+[20:35:07.050] cascade: mode=CASCADE_OBSERVE profile=lab manifest=None framing=gateway-framing/v1
+[20:35:07.081][127.0.0.1:42708] client disconnect
+[20:35:07.082][127.0.0.1:42712] client connect
+[20:35:07.083] [8bd7aa46] received GET shop.local:44903/catalog/widgets (body 0 bytes)
+[20:35:07.103] [8bd7aa46] FEATURE EXTRACTION (shadow) 0.040 ms request-features/v2 method=GET content_type='' body_format=none len=16/0/0 params=0/0 repeated=0 pct_encoded=0 symbols=2 (0.125) non_ascii=0 entropy=3.500
+[20:35:07.103] [8bd7aa46] ALLOW GET shop.local:44903/catalog/widgets reason=None (classifier 20 ms)
+[20:35:07.103][127.0.0.1:42712] server connect 127.0.0.1:44903
+[20:35:07.104][127.0.0.1:42712] client disconnect
+[20:35:07.105][127.0.0.1:42712] server disconnect 127.0.0.1:44903
+[20:35:07.105][127.0.0.1:42718] client connect
+[20:35:07.105] [2ef50b11] received GET shop.local:44903/search (body 0 bytes)
+[20:35:07.110] [2ef50b11] FEATURE EXTRACTION (shadow) 0.031 ms request-features/v2 method=GET content_type='' body_format=none len=7/6/0 params=1/0 repeated=0 pct_encoded=0 symbols=2 (0.154) non_ascii=0 entropy=3.547
+[20:35:07.110] [2ef50b11] BLOCK GET shop.local:44903/search reason=None (classifier 4 ms)
+[20:35:07.111][127.0.0.1:42718] client disconnect

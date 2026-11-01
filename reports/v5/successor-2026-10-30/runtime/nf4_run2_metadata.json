@@ -1,0 +1,67 @@
+{
+  "status": "EXPERIMENTAL_RUNTIME_OVERRIDE_NOT_RECIPE_APPROVAL",
+  "config": "nf4",
+  "run": 2,
+  "recipe_contract": {
+    "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+    "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+    "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+    "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "base_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "vocabulary": [
+      "ALLOW | Normal HTTP request with no attack patterns detected.",
+      "BLOCK | SQL injection payload detected.",
+      "BLOCK | Cross-site scripting payload detected.",
+      "BLOCK | Path traversal attack detected.",
+      "BLOCK | File inclusion attack detected.",
+      "BLOCK | Command injection payload detected.",
+      "BLOCK | Server-side template injection payload detected."
+    ],
+    "max_length": 512,
+    "token_budget_B": 415,
+    "label_budget": 13,
+    "overhead": 76,
+    "margin": 8,
+    "max_new_tokens": 17,
+    "bos_id": 1,
+    "eos_id": 2
+  },
+  "actual_runtime": {
+    "quantization": {
+      "quant_method": "bitsandbytes",
+      "_load_in_8bit": false,
+      "_load_in_4bit": true,
+      "llm_int8_threshold": 6.0,
+      "llm_int8_skip_modules": null,
+      "llm_int8_enable_fp32_cpu_offload": false,
+      "llm_int8_has_fp16_weight": false,
+      "bnb_4bit_quant_type": "nf4",
+      "bnb_4bit_use_double_quant": false,
+      "bnb_4bit_compute_dtype": "bfloat16",
+      "bnb_4bit_quant_storage": "uint8",
+      "load_in_4bit": true,
+      "load_in_8bit": false
+    },
+    "dtype_override": "None",
+    "device_map": "auto",
+    "attention_implementation": "sdpa",
+    "model_dtype": "torch.bfloat16",
+    "config_use_cache": true,
+    "generation_use_cache": null,
+    "max_new_tokens": 17,
+    "parameter_dtypes": [
+      "torch.bfloat16",
+      "torch.float32",
+      "torch.uint8"
+    ]
+  },
+  "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+  "load_s": 2.236292067999784,
+  "total_s": 23.44260568899972,
+  "peak_cuda_allocated_bytes": 929620992,
+  "peak_cuda_reserved_bytes": 1226833920,
+  "rss_end_bytes": 1636216832,
+  "torch_version": "2.6.0+cu124",
+  "transformers_version": "5.8.0",
+  "UTC": "2026-10-31T01:03:19Z"
+}

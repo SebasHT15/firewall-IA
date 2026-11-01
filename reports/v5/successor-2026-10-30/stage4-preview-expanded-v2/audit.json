@@ -1,0 +1,92 @@
+{
+  "schema": "v51-stage4-preview-audit/v1",
+  "status": "ENGINEERING_CHECKS_PASS_ADMISSION_PENDING",
+  "preview_sha256": "decccd625cb1aaab4cbe53e8e73b53fb565b48f14cc1f0993140817232b15a9a",
+  "auditor_sha256": "67358ce45aee1476f1c2fc141a6d42cfe2b841e37df0743291669f8b9fb7254c",
+  "original_TRAIN_meta_sha256": "994d3a8cfc7c9c640c502c674ea62583e33cbe5e37175ac19aec9971b8de8072",
+  "opened_splits": [
+    "TRAIN_CANDIDATE",
+    "VALIDATION_CANDIDATE"
+  ],
+  "reserve_opened": false,
+  "checks": {
+    "typed_preview_schema_only": true,
+    "template_conflicts": 0,
+    "cluster_conflicts": 0,
+    "family_conflicts": 0,
+    "unobservable_family_keys": 0,
+    "original_4gram_near_pairs_across_splits": 0,
+    "full_pool_value_equivalence_conflicts": 0,
+    "full_pool_value_entry_conflicts": 0,
+    "canonical_duplicate_groups": 0,
+    "source_guard_cross_pairs": 0
+  },
+  "identity": {
+    "status": "PASS_UNDER_DRAFT_RULE",
+    "failures": [],
+    "scoped_numeric_rows": 828,
+    "owner_approved": false,
+    "original_H1_checker_modified": false,
+    "scope": "Logical values of every typed leaf; generated token scalars require exact hex16 format. No real-source credential exemption."
+  },
+  "combined_cluster_shares": {
+    "TRAIN_CANDIDATE": {
+      "rows": 5160,
+      "clusters": 35,
+      "largest_share": 0.03875968992248062,
+      "clusters_at_or_above_warn_008": 0,
+      "clusters_above_block_012": 0
+    },
+    "VALIDATION_CANDIDATE": {
+      "rows": 2080,
+      "clusters": 13,
+      "largest_share": 0.07692307692307693,
+      "clusters_at_or_above_warn_008": 0,
+      "clusters_above_block_012": 0
+    }
+  },
+  "distribution": {
+    "TRAIN_CANDIDATE": {
+      "labels": {
+        "ALLOW": 2580,
+        "BLOCK": 2580
+      },
+      "BLOCK_categories": {
+        "Command Injection": 300,
+        "SQL Injection": 380,
+        "Server Side Template Injection": 380,
+        "XSS Injection": 380,
+        "path_file_access": 100,
+        "Server Side Request Forgery": 520,
+        "Open Redirect": 520
+      },
+      "augmented_carriers": {
+        "query": 800,
+        "form": 640,
+        "json": 640
+      }
+    },
+    "VALIDATION_CANDIDATE": {
+      "labels": {
+        "ALLOW": 1040,
+        "BLOCK": 1040
+      },
+      "BLOCK_categories": {
+        "Server Side Request Forgery": 520,
+        "Open Redirect": 520
+      },
+      "augmented_carriers": {
+        "query": 640,
+        "form": 800,
+        "json": 640
+      }
+    }
+  },
+  "training_authorized": false,
+  "pending": [
+    "Source-specific H1 proposal requires owner admission",
+    "Mixed-data shortcut checks and complete original stage-4 evidence binding",
+    "Small number of independent validation sources; rows are not independent trials",
+    "Additional original-category source/slot coverage, recipe/training authorization and owner commit"
+  ]
+}
