@@ -318,6 +318,14 @@ class ActiveTests(Base):
             self.assertEqual(flow.response.status_code, 503)
             self.assertEqual(self.pool.calls, 0)
 
+    async def test_a_request_during_startup_logs_no_error(self):
+        """mitmdump exits on any error logged while it starts, and it listens before that ends."""
+        runtime = self.runtime(C.CASCADE_ACTIVE)
+        runtime._v5_problems = ("injected",)
+        with self.assertNoLogs("firewall.data_plane", level="ERROR"):
+            flow = await self.decide(runtime)
+        self.assertEqual(flow.response.status_code, 503)
+
     async def test_model2_that_never_proved_its_identity_is_not_ready(self):
         model2 = FakeModel2()
         model2.ever_ready = False

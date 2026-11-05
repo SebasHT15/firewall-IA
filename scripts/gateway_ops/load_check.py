@@ -104,6 +104,7 @@ GUARD_FIXTURE = os.path.join(HERE, "fixtures", "guard_fault_addon.py")
 SERVICE_ENV = dict(HF_HUB_OFFLINE="1", TRANSFORMERS_OFFLINE="1", PYTHONDONTWRITEBYTECODE="1",
                    TOKENIZERS_PARALLELISM="false")
 CLOCK_TICK = os.sysconf("SC_CLK_TCK")
+DESKTOP_CLIENT_MIB = 300      # under the smallest model this GPU runs; a desktop window stays far below
 
 
 class ForeignGpuProcess(RuntimeError):
@@ -126,6 +127,18 @@ def proc_table():
         except (OSError, IndexError, ValueError):
             continue
     return table
+
+
+def foreign_compute(apps, known_pids):
+    """Lines of `nvidia-smi --query-compute-apps=pid,process_name,used_memory` that are real work of
+    someone else. A desktop window also shows up there, with a few tens of MiB: that is not a model."""
+    out = []
+    for line in apps.splitlines():
+        fields = [field.strip() for field in line.rsplit(",", 2)] if line.count(",") >= 2 else []
+        if len(fields) == 3 and fields[0].isdigit() and int(fields[0]) not in known_pids \
+                and fields[2].isdigit() and int(fields[2]) >= DESKTOP_CLIENT_MIB:
+            out.append(line.strip())
+    return out
 
 
 class Sampler(threading.Thread):
@@ -169,13 +182,9 @@ class Sampler(threading.Thread):
                 sample["gpu"] = subprocess.run(
                     ["nvidia-smi", "--query-gpu=utilization.gpu,memory.used,temperature.gpu,power.draw,clocks.sm",
                      "--format=csv,noheader,nounits"], capture_output=True, text=True).stdout.strip()
-                apps = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,process_name",
-                                       "--format=csv,noheader"], capture_output=True, text=True).stdout
-                for line in apps.splitlines():
-                    pid = line.split(",")[0].strip()
-                    if pid.isdigit() and "ptyxis" not in line \
-                            and int(pid) not in self.deployment.known_pids:
-                        self.foreign.add(line.strip())
+                apps = subprocess.run(["nvidia-smi", "--query-compute-apps=pid,process_name,used_memory",
+                                       "--format=csv,noheader,nounits"], capture_output=True, text=True).stdout
+                self.foreign.update(foreign_compute(apps, self.deployment.known_pids))
             self.samples.append(sample)
             self.stop_event.wait(1.0)
 

@@ -1,0 +1,274 @@
+{
+  "candidate_selected": null,
+  "inputs": {
+    "artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+    "cascade_rows_sha256": "c4b7c0b82db5992e573efa7baf6c5e5e1736eff81c26347a21977bf5f7c9ea67",
+    "docker_cases_sha256": "a5c6cbab8a9d164fc34eca8206d4901f9dd0991be6521e116aaa7b319b4e4d72",
+    "docker_protocol_sha256": "3b65c6769ec12a3038ac6da1b03b1353c94a77b3d2d6e6313ac208b2f4c4c09e",
+    "private_cases_sha256": "a7837f40b36a56c3dcac16db65e7fe243ead3816a9d959b0bfeac66e0ce0ebaf",
+    "source_sha256": "e864b107799a609f603696d4f4116cebcae1657bdd4d4181e1e177ce5d806421",
+    "train_sha256": "809ce774cf8d20b4243fcda47d587252d0aa07e4b3e5a6c4619fa222a8fbe745",
+    "v5_rows_sha256": "70deee12d30672d49147910768a7bf3339e1c2b7c08b1d549d1e10a28c931775"
+  },
+  "root": {
+    "canonical_sha256": "16022c9843363b438420c5d83afdf62ff6b700b421d2edf557d1436e289716f5",
+    "features": {
+      "alnum_ratio": 0.0,
+      "ampersand_count": 0,
+      "angle_bracket_count": 0,
+      "backslash_count": 0,
+      "body_format": "none",
+      "body_length": 0,
+      "body_param_count": 0,
+      "brace_count": 0,
+      "content_type": "",
+      "double_quote_count": 0,
+      "entropy_bits_per_char": 0.0,
+      "equals_count": 0,
+      "has_body": false,
+      "has_percent_encoding": false,
+      "json_depth": 0,
+      "longest_char_run": 1,
+      "method": "GET",
+      "non_ascii_count": 0,
+      "parenthesis_count": 0,
+      "path_depth": 0,
+      "path_length": 1,
+      "percent_count": 0,
+      "percent_encoded_count": 0,
+      "percent_encoded_ratio": 0.0,
+      "pipe_count": 0,
+      "query_length": 0,
+      "query_param_count": 0,
+      "repeated_param_name_count": 0,
+      "semicolon_count": 0,
+      "single_quote_count": 0,
+      "slash_count": 1,
+      "symbol_count": 1,
+      "symbol_ratio": 1.0,
+      "total_param_count": 0
+    },
+    "intercept": 6.3669191833419285,
+    "logit": 9.513571760411766,
+    "nonzero_terms": [
+      {
+        "contribution": 3.304301348247063,
+        "name": "symbol_ratio",
+        "value": 1.0
+      },
+      {
+        "contribution": 0.27004869083317345,
+        "name": "slash_count",
+        "value": 1.0
+      },
+      {
+        "contribution": -0.22206072278598088,
+        "name": "method=GET",
+        "value": 1.0
+      },
+      {
+        "contribution": -0.13264340648580505,
+        "name": "body_format=none",
+        "value": 1.0
+      },
+      {
+        "contribution": -0.13264340648580505,
+        "name": "content_type=",
+        "value": 1.0
+      },
+      {
+        "contribution": 0.1216461360712752,
+        "name": "symbol_count",
+        "value": 1.0
+      },
+      {
+        "contribution": -0.05773691154409585,
+        "name": "longest_char_run",
+        "value": 1.0
+      },
+      {
+        "contribution": -0.004259150779986363,
+        "name": "path_length",
+        "value": 1.0
+      }
+    ],
+    "p_block": 0.9999261626310745
+  },
+  "scenarios": {
+    "baseline_observed": {
+      "confusion": {
+        "FN": 17,
+        "FP": 48,
+        "TN": 324,
+        "TP": 151
+      },
+      "early_block_fp": 19,
+      "early_block_tp": 24,
+      "newly_deferred_early_ids": []
+    },
+    "both_guards_cpu": {
+      "confusion": {
+        "FN": 17,
+        "FP": 33,
+        "TN": 339,
+        "TP": 151
+      },
+      "early_block_fp": 4,
+      "early_block_tp": 24,
+      "newly_deferred_early_ids": [
+        "docker-dev-0000",
+        "docker-dev-0012",
+        "docker-dev-0024",
+        "docker-dev-0036",
+        "docker-dev-0048",
+        "docker-dev-0060",
+        "docker-dev-0072",
+        "docker-dev-0084",
+        "docker-dev-0096",
+        "docker-dev-0108",
+        "docker-dev-0120",
+        "docker-dev-0132",
+        "docker-dev-0144",
+        "docker-dev-0156",
+        "docker-dev-0168"
+      ]
+    },
+    "path_guard_cpu": {
+      "confusion": {
+        "FN": 17,
+        "FP": 33,
+        "TN": 339,
+        "TP": 151
+      },
+      "early_block_fp": 4,
+      "early_block_tp": 24,
+      "newly_deferred_early_ids": [
+        "docker-dev-0000",
+        "docker-dev-0012",
+        "docker-dev-0024",
+        "docker-dev-0036",
+        "docker-dev-0048",
+        "docker-dev-0060",
+        "docker-dev-0072",
+        "docker-dev-0084",
+        "docker-dev-0096",
+        "docker-dev-0108",
+        "docker-dev-0120",
+        "docker-dev-0132",
+        "docker-dev-0144",
+        "docker-dev-0156",
+        "docker-dev-0168"
+      ]
+    },
+    "ratio_guard_cpu": {
+      "confusion": {
+        "FN": 17,
+        "FP": 33,
+        "TN": 339,
+        "TP": 151
+      },
+      "early_block_fp": 4,
+      "early_block_tp": 24,
+      "newly_deferred_early_ids": [
+        "docker-dev-0000",
+        "docker-dev-0012",
+        "docker-dev-0024",
+        "docker-dev-0036",
+        "docker-dev-0048",
+        "docker-dev-0060",
+        "docker-dev-0072",
+        "docker-dev-0084",
+        "docker-dev-0096",
+        "docker-dev-0108",
+        "docker-dev-0120",
+        "docker-dev-0132",
+        "docker-dev-0144",
+        "docker-dev-0156",
+        "docker-dev-0168"
+      ]
+    }
+  },
+  "schema": "model2-support-docker-dev-diagnostic/v1",
+  "scope": "KNOWN_DEV_CPU_COUNTERFACTUAL",
+  "train_support": {
+    "exact_root_count": 0,
+    "path_length_min": 7,
+    "rows": 3080,
+    "symbol_ratio_max": 0.5286624203821656
+  },
+  "v5_known_errors_by_component": [
+    {
+      "component": "edge-0",
+      "family": "benign_edge",
+      "label": "ALLOW",
+      "n": 1
+    },
+    {
+      "component": "edge-1",
+      "family": "benign_edge",
+      "label": "ALLOW",
+      "n": 1
+    },
+    {
+      "component": "edge-2",
+      "family": "benign_edge",
+      "label": "ALLOW",
+      "n": 1
+    },
+    {
+      "component": "edge-3",
+      "family": "benign_edge",
+      "label": "ALLOW",
+      "n": 1
+    },
+    {
+      "component": "edge-5",
+      "family": "benign_edge",
+      "label": "ALLOW",
+      "n": 1
+    },
+    {
+      "component": "ssrf-template-0",
+      "family": "ssrf",
+      "label": "ALLOW",
+      "n": 6
+    },
+    {
+      "component": "ssrf-template-1",
+      "family": "ssrf",
+      "label": "ALLOW",
+      "n": 6
+    },
+    {
+      "component": "ssrf-template-2",
+      "family": "ssrf",
+      "label": "ALLOW",
+      "n": 6
+    },
+    {
+      "component": "ssrf-template-3",
+      "family": "ssrf",
+      "label": "ALLOW",
+      "n": 6
+    },
+    {
+      "component": "open_redirect-template-0",
+      "family": "open_redirect",
+      "label": "BLOCK",
+      "n": 6
+    },
+    {
+      "component": "open_redirect-template-2",
+      "family": "open_redirect",
+      "label": "BLOCK",
+      "n": 6
+    },
+    {
+      "component": "path_traversal-template-0",
+      "family": "path_traversal",
+      "label": "BLOCK",
+      "n": 5
+    }
+  ],
+  "warning": "Guard scenarios are CPU reconstructions on known DEV. They have no gateway, effect, latency or independent-test evidence."
+}

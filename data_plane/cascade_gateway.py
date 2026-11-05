@@ -437,7 +437,9 @@ class CascadeRuntime:
         elapsed = (time.perf_counter() - started) * 1000
         record.update({"applied": C.DENY, "deciding_stage": stage, "reason": reason,
                        "http_status": status, "gateway_ms": elapsed, "stage_ms": stage_ms or {}})
-        log.log(logging.WARNING if status == 403 else logging.ERROR,
+        # Not ready is a state, not a failure. mitmdump listens before its startup ends and exits on any
+        # error logged in that window, so an error here would kill a gateway restarted under traffic.
+        log.log(logging.WARNING if status == 403 or stage == "readiness" else logging.ERROR,
                 "[%s] DENY stage=%s reason=%s status=%d", record["correlation_id"], stage, reason,
                 status)
         self._account(result, record, {**(stage_ms or {}), "gateway": elapsed})

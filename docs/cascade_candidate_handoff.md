@@ -75,6 +75,20 @@ keep `canonical.max_received_body` at or below its `max_decoded_body`: a higher 
 Faults are injected by a forwarder between the gateway and V5, so a real service can fail in every way
 without touching its weights. `--doubles` runs the mechanism layer with a V5 double, without GPU.
 
+## Compare the modes, case by case
+
+Sends every case of a delivered evaluation through the gateway, one at a time, and keeps classification,
+action, HTTP status and independent reception apart:
+
+```bash
+.venv-dataplane/bin/python scripts/gateway_ops/candidate_compare.py --manifest <manifest.json> --mode V5_ONLY --cases <cases.private.jsonl> --wires <inputs.private.jsonl> --census <predictions.jsonl> --out <new directory> --work <private directory>
+```
+
+Repeat with `--mode CASCADE_ACTIVE`, into the same directory. Cases without a recorded wire get one built
+from their canonical text. A forwarder hashes what V5 receives, so only `V5_ONLY` confirms the round trip
+of every case: Model 2's early blocks never reach V5. `candidate_compare_report.py` joins the rows with the
+censuses, the counterfactuals and the cases the delivery singled out.
+
 ## Traffic and operation trials
 
 Phases, in order. Rates come from this candidate's own ladder:
@@ -109,7 +123,14 @@ EVIDENCE=<new dir> WORK=<private dir> MANIFEST=<manifest.json> scripts/gateway_o
 | Audit: requested, completed, discarded, failed | `audit_accounting` per step, `/status`, `/metrics` |
 
 Percentiles over repetitions come from the pooled rows, by nearest rank. They are never averaged. Rates
-are given per repetition as mean and range.
+are given per repetition as mean and range. `candidate_load_summary.py` adds totals of every step, peaks,
+pooled audit cells and the cases V5 could not answer.
+
+Recovery ends at 10 consecutive clean probes. A case V5 cannot answer gives a 503 and restarts that count,
+so read the probes before reading a long recovery as a slow drain.
+
+Without an explicit `--soak-high-rate`, `soakhigh` is the same rate as `soak` when V4 takes no part. Use it
+only with a higher rate, such as 0.7 x the lowest sustainable rate of `CASCADE_ACTIVE`.
 
 `--with-v4` adds `V4_ONLY`, `CASCADE_OBSERVE` and the return to V4. It needs V4 loaded on the same GPU
 and is left out by default.
@@ -122,6 +143,11 @@ and is left out by default.
 
 `serial` behaves like one GPU. Its times are the ones it was told to use, so a dry run proves the
 harness, not a capacity.
+
+## Restarting under traffic
+
+mitmdump listens before its startup ends and exits on any error logged in that window. A denial while not
+ready must therefore never log an error. `restart_under_traffic.py` checks it, with a V5 double.
 
 ## What needs a real application
 

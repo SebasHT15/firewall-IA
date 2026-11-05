@@ -1,0 +1,224 @@
+{
+  "clean_after": {
+    "checked_utc": 1793846530.0105598,
+    "clean": true,
+    "leftovers": [],
+    "run_id": "20261104T204150-2d1418",
+    "schema": "firewall-local-stack-clean/v1"
+  },
+  "created_utc": 1793846530.0105977,
+  "identity": {
+    "app": {
+      "image": "firewall-ia/lab-app:lab",
+      "image_id": "sha256:7e7f96b9ae8d7ae90dcb4acf0680f67be1e3de9e8a2ef71db01260aa513fd2ef",
+      "source": "scripts/local_stack/notes_app/app.py",
+      "source_sha256": "f6d25d46e8abfe7b85f753258c6b8107527aee75547d41269285bc2c77b7dd5c"
+    },
+    "crs": null,
+    "effect_routes": false,
+    "fast_path": null,
+    "firewall": "cascade",
+    "front": {
+      "alpn": "h2",
+      "conf_sha256": "d90e95223aff83153cdf27fcc9a6a5ee1a73b9bc750bef08b233f4ebbac0b759",
+      "image": "nginx:1.25-alpine",
+      "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00",
+      "template_sha256": "542d0aee16dcd2be2b1f4199711cac85f6d43499636a09ba5d7577e8bb64a4dc",
+      "tls_version": "TLSv1.3"
+    },
+    "manifest": {
+      "manifest_id": "v51-policy-20261101-native-baseline34",
+      "path": "reports/v5/successor-post-training-2026-11-01/cascade-native.EXPERIMENTAL.json",
+      "sha256": "a3eb71aa1ccdbe07e289c515c5885172cff9b64703a5344cc13ea57d91a3d829",
+      "status": "EXPERIMENTAL"
+    },
+    "mode": "V5_ONLY",
+    "schema": "firewall-local-stack-identity/v1",
+    "stack_source_sha256": "121a0293fc836ebe8400060c3af9a0dc81df26d912dc3e1cec95b1d659f415e3",
+    "upstream": "app",
+    "v4": "not started",
+    "v5": "url"
+  },
+  "kind": "MECHANISM_CHECK_WITH_V5_DOUBLE",
+  "passed": true,
+  "probes": [
+    {
+      "app_lines": 1,
+      "elapsed_ms": 10.7,
+      "firewall_body": false,
+      "front": {
+        "status": 200,
+        "upstream_connect_time": "0.000",
+        "upstream_status": "200"
+      },
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "reason": null,
+          "stage": "v5"
+        }
+      ],
+      "layer": "application",
+      "passed": true,
+      "probe": "baseline",
+      "status": 200,
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "elapsed_ms": 8.7,
+      "firewall_body": true,
+      "front": {
+        "status": 503,
+        "upstream_connect_time": "0.001",
+        "upstream_status": "503"
+      },
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 503,
+          "reason": "v5_error",
+          "stage": "v5"
+        }
+      ],
+      "layer": "firewall",
+      "passed": true,
+      "probe": "v5_error500",
+      "status": 503,
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 0,
+      "elapsed_ms": 9.7,
+      "firewall_body": true,
+      "front": {
+        "status": 503,
+        "upstream_connect_time": "0.000",
+        "upstream_status": "503"
+      },
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 503,
+          "reason": "v5_invalid",
+          "stage": "v5"
+        }
+      ],
+      "layer": "firewall",
+      "passed": true,
+      "probe": "v5_invalid_no_eos",
+      "status": 503,
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 0,
+      "elapsed_ms": 3012.2,
+      "firewall_body": true,
+      "front": {
+        "status": 503,
+        "upstream_connect_time": "0.000",
+        "upstream_status": "503"
+      },
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 503,
+          "reason": "v5_error",
+          "stage": "v5"
+        }
+      ],
+      "layer": "firewall",
+      "passed": true,
+      "probe": "v5_hang",
+      "status": 503,
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "elapsed_ms": 13.0,
+      "firewall_body": false,
+      "front": {
+        "status": 200,
+        "upstream_connect_time": "0.000",
+        "upstream_status": "200"
+      },
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "reason": null,
+          "stage": "v5"
+        }
+      ],
+      "layer": "application",
+      "passed": true,
+      "probe": "v5_recovered",
+      "status": 200,
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "elapsed_ms": 3117.2,
+      "firewall_body": false,
+      "front": {
+        "status": 502,
+        "upstream_connect_time": "0.001",
+        "upstream_status": "502"
+      },
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "reason": null,
+          "stage": "v5"
+        }
+      ],
+      "layer": "upstream_unreachable",
+      "passed": true,
+      "probe": "app_stopped",
+      "status": 502,
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "elapsed_ms": 9.2,
+      "firewall_body": false,
+      "front": {
+        "status": 200,
+        "upstream_connect_time": "0.000",
+        "upstream_status": "200"
+      },
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "reason": null,
+          "stage": "v5"
+        }
+      ],
+      "layer": "application",
+      "passed": true,
+      "probe": "app_restarted",
+      "status": 200,
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "elapsed_ms": 3.9,
+      "firewall_body": false,
+      "front": {
+        "status": 502,
+        "upstream_connect_time": "-",
+        "upstream_status": "502"
+      },
+      "gateway": [],
+      "layer": "front",
+      "passed": true,
+      "probe": "gateway_killed",
+      "status": 502,
+      "v5_calls": 0
+    }
+  ],
+  "schema": "firewall-local-stack-failure-check/v1"
+}

@@ -4,9 +4,11 @@ works against a real service, whose weights cannot be made to misbehave at will,
 
 Everything else passes through unchanged. `identity` overrides fields of /health or /contract, to show
 the gateway a service that is not the one in its manifest while the real one keeps running. It counts the
-calls that reached the service, which is an independent count of V5 calls.
+calls that reached the service, which is an independent count of V5 calls, and keeps the hash of the last
+canonical text sent, never the text.
 Standard library only. A test fixture: it is never in a deployment path.
 """
+import hashlib
 import json
 import socket
 import threading
@@ -41,6 +43,7 @@ class FaultProxy:
         self.fault = None
         self.identity = {}
         self.classify_calls = 0
+        self.canonical_sha256 = None
         self._lock = threading.Lock()
         proxy = self
 
@@ -88,8 +91,10 @@ class FaultProxy:
                     self.close_connection = True
                 else:
                     if self.path == "/classify":
+                        text = json.loads(data).get("canonical_request", "")
                         with proxy._lock:
                             proxy.classify_calls += 1
+                            proxy.canonical_sha256 = hashlib.sha256(text.encode("utf-8")).hexdigest()
                     self.reply(*self.forward(data, "POST"))
 
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)

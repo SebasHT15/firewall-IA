@@ -1,0 +1,207 @@
+{
+  "decisions": {
+    "fast_path_fixture:ALLOW": 1,
+    "fast_path_fixture:BLOCK": 1,
+    "health_names:ALLOW": 10,
+    "lab_app_surface_read_from_its_code:ALLOW": 11,
+    "lab_app_surface_read_from_its_code:BLOCK": 1
+  },
+  "manifest": "reports/v5/successor-post-training-2026-11-01/cascade-native.EXPERIMENTAL.json",
+  "note": "Written after an audit showed a blocked health route. Describes extent, estimates no rate. Direct API, no application contacted.",
+  "rows": [
+    {
+      "decision": "BLOCK",
+      "group": "fast_path_fixture",
+      "invalid_reason": null,
+      "reason": "Server-side request forgery attack detected.",
+      "status": "ok",
+      "target": "/healthz"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "fast_path_fixture",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/status?page=1"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/health"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/healthcheck"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/ready"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/readyz"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/live"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/livez"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/ping"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/status"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/metrics"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "health_names",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/version"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/products"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/products?category=books&page=2"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/products/3"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/search?q=lamp"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/login"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/profile"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/cart"
+    },
+    {
+      "decision": "BLOCK",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Open redirect payload detected.",
+      "status": "ok",
+      "target": "/static/app.css"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/api/products"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/api/products/3"
+    },
+    {
+      "decision": "ALLOW",
+      "group": "lab_app_surface_read_from_its_code",
+      "invalid_reason": null,
+      "reason": "Normal HTTP request with no attack patterns detected.",
+      "status": "ok",
+      "target": "/api/me"
+    }
+  ],
+  "schema": "firewall-v5-route-probe/v1",
+  "status": "POST_HOC_DIAGNOSTIC_NOT_AN_EVALUATION"
+}

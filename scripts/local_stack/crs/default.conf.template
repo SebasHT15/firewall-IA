@@ -1,0 +1,27 @@
+# firewall-IA local stack — ModSecurity + OWASP CRS comparator. Replaces the image's
+# conf.d/default.conf.template so the server listens on LOOPBACK only (the container runs on the host
+# network) and has no TLS listener of its own: TLS ends at the same front as the cascade arm.
+# Everything else (CRS rules, ModSecurity settings, proxy includes) is the image's own.
+
+server_tokens ${SERVER_TOKENS};
+more_set_headers 'Server: ${SERVER_HEADER}';
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+
+server {
+    listen 127.0.0.1:${PORT} default_server;
+    server_name ${SERVER_NAME};
+
+    PROXY_SSL_CONFIG
+
+    location / {
+        client_max_body_size 0;
+        include includes/cors.conf;
+        include includes/proxy_backend.conf;
+    }
+
+    include includes/location_common.conf;
+}

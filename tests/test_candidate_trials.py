@@ -16,8 +16,13 @@ import urllib.error
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path[:0] = [os.path.join(REPO, "data_plane"), os.path.join(REPO, "scripts", "gateway_ops")]
 
+import canonical_request as cr  # noqa: E402
+import candidate_compare as CC  # noqa: E402
+import candidate_compare_report as CR  # noqa: E402
+import candidate_load_summary as CS    # noqa: E402
 import cascade_manifest as CM   # noqa: E402
 import fault_proxy as FP        # noqa: E402
+import http1_wire               # noqa: E402
 import gpu_gate                 # noqa: E402
 import live_stack as L          # noqa: E402
 import load_analyze as LA       # noqa: E402
@@ -27,6 +32,133 @@ import load_lib as LL           # noqa: E402
 FIXTURE = os.path.join(REPO, "reports/v5/hybrid/gateway-integration-v1/preparation-2026-11-01/fixtures/"
                              "doubles-candidate.json")
 DOUBLES = os.path.join(REPO, "scripts", "gateway_ops", "service_doubles.py")
+
+
+def compare_row(reference="BLOCK", v5=None, model2=None, applied="DENY", status=403, received=0,
+                equal=None, canonical=True, census=True):
+    return {"id": "c", "cohort": "dev", "reference": reference, "wire_origin": "built",
+            "classification": {"v5": dict({"status": None, "decision": None}, **(v5 or {})),
+                               "model2": dict({"decision": None}, **(model2 or {}))},
+            "action": {"applied": applied, "deciding_stage": "v5", "reason": None}, "status": status,
+            "reception": {"received": received, "bytes_equal_sent": equal},
+            "canonical_equals_census": canonical, "v5_equals_census": census, "client_ms": 5.0}
+
+
+class CompareLayersTests(unittest.TestCase):
+    """Classification, action, status and reception are read apart: one never stands for another."""
+
+    def test_a_built_wire_keeps_method_target_type_and_body(self):
+        text = 'PATCH /api/a?b=1 HTTP/1.1\nContent-Type: application/json\n\n{"x": 1}'
+        parsed = http1_wire.parse_request(CC.build_wire(text))
+        self.assertEqual(cr.parse_canonical(text).body, parsed.parts.body)
+        self.assertEqual((b"PATCH", b"/api/a?b=1"), (parsed.parts.method, parsed.parts.target))
+        self.assertIn((b"Content-Type", b"application/json"), list(parsed.parts.headers))
+
+    def test_a_request_without_body_has_no_length(self):
+        self.assertNotIn(b"Content-Length", CC.build_wire("GET /a?b=1 HTTP/1.1\n"))
+
+    def test_an_early_block_counts_as_the_decision_of_model2(self):
+        row = compare_row(model2={"decision": "BLOCK"})
+        self.assertEqual("BLOCK", CC.decided(row))
+        self.assertTrue(CC.action_follows(row) and CC.status_follows(row) and CC.reception_follows(row))
+
+    def test_an_invalid_v5_answer_is_no_decision(self):
+        row = compare_row(v5={"status": "invalid"}, applied="DENY", status=503)
+        self.assertIsNone(CC.decided(row))
+        self.assertEqual(1, CC.confusion([row])["NO_DECISION"])
+        self.assertFalse(CC.action_follows(row))
+        self.assertTrue(CC.status_follows(row))
+
+    def test_a_forward_needs_the_same_bytes_at_the_sink(self):
+        row = compare_row(reference="ALLOW", v5={"status": "ok", "decision": "ALLOW"}, applied="FORWARD",
+                          status=200, received=1, equal=False)
+        self.assertFalse(CC.reception_follows(row))
+        self.assertEqual(1, CC.confusion([row])["TN"])
+
+    def test_a_denial_that_reached_the_sink_is_caught(self):
+        self.assertFalse(CC.reception_follows(compare_row(received=1, equal=True)))
+
+    def test_a_different_canonical_is_reported_not_counted(self):
+        rows = [compare_row(v5={"status": "ok", "decision": "BLOCK"}),
+                dict(compare_row(), id="d", canonical_equals_census=False),
+                dict(compare_row(), id="e", canonical_equals_census=None)]
+        part = CC.summarize(rows)["dev"]["round_trip"]
+        self.assertEqual({"reached_v5": 2, "canonical_equal": 1, "different": ["d"]}, part)
+
+    def test_the_row_keeps_no_wire(self):
+        case = {"id": "c", "cohort": "dev", "label": "ALLOW", "wire_origin": "built",
+                "canonical_sha256": "a" * 64, "wire_sha256": "b" * 64, "wire_bytes": b"x"}
+        row = CC.layered_row(case, "V5_ONLY", 200, 1, {"v5": {"status": "ok", "decision": "ALLOW"}},
+                             sink_sha256="b" * 64, seen_sha256="a" * 64, client_ms=1.0, census=None)
+        self.assertEqual((True, True), (row["canonical_equals_census"], row["reception"]["bytes_equal_sent"]))
+        self.assertNotIn("wire_bytes", json.dumps(row))
+        self.assertNotIn("b" * 64, json.dumps(row))
+
+
+    def test_a_census_is_compared_on_status_and_decision_with_the_service_fields_kept(self):
+        case = {"id": "c", "cohort": "dev", "label": "ALLOW", "wire_origin": "built",
+                "canonical_sha256": "a" * 64, "wire_sha256": "b" * 64}
+        record = {"v5": {"status": "ok", "decision": "ALLOW"}, "v5_service": {"generated_tokens": 13}}
+        row = lambda census: CC.layered_row(case, "V5_ONLY", 200, 1, record, sink_sha256="b" * 64,  # noqa: E731
+                                            seen_sha256="a" * 64, client_ms=1.0, census=census)
+        self.assertTrue(row({"status": "ok", "decision": "ALLOW", "reason": "x"})["v5_equals_census"])
+        self.assertFalse(row({"status": "ok", "decision": "BLOCK"})["v5_equals_census"])
+        self.assertEqual(13, row(None)["classification"]["v5"]["generated_tokens"])
+
+
+class CompareReportTests(unittest.TestCase):
+    def test_a_different_answer_is_listed_by_case(self):
+        rows = [dict(compare_row(v5={"status": "ok", "decision": "ALLOW"}), id="a"),
+                dict(compare_row(v5={"status": "ok", "decision": "BLOCK"}), id="b"),
+                dict(compare_row(model2={"decision": "BLOCK"}), id="c")]
+        census = {"a": {"status": "ok", "decision": "ALLOW"}, "b": {"status": "ok", "decision": "ALLOW"}}
+        self.assertEqual({"compared": 2, "same": 1, "different": ["b"]}, CR.same_as_census(rows, census))
+
+    def test_a_counterfactual_must_match_the_stage_as_well(self):
+        row = dict(compare_row(model2={"decision": "BLOCK"}), id="a")
+        row["action"]["deciding_stage"] = "model2"
+        self.assertEqual(1, CR.same_as_counterfactual([row], {"a": {"decision": "BLOCK",
+                                                                    "deciding_stage": "model2"}})["same"])
+        self.assertEqual(0, CR.same_as_counterfactual([row], {"a": {"decision": "BLOCK",
+                                                                    "deciding_stage": "v5"}})["same"])
+
+    def test_the_effect_of_model2_comes_from_the_two_gateway_runs(self):
+        alone = {"a": compare_row(v5={"status": "ok", "decision": "ALLOW"})}
+        active = {"a": compare_row(model2={"decision": "BLOCK", "p_block": 0.95})}
+        active["a"]["action"]["deciding_stage"] = "model2"
+        effect = CR.model2_effect(active, alone)
+        self.assertEqual(1, effect["early_blocks"])
+        self.assertEqual(("ALLOW", "BLOCK"), (effect["changed"][0]["v5_alone"], effect["changed"][0]["cascade"]))
+
+
+class LoadSummaryTests(unittest.TestCase):
+    def test_totals_name_the_step_that_broke_reception(self):
+        client = {key: 1 for key in CS.TOTALS}
+        runs = {"r": {"steps": [{"label": "a", "client": client, "L2": {"conformant": True}},
+                                {"label": "b", "client": client, "L2": {"conformant": False}}]}}
+        out = CS.totals(runs)
+        self.assertEqual((2, ["r/b"]), (out["offered"], out["L2_not_conformant"]))
+
+    def test_an_analysis_or_a_note_is_not_a_run(self):
+        with tempfile.TemporaryDirectory() as directory:
+            for name in ("analysis-ladder.json", "rates_from_ladder.json", "protocol.json", "soak_x.json"):
+                with open(os.path.join(directory, name), "w", encoding="utf-8") as fh:
+                    json.dump({"name": name}, fh)
+            self.assertEqual(["soak_x"], list(LA.load_runs(directory)))
+            self.assertEqual(["soak_x"], list(CS.results(directory)))
+
+
+class ForeignGpuTests(unittest.TestCase):
+    def test_a_desktop_window_is_not_a_foreign_model(self):
+        apps = "10033, /usr/bin/ptyxis, 40\n112691, /usr/bin/gnome-text-editor, 72\n"
+        self.assertEqual([], LK.foreign_compute(apps, set()))
+
+    def test_real_work_of_someone_else_stops_the_run_and_ours_does_not(self):
+        apps = "500, /usr/bin/python3.12, 1426\n501, /usr/bin/python3.12, 1400\n"
+        self.assertEqual(["501, /usr/bin/python3.12, 1400"], LK.foreign_compute(apps, {500}))
+
+    def test_a_memory_nvidia_smi_cannot_read_is_not_taken_as_work(self):
+        self.assertEqual([], LK.foreign_compute("500, x, [N/A]\n", set()))
 
 
 class GpuGateTests(unittest.TestCase):

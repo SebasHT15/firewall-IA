@@ -24,7 +24,9 @@ import load_lib as LL  # noqa: E402
 def load_runs(run_dir):
     runs = {}
     for path in sorted(glob.glob(os.path.join(run_dir, "*.json"))):
-        if os.path.basename(path) in ("protocol.json", "protocol_addendum.json", "analysis.json"):
+        name = os.path.basename(path)
+        if name in ("protocol.json", "protocol_addendum.json", "rates_from_ladder.json") \
+                or name.startswith("analysis"):
             continue
         with open(path, encoding="utf-8") as fh:
             runs[os.path.basename(path)[:-5]] = json.load(fh)

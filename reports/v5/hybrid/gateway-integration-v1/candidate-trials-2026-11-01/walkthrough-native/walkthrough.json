@@ -1,0 +1,736 @@
+{
+  "duration_s": 168.52647423744202,
+  "layers": {
+    "attack_effect": {
+      "needs": "an authorized isolated application with an effect oracle per family; see docs/cascade_candidate_handoff.md",
+      "status": "NOT_MEASURED",
+      "why": "The destination is an inert sink. It records exact bytes and answers 200, so a delivered request proves delivery and never that an attack worked or failed."
+    },
+    "classification": {
+      "note": "References are authored expectations, not confirmed attacks. JWT and CSRF need state. No threshold, candidate or set was selected from this.",
+      "population": "authored_paired_dev",
+      "status": "MEASURED_ON_DEV",
+      "summary": {
+        "L1_agrees_with_reference": 409,
+        "L2_conformant": 434,
+        "L3_outcomes": {
+          "reference_allow_delivered": 214,
+          "reference_allow_not_delivered": 7,
+          "reference_block_delivered": 18,
+          "reference_block_not_delivered": 195
+        },
+        "by_family": {
+          "benign_probe": {
+            "ALLOW": 18,
+            "BLOCK": 2
+          },
+          "benign_twin": {
+            "ALLOW": 196,
+            "BLOCK": 5
+          },
+          "command_injection": {
+            "ALLOW": 1,
+            "BLOCK": 33
+          },
+          "csrf": {
+            "ALLOW": 4
+          },
+          "jwt": {
+            "ALLOW": 6
+          },
+          "open_redirect": {
+            "ALLOW": 3,
+            "BLOCK": 5
+          },
+          "other_attack": {
+            "ALLOW": 1,
+            "BLOCK": 11
+          },
+          "path_file_access": {
+            "ALLOW": 1,
+            "BLOCK": 34
+          },
+          "sql_injection": {
+            "ALLOW": 2,
+            "BLOCK": 34
+          },
+          "ssrf": {
+            "BLOCK": 34
+          },
+          "ssti": {
+            "BLOCK": 10
+          },
+          "xss": {
+            "BLOCK": 34
+          }
+        },
+        "by_reference_kind": {
+          "authored_attempt_needs_state_context": {
+            "ALLOW": 10,
+            "reference_block_delivered": 10
+          },
+          "authored_benign": {
+            "ALLOW": 214,
+            "BLOCK": 7,
+            "reference_allow_delivered": 214,
+            "reference_allow_not_delivered": 7
+          },
+          "authored_constructed_attempt": {
+            "ALLOW": 8,
+            "BLOCK": 195,
+            "reference_block_delivered": 8,
+            "reference_block_not_delivered": 195
+          }
+        },
+        "cascade_routes": {
+          "None": 434
+        },
+        "cases": 434,
+        "http_statuses": {
+          "200": 232,
+          "403": 202
+        },
+        "no_response": 0,
+        "observations": {
+          "None": 434
+        },
+        "out_of_vocabulary_families": [
+          "ssrf",
+          "open_redirect",
+          "jwt",
+          "csrf",
+          "other_attack"
+        ],
+        "reasons": {
+          "None": 232,
+          "model2_block": 52,
+          "v5_block": 150
+        },
+        "routes": {
+          "model2": 52,
+          "v5": 382
+        }
+      }
+    },
+    "mechanism": {
+      "checks": [
+        {
+          "check": "manifest accepted",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest is a v2 candidate",
+          "group": "delivery",
+          "observed": {
+            "schema": "firewall-cascade-model-manifest/v2"
+          },
+          "passed": true
+        },
+        {
+          "check": "adapter, recipe and decoder bytes match",
+          "group": "delivery",
+          "observed": {
+            "problems": []
+          },
+          "passed": true
+        },
+        {
+          "check": "recipe readable as a V5 contract",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest template fingerprint equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest vocabulary equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest token budget B equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest max_length equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest margin equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest base model equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest base revision equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "Model 2 and its policy are named",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "another adapter: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_adapter_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another recipe: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_recipe_sha256_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another vocabulary: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_vocabulary_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another budget: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_token_budget_B_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another label budget: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_label_budget_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another template: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_template_fingerprint_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another base revision: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_base_revision_mismatch",
+              "canonical_workers_unavailable",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "another runtime: not ready, fail-closed",
+          "group": "identity_readiness",
+          "observed": {
+            "problems": [
+              "v5_runtime_profile_mismatch",
+              "model2_not_started"
+            ],
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "ready, and serving this manifest",
+          "group": "routes",
+          "observed": {
+            "manifest_id": "v51-policy-20261101-native-baseline34"
+          },
+          "passed": true
+        },
+        {
+          "check": "reported as experimental, never approved",
+          "group": "routes",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "V5 route: action follows the decision",
+          "group": "routes",
+          "observed": {
+            "delivered": 1,
+            "reason": null,
+            "stage": "v5",
+            "status": 200,
+            "v5_decision": "ALLOW"
+          },
+          "passed": true
+        },
+        {
+          "check": "V5 route: another request",
+          "group": "routes",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_block",
+            "stage": "v5",
+            "status": 403,
+            "v5_decision": "BLOCK"
+          },
+          "passed": true
+        },
+        {
+          "check": "Model 2 route: early BLOCK, no V5 call",
+          "group": "routes",
+          "observed": {
+            "delivered": 0,
+            "reason": "model2_block",
+            "stage": "model2",
+            "status": 403,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "Fast Path fixture route: no synchronous V5 call",
+          "group": "routes",
+          "observed": {
+            "decided_equals_delivered": true,
+            "delivered": 1,
+            "reason": null,
+            "stage": "fast_path",
+            "status": 200,
+            "v4_calls": 0,
+            "v5_calls": 1
+          },
+          "passed": true
+        },
+        {
+          "check": "the audit of that permit has no retroactive effect",
+          "group": "routes",
+          "observed": {
+            "verdict": "DISAGREE"
+          },
+          "passed": true
+        },
+        {
+          "check": "canonical reject: protocol answer, no model",
+          "group": "routes",
+          "observed": {
+            "delivered": 0,
+            "reason": "canonical_REJECT",
+            "stage": "protocol",
+            "status": 400,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "out of scope: HTTP/1.0",
+          "group": "routes",
+          "observed": {
+            "delivered": 0,
+            "reason": "scope_http_version",
+            "stage": "framing",
+            "status": 505,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "ambiguous framing stopped before the addon",
+          "group": "routes",
+          "observed": {
+            "delivered": 0,
+            "reason": null,
+            "stage": "none",
+            "status": 400,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "independent reception equals the forwarded decisions",
+          "group": "routes",
+          "observed": {
+            "decided": 2,
+            "received": 2
+          },
+          "passed": true
+        },
+        {
+          "check": "worker killed: V5 decides",
+          "group": "model2_failure_defers",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_block",
+            "stage": "v5",
+            "status": 403,
+            "v5_decision": "BLOCK"
+          },
+          "passed": true
+        },
+        {
+          "check": "the failure is on record as non-OK",
+          "group": "model2_failure_defers",
+          "observed": {
+            "model2": "error"
+          },
+          "passed": true
+        },
+        {
+          "check": "worker hung: V5 decides",
+          "group": "model2_failure_defers",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_block",
+            "stage": "v5",
+            "status": 403,
+            "v5_decision": "BLOCK"
+          },
+          "passed": true
+        },
+        {
+          "check": "worker back: early BLOCK again",
+          "group": "model2_failure_defers",
+          "observed": {
+            "delivered": 0,
+            "reason": "model2_block",
+            "stage": "model2",
+            "status": 403,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "independent reception equals the forwarded decisions",
+          "group": "model2_failure_defers",
+          "observed": {
+            "decided": 0,
+            "received": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "error500: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_error",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "error422: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_error",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "saturated503: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_error",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "bad_json: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_error",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "invalid_vocabulary: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_invalid",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "invalid_no_eos: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_invalid",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "content_rejected: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_invalid",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "ok_without_decision: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_ok",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "unknown_status: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_maybe",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "hang: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_error",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "drop: denied, nothing delivered",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 0,
+            "reason": "v5_error",
+            "stage": "v5",
+            "status": 503,
+            "v4_calls": 0,
+            "v5_calls": 0
+          },
+          "passed": true
+        },
+        {
+          "check": "service healthy again: V5 decides",
+          "group": "v5_failure_denies",
+          "observed": {
+            "delivered": 1,
+            "reason": null,
+            "stage": "v5",
+            "status": 200,
+            "v5_decision": "ALLOW"
+          },
+          "passed": true
+        },
+        {
+          "check": "independent reception equals the forwarded decisions",
+          "group": "v5_failure_denies",
+          "observed": {
+            "decided": 1,
+            "received": 1
+          },
+          "passed": true
+        },
+        {
+          "check": "no sentinel of these requests in records or log",
+          "group": "privacy",
+          "observed": {
+            "hits": []
+          },
+          "passed": true
+        },
+        {
+          "check": "V5 killed: not ready, fail-closed",
+          "group": "recovery",
+          "observed": {
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "V5 back: decisions resume",
+          "group": "recovery",
+          "observed": {
+            "delivered": 1,
+            "reason": null,
+            "stage": "v5",
+            "status": 200,
+            "v5_decision": "ALLOW"
+          },
+          "passed": true
+        },
+        {
+          "check": "time until the service was back in readiness",
+          "group": "recovery",
+          "observed": {
+            "seconds": 5.39
+          },
+          "passed": true
+        },
+        {
+          "check": "canonical workers killed: a denial or a decision, nothing else",
+          "group": "recovery",
+          "observed": {
+            "status": 503
+          },
+          "passed": true
+        },
+        {
+          "check": "canonical workers back: decisions resume",
+          "group": "recovery",
+          "observed": {
+            "delivered": 1,
+            "reason": null,
+            "stage": "v5",
+            "status": 200,
+            "v5_decision": "ALLOW"
+          },
+          "passed": true
+        },
+        {
+          "check": "gateway restarted: decisions resume",
+          "group": "recovery",
+          "observed": {
+            "delivered": 1,
+            "reason": null,
+            "stage": "v5",
+            "status": 200,
+            "v5_decision": "ALLOW"
+          },
+          "passed": true
+        },
+        {
+          "check": "independent reception equals the forwarded decisions",
+          "group": "recovery",
+          "observed": {
+            "decided": 3,
+            "received": 3
+          },
+          "passed": true
+        },
+        {
+          "check": "every case answered",
+          "group": "classification",
+          "observed": {
+            "cases": 434
+          },
+          "passed": true
+        },
+        {
+          "check": "L2 conformant on every case",
+          "group": "classification",
+          "observed": {
+            "cases": 434,
+            "conformant": 434
+          },
+          "passed": true
+        }
+      ],
+      "failed": 0,
+      "status": "PASSED",
+      "total": 59
+    }
+  },
+  "manifest_id": "v51-policy-20261101-native-baseline34",
+  "manifest_sha256": "b2c680292f5b8a484ebd75ec7d1e7d3f81f7304dc0636590dfd5666ce15b8f85",
+  "schema": "firewall-candidate-walkthrough/v1",
+  "scope": "Reverse proxy, HTTP/1.1 cleartext, inert sink. Not a deployment, threshold, D70, P9/R3 or Fast Path approval.",
+  "started_utc": 1793575747.7222013,
+  "v4": "not used; the return to V4 is not exercised",
+  "v5": "real"
+}
