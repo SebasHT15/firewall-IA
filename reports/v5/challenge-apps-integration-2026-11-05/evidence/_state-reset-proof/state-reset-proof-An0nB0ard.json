@@ -1,0 +1,27 @@
+{
+  "app": "An0nB0ard",
+  "arm": "v5only",
+  "marker": "FWLABRESET1793898349",
+  "pass": true,
+  "steps": [
+    {
+      "marker_present": true,
+      "observe": "/messages",
+      "pass": true,
+      "status": 200,
+      "step": "run1: marker visible after mutation"
+    },
+    {
+      "marker_absent": true,
+      "observe": "/messages",
+      "pass": true,
+      "seeded_baseline": true,
+      "status": 200,
+      "step": "run2: marker gone on a fresh up (state reset)"
+    },
+    {
+      "pass": true,
+      "step": "teardown + check-clean"
+    }
+  ]
+}

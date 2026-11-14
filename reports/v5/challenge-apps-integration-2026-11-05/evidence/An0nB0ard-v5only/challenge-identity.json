@@ -1,0 +1,48 @@
+{
+  "adapters_source_sha256": "aa455f5b953e77eb2016242adaeada316b61fb69fa0c8df730d78e3e8bd84e65",
+  "app": "An0nB0ard",
+  "app_image": {
+    "adapter_dockerfile": "application's own Dockerfile",
+    "hostname": "an0nb0ard.fwlab.test",
+    "image": "fwlab-challenge/an0nb0ard:lab",
+    "image_id": "sha256:4700125b42bfab235dcb01d627561f259466da344edfd83cbc4c38efe21da42a",
+    "internal_port": 1337
+  },
+  "applications_repo": {
+    "commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+    "commit_matches_pin": true,
+    "pinned_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+    "root": "/home/sebas/Documents/Codex/2026-11-02/sec-challenges",
+    "source_subdir": "Web/An0nB0ard"
+  },
+  "arm": "v5only",
+  "challenge_stack_source_sha256": "86f502fae788f4e76d701f0fc5a667e50dae74df3a124bde8b2644bed8f32a97",
+  "crs": null,
+  "effect_observable": true,
+  "firewall": "cascade",
+  "front": {
+    "alpn": "h2",
+    "arm_template": "stack front (gateway upstream)",
+    "conf_sha256": "6384026ad4d71bcb733f05f8181723b79770674b7cb1ec4738d8a5753599855e",
+    "image": "nginx:1.25-alpine",
+    "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00",
+    "tls_version": "TLSv1.3"
+  },
+  "manifest": {
+    "manifest_id": "v51-model2-guarded-lab-20261105",
+    "path": "reports/v5/model2-guarded-2026-11-05/manifest.EXPERIMENTAL.json",
+    "sha256": "d0f4e0cff6d4394b4d895a2c7aa665f36a85b4819a8800fc3ff6cb646a800e65",
+    "status": "EXPERIMENTAL"
+  },
+  "mode": "V5_ONLY",
+  "schema": "firewall-challenge-stack-identity/v1",
+  "sidecars": [
+    {
+      "image": "mysql:5.7",
+      "image_id": "sha256:4bc6bc963e6d8443453676cae56536f4b8156d78bae03c0145cbe47c2aad73bb",
+      "name": "db"
+    }
+  ],
+  "v5": "double",
+  "vuln_class": "SQL injection (string-concatenated queries)"
+}

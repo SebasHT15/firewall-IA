@@ -1,0 +1,101 @@
+{
+  "app": "An0nB0ard",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "direct",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 1825,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 1293,
+      "check": "benign GET /messages",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None. blog.py imports flask.session but never sets a secret key or writes a session; no server-side session or auth cookie is issued.",
+      "pass": true
+    },
+    {
+      "check": "state reset: /messages shows only the seeded baseline at up",
+      "note": "MySQL on ephemeral tmpfs; re-seeded from members.sql each up",
+      "pass": true,
+      "seeded_entry_present": true
+    },
+    {
+      "app_received": true,
+      "check": "direct arm has no blocking layer (request reaches app)",
+      "note": "baseline: front -> app, no gateway, no WAF",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 82972,
+      "check": "large response /static/css/bootstrap.min.css (82972 B): direct: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 82972,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "db": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app An0nB0ard --arm direct --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/An0nB0ard-direct/An0nB0ard.direct.stack.json",
+    "up --app An0nB0ard --arm direct --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/An0nB0ard-direct/An0nB0ard.direct.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/An0nB0ard-direct --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/An0nB0ard-direct",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/An0nB0ard-direct"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": false,
+  "large_responses": [
+    {
+      "arm": "direct",
+      "asset_bytes": 82972,
+      "capped_502": false,
+      "response_body_len": 82972,
+      "status": 200,
+      "target": "/static/css/bootstrap.min.css"
+    }
+  ],
+  "pass": true,
+  "utc": 1793900364.3373547,
+  "v5": "double"
+}

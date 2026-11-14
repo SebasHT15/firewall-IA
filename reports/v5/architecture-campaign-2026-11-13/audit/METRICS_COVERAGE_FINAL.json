@@ -1,0 +1,358 @@
+{
+  "schema": "architecture-metrics-inventory/v1",
+  "source_spec": "/home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/outputs/METRICAS_CASCADA_PAPER_2026-11-04.md",
+  "source_sha256": "fb8ce839151d9bb842700c8ea4a1a591fe55d62ae5c680e1f3feaf6a3d58c4e8",
+  "scope": "Auditoría final del candidato congelado; mediciones compuestas parciales se identifican explícitamente. No modifica el inventario previo.",
+  "metrics": [
+    {
+      "metric_id": "M01",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "TP, TN, FP, FN **principales** y matriz por brazo",
+      "denominator_or_method": "Etiquetas confirmadas. Un resultado inválido se cuenta como error de su clase verdadera; la denegación operativa fail-closed se informa **separada**.",
+      "status": "MEDIDA",
+      "value": "Candidato TP/TN/FP/FN=66/982/3/2; matrices por app y brazo.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M02",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Recall/TPR = TP/(TP+FN); FNR = FN/(TP+FN)",
+      "denominator_or_method": "Solo ataques confirmados/elegibles. Por familia y aplicación, además del total.",
+      "status": "MEDIDA",
+      "value": "Recall 66/68=97,06%; FNR2/68=2,94%; familias/apps separadas.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M03",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "FPR = FP/(FP+TN); especificidad = TN/(FP+TN)",
+      "denominator_or_method": "Solo legítimas confirmadas. Por ruta, tarea, aplicación y grupo de sesiones.",
+      "status": "MEDIDA",
+      "value": "FPR3/985=0,3046%; especificidad982/985=99,6954%; tarea/app/sesión.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M04",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Precisión/PPV = TP/(TP+FP), F1 y prevalencia",
+      "denominator_or_method": "Reportar con la mezcla de clases de la muestra. No trasladar precisión de un set 50/50 a tráfico real.",
+      "status": "MEDIDA",
+      "value": "PPV66/69=95,65%; F1=96,35%; prevalencia artificial68/1053=6,46%.",
+      "evidence": "S2",
+      "note": ""
+    },
+    {
+      "metric_id": "M05",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Inválidos, errores y timeouts V5 por clase; tasa fail-closed",
+      "denominator_or_method": "Informar separados de TP/FP del clasificador y de problemas de infraestructura.",
+      "status": "MEDIDA",
+      "value": "0 inválidos/errores V5 o denegaciones de infraestructura en población principal; fallos operativos aparte.",
+      "evidence": "S1-S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M06",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Motivo BLOCK exacto y familia correcta",
+      "denominator_or_method": "Entre ataques correctamente bloqueados; también razón equivocada y razón fuera de vocabulario.",
+      "status": "PARCIAL",
+      "value": "49 TP de V5: 30/45 motivos gold exactos, 15 desajustes, 4 HTML sin adjudicar; 17 TP de guardia fuera del denominador.",
+      "evidence": "S2-S3,S8",
+      "note": ""
+    },
+    {
+      "metric_id": "M07",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Ataques con efecto directo positivo; efecto observado con firewall; prevención de efecto",
+      "denominator_or_method": "Denominador = ataques cuyo control directo produjo el efecto predefinido. Conservar los controles ineficaces aparte.",
+      "status": "MEDIDA",
+      "value": "65/65 controles efectivos; candidato: 63 prevenidos, 2 persistentes y 0 desconocidos; estado fuera de banda.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M08",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Recepción indebida, bypass y discrepancia decisión/entrega",
+      "denominator_or_method": "Un bloqueo debe no llegar a la app; un allow/defer debe tener recepción o fallo atribuido.",
+      "status": "MEDIDA",
+      "value": "0 DENY recibidos por app; pares de entrega y oráculos contrastados, errores separados.",
+      "evidence": "S2-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M09",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Tareas benignas y sesiones completas; falsos bloqueos por sesión",
+      "denominator_or_method": "Una sesión fallida por `GET /` no son quince fallos independientes del modelo si el texto es idéntico.",
+      "status": "MEDIDA",
+      "value": "169/172 completas, 3 con FP; 21/172 referencia; 35 plantillas.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M10",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Rechazos propios de aplicación",
+      "denominator_or_method": "JWT, CSRF, sesión, autorización, validación: contar motivo y comparar directo/con firewall. Nunca atribuirlos a V5.",
+      "status": "PARCIAL",
+      "value": "Errores/rechazos legítimos se comparan con directo mediante oráculos; JWT/CSRF no se evalúan en estas apps.",
+      "evidence": "S1,S5",
+      "note": ""
+    },
+    {
+      "metric_id": "M11",
+      "section": "3. Métricas de seguridad imprescindibles",
+      "metric": "Cobertura de entradas",
+      "denominator_or_method": "Canonización rechazada, media no soportado, sobre tamaño, truncamiento, normalización frontal y casos sin decisión.",
+      "status": "PARCIAL",
+      "value": "584 sondas/48 clases; rutas fuera de contrato y front NUL aparte. No matriz universal de media/tamaños/normalización.",
+      "evidence": "S1,S3,S5",
+      "note": ""
+    },
+    {
+      "metric_id": "M12",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "Bloqueos tempranos de Model2: TP, FP y tasa por clase",
+      "denominator_or_method": "Riesgo de su autoridad propia. Un score 0,9 no es probabilidad calibrada por definición.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M13",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "DEFER, indisponible y fuera de soporte; cobertura de Model2",
+      "denominator_or_method": "Qué fracción llega a V5 y por qué.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M14",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "**Rescates:** ataques que V5_ONLY omitía y Model2 bloqueó",
+      "denominator_or_method": "Beneficio real de detección, medido por pares idénticos.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M15",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "**Daño nuevo:** benignas que V5_ONLY permitía y Model2 bloqueó",
+      "denominator_or_method": "Coste incremental; incluir tareas/sesiones afectadas.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M16",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "Llamadas V5 evitadas y tiempo V5 ahorrado, más tiempo Model2 añadido",
+      "denominator_or_method": "Ahorro computacional observado, no inferido solo de la fracción DEFER.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M17",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "Diferencia pareada de recall, FPR, prevención de efecto, sesiones completas y rendimiento útil",
+      "denominator_or_method": "Criterio para mantener CASCADE_ACTIVE o elegir V5_ONLY.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M18",
+      "section": "4. Valor incremental de Model2 y de la cascada",
+      "metric": "Model2 AUC-PR/ROC, Brier/ECE, score por clase y curva riesgo-cobertura",
+      "denominator_or_method": "Diagnóstico/selección en datos permitidos; no sustituyen el punto operativo fijado ni se recalibran con test.",
+      "status": "NO APLICA",
+      "value": "Model2 eliminado del perfil activo; resultados históricos preservados. El ahorro de Fast Path se atribuye por separado.",
+      "evidence": "S4-S5",
+      "note": "Model2 historical results are preserved; only zero processes/calls apply to the new profile."
+    },
+    {
+      "metric_id": "M19",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "Latencia extremo a extremo P50/P95/P99 y distribución completa",
+      "denominator_or_method": "Desde cliente hasta cuerpo completo; separar directo, V5_ONLY, cascada, CRS. Repeticiones y tamaño de muestra por punto.",
+      "status": "MEDIDA",
+      "value": "P50/P95/P99 y crudos cliente por brazo/ruta; carga: 107 corridas, muestras por punto.",
+      "evidence": "S1-S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M20",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "Tiempos de TLS, frente, canonización, Model2, espera V5, inferencia V5, egress, aplicación, respuesta",
+      "denominator_or_method": "Cada etapa con reloj monotónico y correlación por `event_id`; no sumar percentiles.",
+      "status": "PARCIAL",
+      "value": "Etapas gateway/cola V5 y cliente, TLS de carga; no descomposición completa egress/app por event_id. Model2 N/A.",
+      "evidence": "S2-S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M21",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "HTTP/1.1 plano, HTTP/1.1 TLS nuevo/reutilizado, HTTP/2 TLS nuevo/reutilizado",
+      "denominator_or_method": "Estratos distintos. Registrar ALPN, versión TLS, reutilización, streams/conexión y concurrencia.",
+      "status": "PARCIAL",
+      "value": "H1 TLS nuevo principal; H2 TLS persistente subset; H1 persistente carga. Otros estratos sin nueva medición.",
+      "evidence": "S3,S5,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M22",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "Carga ofrecida, completada, útil y rechazada (rps); escalera y punto de saturación",
+      "denominator_or_method": "Throughput útil = respuestas completas y correctas por segundo, no solo conexiones aceptadas. Fijar SLO antes de la prueba.",
+      "status": "MEDIDA",
+      "value": "Escalera 4-64 rps, 3 repeticiones/punto, SLO 1 s. An0 nB0 ard: 16 a 32 rps; directo/CRS alcanzan techo 64. Cliente incluido.",
+      "evidence": "S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M23",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "Cola: profundidad/espera de admisión, in-flight, worker V5, auditoría; rechazos por límite",
+      "denominator_or_method": "Correlacionar cola y P95/P99; documentar política de backpressure.",
+      "status": "PARCIAL",
+      "value": "Espera cliente/admisión/V5 y snapshots de colas; sin serie exhaustiva continua de todos los componentes.",
+      "evidence": "S2-S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M24",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "502, 503, 4xx, timeouts, desconexiones, cuerpos incompletos y reintentos",
+      "denominator_or_method": "Por capa responsable y tasa sobre solicitudes ofrecidas.",
+      "status": "MEDIDA",
+      "value": "Status, incompletos/timeouts y utilidad por ofrecidas/capa en crudos; fallos controlados separados.",
+      "evidence": "S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M25",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "GPU: utilización, VRAM media/pico, proceso dueño, potencia/energía si medible; CPU/RAM por servicio",
+      "denominator_or_method": "Registrar hardware, frecuencia de muestreo, warmup y proceso; energía queda diagnóstica si no hay instrumento confiable.",
+      "status": "PARCIAL",
+      "value": "GPU/VRAM/potencia, RSS y CPU contenedores muestreados; sin energía aislada ni CPU%de proceso calculada.",
+      "evidence": "S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M26",
+      "section": "5. Transporte, rendimiento y recursos",
+      "metric": "Inicio en frío, calentamiento, carga estable, soak, reinicio bajo tráfico, recuperación",
+      "denominator_or_method": "Recuperación = tiempo y número de solicitudes hasta la condición predefinida de servicio limpio.",
+      "status": "PARCIAL",
+      "value": "Inicio frío/warmup, escalera20 s, reinicio bajo tráfico y recuperación; sin soak prolongado.",
+      "evidence": "S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M27",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Fallos y recuperación",
+      "denominator_or_method": "V5 error/timeout/inválido, gateway/app/frente caídos, sobrecarga; códigos, recepción, recuperación y limpieza. Model2_down N/A.",
+      "status": "PARCIAL",
+      "value": "10 fallos reales y 2 reinicios bajo tráfico; error/invalid/timeout de V5 tienen pruebas de mecanismo con doble previo.",
+      "evidence": "S3,S7",
+      "note": ""
+    },
+    {
+      "metric_id": "M28",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Contabilidad de auditoría",
+      "denominator_or_method": "Solicitadas/completadas/descartadas/fallidas/en vuelo, llamadas reales, coste y pérdida de correlación; verificar cierre.",
+      "status": "MEDIDA",
+      "value": "Foreground cierra; auditoría candidata presente, conservada y drenada, con 0 llamadas (tasa 0). Auditoría V5_ONLY no aplica.",
+      "evidence": "S1,S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M29",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Identidad y configuración CRS",
+      "denominator_or_method": "Digest, ModSecurity/CRS, PL1, umbrales5/4, reglas, puntaje y cabeceras añadidas; sin ajuste sobre test.",
+      "status": "MEDIDA",
+      "value": "CRS4.25.2, digest fijo, PL1, umbrales5/4; reglas/puntaje por fila; sin ajuste TEST.",
+      "evidence": "S1,S3-S5",
+      "note": ""
+    },
+    {
+      "metric_id": "M30",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Ahorro y cobertura Fast Path",
+      "denominator_or_method": "Denominador habitual prefijado; por app/tarea y recursos elegibles, llamadas V5 evitadas netas de auditoría y guardia separada.",
+      "status": "MEDIDA",
+      "value": "789/985=80,10%neto auditoría; 6 apps; por tarea/cliente; guardia separada.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M31",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Nuevo daño y entrega indebida Fast Path",
+      "denominator_or_method": "Comparación pareada frente a V5_ONLY y directo, estado/efecto y tareas; no basta respuesta200.",
+      "status": "MEDIDA",
+      "value": "Cero daño nuevo por paso o sesión; cero inyecciones por Fast Path, violaciones en 584 sondas o diferencias de respuesta.",
+      "evidence": "S2-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M32",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "SSTI por cabeceras y ablación",
+      "denominator_or_method": "Secuencia de inyección/observación con directo positivo, fastv5 frente a fastv5_guard; no atribuir la regla a V5.",
+      "status": "MEDIDA",
+      "value": "15/15 SSTI de cabecera rescatadas por guardia; 2 ctype ya bloqueadas; 2 HTML persisten. Ablación explícita.",
+      "evidence": "S1-S3",
+      "note": ""
+    },
+    {
+      "metric_id": "M33",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Intervalos y unidades de independencia",
+      "denominator_or_method": "N por petición, tarea/plantilla, sesión y app; repeticiones miden estabilidad, no nuevos casos independientes.",
+      "status": "MEDIDA",
+      "value": "Benigno: 985 pasos, 934 HTTP, 151 canónicos, 172 sesiones, 35 plantillas. Ataques: 65 sesiones, 14 familias, 3 apps. Wilson condicionado.",
+      "evidence": "S1-S3,S5-S6",
+      "note": ""
+    },
+    {
+      "metric_id": "M34",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Identidad/reproducibilidad de fuentes",
+      "denominator_or_method": "Hashes antes/después, app limpia en pin, casos/runner/política congelados y controles directos sobre fuentes finales.",
+      "status": "MEDIDA",
+      "value": "451 fuentes, 70 inmutables y 21 runners. Huellas de filas, configuraciones, políticas y casos; freeze intacto.",
+      "evidence": "S3-S6",
+      "note": ""
+    },
+    {
+      "metric_id": "M35",
+      "section": "6/8 + protocolo 11 noviembre",
+      "metric": "Tráfico orgánico/humano",
+      "denominator_or_method": "Fuera del alcance elegido por el usuario; no se afirma validez de producción a partir del laboratorio.",
+      "status": "FUERA DE ALCANCE",
+      "value": "Sin tráfico humano/orgánico por alcance elegido; sin afirmación de validez de producción.",
+      "evidence": "S5",
+      "note": ""
+    }
+  ]
+}

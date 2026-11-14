@@ -1,0 +1,329 @@
+{
+  "app": "CatP1cs",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "guarded",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 4153,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 16958,
+      "check": "benign GET /show?img=favicon.ico",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "asset": "/static/img/favicon.ico",
+      "body_len": 16958,
+      "check": "exact static asset FAST_ALLOW skips Model 2 and V5",
+      "last_decision": {
+        "applied": "FORWARD",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "FORWARD",
+        "cascade_stage": "fast_path",
+        "correlation_id": "dbe71fe95959",
+        "deciding_stage": "fast_path",
+        "delivered_bytes": 66,
+        "fast_path": {
+          "decision": "FAST_ALLOW",
+          "policy_id": "sec-challenges-CatP1cs-static-v1",
+          "policy_sha256": "88b0cb7b346fda487252cd3f0ddfe1214cc4600236f62e8217267e182c33bb1f",
+          "policy_status": "PROPOSED",
+          "reasons": [],
+          "rule_id": "exact-static-asset"
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 1.319360002526082,
+        "http_status": null,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": null,
+        "reason": null,
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.004179000825388357,
+          "binding": 0.08277899905806407,
+          "canonical": 0.5951860002824105,
+          "canonical_with_wait": 0.6470869993790984,
+          "fast_path": 0.09226199836120941
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.09226199836120941
+        },
+        "utc": 1793900546.661928,
+        "v4": null,
+        "v5": null,
+        "v5_service": null,
+        "wire_sha256": "8c4c28b8e727b0dbf91c35943c15cd9a0fbdbcc91f0fee4720debff9f7377ac8"
+      },
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "query on static asset cannot FAST_ALLOW",
+      "last_decision": {
+        "applied": "FORWARD",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "FORWARD",
+        "cascade_stage": "v5",
+        "correlation_id": "526885250997",
+        "deciding_stage": "v5",
+        "delivered_bytes": 70,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": "sec-challenges-CatP1cs-static-v1",
+          "policy_sha256": "88b0cb7b346fda487252cd3f0ddfe1214cc4600236f62e8217267e182c33bb1f",
+          "policy_status": "PROPOSED",
+          "reasons": [
+            "NO_RULE_MATCHED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 4.041331998450914,
+        "http_status": null,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.1282841468747643,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": null,
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.00551899938727729,
+          "binding": 0.11250299940002151,
+          "canonical": 0.6380999984685332,
+          "canonical_with_wait": 0.7079250026436057,
+          "fast_path": 0.08920500113163143,
+          "model2": 0.9871000002021901,
+          "v5": 1.5151520019571763
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.08920500113163143,
+          "model2_ms": 0.9871000002021901,
+          "v5_ms": 1.5151520019571763
+        },
+        "utc": 1793900547.112177,
+        "v4": null,
+        "v5": {
+          "decision": "ALLOW",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "a2278d6ab66d1ac1295bc6c002ed68fb60d86196e367387c76b78fcc1452ba72"
+      },
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None. A POST to / returns a random message id; nothing is stored.",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "53ccfbe850be",
+        "deciding_stage": "v5",
+        "delivered_bytes": 51,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": "sec-challenges-CatP1cs-static-v1",
+          "policy_sha256": "88b0cb7b346fda487252cd3f0ddfe1214cc4600236f62e8217267e182c33bb1f",
+          "policy_status": "PROPOSED",
+          "reasons": [
+            "NO_RULE_MATCHED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 4.357884001365164,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.24540937527019235,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.004820001777261496,
+          "binding": 0.09701200178824365,
+          "canonical": 0.7570359994133469,
+          "canonical_with_wait": 0.8344059970113449,
+          "fast_path": 0.09622300058254041,
+          "model2": 1.2255149995326065,
+          "v5": 1.443327000743011
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.09622300058254041,
+          "model2_ms": 1.2255149995326065,
+          "v5_ms": 1.443327000743011
+        },
+        "utc": 1793900547.5920324,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "0784fcd4c64ea2ce83db0f6733baf815fd040986b853d39f94a48a3ba7c43019"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 76673,
+      "check": "large response /show?img=alba.jpg (76673 B): guarded: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 76673,
+      "status": 200
+    },
+    {
+      "asset_bytes": 8106213,
+      "check": "large response /static/img/blackcat.gif (8106213 B): guarded: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 8106213,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app CatP1cs --arm guarded --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/fast-path/CatP1cs/CatP1cs.guarded.fast-path.stack.json --fast-path",
+    "up --app CatP1cs --arm guarded --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/fast-path/CatP1cs/CatP1cs.guarded.fast-path.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/fast-path/CatP1cs --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/fast-path/CatP1cs",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/fast-path/CatP1cs"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": true,
+  "large_responses": [
+    {
+      "arm": "guarded",
+      "asset_bytes": 76673,
+      "capped_502": false,
+      "response_body_len": 76673,
+      "status": 200,
+      "target": "/show?img=alba.jpg"
+    },
+    {
+      "arm": "guarded",
+      "asset_bytes": 8106213,
+      "capped_502": false,
+      "response_body_len": 8106213,
+      "status": 200,
+      "target": "/static/img/blackcat.gif"
+    }
+  ],
+  "pass": true,
+  "utc": 1793900543.3365293,
+  "v5": "double"
+}
