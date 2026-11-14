@@ -9,6 +9,12 @@ score into an action is a SEPARATE, versioned, model-bound decision — this mod
 A policy maps the fitted posterior p_block to exactly one of:
     BLOCK   p_block >= threshold   (early block, no V5 call)
     DEFER   p_block <  threshold   (hand the canonical request to V5)
+An explicit LAB_EXPERIMENTAL `decision_mode: DEFER_ONLY` keeps scoring for
+analysis while always handing the request to V5. The threshold is then a
+counterfactual marker only; it never authorizes a block.
+`GUARDED_ENFORCE` is a separate LAB_EXPERIMENTAL selective candidate bound to
+the original baseline34 artifact and a fixed guard identifier. It can block
+inside the guard's eligibility region; known-DEV results do not approve it.
 Model 2 NEVER produces ALLOW (PDF §3; D55). There is no implicit 0.5: the
 threshold is explicit and required. A policy is bound to ONE model artifact by its
 sha256 and feature_view; applied to any other artifact it does not match and the
@@ -30,6 +36,9 @@ from dataclasses import dataclass
 POLICY_SCHEMA = "model2-decision-policy/v1"
 STATUSES = ("LAB_EXPERIMENTAL", "APPROVED")
 FEATURE_VIEWS = ("baseline_34", "target-path-neutralized/v1")
+DECISION_MODES = ("ENFORCE", "DEFER_ONLY", "GUARDED_ENFORCE")
+SELECTIVE_GUARD = "c1-selective-abstention/v1"
+SELECTIVE_GUARD_ARTIFACT_SHA256 = "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38"
 
 
 class PolicyError(ValueError):
@@ -45,6 +54,8 @@ class Model2Policy:
     threshold: float            # p_block >= threshold -> BLOCK, else DEFER
     sha256: str                 # digest of the policy document
     note: str = ""
+    decision_mode: str = "ENFORCE"
+    guard_id: str | None = None
 
     def binds(self, *, feature_view: str, artifact_sha256: str) -> bool:
         """True iff this policy is the one authored for this exact model artifact."""
@@ -55,7 +66,7 @@ class Model2Policy:
 def parse_policy(doc) -> Model2Policy:
     if not isinstance(doc, dict):
         raise PolicyError("policy must be an object")
-    allowed = {"schema", "policy_id", "status", "approval", "feature_view",
+    allowed = {"schema", "policy_id", "status", "approval", "feature_view", "decision_mode", "guard_id",
                "model_artifact_sha256", "threshold", "note"}
     unknown = set(doc) - allowed
     if unknown:
@@ -74,12 +85,23 @@ def parse_policy(doc) -> Model2Policy:
                 or any(not isinstance(appr.get(k), str) or not appr[k].strip()
                        for k in ("approved_by", "date", "decision_ref"))):
             raise PolicyError("an APPROVED policy needs approval.approved_by/date/decision_ref")
+    decision_mode = doc.get("decision_mode", "ENFORCE")
+    if decision_mode not in DECISION_MODES:
+        raise PolicyError(f"decision_mode must be one of {DECISION_MODES}")
+    if status == "APPROVED" and decision_mode != "ENFORCE":
+        raise PolicyError("selective and defer-only modes are analysis-only LAB_EXPERIMENTAL")
+    guard_id = doc.get("guard_id")
+    if (decision_mode == "GUARDED_ENFORCE" and guard_id != SELECTIVE_GUARD) or (
+            decision_mode != "GUARDED_ENFORCE" and guard_id is not None):
+        raise PolicyError("guard_id must name the supported guard only for GUARDED_ENFORCE")
     fv = doc.get("feature_view")
     if fv not in FEATURE_VIEWS:
         raise PolicyError(f"feature_view must be one of {FEATURE_VIEWS}")
     sha = doc.get("model_artifact_sha256")
     if not isinstance(sha, str) or len(sha) != 64 or any(c not in "0123456789abcdef" for c in sha):
         raise PolicyError("model_artifact_sha256 must be a 64-hex string")
+    if decision_mode == "GUARDED_ENFORCE" and (fv != "baseline_34" or sha != SELECTIVE_GUARD_ARTIFACT_SHA256):
+        raise PolicyError("selective guard is bound to the original baseline34 artifact")
     threshold = doc.get("threshold")
     if isinstance(threshold, bool) or not isinstance(threshold, (int, float)):
         raise PolicyError("threshold must be a number")
@@ -91,7 +113,7 @@ def parse_policy(doc) -> Model2Policy:
         raise PolicyError("note must be a string")
     digest = hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":"),
                                        ensure_ascii=True).encode("ascii")).hexdigest()
-    return Model2Policy(policy_id, status, fv, sha, threshold, digest, note)
+    return Model2Policy(policy_id, status, fv, sha, threshold, digest, note, decision_mode, guard_id)
 
 
 def load_policy(path: str) -> Model2Policy:

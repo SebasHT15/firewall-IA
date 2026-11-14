@@ -74,7 +74,8 @@ class CorrectionContracts(unittest.TestCase):
             ({"output": build.ALLOW},
              {"status": "ok", "ended_with_eos": True, "generated": build.ALLOW}),
         ]
-        report = census.measure(pairs)
+        report = census.measure(iter(pairs))
+        self.assertEqual(report["n"], 4)
         self.assertEqual(report["principal_E5"], {"TP": 1, "TN": 1, "FP": 1, "FN": 1})
         self.assertEqual(report["status"]["invalid"], 2)
         self.assertEqual(report["block_reason"], {"eligible": 1, "exact": 1})

@@ -1,0 +1,194 @@
+{
+  "arms": {
+    "guarded": {
+      "clean": true,
+      "config_sha256": "373af70da9701c72361772c13abb537ee2de5151def4b6efd28ea063f47f8cbb",
+      "log_sha256": "d1a897ac2aafd7c31b061e616a9fe89304147e7bb5bd44c1b607dbb04780173c",
+      "observed": [
+        {
+          "layer": "app",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 200,
+          "step": "API token"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 200,
+          "step": "API with the token"
+        },
+        {
+          "layer": "app_rejected",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 401,
+          "step": "API with alg=none token"
+        },
+        {
+          "layer": "app_rejected",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 401,
+          "step": "API with an expired token"
+        },
+        {
+          "layer": "front",
+          "path": "tls_h1",
+          "stage": null,
+          "status": 400,
+          "step": "traversal-shaped path"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "home page"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "login page (sets session, CSRF token)"
+        },
+        {
+          "layer": "app_rejected",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 403,
+          "step": "login without CSRF token"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 303,
+          "step": "login with CSRF token"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "notes of the session"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "search with the double's marker"
+        },
+        {
+          "layer": "firewall",
+          "path": "tls_h2",
+          "stage": "model2",
+          "status": 403,
+          "step": "SQL-injection-shaped search"
+        }
+      ],
+      "result_sha256": "5876197c4996240ba8b42801fce6dc9e89ed5a2ceed20f21aca91413b5715cbf"
+    },
+    "v51_only": {
+      "clean": true,
+      "config_sha256": "121b4968b0c70d25a08a97003e6093ef387b8233adebd04acfddc8130fcf7a2b",
+      "log_sha256": "a7d1444516960cc1acd5a44107224d5d6eb6508aca1b5804c5e54600b32e3162",
+      "observed": [
+        {
+          "layer": "app",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 200,
+          "step": "API token"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 200,
+          "step": "API with the token"
+        },
+        {
+          "layer": "app_rejected",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 401,
+          "step": "API with alg=none token"
+        },
+        {
+          "layer": "app_rejected",
+          "path": "tls_h1",
+          "stage": "v5",
+          "status": 401,
+          "step": "API with an expired token"
+        },
+        {
+          "layer": "front",
+          "path": "tls_h1",
+          "stage": null,
+          "status": 400,
+          "step": "traversal-shaped path"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "home page"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "login page (sets session, CSRF token)"
+        },
+        {
+          "layer": "app_rejected",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 403,
+          "step": "login without CSRF token"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 303,
+          "step": "login with CSRF token"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "notes of the session"
+        },
+        {
+          "layer": "app",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 200,
+          "step": "search with the double's marker"
+        },
+        {
+          "layer": "firewall",
+          "path": "tls_h2",
+          "stage": "v5",
+          "status": 403,
+          "step": "SQL-injection-shaped search"
+        }
+      ],
+      "result_sha256": "64978bb8adb9f2d2215cecdddd1f8b774e21f07f4f1f577bd4116351aef1fb86"
+    }
+  },
+  "candidate_selected": null,
+  "protected_opened": false,
+  "schema": "model2-guarded-real-v51-demo/v1",
+  "scope": "AUTHORED_LAB_WALKTHROUGH",
+  "source_sha256": "afa67e00ff246c89f32d03a5dea27a070b64bf45bd247004098b8714fac55f2b",
+  "status": "COMPLETE"
+}

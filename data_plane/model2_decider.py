@@ -25,6 +25,7 @@ import os
 import sys
 from dataclasses import dataclass
 from typing import Optional
+from urllib.parse import unquote_to_bytes
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(HERE)
@@ -46,6 +47,40 @@ POLICY_MISMATCH = "POLICY_MISMATCH"
 CANONICAL_NOT_ACCEPTED = "CANONICAL_NOT_ACCEPTED"
 EVIDENCE_MISSING = "EVIDENCE_MISSING"
 SCORING_FAILED = "SCORING_FAILED"
+
+_TRAIN_MIN_PATH_LENGTH = 7
+_TRAIN_MAX_SYMBOL_RATIO = 0.5286624203821656
+
+
+def selective_guard(canonical_text: str) -> bool:
+    """Conservative post-score eligibility for the original baseline34 model.
+
+    The two numeric bounds come from its frozen TRAIN support. Other deferrals
+    cover the known out-of-scope method/body and encoded text cases. This is a
+    development policy, not a proof that future benign requests cannot score high.
+    """
+    features = M2.vector(canonical_text, "baseline_34")
+    if (features["method"] not in {"GET", "POST", "PUT", "PATCH", "DELETE"}
+            or (features["has_body"] and features["body_format"] != "json")
+            or features["path_length"] < _TRAIN_MIN_PATH_LENGTH
+            or features["symbol_ratio"] > _TRAIN_MAX_SYMBOL_RATIO):
+        return False
+    line = canonical_text.partition("\n")[0]
+    target = line.split(" ", 1)[1][:-len(" HTTP/1.1")]
+    if not target.startswith("/"):
+        return False
+    query = target.partition("?")[2]
+    data = query.encode("utf-8")
+    for _ in range(3):
+        if b"%" not in data:
+            break
+        decoded = unquote_to_bytes(data)
+        if decoded == data:
+            return False  # malformed or unresolved escaping is outside this guard
+        data = decoded
+    if b"%" in data:
+        return False
+    return not any(byte >= 128 or byte in (ord("<"), ord(">")) for byte in data)
 
 
 @dataclass(frozen=True)
@@ -114,7 +149,14 @@ class Model2Decider:
             p = M2.score(self.artifact, canonical_text)
         except Exception:
             return self._defer(SCORING_FAILED)
-        decision = BLOCK if p >= pol.threshold else DEFER
+        # DEFER_ONLY preserves scores but never enforces. GUARDED_ENFORCE may
+        # block only inside its fixed, model-bound eligibility region.
+        try:
+            eligible = (pol.decision_mode == "ENFORCE" or
+                        (pol.decision_mode == "GUARDED_ENFORCE" and selective_guard(canonical_text)))
+        except Exception:
+            return self._defer(SCORING_FAILED, p_block=float(p))
+        decision = BLOCK if eligible and p >= pol.threshold else DEFER
         return Model2Outcome(
             decision=decision, status=OK, p_block=float(p), threshold=pol.threshold,
             feature_view=self.feature_view, model_artifact_sha256=self.artifact_sha256,

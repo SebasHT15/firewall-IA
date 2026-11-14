@@ -25,6 +25,26 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(p.policy_id, "p1")
         self.assertEqual(p.threshold, 0.9)
         self.assertEqual(len(p.sha256), 64)
+        self.assertEqual(p.decision_mode, "ENFORCE")
+
+    def test_defer_only_is_explicit_and_analysis_only(self):
+        p = mp.parse_policy(dict(GOOD, decision_mode="DEFER_ONLY"))
+        self.assertEqual(p.decision_mode, "DEFER_ONLY")
+        self.assertRaises(mp.PolicyError, mp.parse_policy,
+                          dict(GOOD, status="APPROVED", decision_mode="DEFER_ONLY",
+                               approval={"approved_by": "owner", "date": "2026-11-05",
+                                         "decision_ref": "test"}))
+        self.assertRaises(mp.PolicyError, mp.parse_policy,
+                          dict(GOOD, decision_mode="unknown"))
+
+    def test_selective_guard_is_bound_to_original_artifact(self):
+        guarded = dict(GOOD, decision_mode="GUARDED_ENFORCE", guard_id=mp.SELECTIVE_GUARD,
+                       model_artifact_sha256=mp.SELECTIVE_GUARD_ARTIFACT_SHA256)
+        self.assertEqual(mp.parse_policy(guarded).guard_id, mp.SELECTIVE_GUARD)
+        self.assertRaises(mp.PolicyError, mp.parse_policy,
+                          dict(guarded, model_artifact_sha256="b" * 64))
+        self.assertRaises(mp.PolicyError, mp.parse_policy,
+                          dict(guarded, guard_id="unknown"))
 
     def test_binds_requires_both_view_and_sha(self):
         p = mp.parse_policy(dict(GOOD))

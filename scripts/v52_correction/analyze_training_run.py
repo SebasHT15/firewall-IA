@@ -29,7 +29,9 @@ def measure(pairs):
     matrix = Counter()
     status = Counter()
     reasons = Counter()
+    n = 0
     for row, result in pairs:
+        n += 1
         expected = row["output"]
         true_block = expected.startswith("BLOCK | ")
         valid = result["status"] == "ok" and result["ended_with_eos"]
@@ -48,7 +50,7 @@ def measure(pairs):
                     reasons["exact"] += 1
         else:
             matrix["FP" if (not valid or predicted_block) else "TN"] += 1
-    return {"n": len(pairs), "principal_E5": {k: matrix[k] for k in ("TP", "TN", "FP", "FN")},
+    return {"n": n, "principal_E5": {k: matrix[k] for k in ("TP", "TN", "FP", "FN")},
             "status": dict(status), "block_reason": dict(reasons)}
 
 
