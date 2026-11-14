@@ -1,0 +1,30 @@
+{
+  "schema": "flag-acquisition-audited-interpretation/v1",
+  "date_cr": "2026-11-14",
+  "transport": "h1_tls_new",
+  "original_metrics_sha256": "b7f7662e5b8cb57af3d3d9f047714e0fea0c0dd69490b4aad94a613e9530a18e",
+  "metric_values_modified": false,
+  "candidate": {
+    "flag_retrievals_prevented": 6,
+    "eligible_exploit_flag_retrievals": 6,
+    "credential_disclosures_prevented": 3,
+    "eligible_credential_disclosures": 3,
+    "fixed_credential_admin_logins_returning_flag": 3,
+    "fixed_credential_admin_logins_evaluable": 3
+  },
+  "other_firewall_arms": {
+    "names": [
+      "v5only",
+      "fastv5",
+      "crs"
+    ],
+    "flag_retrievals_prevented": 3,
+    "eligible_exploit_flag_retrievals": 6,
+    "credential_disclosures_prevented": 3,
+    "eligible_credential_disclosures": 3
+  },
+  "dynamic_extraction_to_login_chain_demonstrated": false,
+  "full_body_reexamination_by_codex": false,
+  "evidence": "recorded runtime full-string oracle outcomes, case definitions, response digests, source/seal/score hashes",
+  "notes": "An0nB0ard SQLi and login have separate sessions; the login credential is fixed in sealed cases. The observed login flag is not prevented by any arm. Raw measurements are unchanged."
+}

@@ -1,5 +1,11 @@
 # Local stack: TLS / HTTP/2 front, cascade gateway, independent application
 
+**Current candidate guide (2026-11-14):** [project status](project_status.md) describes the
+evaluated `FAST_PATH_V5` mode, without Model 2. Use the
+[challenge-app lifecycle](challenge_apps.md#current-candidate-2026-11-13) for its app-bound policies
+and Inf3ct header guard. The defaults and fwlab-notes instructions below remain distinct from
+the six-app candidate; Model 2 starts only for a configuration that requires it.
+
 **Status: lab package for the local demo and the final trials. Not a deployment approval.** Nothing in it
 selects a model, a threshold or a Fast Path policy. Package: [`scripts/local_stack/`](../scripts/local_stack/).
 
@@ -14,6 +20,8 @@ client ──TLS 1.2/1.3, HTTP/1.1 or HTTP/2──> front: nginx 1.25.5 (Docker,
 
 Defaults: `V5_ONLY`, V5 **double**, Fast Path **disabled**, V4 **never started**. `V4_ONLY` and
 `CASCADE_OBSERVE` are refused by this package; they stay with `scripts/gateway_ops/launch.py`.
+The six challenge apps also have an explicitly pinned, lab-only Fast Path variant of `CASCADE_ACTIVE`:
+see [`challenge_apps.md`](challenge_apps.md). The default and the four-arm comparison keep it disabled.
 
 ## Start, stop, check
 

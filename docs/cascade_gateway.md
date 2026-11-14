@@ -1,8 +1,27 @@
 # Cascade gateway: operation
 
-The cascade in the mitmproxy gateway. **Status: lab integration, not a deployment approval.** The
-Model 2 threshold of the development fixture (0.9) is `LAB_EXPERIMENTAL`. There is no approved
-operating point, no real application contract for the Fast Path, and D36 is not met.
+The cascade in the mitmproxy gateway. **Current lab candidate (evaluated 2026-11-13):**
+`FAST_PATH_V5`, V5.1, app-bound public-resource contracts and an optional Inf3ct header guard.
+Model 2 is absent from that path. The [current status](project_status.md) and
+[challenge-app lifecycle](challenge_apps.md#current-candidate-2026-11-13) describe its measured scope.
+The older Model 2 fixture threshold (0.9) remains `LAB_EXPERIMENTAL`; the historical integration
+instructions and their model-selection/latency limits below are retained for reproduction.
+
+## Current mode
+
+`FAST_PATH_V5` validates framing/canonical input, applies an optional app-bound header-sink guard,
+evaluates Fast Path, and calls V5.1 for `CONTINUE`. Model 2 is neither started nor called.
+`fastv5` is the no-header-guard ablation; `fastv5_guard` adds the deterministic guard only for Inf3ct.
+The egress guard still binds classification to the delivered upstream request.
+
+The final campaign used background audit rate 0. Enabled historical auditing is a separate
+mechanism from Model 2 and has separate overhead/agreement evidence. V4 remains a historical
+mode; its missing admission control and input-token concern are not fixed by adopting V5.
+V4 operation/fallback is retired from the supported PC candidate (D87); the instructions below
+are for isolated historical reproduction, not a supported rollback procedure. See the
+[integration requirement map](integration_resolution_2026-11-14.md).
+
+## Historical cascade integration
 
 Results and limits of this integration: [`reports/v5/hybrid/gateway-integration-v1/REPORTE.md`](../reports/v5/hybrid/gateway-integration-v1/REPORTE.md).
 

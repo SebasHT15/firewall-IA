@@ -1,5 +1,15 @@
 # firewall-IA — technical reference
 
+**Current-state guide (2026-11-14):** use [project status](project_status.md) and the
+[documentation map](index.md) for the tested Fast Path + V5.1 candidate and its app-bound header guard.
+The V4, Analyzer, shadow-routing, benchmark and October roadmap sections below retain their
+historical scope. Their statements that V5/Model 2 are unimplemented or V4 decides all traffic do
+not describe the new candidate. Current operation: [challenge apps](challenge_apps.md) and
+[cascade gateway](cascade_gateway.md). Historical results and parser contracts remain unchanged.
+V4 operation is retired from the supported PC integration; its input-token defect and missing
+admission control remain unresolved. Historical commands below are reproduction instructions.
+See [D87's scope and requirement map](integration_resolution_2026-11-14.md).
+
 Component-level detail for the control plane, the data plane, the inference benchmark and
 the dataset. It was moved here verbatim from the top-level README when the first
 functional gateway stage was closed (2026-09-21), so the README could stay a short front
@@ -8,7 +18,7 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D67: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions and later implementation records: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
@@ -28,7 +38,7 @@ Contents: [Control Plane](#control-plane-issue-15) ·
 
 ---
 
-## Integration update — 2026-10-20
+## Historical integration update — 2026-10-20
 
 The current target and completed/pending matrix are in `continuity-2026-10-20.md` and the
 root README. Older target diagrams below describe their recorded stage, not current routing.
@@ -339,10 +349,10 @@ smuggling 2).
 > **37/149 is a diagnostic count, not a false-positive rate.** The case mix was built to
 > provoke failures, so none of its proportions is a performance metric and none
 > extrapolates to real traffic. The internal formal-split FPR is **0.06%** (2 of 3,103
-> benign rows), see [V4 internal evaluation](../README.md#4-v4-internal-evaluation).
+> benign rows), see [V4 internal evaluation](history/README-through-2026-10-21.md#4-v4-internal-evaluation).
 > *(updated at stage close)* External Test v1 later measured **68/200** on its own benign
 > cases — a test-specific figure on a 50/50 constructed set, not an operational FPR either
-> (see [External Test v1](../README.md#5-external-test-v1)).
+> (see [External Test v1](history/README-through-2026-10-21.md#5-external-test-v1)).
 
 **What the evidence supports.** Coverage gaps / out-of-distribution inputs, possible
 spurious correlations (for example loopback Host → SSRF) and joint-feature context
@@ -516,7 +526,7 @@ implementation defects.
 - End-to-end benchmark: pending (Issue #18)
 - Model behaviour on real HTTP traffic: diagnosed in `real-http-fp-v1` (see above) and
   evaluated independently in External Test v1 *(updated at stage close;* see
-  [`../README.md`](../README.md#5-external-test-v1)*)*
+  [`../README.md`](history/README-through-2026-10-21.md#5-external-test-v1)*)*
 - Fast Path: default-off observer implemented; active bypass, deferred validation and performance
   evidence pending (#36–#38). Legacy heuristic scoring (#35/D29) needs scope reconciliation.
 - Request feature extraction (Hybrid Architecture Phase 1): shadow mode only — logged,
@@ -525,6 +535,13 @@ implementation defects.
 ---
 
 ## Hybrid Architecture — target design, status and interfaces
+
+**Current lab update (2026-11-05):** the paragraph and status table below are a historical
+2026-10-20 snapshot. The cascade now has active Model 2 BLOCK/DEFER and V5.1 fallback. An explicit
+lab-only Fast Path variant has been exercised on one exact static resource in each of the six challenge
+apps ([evidence](../reports/v5/fastpath-six-apps-2026-11-05/INFORME.md)); the default four arms still
+leave it off. Learned C2 remains optional and inactive: Model 2 scores the 34 deterministic C1 features
+directly. Do not read the historical table as the current deployment status.
 
 Updated 2026-10-20. V4 remains the sole enforced decision. The target is:
 
@@ -922,7 +939,7 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
   false positives on its benign cases**, concentrated in `api-json` (21/40) and
   `unseen-structure` (24/40). That 34% is specific to this 50/50 constructed test, not an
   operational FPR; it does not prove overfitting and is not formal OOD detection. See
-  [`../README.md`](../README.md#5-external-test-v1).
+  [`../README.md`](history/README-through-2026-10-21.md#5-external-test-v1).
 - **External v1 is one application in one lab, five of nineteen attack categories,**
   plain HTTP/1.1, sequential execution, and no evasion suite — the limits pre-registered
   in [`external_test_v1_protocol.md`](external_test_v1_protocol.md) §13.
@@ -999,7 +1016,7 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
 - Docker demo (`docker/demo.sh`), runtime verified from a clean state
 
 The current ordered plan is in [`continuity-2026-10-20.md`](continuity-2026-10-20.md) and
-[`../README.md`](../README.md#next-steps); issue acceptance is in
+[`../README.md`](future_work.md); issue acceptance is in
 [`issue-plan-2026-10-20.md`](issue-plan-2026-10-20.md). Older CONTEXT §0.9 is historical.
 
 **Hybrid Architecture** *(added 2026-10-04)*: Phase 1 feature extraction (#49), Phase 2A

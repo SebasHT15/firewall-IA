@@ -1,5 +1,12 @@
 # firewall-IA — Project Decision Log
 
+**Current index (2026-11-14):** D83 records the owner-directed no-Model-2 lab profile;
+D84 records separately attributed header inspection; D85 records the sealed architecture result
+and its scope; D86 records the 14 November flag-acquisition campaign result (h1 only, separate
+denominators, qualified by D87). D87 records the integration audit and explicit issue dispositions.
+The October implementation checkpoint below is historical. Read
+[current project state](docs/project_status.md) for the active candidate and integration status.
+
 Authoritative record of confirmed project decisions. Companion to `CONTEXT.md` (project memory)
 and `reports/` (experimental evidence).
 
@@ -3696,3 +3703,160 @@ record and owner launcher are in reports/v5/model2-convergence-recovery-2026-10-
 unchanged v4 freeze/preregistration/ai-audit evidence and current source/library pins; commit the
 successors and pass both actual FINAL gates before returning the launch command. The owner
 launches training. No dataset rebuild, V5 retraining, production activation or winner selection.
+
+## D83 — Owner-directed laboratory candidate without Model 2
+
+- **Decision date:** 2026-11-11 (Costa Rica); recorded here 2026-11-14.
+- **Status:** APPROVED for the bounded laboratory implementation; academic substitutions remain PENDING ADVISOR.
+- **Implementation:** DONE locally as `FAST_PATH_V5`; evaluated 2026-11-13, not yet merged to develop.
+
+The owner directed removal of Model 2 from the new active path and useful application-bound Fast Path
+coverage before V5.1. Preserve the existing proxy, canonical validation, egress delivery guard, V5.1
+weights, representation and all historical Model 2 evidence. Do not delete earlier arms or retrain
+models as part of this change. The implementation uses `model2: null` and no Model 2 process/call;
+`fastv5` and `fastv5_guard` are distinct from historical `CASCADE_ACTIVE`/guarded arms.
+
+The positive-resource contracts of this candidate replace the scalar suspicious-score proposal
+for this laboratory profile. They do not constitute implementation of the original D29 heuristic score
+or an approved academic replacement for ENT-04. D30's asynchronous auditor is a separate component
+and is not retired by removing Model 2. The final campaign used auditor sampling rate 0; earlier
+enabled-audit evidence retains its own scope.
+
+Source of the dated direction: local `coordination/architecture-2026-11-11/INSTRUCCIONES_COMPARTIDAS.md`
+(the document explicitly records execution of Sebas's 11 November decision),
+`RUNTIME_CONTRACT.md` and `DEV_HANDOFF_PUBLIC_V3_GUARD_V2_SHA256.json`.
+Public implementation: `data_plane/cascade.py`, `cascade_manifest.py`, `cascade_runtime.py`,
+`scripts/local_stack/challenges/challenge_stack.py` and
+`reports/v5/fastv5-2026-11-11/manifest.EXPERIMENTAL.json`.
+This entry records the prior direction; it does not invent a supervisor approval or backdate Git integration.
+
+## D84 — Preserve V5's representation and attribute header inspection separately
+
+- **Decision date:** 2026-11-11 (Costa Rica); recorded here 2026-11-14.
+- **Status:** APPROVED within D83's bounded laboratory implementation.
+- **Implementation:** DONE locally, versioned as `request-header-sink-guard/v2`.
+
+The owner-directed run requires checking the difference between what the application consumes and
+what `canonical-request/v1` exposes, without silently changing the model's trained view. The candidate
+therefore preserves that view and uses a separate deterministic rule bound to Inf3ct's header sink.
+It checks Jinja openings in POST header values; v2 normalizes the method to match the application's
+POST interpretation. Version 1 and earlier DEV evidence retain their original identity.
+
+Guard decisions are attributed as `request_guard`, not V5 or Model 2. The guard is not a general
+stored-HTML/XSS classifier. Public-resource Fast Path contracts bind the app/source/image, methods,
+targets, body and declared header grammars; unknown cases continue to inspection.
+
+Evidence: the same shared instructions, `DECISION_CODEX_I1.md`, `RUNTIME_CONTRACT.md`,
+`data_plane/request_guard.py`, `tests/test_fastv5_candidate.py`, and the 13 November ablation results.
+The measured header-SSTI improvement belongs to this control; benign FP recovery belongs to Fast Path.
+Neither is an improvement to V5.1's weights.
+
+## D85 — Record the sealed architecture result without replacing its scope
+
+- **Evidence date:** 2026-11-13; recorded 2026-11-14.
+- **Status:** CORE REQUIREMENT under D7/D39/D41/D42; this is an evidence-scope record, not a new deployment approval.
+- **Implementation:** DONE for that campaign; later flag work is a separate experiment.
+
+The frozen candidate `fastv5-public-v3-headerguard-v2-20261111` satisfied the preregistered C1–C5
+conditions on the declared population. Freeze manifest SHA-256:
+`ae1cf86fc7c3710f35014501fadbea0a0b03ad9e097fb2fd2bbc9d969b69e51d` (451 files).
+The independent audit rechecked 1,640 evidence conditions, with no remaining discrepancies.
+Keep the candidate, protocol, raw runs and denominators intact; do not reinterpret exposed test cases
+as independent data for a tuned successor.
+
+Primary denominators: 985 benign requests in 172 sessions, 65 eligible attack sessions,
+68 injection steps and 584 boundary probes. Candidate results: 3 benign FP, 169 complete sessions,
+63 attack-session effects prevented, and 789 benign V5 calls avoided at audit rate 0.
+Three inspected benign FP and two stored-HTML-header effects remain. The h2 results are a three-app subset.
+
+This supports an experimental acceptance recommendation in these apps/client contracts. It does not
+establish organic/production risk, unseen-app generalization, adaptive-attacker resistance, a general
+comparison victory over CRS, or completion of the academic embedded/export/reserved-test objectives.
+V4's security/admission-control limitations remain separate. Later flag claims require their own
+full retrieval/control evidence and cannot be inferred from generic effect-prevention counts.
+
+Public source: `reports/v5/architecture-campaign-2026-11-13/` and
+`docs/project_status.md`; local audit closure: `AUDIT_FINAL.md`, `CROSS_REVIEW_CLAUDE.md`
+and `METRICS_COVERAGE_FINAL.md` in the architecture coordination directory.
+
+### Recorded outcomes supporting D83–D85
+
+V5.1 is the selected local successor. V5.2 corrected four shared-validation false positives and
+introduced 13 false negatives, so it was not selected; see its immutable `NOT_SELECTED.md`.
+Model 2's successors/guards and the 7 November Fast Path coverage of 0/130 are preserved as
+negative/limited results rather than removed from the narrative.
+The destination-model export, llama.cpp/security/performance evaluation and physical embedded
+deployment remain pending. The integration workflow is a single PR to develop after Claude's flag
+campaign and repository consolidation; Sebas creates the later main PR. This is not a supervisor
+approval to substitute the project's academic deliverables.
+
+## D86 — Record the 14 November flag-acquisition campaign result without pooling it
+
+**Later qualification:** D87 and the run-1 AUDIT_CORRECTIONS.md qualify the original
+interpretation below. Nine prevented primitives are six prevented flag retrievals and three
+prevented credential disclosures; the fixed-credential login flag remains available on all arms.
+
+- **Evidence date:** 2026-11-14; recorded 2026-11-14.
+- **Status:** Evidence-scope record under D7/D39/D41/D42; not a new deployment or academic approval.
+- **Implementation:** DONE for that campaign (h1 only). Separate experiment from the 13 November architecture campaign.
+
+A separate flag-acquisition campaign measured, over `h1_tls_new` only, whether each of the six apps'
+flags can be obtained over HTTP against the `direct` control and whether the candidate
+`fastv5-public-v3-headerguard-v2-20261111` prevents it. Four of six apps have an HTTP-retrievable flag;
+all four were obtained on `direct` (three exploits — CatP1cs path traversal, An0nB0ard SQLi credential
+disclosure, Inf3ct header SSTI — and one legitimate retrieval, D33pTh0ught `answer=42`), 3/3 reps,
+with the full flag/credential string oracle-verified.
+
+Against the three exploits (denominator 9 = 3 sequences × 3 reps), the candidate prevented **9/9**:
+V5.1 for the traversal and the SQLi credential read; the deterministic `request-header-sink-guard/v2`
+(`request_guard`) for the header SSTI. `v5only`, `fastv5` and CRS prevented **6/9** each; none stops
+the header SSTI (`PERSISTED`). The guard block is attributed to `request_guard`, not to V5.
+
+Scope and distinctions this record keeps:
+- The three exploit apps distribute the **same placeholder flag**; this is a full-string retrieval-
+  mechanism result, not three distinct secrets. 9/9 is three repeated sequences — not nine independent
+  techniques nor six exploited apps.
+- An0nB0ard's scored exploit is the SQLi credential disclosure; the benign admin login with that
+  credential is correctly allowed on every arm and is not the exploit.
+- D33pTh0ught's correct answer is a legitimate retrieval, correctly allowed on every arm; ObC00ki3s has
+  no server-side flag; ag3ncy's admin branch was unmeasured (password undetermined within budget).
+- Flag prevention (this campaign) is not the same measurement as effect prevention (D85); their
+  denominators are not pooled. run-1 is `h1_tls_new` only; no HTTP/2 subset is part of it, and the
+  13 November h2 subset is not attributed here.
+- No Model 2 in any run (`model2_present:false`); Fast Path audit rate 0; 30/30 runs clean; GPU released.
+
+Public source: `reports/v5/flag-acquisition-2026-11-14/run-1/` (PROTOCOL, RESULTS, METRICS.json,
+metrics_table.csv, EVIDENCE_INDEX.json, HANDOFF_CODEX.md, CLEANUP_GPU.json). Raw cases and runs are
+private, outside Git, under `/home/sebas/Documents/Codex/2026-11-02/fwlab-architecture-private/2026-11-14/`.
+This is experimental lab evidence, not an organic/production, unseen-app, adaptive-attacker or academic
+acceptance claim.
+
+## D87 — Integration audit, retained evidence and explicit PC scope disposition
+
+- **Date:** 2026-11-14 (America/Costa_Rica).
+- **Status:** Engineering disposition by Codex under Sebas's instruction to consolidate the PC
+  result, resolve issues for their real reasons, prepare commits and one PR to develop.
+  This is not a new measurement, a deployment promotion or supervisor approval.
+- **Evidence:** `docs/integration_resolution_2026-11-14.md`,
+  `reports/v5/integration-review-2026-11-14/`, and flag run-1 `AUDIT_CORRECTIONS.md`.
+
+1. Correct D86's interpretation without changing measured rows: the 9/9 prevented primitives
+   combine 6/6 exploit-driven flag retrievals (CatP1cs/Inf3ct) and 3/3 SQLi credential
+   disclosures (An0nB0ard). The latter's login uses a predeclared fixed credential, separate
+   sessions, and returns the flag in all arms. No dynamic extraction-to-login prevention is claimed.
+2. Retain the existing five-arm Inf3ct H2 exploration, 105 rows, separately indexed and excluded
+   from primary run-1 H1 metrics. Do not erase it or retroactively attach it to 13 November.
+3. Retire V4 operational support in this PC delivery. Its entrypoints/modes and immutable
+   artifacts remain for isolated historical reproduction. #65 is a retirement/not_planned
+   disposition, not a tokenization patch or proof that V4 is safe. No V4 fallback is supported
+   for the current candidate. Reintroduction requires its outstanding diagnostic/fix/validation.
+4. Resolve implemented research/documentation with its measured scope. Retire the old scalar
+   score/calibration and V4-observer plans; retain unfinished performance, original-wire,
+   contextual-signal and production-policy criteria explicitly in the integration map and
+   future-work record. Do not mark those criteria implemented to close their old umbrella issues.
+5. Adopt the proposed out-of-PC-delivery disposition of reserved CSIC, held-out evasion,
+   stateful classification and SIEM (#27/#29/#30/#31), retaining their proposals and limits.
+   Keep #10–#14 and #19–#22 open for selected-model export/runtime and physical embedded work.
+6. Publication comprises source, tests, bounded public evidence and documentation. Private
+   rows/bodies/keys and model weights stay out of Git. One PR targets develop; Sebas owns
+   the later main PR. Administrative issue closure is not academic deliverable completion.

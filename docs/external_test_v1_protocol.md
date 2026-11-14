@@ -11,7 +11,7 @@
 > - **Executed** as `external-v1-run-001` with the runner at commit `9656df9`: 1,200 gateway
 >   requests (400 × 3) and 300 direct `/classify` calls (100 × 3), 0 execution errors, 0
 >   nondeterminism — [`../reports/external/external-v1-run-001/`](../reports/external/external-v1-run-001/).
->   Headline results: [`../README.md`](../README.md#5-external-test-v1).
+>   Headline results: [`../README.md`](history/README-through-2026-10-21.md#5-external-test-v1).
 > - **Disclosed deviation from §11 — methodology limitation of External Test v1.**
 >   The preregistered proxy-to-`/classify` byte-equivalence check was not executed during
 >   `external-v1-run-001` because the data-plane runtime did not contain `strace`.
