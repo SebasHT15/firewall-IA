@@ -120,6 +120,15 @@ class ManifestTests(Fixture):
         doc["status"] = "APPROVED"
         self.assertRefused(doc, "approval")
 
+    def test_fast_path_v5_requires_a_model2_null_manifest(self):
+        self.assertIn("model2_forbidden_for_fast_path_v5",
+                      CM.enablement_problems(CM.parse_manifest(self.manifest), C.FAST_PATH_V5, "lab"))
+        doc = copy.deepcopy(self.manifest)
+        doc["model2"] = None
+        self.assertEqual(CM.enablement_problems(CM.parse_manifest(doc), C.FAST_PATH_V5, "lab"), ())
+        self.assertIn("manifest_not_approved_for_production",
+                      CM.enablement_problems(CM.parse_manifest(doc), C.FAST_PATH_V5, "production"))
+
     def test_enablement_by_mode_and_profile(self):
         m = CM.parse_manifest(self.manifest)
         self.assertEqual(CM.enablement_problems(m, C.CASCADE_ACTIVE, "lab"), ())
@@ -201,6 +210,13 @@ class GatewayConfigTests(Fixture):
         self.assertEqual(cfg.mode, C.CASCADE_ACTIVE)
         self.assertEqual(cfg.fast_path.activation, "disabled")
         self.assertIsNone(CM.resolve_fast_path_policy(cfg.fast_path))
+
+    def test_new_mode_does_not_budget_inactive_model2_timeout(self):
+        self.doc["mode"] = C.FAST_PATH_V5
+        self.doc["model2"]["timeout_seconds"] = 60
+        self.assertEqual(CM.parse_gateway_config(self.doc).mode, C.FAST_PATH_V5)
+        self.doc["mode"] = C.CASCADE_ACTIVE
+        self.assertRefused(self.doc, "decision_deadline_seconds")
 
     def test_no_key_has_a_default(self):
         for key in list(self.doc):

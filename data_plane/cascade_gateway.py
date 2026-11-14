@@ -31,6 +31,7 @@ headers and the body are never logged. The wire digest is lab evidence and off b
 import asyncio
 import concurrent.futures
 import dataclasses
+import hashlib
 import json
 import logging
 import os
@@ -100,7 +101,8 @@ class V5ServiceClient(RT.V5HttpClient):
     different problems. These fields are measurements: none of them reaches a decision.
     tests/test_data_plane_cascade.py checks that it answers exactly like the base class."""
 
-    FIELDS = ("queue_wait_ms", "pipeline_ms", "service_ms", "generated_tokens", "decoder_verified",
+    FIELDS = ("queue_wait_ms", "pipeline_ms", "service_ms", "generated_tokens", "prompt_tokens",
+              "ended_with_eos", "decoder_verified",
               "decoder_fallback")
 
     def __init__(self, url: str, timeout_s: float, metrics: ops.Metrics):
@@ -108,12 +110,19 @@ class V5ServiceClient(RT.V5HttpClient):
         self._metrics = metrics
         self._local = threading.local()
         self._in_flight = 0
+        self._attempts = self._finished = 0
+        self._generate_ms_sum = 0.0
         self._in_flight_lock = threading.Lock()
 
     def in_flight(self) -> int:
         """Calls of this client now in V5. The audit yields to them."""
         with self._in_flight_lock:
             return self._in_flight
+
+    def accounting(self):
+        with self._in_flight_lock:
+            return {"request_attempts": self._attempts, "finished_attempts": self._finished,
+                    "in_flight": self._in_flight, "generate_ms_sum": self._generate_ms_sum}
 
     def _failed(self, detail: str) -> C.V5Reply:
         self._metrics.inc("firewall_v5_client_errors_total", detail=detail)
@@ -122,11 +131,17 @@ class V5ServiceClient(RT.V5HttpClient):
     def __call__(self, canonical_text: str) -> C.V5Reply:
         with self._in_flight_lock:
             self._in_flight += 1
+            self._attempts += 1
         try:
-            return self._classify(canonical_text)
+            reply = self._classify(canonical_text)
+            if isinstance(reply.generate_ms, (int, float)) and reply.generate_ms >= 0:
+                with self._in_flight_lock:
+                    self._generate_ms_sum += reply.generate_ms
+            return reply
         finally:
             with self._in_flight_lock:
                 self._in_flight -= 1
+                self._finished += 1
 
     def _classify(self, canonical_text: str) -> C.V5Reply:
         self._local.fields = None
@@ -147,7 +162,7 @@ class V5ServiceClient(RT.V5HttpClient):
         self._local.fields = {name: payload.get(name) for name in self.FIELDS}
         return C.V5Reply(status=payload.get("status", "error"), decision=payload.get("decision"),
                          invalid_reason=payload.get("invalid_reason"),
-                         generate_ms=payload.get("generate_ms"))
+                         generate_ms=payload.get("generate_ms"), reason=payload.get("reason"))
 
     def take_fields(self):
         """What the last call on this thread reported, once."""
@@ -205,7 +220,8 @@ class CascadeRuntime:
         self._probe_task = None
 
     def _build_router(self, mode, v4_client=None) -> C.CascadeRouter:
-        return RT.build_router(C.CascadeConfig(mode=mode, fast_path_policy=self.policy),
+        return RT.build_router(C.CascadeConfig(mode=mode, fast_path_policy=self.policy,
+                                               request_guard_policy=getattr(self.cfg, "request_guard_policy", None)),
                                model2_decider=self.model2, v5_client=self.v5_client,
                                v4_client=v4_client)
 
@@ -285,11 +301,14 @@ class CascadeRuntime:
             "manifest_status": manifest.status if manifest else None,
             "token_budget_B": manifest.canonical.token_budget_B if manifest else None,
             "model2_policy_status": model2.policy_status if model2 else None,
+            "request_guard_policy_id": getattr(getattr(self.cfg, "request_guard_policy", None), "policy_id", None),
+            "request_guard_policy_sha256": getattr(getattr(self.cfg, "request_guard_policy", None), "sha256", None),
             "fast_path_activation": self.cfg.fast_path.activation,
             "fast_path_policy_status": self.policy.status if self.policy else None,
             "verified_evidence": self.verified_evidence,
             "canonical_workers": self.pool.status() if self.pool else None,
             "model2_worker": self.model2.status() if self.model2 else None,
+            "v5_client_accounting": self.v5_client.accounting() if hasattr(self.v5_client, "accounting") else None,
             "tickets": len(self.book), "tickets_expired": self.book.expired,
             "egress_guard": bool(self.guard and self.guard.listening),
             "queues": self.queues(),
@@ -366,6 +385,11 @@ class CascadeRuntime:
             self._probe_task.cancel()
         if self.auditor is not None:
             self.auditor.close()
+        self._emit({"kind": "shutdown_accounting", "schema": RECORD_SCHEMA,
+                    "utc": time.time(), "mode": self.cfg.mode,
+                    "fast_path_audit": self.auditor.accounting() if self.auditor else None,
+                    "model2_present": self.model2 is not None,
+                    "v5_client_accounting": self.v5_client.accounting() if hasattr(self.v5_client, "accounting") else None})
         if self.model2 is not None:
             self.model2.close()
         if self.pool is not None:
@@ -521,6 +545,14 @@ class CascadeRuntime:
             self._deny(flow, record, status, "canonical", f"canonical_{outcome.status.lower()}",
                        started, stage_ms=stage_ms)
             return True
+        record["canonical_size"] = outcome.view.size
+        if outcome.view.text is not None:
+            canonical_bytes = outcome.view.text.encode("utf-8")
+            record["canonical_text_bytes"] = len(canonical_bytes)
+            if self.cfg.observability.log_wire_sha256:
+                # Same lab-only evidence gate as the wire digest. Short hashes
+                # can be guessed, so production profiles keep this disabled.
+                record["canonical_text_sha256"] = hashlib.sha256(canonical_bytes).hexdigest()
 
         parts = binding.parts
         snapshot = C.Snapshot(method=parts.method, target=parts.target,
@@ -558,7 +590,7 @@ class CascadeRuntime:
 
         if result.deciding_stage == C.STAGE_PROTOCOL:
             status = 400
-        elif result.reason in ("v5_block", "model2_block"):
+        elif result.reason in ("v5_block", "model2_block", "request_guard_block"):
             status = 403
         else:
             status = 503
@@ -691,7 +723,7 @@ def build_runtime(cfg) -> CascadeRuntime:
             lambda: CC.build_client(canonical.bounds, manifest.canonical,
                                     canonical.max_received_body, canonical.max_text_bytes),
             canonical.workers)
-        if manifest.model2 is not None and cfg.mode != C.V5_ONLY:
+        if manifest.model2 is not None and cfg.mode not in (C.V5_ONLY, C.FAST_PATH_V5):
             # A canonical text may need up to 6 JSON bytes per byte, plus the small envelope.
             frame_cap = 6 * canonical.max_text_bytes + 4096
             model2 = M2C.Model2WorkerClient(

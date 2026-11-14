@@ -83,7 +83,7 @@ class V5HttpClient:
             status=payload.get("status", "error"),
             decision=payload.get("decision"),
             invalid_reason=payload.get("invalid_reason"),
-            generate_ms=payload.get("generate_ms"))
+            generate_ms=payload.get("generate_ms"), reason=payload.get("reason"))
 
 
 class V5InProcessClient:
@@ -97,7 +97,7 @@ class V5InProcessClient:
         parsed, measure = self.core.classify_canonical(self.m, canonical_text)
         return C.V5Reply(status=parsed.status, decision=parsed.decision,
                          invalid_reason=parsed.invalid_reason,
-                         generate_ms=measure.get("generate_ms"))
+                         generate_ms=measure.get("generate_ms"), reason=parsed.reason)
 
 
 class V4HttpClient:
@@ -131,7 +131,8 @@ def build_router(config: C.CascadeConfig, *, model2_decider=None, v5_client=None
                  v4_client=None) -> C.CascadeRouter:
     """Assemble a router. `model2_decider` is a `Model2Decider` (its .decide is bound);
     `v5_client`/`v4_client` are callables as above."""
-    m2 = model2_decider.decide if model2_decider is not None else None
+    m2 = (model2_decider.decide if model2_decider is not None
+          and config.mode not in (C.V5_ONLY, C.FAST_PATH_V5) else None)
     return C.CascadeRouter(
         config,
         fast_path_evaluate=fp.safe_evaluate,

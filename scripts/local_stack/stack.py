@@ -48,6 +48,7 @@ sys.path[:0] = [HERE, OPS, os.path.join(REPO, "data_plane")]
 
 import gpu_gate                   # noqa: E402
 import live_stack as L            # noqa: E402
+import fast_path as FP            # noqa: E402
 
 STATE_SCHEMA = "firewall-local-stack-state/v1"
 CONFIG_SCHEMA = "firewall-local-stack/v1"
@@ -55,13 +56,14 @@ STATE_FILE = "stack-state.json"
 APP_SOURCE = os.path.join(HERE, "notes_app", "app.py")
 NGINX_TEMPLATE = os.path.join(HERE, "front", "nginx.conf.template")
 PYTHON = L.PYTHON
-ALLOWED_MODES = ("V5_ONLY", "CASCADE_ACTIVE")
+ALLOWED_MODES = ("V5_ONLY", "CASCADE_ACTIVE", "FAST_PATH_V5")
 OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 CONFIG_KEYS = {"schema", "mode", "manifest", "ports", "front", "app", "gateway", "fast_path"}
-OPTIONAL_KEYS = {"crs"}
+OPTIONAL_KEYS = {"crs", "request_guard"}
 CRS_KEYS = {"image", "image_id", "port", "blocking_paranoia", "anomaly_inbound", "anomaly_outbound"}
 CRS_DIR = os.path.join(HERE, "crs")
 PORT_KEYS = ("front_tls", "front_status", "gateway", "guard", "admin", "v5")
+FAST_PATH_KEYS = {"policy_file", "policy_sha256", "application_contract_ref", "audit_sample_rate"}
 
 
 class StackError(RuntimeError):
@@ -158,8 +160,24 @@ def load_config(path):
         raise StackError("config schema")
     if cfg["mode"] not in ALLOWED_MODES:
         raise StackError(f"mode {cfg['mode']!r}: this package runs {ALLOWED_MODES}; V4 is not part of it")
-    if cfg["fast_path"] is not None:
-        raise StackError("fast_path must be null: a Fast Path policy is measured separately, never by default")
+    fast = cfg["fast_path"]
+    if fast is not None:
+        if cfg["mode"] not in ("CASCADE_ACTIVE", "FAST_PATH_V5") or not isinstance(fast, dict) or set(fast) != FAST_PATH_KEYS:
+            raise StackError("fast_path requires CASCADE_ACTIVE or FAST_PATH_V5 and the four pinned policy fields")
+        if (not isinstance(fast["policy_file"], str) or not fast["policy_file"]
+                or not isinstance(fast["policy_sha256"], str)
+                or not isinstance(fast["application_contract_ref"], str)
+                or not fast["application_contract_ref"].strip()
+                or isinstance(fast["audit_sample_rate"], bool)
+                or not isinstance(fast["audit_sample_rate"], (int, float))
+                or not 0 <= fast["audit_sample_rate"] <= 1):
+            raise StackError("fast_path fields are invalid")
+        try:
+            policy = FP.load_policy(resolve(fast["policy_file"]))
+        except (OSError, FP.PolicyError) as exc:
+            raise StackError(f"fast_path policy invalid: {type(exc).__name__}") from None
+        if policy.sha256 != fast["policy_sha256"] or policy.status != "PROPOSED":
+            raise StackError("fast_path policy digest/status differs from the pinned lab policy")
     if set(cfg["ports"]) != set(PORT_KEYS) or len(set(cfg["ports"].values())) != len(PORT_KEYS):
         raise StackError("ports: need distinct " + ", ".join(PORT_KEYS))
     if "crs" in cfg:
@@ -167,6 +185,17 @@ def load_config(path):
             raise StackError(f"crs keys must be {sorted(CRS_KEYS)}")
         if cfg["crs"]["port"] in cfg["ports"].values():
             raise StackError("crs port collides")
+    if cfg.get("request_guard") is not None:
+        g = cfg["request_guard"]
+        if (cfg["mode"] != "FAST_PATH_V5" or fast is None or not isinstance(g, dict)
+                or set(g) != {"policy_file", "policy_sha256", "application_contract_ref"}
+                or g["application_contract_ref"] != fast["application_contract_ref"]):
+            raise StackError("request_guard configuration or application binding invalid")
+        import request_guard as RG
+        try:
+            RG.load(resolve(g["policy_file"]), g["policy_sha256"], g["application_contract_ref"])
+        except (ValueError, OSError, TypeError):
+            raise StackError("request_guard policy changed or invalid") from None
     return cfg
 
 
@@ -179,6 +208,10 @@ def check_manifest(cfg):
         manifest = json.load(fh)
     if cfg["mode"] == "CASCADE_ACTIVE" and not manifest.get("model2"):
         raise StackError("CASCADE_ACTIVE needs a manifest with Model 2")
+    if cfg["mode"] == "FAST_PATH_V5" and manifest.get("model2") is not None:
+        raise StackError("FAST_PATH_V5 forbids Model 2 in its manifest")
+    if cfg["mode"] == "FAST_PATH_V5" and cfg["fast_path"] is None:
+        raise StackError("FAST_PATH_V5 needs a pinned Fast Path policy")
     return path, manifest
 
 
@@ -297,6 +330,8 @@ def tls_context(ca_cert, alpn=("http/1.1",)):
 # ─────────────────────────────── up ───────────────────────────────
 def preflight(cfg, args):
     problems = []
+    if cfg["fast_path"] is not None and args.firewall != "cascade":
+        problems.append("fast_path needs the cascade firewall")
     for key in PORT_KEYS:
         if key == "v5" and args.v5.startswith("url:"):
             continue
@@ -400,14 +435,22 @@ def start_v5(state, cfg, args, manifest_path):
 
 def gateway_document(cfg, manifest_path, app_ip, v5_url, gw_dir):
     ports, gw = cfg["ports"], cfg["gateway"]
+    fast = cfg["fast_path"]
     doc = L.gateway_config(mode=cfg["mode"], manifest=manifest_path, listen_port=ports["gateway"],
                            guard_port=ports["guard"], sink_port=cfg["app"]["port"],
                            admin_port=ports["admin"], v4_url="http://127.0.0.1:9", v5_url=v5_url,
                            workdir=gw_dir, v5_timeout=gw["v5_timeout_seconds"],
                            v4_timeout=1.0, deadline=gw["decision_deadline_seconds"],
                            max_inflight=gw["max_inflight"], max_waiting=gw["max_waiting"],
-                           body_size_limit=gw["body_size_limit"])
+                           body_size_limit=gw["body_size_limit"],
+                           fast_path_policy=resolve(fast["policy_file"]) if fast else None,
+                           fast_path_sha256=fast["policy_sha256"] if fast else None,
+                           sample_rate=fast["audit_sample_rate"] if fast else 0.0)
+    if cfg.get("request_guard") is not None:
+        doc["cascade_gateway"]["request_guard"] = dict(cfg["request_guard"], policy_file=resolve(cfg["request_guard"]["policy_file"]))
     doc["cascade_gateway"]["framing"]["egress_guard"]["upstream_host"] = app_ip
+    if fast:
+        doc["cascade_gateway"]["fast_path"]["application_contract_ref"] = fast["application_contract_ref"]
     return doc
 
 
@@ -572,7 +615,7 @@ def identity(cfg, manifest_path, manifest, front, args, crs=None):
                          "manifest_id": manifest.get("manifest_id"), "status": manifest.get("status")},
             "firewall": args.firewall,
             "crs": {k: v for k, v in crs.items() if k != "audit_log"} if crs else None,
-            "fast_path": None, "v4": "not started", "v5": args.v5.split(":", 1)[0] if args.firewall == "cascade" else None,
+            "fast_path": cfg["fast_path"], "v4": "not started", "v5": args.v5.split(":", 1)[0] if args.firewall == "cascade" else None,
             "upstream": args.upstream, "effect_routes": args.effect_routes,
             "front": {"image": cfg["front"]["image"], "image_id": cfg["front"]["image_id"],
                       "template_sha256": sha256_file(NGINX_TEMPLATE), "conf_sha256": front["conf_sha256"],
@@ -719,6 +762,8 @@ def pin(args):
         raise StackError(f"manifest refused: {exc}")
     if args.mode == "CASCADE_ACTIVE" and manifest.model2 is None:
         raise StackError("CASCADE_ACTIVE needs a manifest with Model 2")
+    if args.mode == "FAST_PATH_V5" and (manifest.model2 is not None or cfg["fast_path"] is None):
+        raise StackError("FAST_PATH_V5 needs a model2-null manifest and a pinned Fast Path policy")
     cfg.update(mode=args.mode, manifest={"path": rel(path), "sha256": sha256_file(path)})
     with open(args.out, "x", encoding="utf-8") as fh:
         json.dump(cfg, fh, indent=2)

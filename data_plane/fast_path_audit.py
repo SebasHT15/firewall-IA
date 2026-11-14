@@ -98,6 +98,8 @@ class FastPathAuditor:
         self._lock = threading.Lock()
         self._queued_bytes = 0
         self._abandoned = 0
+        self._v5_calls_started = 0
+        self._v5_generate_ms_sum = 0.0
         self._closed = False
         self._tokens = float(config.burst)
         self._refilled = clock()
@@ -134,7 +136,10 @@ class FastPathAuditor:
         """requested == completed + discarded + failed + in_flight, at every instant it is read."""
         with self._lock:
             return {**self._counts, "in_flight": self._in_flight,
-                    "queued": self._worker.qsize(), "queued_bytes": self._queued_bytes}
+                    "queued": self._worker.qsize(), "queued_bytes": self._queued_bytes,
+                    "v5_calls_started": self._v5_calls_started,
+                    "v5_generate_ms_sum": self._v5_generate_ms_sum,
+                    "abandoned_calls": self._abandoned}
 
     def _take_token(self) -> bool:
         now = self._clock()
@@ -254,6 +259,9 @@ class FastPathAuditor:
                 box["error"] = type(exc).__name__
 
         thread = threading.Thread(target=call, name="fast-path-audit-call", daemon=True)
+        with self._lock:
+            self._v5_calls_started += 1
+        record["v5_call_started"] = True
         thread.start()
         thread.join(self.config.timeout_seconds)
         audit_ms = (self._clock() - started) * 1000
@@ -269,6 +277,11 @@ class FastPathAuditor:
             self._end({**record, "status": ERROR, "verdict": INCONCLUSIVE, "detail": box["error"]})
             return
         reply = box.get("reply")
+        generate_ms = getattr(reply, "generate_ms", None)
+        if isinstance(generate_ms, (int, float)) and generate_ms >= 0:
+            record["v5_generate_ms"] = generate_ms
+            with self._lock:
+                self._v5_generate_ms_sum += generate_ms
         status, decision = getattr(reply, "status", None), getattr(reply, "decision", None)
         if status == "ok" and decision == "ALLOW":
             verdict = AGREE

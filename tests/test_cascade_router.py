@@ -89,6 +89,41 @@ def router(mode, *, fp="CONTINUE", fp_reasons=("NO_RULE_MATCHED",), m2="DEFER",
 
 
 class CascadeRouterTests(unittest.TestCase):
+    def test_fast_path_v5_never_calls_model2_on_continue(self):
+        r, calls = router(C.FAST_PATH_V5, m2="BLOCK",
+                          v5_reply=C.V5Reply(status="ok", decision="ALLOW"))
+        out = r.route(snap())
+        self.assertEqual(out.applied, C.FORWARD)
+        self.assertEqual(out.deciding_stage, C.STAGE_V5)
+        self.assertIsNone(out.model2)
+        self.assertNotIn("model2_ms", out.timings_ms)
+        self.assertEqual(calls, {"m2": 0, "v5": 1, "v4": 0})
+
+    def test_fast_path_v5_short_circuits_both_models(self):
+        r, calls = router(C.FAST_PATH_V5, fp="FAST_ALLOW")
+        out = r.route(snap())
+        self.assertEqual((out.applied, out.deciding_stage), (C.FORWARD, C.STAGE_FAST_PATH))
+        self.assertEqual(calls, {"m2": 0, "v5": 0, "v4": 0})
+
+    def test_fast_path_v5_protocol_and_model_failures_stay_closed(self):
+        r, calls = router(C.FAST_PATH_V5)
+        self.assertEqual(r.route(snap("REJECT")).deciding_stage, C.STAGE_PROTOCOL)
+        self.assertEqual(calls, {"m2": 0, "v5": 0, "v4": 0})
+        r, calls = router(C.FAST_PATH_V5, v5_exc=TimeoutError())
+        out = r.route(snap())
+        self.assertEqual(out.applied, C.DENY)
+        self.assertEqual(out.v5["status"], "error")
+        self.assertEqual(calls["m2"], 0)
+
+    def test_v5_reason_is_recorded_only_from_closed_vocabulary(self):
+        good = "SQL injection payload detected."
+        r, _ = router(C.V5_ONLY, v5_reply=C.V5Reply(status="ok", decision="BLOCK",
+                                                     reason=good))
+        self.assertEqual(r.route(snap()).v5["reason"], good)
+        r, _ = router(C.V5_ONLY, v5_reply=C.V5Reply(status="ok", decision="BLOCK",
+                                                     reason="untrusted free text"))
+        self.assertNotIn("reason", r.route(snap()).v5)
+
     def test_protocol_reject_denies_without_models(self):
         r, calls = router(C.CASCADE_ACTIVE)
         out = r.route(snap(outcome="REJECT", text=None, reject="R8"))

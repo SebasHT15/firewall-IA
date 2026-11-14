@@ -776,6 +776,14 @@ class AuditWiringTests(Base):
             client("x")
         self.assertEqual(client.in_flight(), 0)
 
+    def test_attempt_accounting_includes_failures_and_exceptions(self):
+        client = CG.V5ServiceClient("http://127.0.0.1:1", 0.05, ops.Metrics())
+        client._classify = mock.Mock(return_value=C.V5Reply(status="ok",decision="ALLOW",generate_ms=12))
+        client("unit")
+        client._classify = mock.Mock(side_effect=RuntimeError("unit"))
+        with self.assertRaises(RuntimeError):client("unit")
+        self.assertEqual(client.accounting(), {"request_attempts":2,"finished_attempts":2,"in_flight":0,"generate_ms_sum":12})
+
     def test_status_reports_queues_and_the_audit_accounting(self):
         auditor = types.SimpleNamespace(accounting=lambda: {"requested": 3, "queued": 1},
                                         close=lambda: None)

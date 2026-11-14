@@ -217,6 +217,34 @@ class StackConfig(unittest.TestCase):
         with self.assertRaises(S.StackError):
             S.load_config(self.write(doc))
 
+    def test_lab_fast_path_policy_is_pinned_and_requires_active_cascade(self):
+        policy_doc = {"schema": S.FP.POLICY_SCHEMA, "policy_id": "test-static",
+                      "status": "PROPOSED", "canonical_contract": S.FP.CANONICAL_CONTRACT_ID,
+                      "http_versions": ["HTTP/1.1"],
+                      "rules": [{"id": "asset", "methods": ["GET"], "path": ["static", "x.css"],
+                                 "query": {}, "required_query": [],
+                                 "headers": {"host": {"type": "enum", "values": ["notes.fwlab.test"]}}}]}
+        policy_path = self.write(policy_doc)
+        parsed = S.FP.parse_policy(policy_doc)
+        doc = self.base()
+        doc["mode"] = "CASCADE_ACTIVE"
+        doc["fast_path"] = {"policy_file": policy_path, "policy_sha256": parsed.sha256,
+                            "application_contract_ref": "test-app-static-v1", "audit_sample_rate": 0.0}
+        cfg = S.load_config(self.write(doc))
+        gateway = S.gateway_document(cfg, S.resolve(cfg["manifest"]["path"]), "127.0.0.2",
+                                     "http://127.0.0.1:8001", tempfile.mkdtemp())
+        fast = gateway["cascade_gateway"]["fast_path"]
+        self.assertEqual((fast["activation"], fast["policy_sha256"], fast["application_contract_ref"]),
+                         ("experimental_fixture", parsed.sha256, "test-app-static-v1"))
+        self.assertTrue(gateway["cascade_gateway"]["framing"]["verified_evidence"])
+        doc["fast_path"]["policy_sha256"] = "0" * 64
+        with self.assertRaises(S.StackError):
+            S.load_config(self.write(doc))
+        doc["fast_path"]["policy_sha256"] = parsed.sha256
+        doc["mode"] = "V5_ONLY"
+        with self.assertRaises(S.StackError):
+            S.load_config(self.write(doc))
+
     def test_crs_section(self):
         cfg = S.load_config(os.path.join(PKG, "stack.example.json"))
         self.assertEqual((cfg["crs"]["blocking_paranoia"], cfg["crs"]["anomaly_inbound"],

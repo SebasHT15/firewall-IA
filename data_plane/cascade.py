@@ -32,21 +32,27 @@ which stage decided it. Modes:
   V5_ONLY         canonical -> V5 directly (no Fast Path, no Model 2)
   CASCADE_OBSERVE the cascade is computed and recorded, but the APPLIED action is
                   V4's (V4 unchanged); use to compare without changing traffic
-  CASCADE_ACTIVE  the cascade decides and is applied
+  CASCADE_ACTIVE  the historical cascade decides and is applied
+  FAST_PATH_V5    canonical -> Fast Path -> V5, never loads/calls Model 2
 
 Standard library only.
 """
 
 import time
+try:
+    from . import request_guard as RG
+except ImportError:
+    import request_guard as RG
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
 # Modes
 V4_ONLY = "V4_ONLY"
 V5_ONLY = "V5_ONLY"
+FAST_PATH_V5 = "FAST_PATH_V5"
 CASCADE_OBSERVE = "CASCADE_OBSERVE"
 CASCADE_ACTIVE = "CASCADE_ACTIVE"
-MODES = (V4_ONLY, V5_ONLY, CASCADE_OBSERVE, CASCADE_ACTIVE)
+MODES = (V4_ONLY, V5_ONLY, FAST_PATH_V5, CASCADE_OBSERVE, CASCADE_ACTIVE)
 
 # Applied actions
 FORWARD = "FORWARD"
@@ -56,6 +62,7 @@ DENY = "DENY"
 STAGE_PROTOCOL = "protocol"       # canonical REJECT/UNSUPPORTED
 STAGE_FAST_PATH = "fast_path"
 STAGE_MODEL2 = "model2"
+STAGE_REQUEST_GUARD = "request_guard"
 STAGE_V5 = "v5"
 STAGE_V4 = "v4"
 
@@ -64,6 +71,24 @@ STAGE_V4 = "v4"
 # model-independent; an early BLOCK is honored only with an OK status.
 MODEL2_OK = "OK"
 MODEL2_BLOCK = "BLOCK"
+
+# Only these parser-vocabulary reasons may enter public gateway records. The
+# serving API also returns a reason, but a malformed upstream must never turn
+# that free field into a request or model-output logging channel.
+SAFE_V5_REASONS = frozenset((
+    "Normal HTTP request with no attack patterns detected.",
+    "SQL injection payload detected.",
+    "Cross-site scripting payload detected.",
+    "Path traversal attack detected.",
+    "File inclusion attack detected.",
+    "Command injection payload detected.",
+    "Server-side template injection payload detected.",
+    "Server-side request forgery attack detected.",
+    "Open redirect payload detected.",
+    "NoSQL injection payload detected.",
+    "CRLF injection payload detected.",
+    "XPath injection payload detected.",
+))
 
 
 @dataclass(frozen=True)
@@ -93,6 +118,7 @@ class V5Reply:
     invalid_reason: Optional[str] = None
     detail: Optional[str] = None
     generate_ms: Optional[float] = None
+    reason: Optional[str] = None
 
 
 @dataclass
@@ -111,6 +137,7 @@ class CascadeResult:
     canonical_outcome: Optional[str]
     canonical_reject: Optional[str] = None
     fast_path: Optional[dict] = None
+    request_guard: Optional[dict] = None
     model2: Optional[dict] = None
     v5: Optional[dict] = None
     v4: Optional[dict] = None
@@ -127,6 +154,7 @@ class CascadeConfig:
     mode: str = CASCADE_ACTIVE
     fast_path_policy: Any = None        # fast_path.Policy or None
     v5_fail_closed: bool = True         # invalid/error/timeout -> DENY (always True here)
+    request_guard_policy: Any = None    # explicit app-bound rule, new mode only
 
     def __post_init__(self):
         if self.mode not in MODES:
@@ -169,6 +197,8 @@ class CascadeRouter:
         t["v5_ms"] = (time.perf_counter() - t0) * 1000
         out.v5 = {"status": reply.status, "decision": reply.decision,
                   "invalid_reason": reply.invalid_reason, "generate_ms": reply.generate_ms}
+        if isinstance(reply.reason, str) and reply.reason in SAFE_V5_REASONS:
+            out.v5["reason"] = reply.reason
         if reply.status == "ok" and reply.decision == "ALLOW":
             return FORWARD, STAGE_V5, None
         if reply.status == "ok" and reply.decision == "BLOCK":
@@ -215,6 +245,18 @@ class CascadeRouter:
 
         canonical_text = getattr(canon, "text", None)
 
+        if self.config.mode == FAST_PATH_V5 and self.config.request_guard_policy is not None:
+            t0 = time.perf_counter()
+            try:
+                out.request_guard = RG.evaluate(snapshot, self.config.request_guard_policy)
+            except Exception as exc:
+                out.request_guard = {"status": "ERROR", "detail": type(exc).__name__}
+                return DENY, STAGE_REQUEST_GUARD, "request_guard_unavailable"
+            finally:
+                t["request_guard_ms"] = (time.perf_counter() - t0) * 1000
+            if out.request_guard["status"] == "MATCH":
+                return DENY, STAGE_REQUEST_GUARD, "request_guard_block"
+
         # Fast Path
         t0 = time.perf_counter()
         fp_input = self._mk_fp(snapshot)
@@ -226,6 +268,9 @@ class CascadeRouter:
                          "policy_status": decision.policy_status}
         if decision.decision == "FAST_ALLOW":
             return FORWARD, STAGE_FAST_PATH, None
+
+        if self.config.mode == FAST_PATH_V5:
+            return self._call_v5(canonical_text, out, t)
 
         # Model 2 — early BLOCK only on an OK status; every other outcome
         # (DEFER, non-OK status, or a raised exception) fails to DEFER -> V5.
@@ -292,7 +337,7 @@ class CascadeRouter:
                 out.v5 = {"status": "error", "detail": type(exc).__name__}
         out.cascade_applied, out.cascade_stage = c_action, c_stage
 
-        if mode == CASCADE_ACTIVE:
+        if mode in (CASCADE_ACTIVE, FAST_PATH_V5):
             out.applied, out.deciding_stage, out.reason = c_action, c_stage, c_reason
             out.timings_ms = t
             return out

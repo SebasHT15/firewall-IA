@@ -121,11 +121,24 @@ def tls_context(ca_cert, alpn):
     return ctx
 
 
-def connect(port, *, tls=None, server_hostname=None, session=None, timeout=10.0):
+def connect(port, *, tls=None, server_hostname=None, session=None, timeout=10.0, timings=None):
+    started = time.perf_counter()
     raw = socket.create_connection(("127.0.0.1", port), timeout=timeout)
+    if timings is not None:
+        timings["tcp_connect_ms"] = (time.perf_counter() - started) * 1000
     if tls is None:
         return raw
-    return tls.wrap_socket(raw, server_hostname=server_hostname, session=session)
+    try:
+        sock = tls.wrap_socket(raw, server_hostname=server_hostname, session=session,
+                               do_handshake_on_connect=False)
+        started = time.perf_counter()
+        sock.do_handshake()
+        if timings is not None:
+            timings["tls_handshake_ms"] = (time.perf_counter() - started) * 1000
+        return sock
+    except Exception:
+        raw.close()
+        raise
 
 
 def connect_host(host, port, timeout=10.0):
@@ -135,8 +148,10 @@ def connect_host(host, port, timeout=10.0):
 def h1_exchange(port, raw, *, tls=None, server_hostname=None, head=False, session=None, timeout=10.0):
     """One request on a new connection. Returns a result dict."""
     started = time.perf_counter()
+    timings = {}
     try:
-        sock = connect(port, tls=tls, server_hostname=server_hostname, session=session, timeout=timeout)
+        sock = connect(port, tls=tls, server_hostname=server_hostname, session=session,
+                       timeout=timeout, timings=timings)
     except (OSError, ssl.SSLError) as exc:
         return {"status": None, "error": f"connect:{type(exc).__name__}", "headers": [], "body": b""}
     with sock:
@@ -152,15 +167,17 @@ def h1_exchange(port, raw, *, tls=None, server_hostname=None, head=False, sessio
         if tls is not None:
             info["tls_session"] = sock.session
     return {"status": status, "error": None if status else "no_response", "headers": headers, "body": body,
-            "elapsed_ms": (time.perf_counter() - started) * 1000, **info}
+            "elapsed_ms": (time.perf_counter() - started) * 1000, **timings, **info}
 
 
 # ─────────────────────────────── HTTP/2 ───────────────────────────────
 class H2Client:
     """One TLS connection with ALPN h2. Streams are opened with `request` and collected with `collect`."""
 
-    def __init__(self, port, tls, server_hostname, timeout=10.0, validate=True):
-        self.sock = connect(port, tls=tls, server_hostname=server_hostname, timeout=timeout)
+    def __init__(self, port, tls, server_hostname, timeout=10.0, validate=True, session=None):
+        self.connect_timings = {}
+        self.sock = connect(port, tls=tls, server_hostname=server_hostname, timeout=timeout,
+                            session=session, timings=self.connect_timings)
         self.alpn = self.sock.selected_alpn_protocol()
         if self.alpn != "h2":
             raise RuntimeError(f"ALPN {self.alpn!r}")

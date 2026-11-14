@@ -72,7 +72,10 @@ def check(cfg) -> dict:
                            "policy_status": policy.status if policy else None}
     report["problems"].extend(CM.validate_consistency(cfg, manifest))
     report["problems"].extend(CM.candidate_file_problems(manifest))
-    for name, python in (("canonical", cfg.canonical.bounds.python), ("model2", cfg.model2.python)):
+    interpreters = [("canonical", cfg.canonical.bounds.python)]
+    if manifest.model2 is not None and cfg.mode not in (C.V5_ONLY, C.FAST_PATH_V5):
+        interpreters.append(("model2", cfg.model2.python))
+    for name, python in interpreters:
         if not os.access(python, os.X_OK):
             report["problems"].append(f"{name}_python_missing")
     return report

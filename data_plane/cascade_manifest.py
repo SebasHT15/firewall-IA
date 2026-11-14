@@ -45,6 +45,7 @@ import canonical_request as CR
 import cascade as C
 import fast_path as fp
 import model2_policy as mp
+import request_guard as RG
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -58,7 +59,7 @@ ADAPTER_WEIGHTS = "adapter_model.safetensors"
 MANIFEST_STATUSES = ("EXPERIMENTAL", "APPROVED")
 PROFILE_STATUSES = ("EXPERIMENTAL", "APPROVED")
 DEPLOYMENT_PROFILES = ("lab", "production")
-AUTHORITATIVE_MODES = (C.V5_ONLY, C.CASCADE_ACTIVE)
+AUTHORITATIVE_MODES = (C.V5_ONLY, C.CASCADE_ACTIVE, C.FAST_PATH_V5)
 FAST_PATH_ACTIVATIONS = ("disabled", "experimental_fixture", "production")
 
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -415,6 +416,8 @@ def enablement_problems(manifest: ModelManifest, mode: str, deployment_profile: 
     problems = []
     if mode == C.CASCADE_ACTIVE and manifest.model2 is None:
         problems.append("model2_required_for_cascade_active")
+    if mode == C.FAST_PATH_V5 and manifest.model2 is not None:
+        problems.append("model2_forbidden_for_fast_path_v5")
     if deployment_profile == "production" and mode in AUTHORITATIVE_MODES:
         if manifest.status != "APPROVED":
             problems.append("manifest_not_approved_for_production")
@@ -592,6 +595,7 @@ class GatewayConfig:
     observability: ObservabilityConfig
     rollback_file: str
     probe_interval_seconds: float
+    request_guard_policy: object = None
 
 
 _LOOPBACK = ("127.0.0.1", "::1", "localhost")
@@ -619,7 +623,7 @@ def parse_gateway_config(doc, base_dir: str = REPO_ROOT) -> GatewayConfig:
     w = "cascade_gateway"
     _keys(doc, ("schema", "mode", "deployment_profile", "manifest", "listen", "v4", "v5", "model2",
                 "canonical", "admission", "framing", "fast_path", "observability", "rollback_file",
-                "probe_interval_seconds"), (), w)
+                "probe_interval_seconds"), ("request_guard",), w)
     if doc["schema"] != CONFIG_SCHEMA:
         raise ManifestError(f"{w}.schema must be {CONFIG_SCHEMA!r}")
     mode = doc["mode"]
@@ -663,10 +667,10 @@ def parse_gateway_config(doc, base_dir: str = REPO_ROOT) -> GatewayConfig:
     deadline = _num(s, "decision_deadline_seconds", f"{w}.admission")
     observe_pending = _int(s, "observe_max_pending", f"{w}.admission")
 
-    if deadline <= v5_timeout + model2.timeout_seconds:
+    stage_timeout_budget = v5_timeout + (0 if mode == C.FAST_PATH_V5 else model2.timeout_seconds)
+    if deadline <= stage_timeout_budget:
         # A deadline inside the stage timeouts would deny on slowness that a stage still tolerates.
-        raise ManifestError(f"{w}.admission.decision_deadline_seconds must exceed the V5 and Model 2 "
-                            "timeouts together")
+        raise ManifestError(f"{w}.admission.decision_deadline_seconds must exceed active-stage timeouts")
 
     framing = _parse_framing(doc["framing"], profile, f"{w}.framing")
     fast_path_cfg = _parse_fast_path(doc["fast_path"], profile, framing, base_dir, f"{w}.fast_path")
@@ -685,8 +689,22 @@ def parse_gateway_config(doc, base_dir: str = REPO_ROOT) -> GatewayConfig:
         # A hash of a low-entropy request can be inverted: it is lab evidence, not a log field.
         raise ManifestError(f"{where}.log_wire_sha256 is only valid in the lab profile")
 
+    guard_policy = None
+    if doc.get("request_guard") is not None:
+        if mode != C.FAST_PATH_V5 or profile != "lab":
+            raise ManifestError("request_guard requires FAST_PATH_V5 in lab")
+        gs = doc["request_guard"]
+        _keys(gs, ("policy_file", "policy_sha256", "application_contract_ref"), (), "request_guard")
+        if gs["application_contract_ref"] != fast_path_cfg.application_contract_ref:
+            raise ManifestError("request_guard must bind the same application as Fast Path")
+        try:
+            guard_policy = RG.load(_path(_str(gs, "policy_file", "request_guard"), base_dir),
+                _hex64(gs, "policy_sha256", "request_guard"), gs["application_contract_ref"])
+        except (ValueError, OSError, TypeError):
+            raise ManifestError("request_guard policy invalid or changed") from None
+
     return GatewayConfig(
-        mode=mode, deployment_profile=profile,
+        mode=mode, deployment_profile=profile, request_guard_policy=guard_policy,
         manifest_path=_path(_str(doc, "manifest", w), base_dir),
         listen_host=listen_host, listen_port=listen_port, v4_url=v4_url,
         v4_timeout_seconds=v4_timeout, v5_url=v5_url,
@@ -805,6 +823,8 @@ def load_gateway_config(path: str, base_dir: str = REPO_ROOT) -> GatewayConfig:
 def validate_consistency(cfg: GatewayConfig, manifest: ModelManifest) -> tuple:
     """Cross-document checks. Closed reasons; empty means the two documents fit together."""
     problems = list(enablement_problems(manifest, cfg.mode, cfg.deployment_profile))
+    if cfg.mode == C.FAST_PATH_V5 and cfg.fast_path.activation == "disabled":
+        problems.append("fast_path_required_for_fast_path_v5")
     if cfg.canonical.max_received_body > manifest.canonical.max_decoded_body:
         problems.append("max_received_body_over_max_decoded_body")
     return tuple(problems)
