@@ -1,0 +1,121 @@
+{
+  "schema": "v51-source-partition-proposal/v1",
+  "status": "DRAFT_NOT_STAGE4_OR_TRAINING_AUTHORIZATION",
+  "seed": 20261030,
+  "source_registry_sha256": "8443bde3dd75dadef84f6a9600b5cf068e273f3acfb562631e91a0fbf2ed4a95",
+  "original_TRAIN_meta_sha256": "994d3a8cfc7c9c640c502c674ea62583e33cbe5e37175ac19aec9971b8de8072",
+  "original_TRAIN_rows": 3080,
+  "original_TRAIN_family_keys": 159,
+  "selected_new_values": 122,
+  "new_component_groups": 40,
+  "new_groups_anchored_to_old_TRAIN": 0,
+  "artifacts": [
+    {
+      "split": "TRAIN_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/TRAIN_CANDIDATE.source.jsonl",
+      "sha256": "4137f8a6901a0a1cfad152dc0ea252fc3fa9bd94a947d02b0628aa4c3494af1a",
+      "source_rows": 86,
+      "components": 18,
+      "categories": {
+        "Server Side Request Forgery": 64,
+        "Open Redirect": 22
+      }
+    },
+    {
+      "split": "VALIDATION_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/VALIDATION_CANDIDATE.source.jsonl",
+      "sha256": "5e51632ff5645be94a65192511b3503c7d2f14a333da5250f9a6295fab76ed0f",
+      "source_rows": 18,
+      "components": 15,
+      "categories": {
+        "Server Side Request Forgery": 16,
+        "Open Redirect": 2
+      }
+    },
+    {
+      "split": "RESERVE_CANDIDATE",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/RESERVE_CANDIDATE.source.jsonl",
+      "sha256": "2691d905af1d2636c035b27fe38c4b700326c3514e70568644ebd3a3fccf2f3a",
+      "source_rows": 18,
+      "components": 7,
+      "categories": {
+        "Server Side Request Forgery": 15,
+        "Open Redirect": 3
+      }
+    }
+  ],
+  "new_template_assignments": {
+    "320b817407a8ef2d243aa53c0cda1cae905ae823c96428f6c0d3700be4bc5d91": {
+      "name": "v51-remote-thumbnail",
+      "cluster": "v51-remote-thumbnail",
+      "carrier": "query",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "bb5f3a2d73fb1e0cd2a80140bf5d86a9cbcffc5eec266527ecb6145638309547": {
+      "name": "v51-feed-inspection",
+      "cluster": "v51-feed-inspection",
+      "carrier": "query",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "869894be9520dbb671ae1dcf74d838c94f9b8358673aeef76a8b30d24070020f": {
+      "name": "v51-source-task",
+      "cluster": "v51-source-task",
+      "carrier": "query",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "24f6eb31a7f7c8263f094d35d58a9a8a1a7c0d03b1a3e2d12a165673b523dc54": {
+      "name": "v51-remote-media",
+      "cluster": "v51-remote-media",
+      "carrier": "form",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "2eebed13fdac096c6ccc821f1f0378568aabab899f78960dac28ed9d18cce0e2": {
+      "name": "v51-catalog-connect",
+      "cluster": "v51-catalog-connect",
+      "carrier": "form",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "37b49ca1463ce205ee2f486cf82485b7cfcf2f4b643a2e363deebbbb1d0632fe": {
+      "name": "v51-channel-address",
+      "cluster": "v51-channel-address",
+      "carrier": "form",
+      "split": "RESERVE_CANDIDATE"
+    },
+    "02104eef43bf29d0ef4aafa11903b775ad023f0c3b7ce546a636b1cd96f5e7ca": {
+      "name": "v51-asset-inspection",
+      "cluster": "v51-asset-inspection",
+      "carrier": "json",
+      "split": "TRAIN_CANDIDATE"
+    },
+    "c50993273e563b3d9798700f66c58c423fbe905fd23fd3c400ff4728664a5cb4": {
+      "name": "v51-automation-hook",
+      "cluster": "v51-automation-hook",
+      "carrier": "json",
+      "split": "VALIDATION_CANDIDATE"
+    },
+    "49c0a6938408b5b1faa113741e40cfb509d98d1d2584359ba1d0546708c42811": {
+      "name": "v51-export-target",
+      "cluster": "v51-export-target",
+      "carrier": "json",
+      "split": "RESERVE_CANDIDATE"
+    }
+  },
+  "checks": {
+    "original_TRAIN_preserved": true,
+    "old_VALIDATION_not_reused_for_training": true,
+    "source_family_disjoint": true,
+    "original_4gram_near_duplicate_pairs_across_splits": 0,
+    "template_IDs_new_vs_old_TRAIN_disjoint": true
+  },
+  "limitations": [
+    "Anchoring currently uses original TRAIN row family IDs; pre-merge/value-entry full checks still required in final stage-4 binding",
+    "Diagnostic holdouts have few components; no D18/D77 or rare-FPR accreditation",
+    "Original old protected sets are unopened; new RESERVE_CANDIDATE now sealed before training/inference",
+    "No final rows generated, no trained successor and no approved source/recipe/auth record"
+  ],
+  "remaining": [
+    "Stage-4 row/meta generation with actual shared encoding",
+    "Full SPL/template/value/pair/shortcut/H1 checks",
+    "Contract-bound source/owner admission and commit before training"
+  ]
+}

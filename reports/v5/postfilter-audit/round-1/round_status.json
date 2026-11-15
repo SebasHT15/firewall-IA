@@ -1,0 +1,87 @@
+{
+  "adjudication": {
+    "pending": 33,
+    "vp_rule": {
+      "applied": 69,
+      "approved": "owner 2026-10-19",
+      "id": "vp_split_to_probably_correct/v1",
+      "trace": "adjudication_rule_applied.jsonl"
+    },
+    "workbook_part1": {
+      "items": 17,
+      "path": "adjudication/workbook_part1.csv",
+      "sha256": "e208decff9275f4993abab1e11acb405f5f7bb2ec268220e89ae70e37f248fe3"
+    },
+    "workbook_part2": {
+      "items": 16,
+      "status": "not generated until the blind human review is complete (items inside the human subsample)"
+    }
+  },
+  "agreement": {
+    "disagreements": {
+      "by_category": {
+        "CRLF Injection": 1,
+        "Command Injection": 4,
+        "NoSQL Injection": 2,
+        "Open Redirect": 7,
+        "SQL Injection": 2,
+        "Server Side Template Injection": 2,
+        "XPath Injection": 1,
+        "XSS Injection": 12,
+        "path_file_access": 2
+      },
+      "needs_adjudication": 33,
+      "total": 102,
+      "vp_split_rule_candidate": 69
+    },
+    "discrepancy_sheet": {
+      "path": "discrepancy_sheet.jsonl",
+      "sha256": "2edbb8502d80e2ae882b0f76bca73f301313dc4ee151f5784945387d53aa2c36"
+    },
+    "exact": 351,
+    "file": "agreement_report.json",
+    "kappa_incorrect_vs_not": 0.8978,
+    "kappa_usable_vs_not": 0.8391,
+    "note": "LLM-LLM agreement, not human validation",
+    "paired": 453,
+    "status": "COMPLETE"
+  },
+  "annotation": {
+    "a1": {
+      "file": "annotations_a1.jsonl",
+      "model": "claude-sonnet-5-5",
+      "rows": 453,
+      "sha256": "ea956073354434b6bdf5d182d3ded8e1c552f56d12f46f4ff6d44fb4351df5a7"
+    },
+    "a2": {
+      "file": "annotations_a2.jsonl",
+      "model": "claude-haiku-5-5",
+      "preregistration": "a2_preregistration.json",
+      "rows": 453,
+      "sha256": "c497d098a23dcd5705ba1c27461f7982b95a737674ab595be1f886448a1a1863"
+    },
+    "supplementary_opus55_partial": {
+      "model": "claude-opus-5-5",
+      "rows": 377,
+      "slot": "annotation_a2_opus55_partial/",
+      "use": "descriptive only, not in the gate"
+    }
+  },
+  "gate": {
+    "FAIL": 0,
+    "PASS": 0,
+    "PENDING_ADJUDICATION": 9,
+    "PENDING_HUMAN_REVIEW": 1,
+    "note": "no category PASS, no payload VERIFIED"
+  },
+  "human_review": {
+    "labelled": 0,
+    "required": 200,
+    "sheet": "human_review/human_labels.csv",
+    "status": "NOT STARTED; must be done by a real person, blind (see blindness caveat)"
+  },
+  "round": 1,
+  "status": "PENDING_HUMAN_REVIEW_AND_ADJUDICATION",
+  "status_detail": "both LLM annotations complete (a1 claude-sonnet-5-5 453/453, a2 claude-haiku-5-5 453/453); 102 disagreements await an identified adjudicator (V/P rule not approved); blind human review 0/200",
+  "target_status_when_annotation_complete": "PENDING_HUMAN_REVIEW_AND_ADJUDICATION"
+}

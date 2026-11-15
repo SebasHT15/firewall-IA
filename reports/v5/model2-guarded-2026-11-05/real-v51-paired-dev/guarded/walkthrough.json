@@ -1,0 +1,223 @@
+{
+  "duration_s": 48.80826926231384,
+  "layers": {
+    "attack_effect": {
+      "needs": "an authorized isolated application with an effect oracle per family; see docs/cascade_candidate_handoff.md",
+      "status": "NOT_MEASURED",
+      "why": "The destination is an inert sink. It records exact bytes and answers 200, so a delivered request proves delivery and never that an attack worked or failed."
+    },
+    "classification": {
+      "note": "References are authored expectations, not confirmed attacks. JWT and CSRF need state. No threshold, candidate or set was selected from this.",
+      "population": "authored_paired_dev",
+      "status": "MEASURED_ON_DEV",
+      "summary": {
+        "L1_agrees_with_reference": 409,
+        "L2_conformant": 434,
+        "L3_outcomes": {
+          "reference_allow_delivered": 215,
+          "reference_allow_not_delivered": 6,
+          "reference_block_delivered": 19,
+          "reference_block_not_delivered": 194
+        },
+        "by_family": {
+          "benign_probe": {
+            "ALLOW": 19,
+            "BLOCK": 1
+          },
+          "benign_twin": {
+            "ALLOW": 196,
+            "BLOCK": 5
+          },
+          "command_injection": {
+            "ALLOW": 2,
+            "BLOCK": 32
+          },
+          "csrf": {
+            "ALLOW": 4
+          },
+          "jwt": {
+            "ALLOW": 6
+          },
+          "open_redirect": {
+            "ALLOW": 3,
+            "BLOCK": 5
+          },
+          "other_attack": {
+            "ALLOW": 1,
+            "BLOCK": 11
+          },
+          "path_file_access": {
+            "ALLOW": 1,
+            "BLOCK": 34
+          },
+          "sql_injection": {
+            "ALLOW": 2,
+            "BLOCK": 34
+          },
+          "ssrf": {
+            "BLOCK": 34
+          },
+          "ssti": {
+            "BLOCK": 10
+          },
+          "xss": {
+            "BLOCK": 34
+          }
+        },
+        "by_reference_kind": {
+          "authored_attempt_needs_state_context": {
+            "ALLOW": 10,
+            "reference_block_delivered": 10
+          },
+          "authored_benign": {
+            "ALLOW": 215,
+            "BLOCK": 6,
+            "reference_allow_delivered": 215,
+            "reference_allow_not_delivered": 6
+          },
+          "authored_constructed_attempt": {
+            "ALLOW": 9,
+            "BLOCK": 194,
+            "reference_block_delivered": 9,
+            "reference_block_not_delivered": 194
+          }
+        },
+        "cascade_routes": {
+          "None": 434
+        },
+        "cases": 434,
+        "http_statuses": {
+          "200": 234,
+          "403": 200
+        },
+        "no_response": 0,
+        "observations": {
+          "None": 434
+        },
+        "out_of_vocabulary_families": [
+          "ssrf",
+          "open_redirect",
+          "jwt",
+          "csrf",
+          "other_attack"
+        ],
+        "reasons": {
+          "None": 234,
+          "model2_block": 41,
+          "v5_block": 159
+        },
+        "routes": {
+          "model2": 41,
+          "v5": 393
+        }
+      }
+    },
+    "mechanism": {
+      "checks": [
+        {
+          "check": "manifest accepted",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest is a v2 candidate",
+          "group": "delivery",
+          "observed": {
+            "schema": "firewall-cascade-model-manifest/v2"
+          },
+          "passed": true
+        },
+        {
+          "check": "adapter, recipe and decoder bytes match",
+          "group": "delivery",
+          "observed": {
+            "problems": []
+          },
+          "passed": true
+        },
+        {
+          "check": "recipe readable as a V5 contract",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest template fingerprint equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest vocabulary equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest token budget B equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest max_length equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest margin equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest base model equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "manifest base revision equals the recipe",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "Model 2 and its policy are named",
+          "group": "delivery",
+          "observed": {},
+          "passed": true
+        },
+        {
+          "check": "every case answered",
+          "group": "classification",
+          "observed": {
+            "cases": 434
+          },
+          "passed": true
+        },
+        {
+          "check": "L2 conformant on every case",
+          "group": "classification",
+          "observed": {
+            "cases": 434,
+            "conformant": 434
+          },
+          "passed": true
+        }
+      ],
+      "failed": 0,
+      "status": "PASSED",
+      "total": 14
+    }
+  },
+  "manifest_id": "v51-model2-guarded-lab-20261105",
+  "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+  "schema": "firewall-candidate-walkthrough/v1",
+  "scope": "Reverse proxy, HTTP/1.1 cleartext, inert sink. Not a deployment, threshold, D70, P9/R3 or Fast Path approval.",
+  "started_utc": 1793894459.9778852,
+  "v4": "not used; the return to V4 is not exercised",
+  "v5": "real"
+}

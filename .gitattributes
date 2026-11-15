@@ -1,2 +1,15 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Preserve exact captured experiment console output; trailing padding is evidence, not source style.
+reports/v5/model2-guarded-2026-11-05/real-v51-demo/guarded.stdout.txt whitespace=-blank-at-eol
+reports/v5/model2-guarded-2026-11-05/real-v51-demo/v51_only.stdout.txt whitespace=-blank-at-eol
+reports/v5/model2-guarded-2026-11-05/real-v51-paired-dev/defer_only.stdout.txt whitespace=-blank-at-eol
+reports/v5/model2-guarded-2026-11-05/real-v51-paired-dev/guarded.stdout.txt whitespace=-blank-at-eol
+
+# Preserve the original generated historical matrices, including their final blank line.
+reports/v5/challenge-apps-integration-2026-11-05/MATRIX.md whitespace=-blank-at-eof
+reports/v5/challenge-apps-premeasurement-2026-11-05/MATRIX.md whitespace=-blank-at-eof
+
+# Retain the delivered CSV bytes (including CRLF) alongside its recorded evidence.
+reports/v5/flag-acquisition-2026-11-14/run-1/metrics_table.csv -text whitespace=cr-at-eol

@@ -693,6 +693,31 @@ class TestInferenceBehaviourPreserved(unittest.TestCase):
                                    "GET / HTTP/1.1", "cpu")
         self.assertFalse(m["stopped_on_eos"])
 
+    def test_ended_with_eos_is_read_from_the_token_ids(self):
+        import torch
+
+        class Eos(_FakeModel):
+            def __init__(self, tail, n=9):
+                super().__init__(n)
+                self.tail = tail
+
+            def generate(self, **kwargs):
+                n = kwargs["input_ids"].shape[1]
+                return torch.tensor([[1] * n + [5] * (self.n_new - len(self.tail)) + self.tail])
+
+        def ended(mdl):
+            return core.classify_timed(self.tok, mdl, "GET / HTTP/1.1", "cpu")[1]["ended_with_eos"]
+
+        self.assertTrue(ended(Eos([2])))                              # stopped on EOS
+        self.assertFalse(ended(Eos([])))                              # no EOS: cut
+        cap = core.MAX_NEW_TOKENS
+        self.assertFalse(ended(Eos([], n=cap)))                       # token cap, no EOS
+        self.assertTrue(ended(Eos([2], n=cap)))                       # EOS is the very last allowed token
+        # stopped_on_eos keeps its length-based meaning (recorded benchmarks).
+        _, m = core.classify_timed(self.tok, Eos([2], n=cap), "GET / HTTP/1.1", "cpu")
+        self.assertFalse(m["stopped_on_eos"])
+        self.assertTrue(m["ended_with_eos"])
+
     def test_all_stages_are_timed(self):
         _, m = core.classify_timed(self.tok, self.mdl, "GET / HTTP/1.1", "cpu")
         for k in ("prompt_build_ms", "tokenize_ms", "transfer_ms", "generate_ms",

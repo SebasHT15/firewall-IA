@@ -1,0 +1,52 @@
+{
+  "schema": "firewall-local-stack/v1",
+  "mode": "CASCADE_ACTIVE",
+  "manifest": {
+    "path": "reports/v5/model2-guarded-2026-11-05/manifest.EXPERIMENTAL.json",
+    "sha256": "d0f4e0cff6d4394b4d895a2c7aa665f36a85b4819a8800fc3ff6cb646a800e65"
+  },
+  "ports": {
+    "front_tls": 8443,
+    "front_status": 8444,
+    "gateway": 8080,
+    "guard": 8081,
+    "admin": 8090,
+    "v5": 8001
+  },
+  "front": {
+    "image": "nginx:1.25-alpine",
+    "http2": true,
+    "workers": 2,
+    "max_body": "64k",
+    "upstream_keepalive": 16,
+    "upstream_timeout": "10s",
+    "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00"
+  },
+  "app": {
+    "image": "fwlab-challenge/catp1cs:lab",
+    "image_id": "sha256:da7f29dbad25462058367b08824afe876965aa39f1a06d2170805b47cce28f67",
+    "port": 1337,
+    "hostname": "catp1cs.fwlab.test"
+  },
+  "gateway": {
+    "body_size_limit": "16m",
+    "v5_timeout_seconds": 3.0,
+    "decision_deadline_seconds": 5.0,
+    "max_inflight": 8,
+    "max_waiting": 16
+  },
+  "fast_path": {
+    "policy_file": "reports/v5/challenge-apps-premeasurement-2026-11-05/real-v51-fast-path/CatP1cs/CatP1cs.guarded.fast-path.stack.json.fast-path.json",
+    "policy_sha256": "88b0cb7b346fda487252cd3f0ddfe1214cc4600236f62e8217267e182c33bb1f",
+    "application_contract_ref": "sec-challenges@be8e4e8f1c6aa12a17430146d569870d96d43dd5:Web/CatP1cs:/static/img/favicon.ico",
+    "audit_sample_rate": 0.0
+  },
+  "crs": {
+    "image": "owasp/modsecurity-crs:4.25.2-nginx-alpine-202610180210-lts",
+    "port": 8460,
+    "blocking_paranoia": 1,
+    "anomaly_inbound": 5,
+    "anomaly_outbound": 4,
+    "image_id": "sha256:57fd215e2894638a02d235f88510fa2a129d64740f0edb6798ca0e4aa2f02457"
+  }
+}

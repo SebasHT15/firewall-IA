@@ -1,0 +1,298 @@
+{
+  "app": "Inf3ct",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "guarded",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 1243,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 230,
+      "check": "benign GET /log",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "asset": "/static/img/anon.png",
+      "body_len": 52999,
+      "check": "exact static asset FAST_ALLOW skips Model 2 and V5",
+      "last_decision": {
+        "applied": "FORWARD",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "FORWARD",
+        "cascade_stage": "fast_path",
+        "correlation_id": "916ddcf8de28",
+        "deciding_stage": "fast_path",
+        "delivered_bytes": 62,
+        "fast_path": {
+          "decision": "FAST_ALLOW",
+          "policy_id": "sec-challenges-Inf3ct-static-v1",
+          "policy_sha256": "b6930b04dbdaa051fa4030c2b3addddd8450070095c3fa55e261f886ea10dc66",
+          "policy_status": "PROPOSED",
+          "reasons": [],
+          "rule_id": "exact-static-asset"
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 1.3256060010462534,
+        "http_status": null,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": null,
+        "reason": null,
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.005082001734990627,
+          "binding": 0.08659900049678981,
+          "canonical": 0.6024440008332022,
+          "canonical_with_wait": 0.6567290001839865,
+          "fast_path": 0.09159899855148979
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.09159899855148979
+        },
+        "utc": 1793899341.4919357,
+        "v4": null,
+        "v5": null,
+        "v5_service": null,
+        "wire_sha256": "f57ed70513c1ddbcf911f4a68079230c938a73f22a62ed32467d233e00c2f3bc"
+      },
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "query on static asset cannot FAST_ALLOW",
+      "last_decision": {
+        "applied": "FORWARD",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "FORWARD",
+        "cascade_stage": "v5",
+        "correlation_id": "4431cf6c9aa9",
+        "deciding_stage": "v5",
+        "delivered_bytes": 66,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": "sec-challenges-Inf3ct-static-v1",
+          "policy_sha256": "b6930b04dbdaa051fa4030c2b3addddd8450070095c3fa55e261f886ea10dc66",
+          "policy_status": "PROPOSED",
+          "reasons": [
+            "NO_RULE_MATCHED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 2.952843002276495,
+        "http_status": null,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.18056157414803858,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": null,
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.0035729972296394408,
+          "binding": 0.06793300053686835,
+          "canonical": 0.48329900164389983,
+          "canonical_with_wait": 0.5172879973542877,
+          "fast_path": 0.062406001234194264,
+          "model2": 0.8586049989389721,
+          "v5": 1.117896998039214
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.062406001234194264,
+          "model2_ms": 0.8586049989389721,
+          "v5_ms": 1.117896998039214
+        },
+        "utc": 1793899341.948904,
+        "v4": null,
+        "v5": {
+          "decision": "ALLOW",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "7df2006232eb733712f7fe0cc004365d6fbeb4cc2d5a9f5bb406010782ca884a"
+      },
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: /log fresh at up, then stores this run's marker",
+      "log_fresh_at_up": true,
+      "marker_stored": true,
+      "note": "in-memory log; resets per container/up",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "3ec22e7a643f",
+        "deciding_stage": "v5",
+        "delivered_bytes": 50,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": "sec-challenges-Inf3ct-static-v1",
+          "policy_sha256": "b6930b04dbdaa051fa4030c2b3addddd8450070095c3fa55e261f886ea10dc66",
+          "policy_status": "PROPOSED",
+          "reasons": [
+            "NO_RULE_MATCHED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 3.8440290009020828,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.24540937527019235,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.004663001163862646,
+          "binding": 0.08600199726060964,
+          "canonical": 0.5187280003156047,
+          "canonical_with_wait": 0.5699169996660203,
+          "fast_path": 0.0759089998609852,
+          "model2": 0.8306729978357907,
+          "v5": 1.5579600003547966
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.0759089998609852,
+          "model2_ms": 0.8306729978357907,
+          "v5_ms": 1.5579600003547966
+        },
+        "utc": 1793899342.4813442,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "45b620d75bc05128099b1829ec867b0568940de0aba3d638871637ae795f42f6"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app Inf3ct --arm guarded --out reports/v5/fastpath-six-apps-2026-11-05/Inf3ct/Inf3ct.guarded.fast-path.stack.json --fast-path",
+    "up --app Inf3ct --arm guarded --config reports/v5/fastpath-six-apps-2026-11-05/Inf3ct/Inf3ct.guarded.fast-path.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/fastpath-six-apps/Inf3ct --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/fastpath-six-apps/Inf3ct",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/fastpath-six-apps/Inf3ct"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": true,
+  "large_responses": [],
+  "pass": true,
+  "utc": 1793899338.3449671,
+  "v5": "double"
+}

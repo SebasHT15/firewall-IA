@@ -1,0 +1,5867 @@
+{
+ "analysis_version": "v5-benign-coverage-audit/v1",
+ "base_commit": "56020455df50ebb3dae9db67ad58294689dc7214",
+ "benign_rows_by_source": {
+  "csic_benign": 5910,
+  "synthetic_benign": 6657
+ },
+ "benign_support_status_by_dimension": {
+  "anywhere": {
+   "ABSENT": 1
+  },
+  "char": {
+   "ABSENT": 9,
+   "SCARCE": 6,
+   "SUPPORTED": 6
+  },
+  "encoding": {
+   "ABSENT": 11,
+   "SCARCE": 3,
+   "SUPPORTED": 6
+  },
+  "envelope": {
+   "ABSENT": 1,
+   "SCARCE": 3,
+   "SUPPORTED": 26
+  },
+  "field": {
+   "SUPPORTED": 12
+  },
+  "form": {
+   "ABSENT": 1,
+   "SCARCE": 1,
+   "SUPPORTED": 4
+  },
+  "json": {
+   "ABSENT": 7,
+   "SUPPORTED": 4
+  },
+  "lexical": {
+   "ABSENT": 23,
+   "SCARCE": 10,
+   "SUPPORTED": 8
+  },
+  "structure": {
+   "ABSENT": 9,
+   "SCARCE": 7,
+   "SUPPORTED": 39
+  },
+  "value_char": {
+   "ABSENT": 2,
+   "SCARCE": 1,
+   "SUPPORTED": 6
+  }
+ },
+ "branch": "research/v5-benign-coverage-audit",
+ "dev_contrast": {
+  "dev57": {
+   "allow_with_three_or_more_uncovered_content_markers": 9,
+   "allow_with_three_or_more_uncovered_examples": [
+    {
+     "first_line": "POST /api/orders HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "3afb15b9c2cb295509731b0c1e47d37d48a5eca355e4b7f65c5fcbde7b22f893",
+     "uncovered_content": [
+      "json:array_inside",
+      "json:depth=3+",
+      "json:nested_object",
+      "json:number",
+      "json:top_keys=2",
+      "structure:body_params=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "POST /api/login HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "5e4b70a5351bea7f301be82bbda641334911174a1eaa0c692dd3087bc4ba4c09",
+     "uncovered_content": [
+      "char:!",
+      "json:top_keys=2",
+      "structure:body_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "POST /api/contact HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "65df5cb2891adfb7eaa347e335cf90b09173f604cd2c7cf7ce954f5c9f366eba",
+     "uncovered_content": [
+      "char:<",
+      "char:>",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3",
+      "value_char:&"
+     ]
+    },
+    {
+     "first_line": "GET /search?q=how+to+select+a+good+password&lang=en HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "7284eb562f252c18b639e6b0f6583b801c3c9b9268d0118d5c2e0332a9299a55",
+     "uncovered_content": [
+      "lexical:select",
+      "structure:query_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "GET /api/products?category=electronics&page=1&sort=price_asc HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "9a3baaff5f7b3f0e72f0ad3dd6bd53fc597038b3e57c9b81616bd4260b24cc3c",
+     "uncovered_content": [
+      "structure:query_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "GET /api/reports?filter=active&sort=desc&limit=100 HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "cbbdd0110ad7ec9d7331d2aec19f004175303a4db4974966fd7926e56f878c94",
+     "uncovered_content": [
+      "structure:query_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "GET /api/items?ids=1,2,3,4,5&fields=id,name,price HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "cebb3ba8e16f240e2fd6683ca24888d5b4751f112247179da7882a4aef7ade60",
+     "uncovered_content": [
+      "structure:query_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "POST /api/users HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "dedb3b3963102eb23c830c3fbea59311a68f863ba61aa93d7714192801635453",
+     "uncovered_content": [
+      "json:bool",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "PUT /api/users/99/settings HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "f0277dc4052956e712b4b558f059d3ffa564fcab915621784135b2383953cc5b",
+     "uncovered_content": [
+      "json:bool",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:path_depth=4",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    }
+   ],
+   "benign_unique_texts": 145,
+   "benign_v4": {
+    "ALLOW": 102,
+    "BLOCK": 43
+   },
+   "block_with_zero_uncovered_content_markers": [
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "0f755ef140f13b4957a56a330869d54be7ff64be9180d31fd9d154855ce95d16",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "HTTP parameter pollution detected"
+     ]
+    },
+    {
+     "first_line": "GET /products?id=42 HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "16ab65ffd2e104e79c8e0b29b7f94afe94fd3de4540ac989161212f59df6a854",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "HTTP parameter pollution detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "21c52c55e9b8714fe555283769aaaa5a88c9a821e9102da0559b28a803e562fe",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "220a86377edd289f8a9fc1579a2f102b5d07d7aabe3d282ddb968a88ee8bbb41",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "2e1432d5c57170fe478a619ab46b74fa8db4383b0e29cc141b60d8ce8dbe40b6",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "File inclusion attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "358dcc3ff04212ab7543966c7bc9f1424e98d86d8ca5b750302df571d0334390",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "375be2a05b7bf3ecd3ca102a2c6c90a6dc545dcbc121cea6d5987a8f2a668eb3",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "4e6fde093471aa4333556c859071ea9b864f014d0bc96df0e79df489aae44917",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "572771ea8933d9f4f99c4e29c7186b1640246cd66eba664ef42829de6fabb950",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "5bcf4195dab453702dae8d62740bcddaa28cf5d64394881e071a196b2c534fa4",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Open redirect payload detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "62cc91e5800891a3783c2017fb0dc36a721d87a1d8681afef7b757fa8a78b849",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "6dfae2a338db85c5f6d09bff6f7b114a974e09934649d38652df9b82c0efdc78",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "72d901c5a04924fbb0ea425aefa50b81e5086a9381d337ba59767a52af75cdeb",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "78ba2971d84ce37636140830f3c161c117c3fce3a0927e6e01be80e4c1fc5478",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "80d57a601c97464a77c8d3c53a14f40265f6563712cc248b3040e3905991bef0",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Open redirect payload detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "82c964384eec7ca02ca8de1fdc64409886e2436f549d1e740a55d94f0329af66",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "94d001de5526e4992547ec04793ce3495c1a10f3002bfc3bef299b9bda731fbc",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Open redirect payload detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "95ff5077623a1cf9de2f1ea78cc265cd26f3604174d6003d3224d7e49524ee10",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /favicon.ico HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "9799f5f92d8e9e3f00906c0883ae55e4cd835360949ee70e1c5971adfefd4d02",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "File inclusion attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "9afb66dc7bee49028f32d642bbda945fdeebf3cf82f124308345dda7379969c1",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "9d0858df0606372e9df848e0c1cb2207270f09738fd894704f8a507d77a8da71",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "9f9479b2b8236b6260d497979d9b4e7a38a233261d17cf028362de6463a0bec2",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "a717f9f9e88ef48c1161bbd341f3f3dd89222d272a92ea01c311a63abd698354",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "b136e6ad557a153d28891c6ec5a82ec2ddc8d65a6b82b0a38d51806ebe94b9af",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "b4b174cb11ca765a7217284f0e1990439b9689cf03c4caf436d26693dde37d51",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "d912dca2da9fa7ba32ad91c17b1df11c4ee109d2ef63036a58641ba6fd8f6e03",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "dd1af0aafb860a1cde45ed560523c37ef94e07abaea9f11b3d0fad964b16ba9c",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /api/products HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "dea225b060c50ce321a7e5631beaa7e6a0516b4105b178e1dfcd9c166de7f476",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "HTTP parameter pollution detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "e18c8f699aba7219175d04f057c3f5cf5ce1531e1012e68394ca7235ee7c4ed5",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "f09cb3a44d8397486876928d4b92a74e8b447ed96f4c004cb02f2930783d2799",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "f458ceb985c112e41df675d39021b4d609ea1cdd08f0cd88a7a4de104284de35",
+     "uncovered_envelope": [
+      "anywhere:internal_address_literal",
+      "envelope:has_proxy-connection",
+      "envelope:host_loopback_ip",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /index.html HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "f6b2c5ff885022de121935b217b3c651e759ee95f1ac98e1c4b3c057277dbc6c",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /favicon.ico HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "f8bb6fd4cf0b0a66aa4cb7ddb0017338a07982ae18a58fedf127cb6cd9d894b8",
+     "uncovered_envelope": [
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "File inclusion attack detected"
+     ]
+    },
+    {
+     "first_line": "GET /favicon.ico HTTP/1.1",
+     "source": "dev57",
+     "text_sha256": "fa2e3935b167e9e57aafdf7db8eabde2a1e51c8570722d91d74b3e60e87f157c",
+     "uncovered_envelope": [
+      "envelope:has_proxy-connection",
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "File inclusion attack detected"
+     ]
+    }
+   ],
+   "by_uncovered_content_markers": {
+    "0": {
+     "ALLOW": 91,
+     "BLOCK": 34
+    },
+    "1": {
+     "ALLOW": 2,
+     "BLOCK": 4
+    },
+    "3+": {
+     "ALLOW": 9,
+     "BLOCK": 5
+    }
+   },
+   "by_uncovered_envelope_markers": {
+    "0": {
+     "ALLOW": 20,
+     "BLOCK": 6
+    },
+    "1": {
+     "ALLOW": 46,
+     "BLOCK": 2
+    },
+    "2+": {
+     "ALLOW": 36,
+     "BLOCK": 35
+    }
+   },
+   "content_marker_sets": 27,
+   "content_marker_sets_with_mixed_v4_decisions": 4,
+   "inconsistent_v4_texts": 0,
+   "input": "reports/hybrid/v4-analyzer-disagreement-v1/records.jsonl",
+   "mixed_sets_detail": [
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /about.html HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /about.html HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /about.html HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /about.html HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /favicon.ico HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /index.html HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /index.html HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /index.html HTTP/1.1",
+       "v4": "ALLOW"
+      }
+     ],
+     "v4": {
+      "ALLOW": 64,
+      "BLOCK": 32
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /api/me HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /api/products HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /api/products HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /api/products HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /api/status HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /api/products HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 5,
+      "BLOCK": 1
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET / HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET / HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET / HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET / HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 1,
+      "BLOCK": 3
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /products?id=42 HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?id=42 HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?id=42 HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?id=42 HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 3,
+      "BLOCK": 1
+     }
+    }
+   ],
+   "per_uncovered_marker": {
+    "anywhere:internal_address_literal": {
+     "ALLOW": 10,
+     "BLOCK": 23,
+     "train_attack_generator_groups": 74,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "char:!": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 481,
+     "train_benign_generator_groups": 19,
+     "train_benign_support": "SCARCE"
+    },
+    "char:'": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 2065,
+     "train_benign_generator_groups": 19,
+     "train_benign_support": "SCARCE"
+    },
+    "char:<": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 2143,
+     "train_benign_generator_groups": 29,
+     "train_benign_support": "SCARCE"
+    },
+    "char:>": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 2172,
+     "train_benign_generator_groups": 29,
+     "train_benign_support": "SCARCE"
+    },
+    "envelope:has_proxy-connection": {
+     "ALLOW": 35,
+     "BLOCK": 29,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "envelope:host_loopback_ip": {
+     "ALLOW": 10,
+     "BLOCK": 23,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "envelope:host_port=80": {
+     "ALLOW": 2,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "envelope:host_port=other": {
+     "ALLOW": 74,
+     "BLOCK": 37,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:array_inside": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 1,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:bool": {
+     "ALLOW": 2,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:depth=3+": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 1,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:nested_object": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 7,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:number": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:top_keys=2": {
+     "ALLOW": 2,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 6,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:top_keys=3": {
+     "ALLOW": 3,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:drop": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 105,
+     "train_benign_generator_groups": 2,
+     "train_benign_support": "SCARCE"
+    },
+    "lexical:select": {
+     "ALLOW": 1,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 416,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:table": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 160,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:union": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 174,
+     "train_benign_generator_groups": 1,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:body_params=2": {
+     "ALLOW": 2,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 7,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:body_params=3": {
+     "ALLOW": 3,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 151,
+     "train_benign_generator_groups": 7,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:path_depth=0": {
+     "ALLOW": 1,
+     "BLOCK": 3,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:path_depth=4": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 1,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:query_params=2": {
+     "ALLOW": 2,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 5,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:query_params=3": {
+     "ALLOW": 2,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 146,
+     "train_benign_generator_groups": 4,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:rf_total_param_count=2": {
+     "ALLOW": 3,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 7,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:rf_total_param_count=3": {
+     "ALLOW": 5,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 297,
+     "train_benign_generator_groups": 11,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:total_params=2": {
+     "ALLOW": 4,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 12,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:total_params=3": {
+     "ALLOW": 5,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 297,
+     "train_benign_generator_groups": 11,
+     "train_benign_support": "SCARCE"
+    },
+    "value_char:&": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 492,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    }
+   },
+   "sha256": "2c297fb186769b4a227ca4d749115bec781cc578763036ed4188b50ed873f549",
+   "texts_in_mixed_sets": 110,
+   "unique_texts": 254
+  },
+  "dev60": {
+   "allow_with_three_or_more_uncovered_content_markers": 48,
+   "allow_with_three_or_more_uncovered_examples": [
+    {
+     "first_line": "POST /checkout HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "075922d428f11eac23db3b700e4b38038ab8e74e702fe7cbecf65135739d9af7",
+     "uncovered_content": [
+      "char:'",
+      "encoding:%27",
+      "form:body_fields=2",
+      "structure:body_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "POST /cart HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "0d474de8e9f3d12965a53afa973701d202ddefa4e825c9f86c62a211e8181f1a",
+     "uncovered_content": [
+      "form:body_fields=2",
+      "structure:body_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=home&sort=id&page=1&limit=10 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "1024085ae90b5059edf90d2005aefe2dd329156d83a3195d75385c50189aaaff",
+     "uncovered_content": [
+      "structure:query_params=4",
+      "structure:rf_total_param_count=4",
+      "structure:total_params=4"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=electronics&sort=id&page=1&limit=10 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "14409353a4e34b502b57ac7eaaf00099ddf8fdae45dc97b53de71b724bff0f19",
+     "uncovered_content": [
+      "structure:query_params=4",
+      "structure:rf_total_param_count=4",
+      "structure:total_params=4"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=office&sort=id&page=1&limit=10 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "154e62e8fc0c78f32983cd5fa09a7b0b3f453ead14f3d90a2e5c639335e82d16",
+     "uncovered_content": [
+      "structure:query_params=4",
+      "structure:rf_total_param_count=4",
+      "structure:total_params=4"
+     ]
+    },
+    {
+     "first_line": "GET /search?q=shoes&next=%2F HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "1718e5f30d15b3d6aa92656448e147f59c2ea40e8e0693efc78ce3cc274d7777",
+     "uncovered_content": [
+      "structure:query_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "POST /api/orders HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "1975c81c6629c0b7b4ec6c8f5aa7227e85f1ca4fa751f16c960b42ef2c7db9d4",
+     "uncovered_content": [
+      "json:number",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=toys&sort=id&page=1&limit=10 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "1cb7209bcacc8d143840b977a51269d673d37bb5a8f5c0c44d65c0597524df42",
+     "uncovered_content": [
+      "structure:query_params=4",
+      "structure:rf_total_param_count=4",
+      "structure:total_params=4"
+     ]
+    },
+    {
+     "first_line": "POST /api/orders HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "1ef094b41d37c64f797b6deb1a4a3c3fd70d6ddf51b7c2bf52d16dc49c6433a1",
+     "uncovered_content": [
+      "json:number",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "POST /api/orders HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "212decf35d4ee655dd8cd40ca3e247df981fe7c8f5109ed294763c75c0ff1c13",
+     "uncovered_content": [
+      "json:number",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "POST /api/orders HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "356675bf00e7e939676ddb9699012a51fac7213d3ac5e52141bcfd67196016d2",
+     "uncovered_content": [
+      "json:number",
+      "json:top_keys=3",
+      "structure:body_params=3",
+      "structure:rf_total_param_count=3",
+      "structure:total_params=3"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=sport&sort=id&page=1&limit=10 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "366f7959e78bba616539f35751767cac83d183df07d6bdb44f301f3149970c1d",
+     "uncovered_content": [
+      "structure:query_params=4",
+      "structure:rf_total_param_count=4",
+      "structure:total_params=4"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=apparel&sort=id&page=1&limit=10 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "38947f132a65dab86422ac0c9a5de5addd8575367f94df5bbdb5fb105c4923ee",
+     "uncovered_content": [
+      "structure:query_params=4",
+      "structure:rf_total_param_count=4",
+      "structure:total_params=4"
+     ]
+    },
+    {
+     "first_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Fpromo%2Fsummer.json HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "3faaadc1bcbb9bd96bab1460c00042b3592abdad4fe893008d0ccd76594eb324",
+     "uncovered_content": [
+      "structure:query_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    },
+    {
+     "first_line": "GET /search?q=shoes&next=%2Fcart HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "482cdf0d204043919da1f0d330fcf694ab18f815654f27f80883d44e38ff18ca",
+     "uncovered_content": [
+      "structure:query_params=2",
+      "structure:rf_total_param_count=2",
+      "structure:total_params=2"
+     ]
+    }
+   ],
+   "benign_unique_texts": 142,
+   "benign_v4": {
+    "ALLOW": 97,
+    "BLOCK": 45
+   },
+   "block_with_zero_uncovered_content_markers": [
+    {
+     "first_line": "GET /search?q=return%20policy%20details HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "6818da4466449e9995ff6e514bc641ad68be2bf9f1cd54f8fe95b066d8ba985c",
+     "uncovered_envelope": [
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "HTTP parameter pollution detected"
+     ]
+    },
+    {
+     "first_line": "GET /api/products?url=1%2C2%2C3%2C4%2C5 HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "c4501cc7b8a522cce77f3261c6772ba47c7d2e11c6853fe2efaa409a598dc18a",
+     "uncovered_envelope": [
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Cross-site scripting payload detected"
+     ]
+    },
+    {
+     "first_line": "GET /api/products?url=https%3A%2F%2Fcdn.fwlab.test%2Ffeed.json HTTP/1.1",
+     "source": "dev60",
+     "text_sha256": "cc9bc3ef59f238886b54b49c488d71e6996bdd53436f8a21485c68c592c657fc",
+     "uncovered_envelope": [
+      "envelope:host_port=other"
+     ],
+     "v4_reasons": [
+      "Server-side request forgery attack detected"
+     ]
+    }
+   ],
+   "by_uncovered_content_markers": {
+    "0": {
+     "ALLOW": 40,
+     "BLOCK": 3
+    },
+    "1": {
+     "ALLOW": 9,
+     "BLOCK": 8
+    },
+    "3+": {
+     "ALLOW": 48,
+     "BLOCK": 34
+    }
+   },
+   "by_uncovered_envelope_markers": {
+    "1": {
+     "ALLOW": 80,
+     "BLOCK": 13
+    },
+    "2+": {
+     "ALLOW": 17,
+     "BLOCK": 32
+    }
+   },
+   "content_marker_sets": 52,
+   "content_marker_sets_with_mixed_v4_decisions": 7,
+   "inconsistent_v4_texts": 0,
+   "input": "reports/hybrid/v4-analyzer-paired-dev-v1/records.jsonl",
+   "mixed_sets_detail": [
+    {
+     "examples": [
+      {
+       "body": "username=jose.ramirez&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "username=lee.wong&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "username=mary-jane&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "username=a.khan&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "username=alice&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "username=bob&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "username=fatima&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "username=n.garcia&password=s3cret%21",
+       "request_line": "POST /login HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 3,
+      "BLOCK": 8
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Fcatalog%2Ffood.json HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Fcatalog%2Foffice.json HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Fcatalog%2Fsport.json HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Ffeeds%2Fnew-arrivals.xml HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Fpromo%2Fsummer.json HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fshop.fwlab.test%2Freviews%2Flatest.json HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /products?category=office&url=https%3A%2F%2Fcdn.fwlab.test%2Fassets%2Fcatalog.json HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 6,
+      "BLOCK": 1
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /search?q=laptop%20stand%20aluminium HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=mechanical%20keyboard%20brown%20switches HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=mechanical%20keyboard%20brown%20switches%20tenkeyless HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=noise%20cancelling%20headphones HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=wireless%20mouse%20ergonomic HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=yoga%20mat%20non%20slip HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=return%20policy%20details HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 6,
+      "BLOCK": 1
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /static/img%2Flogo-2024.png HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /static/css%2Fapp.min.css HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET /static/css%2Ftheme-dark.css HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET /static/fonts%2Finter.woff2 HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET /static/img%2Fproducts%2F3-detail.png HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET /static/img%2Fproducts%2F3-thumb.png HTTP/1.1",
+       "v4": "BLOCK"
+      },
+      {
+       "body": "",
+       "request_line": "GET /static/js%2Fcart.js HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 1,
+      "BLOCK": 6
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /search?q=how%20to%20select%20a%20good%20password HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=how%20to%20select%20a%20good%20password%20manager HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=select%20your%20plan%20comparison HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 2,
+      "BLOCK": 1
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "",
+       "request_line": "GET /search?q=labor%20union%20history%20books HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "",
+       "request_line": "GET /search?q=credit%20union%20savings%20account%20options HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 1,
+      "BLOCK": 1
+     }
+    },
+    {
+     "examples": [
+      {
+       "body": "address=Rue%20de%20l%27Eglise%205&card_last4=0000",
+       "request_line": "POST /checkout HTTP/1.1",
+       "v4": "ALLOW"
+      },
+      {
+       "body": "address=9%20St.%20Mary%27s%20Gate&card_last4=0000",
+       "request_line": "POST /checkout HTTP/1.1",
+       "v4": "BLOCK"
+      }
+     ],
+     "v4": {
+      "ALLOW": 1,
+      "BLOCK": 1
+     }
+    }
+   ],
+   "per_uncovered_marker": {
+    "char:!": {
+     "ALLOW": 4,
+     "BLOCK": 11,
+     "train_attack_generator_groups": 481,
+     "train_benign_generator_groups": 19,
+     "train_benign_support": "SCARCE"
+    },
+    "char:#": {
+     "ALLOW": 0,
+     "BLOCK": 3,
+     "train_attack_generator_groups": 658,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "char:'": {
+     "ALLOW": 1,
+     "BLOCK": 6,
+     "train_attack_generator_groups": 2065,
+     "train_benign_generator_groups": 19,
+     "train_benign_support": "SCARCE"
+    },
+    "char:<": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 2143,
+     "train_benign_generator_groups": 29,
+     "train_benign_support": "SCARCE"
+    },
+    "char:>": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 2172,
+     "train_benign_generator_groups": 29,
+     "train_benign_support": "SCARCE"
+    },
+    "encoding:%21": {
+     "ALLOW": 3,
+     "BLOCK": 10,
+     "train_attack_generator_groups": 416,
+     "train_benign_generator_groups": 19,
+     "train_benign_support": "SCARCE"
+    },
+    "encoding:%23": {
+     "ALLOW": 0,
+     "BLOCK": 3,
+     "train_attack_generator_groups": 624,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "encoding:%27": {
+     "ALLOW": 1,
+     "BLOCK": 6,
+     "train_attack_generator_groups": 1906,
+     "train_benign_generator_groups": 19,
+     "train_benign_support": "SCARCE"
+    },
+    "encoding:pct_in_path": {
+     "ALLOW": 1,
+     "BLOCK": 6,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "envelope:has_content-length": {
+     "ALLOW": 17,
+     "BLOCK": 32,
+     "train_attack_generator_groups": 6,
+     "train_benign_generator_groups": 3,
+     "train_benign_support": "SCARCE"
+    },
+    "envelope:has_origin": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 26,
+     "train_benign_generator_groups": 28,
+     "train_benign_support": "SCARCE"
+    },
+    "envelope:has_referer": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 26,
+     "train_benign_generator_groups": 28,
+     "train_benign_support": "SCARCE"
+    },
+    "envelope:host_port=other": {
+     "ALLOW": 97,
+     "BLOCK": 45,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "form:body_fields=2": {
+     "ALLOW": 6,
+     "BLOCK": 22,
+     "train_attack_generator_groups": 1,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:number": {
+     "ALLOW": 11,
+     "BLOCK": 10,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:top_keys=3": {
+     "ALLOW": 11,
+     "BLOCK": 10,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "json:url_string": {
+     "ALLOW": 1,
+     "BLOCK": 6,
+     "train_attack_generator_groups": 49,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:call": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 13,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:drop": {
+     "ALLOW": 2,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 105,
+     "train_benign_generator_groups": 2,
+     "train_benign_support": "SCARCE"
+    },
+    "lexical:include": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 100,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:match": {
+     "ALLOW": 0,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 26,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:or": {
+     "ALLOW": 2,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 184,
+     "train_benign_generator_groups": 1,
+     "train_benign_support": "SCARCE"
+    },
+    "lexical:order": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 62,
+     "train_benign_generator_groups": 2,
+     "train_benign_support": "SCARCE"
+    },
+    "lexical:select": {
+     "ALLOW": 2,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 416,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "lexical:union": {
+     "ALLOW": 1,
+     "BLOCK": 1,
+     "train_attack_generator_groups": 174,
+     "train_benign_generator_groups": 1,
+     "train_benign_support": "SCARCE"
+    },
+    "lexical:where": {
+     "ALLOW": 1,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 184,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:body_params=2": {
+     "ALLOW": 6,
+     "BLOCK": 22,
+     "train_attack_generator_groups": 7,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:body_params=3": {
+     "ALLOW": 11,
+     "BLOCK": 10,
+     "train_attack_generator_groups": 151,
+     "train_benign_generator_groups": 7,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:query_params=2": {
+     "ALLOW": 15,
+     "BLOCK": 2,
+     "train_attack_generator_groups": 5,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:query_params=4": {
+     "ALLOW": 16,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:rf_total_param_count=2": {
+     "ALLOW": 21,
+     "BLOCK": 24,
+     "train_attack_generator_groups": 7,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:rf_total_param_count=3": {
+     "ALLOW": 11,
+     "BLOCK": 10,
+     "train_attack_generator_groups": 297,
+     "train_benign_generator_groups": 11,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:rf_total_param_count=4": {
+     "ALLOW": 16,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 6,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:total_params=2": {
+     "ALLOW": 21,
+     "BLOCK": 24,
+     "train_attack_generator_groups": 12,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "structure:total_params=3": {
+     "ALLOW": 11,
+     "BLOCK": 10,
+     "train_attack_generator_groups": 297,
+     "train_benign_generator_groups": 11,
+     "train_benign_support": "SCARCE"
+    },
+    "structure:total_params=4": {
+     "ALLOW": 16,
+     "BLOCK": 0,
+     "train_attack_generator_groups": 0,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    },
+    "value_char:&": {
+     "ALLOW": 0,
+     "BLOCK": 4,
+     "train_attack_generator_groups": 492,
+     "train_benign_generator_groups": 0,
+     "train_benign_support": "ABSENT"
+    }
+   },
+   "sha256": "c268a313b11087290b5fea9b37cd15855b6ab1434c1c5e29c6c4234a506743f2",
+   "texts_in_mixed_sets": 39,
+   "unique_texts": 355
+  }
+ },
+ "generated_utc": "2026-10-06T17:26:45Z",
+ "inputs": {
+  "hybrid_analyzer_v2": {
+   "path": "datasets/hybrid_analyzer_v2/hybrid_analyzer_v2.jsonl",
+   "sha256": "e8da8674435ed65057161bb4c74b41dc4aa1d8bf876b0327c53ecba7c0d99b75",
+   "used": "group ids of V4-train rows only"
+  },
+  "not_opened": [
+   "datasets/external_v1",
+   "reports/external",
+   "docker/.lab-logs",
+   "datasets/v4_clean/eval.jsonl"
+  ],
+  "v4_train": {
+   "path": "datasets/v4_clean/train.jsonl",
+   "rows": 25134,
+   "sha256": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b"
+  }
+ },
+ "markers": {
+  "anywhere:internal_address_literal": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 74,
+    "generator_groups": 74,
+    "rows": 84,
+    "unique_texts": 84
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:!": {
+   "ALLOW": {
+    "d54_groups": 19,
+    "generator_groups": 19,
+    "rows": 19,
+    "unique_texts": 19
+   },
+   "BLOCK": {
+    "d54_groups": 479,
+    "generator_groups": 481,
+    "rows": 731,
+    "unique_texts": 731
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 19
+   },
+   "benign_group_share": 0.038,
+   "benign_support": "SCARCE"
+  },
+  "char:\"": {
+   "ALLOW": {
+    "d54_groups": 44,
+    "generator_groups": 53,
+    "rows": 53,
+    "unique_texts": 53
+   },
+   "BLOCK": {
+    "d54_groups": 2005,
+    "generator_groups": 2010,
+    "rows": 2957,
+    "unique_texts": 2957
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 51
+   },
+   "benign_group_share": 0.0257,
+   "benign_support": "SUPPORTED"
+  },
+  "char:#": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 656,
+    "generator_groups": 658,
+    "rows": 971,
+    "unique_texts": 971
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:$": {
+   "ALLOW": {
+    "d54_groups": 24,
+    "generator_groups": 25,
+    "rows": 25,
+    "unique_texts": 25
+   },
+   "BLOCK": {
+    "d54_groups": 305,
+    "generator_groups": 305,
+    "rows": 388,
+    "unique_texts": 388
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 19,
+    "synthetic_benign": 6
+   },
+   "benign_group_share": 0.0758,
+   "benign_support": "SCARCE"
+  },
+  "char:'": {
+   "ALLOW": {
+    "d54_groups": 19,
+    "generator_groups": 19,
+    "rows": 19,
+    "unique_texts": 19
+   },
+   "BLOCK": {
+    "d54_groups": 2056,
+    "generator_groups": 2065,
+    "rows": 2905,
+    "unique_texts": 2905
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 19
+   },
+   "benign_group_share": 0.0091,
+   "benign_support": "SCARCE"
+  },
+  "char:(": {
+   "ALLOW": {
+    "d54_groups": 42,
+    "generator_groups": 59,
+    "rows": 59,
+    "unique_texts": 59
+   },
+   "BLOCK": {
+    "d54_groups": 2535,
+    "generator_groups": 2537,
+    "rows": 3612,
+    "unique_texts": 3612
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 7,
+    "synthetic_benign": 52
+   },
+   "benign_group_share": 0.0227,
+   "benign_support": "SUPPORTED"
+  },
+  "char:)": {
+   "ALLOW": {
+    "d54_groups": 42,
+    "generator_groups": 59,
+    "rows": 59,
+    "unique_texts": 59
+   },
+   "BLOCK": {
+    "d54_groups": 2959,
+    "generator_groups": 2961,
+    "rows": 4256,
+    "unique_texts": 4256
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 7,
+    "synthetic_benign": 52
+   },
+   "benign_group_share": 0.0195,
+   "benign_support": "SUPPORTED"
+  },
+  "char:*": {
+   "ALLOW": {
+    "d54_groups": 18,
+    "generator_groups": 18,
+    "rows": 18,
+    "unique_texts": 18
+   },
+   "BLOCK": {
+    "d54_groups": 433,
+    "generator_groups": 435,
+    "rows": 555,
+    "unique_texts": 555
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 18
+   },
+   "benign_group_share": 0.0397,
+   "benign_support": "SCARCE"
+  },
+  "char:..": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1203,
+    "generator_groups": 1204,
+    "rows": 1226,
+    "unique_texts": 1226
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:;": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1530,
+    "generator_groups": 1535,
+    "rows": 2262,
+    "unique_texts": 2262
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:<": {
+   "ALLOW": {
+    "d54_groups": 26,
+    "generator_groups": 29,
+    "rows": 29,
+    "unique_texts": 29
+   },
+   "BLOCK": {
+    "d54_groups": 2138,
+    "generator_groups": 2143,
+    "rows": 3200,
+    "unique_texts": 3200
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 29
+   },
+   "benign_group_share": 0.0134,
+   "benign_support": "SCARCE"
+  },
+  "char:>": {
+   "ALLOW": {
+    "d54_groups": 26,
+    "generator_groups": 29,
+    "rows": 29,
+    "unique_texts": 29
+   },
+   "BLOCK": {
+    "d54_groups": 2167,
+    "generator_groups": 2172,
+    "rows": 3230,
+    "unique_texts": 3230
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 29
+   },
+   "benign_group_share": 0.0132,
+   "benign_support": "SCARCE"
+  },
+  "char:[": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 343,
+    "generator_groups": 343,
+    "rows": 468,
+    "unique_texts": 468
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:\\": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1483,
+    "generator_groups": 1484,
+    "rows": 1758,
+    "unique_texts": 1758
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:]": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 335,
+    "generator_groups": 335,
+    "rows": 459,
+    "unique_texts": 459
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:`": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 213,
+    "generator_groups": 213,
+    "rows": 293,
+    "unique_texts": 293
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:non_ascii_decoded": {
+   "ALLOW": {
+    "d54_groups": 640,
+    "generator_groups": 640,
+    "rows": 1148,
+    "unique_texts": 1148
+   },
+   "BLOCK": {
+    "d54_groups": 2287,
+    "generator_groups": 2295,
+    "rows": 2371,
+    "unique_texts": 2371
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 640
+   },
+   "benign_group_share": 0.2181,
+   "benign_support": "SUPPORTED"
+  },
+  "char:{": {
+   "ALLOW": {
+    "d54_groups": 41,
+    "generator_groups": 60,
+    "rows": 60,
+    "unique_texts": 60
+   },
+   "BLOCK": {
+    "d54_groups": 429,
+    "generator_groups": 429,
+    "rows": 567,
+    "unique_texts": 567
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 60
+   },
+   "benign_group_share": 0.1227,
+   "benign_support": "SUPPORTED"
+  },
+  "char:|": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 187,
+    "generator_groups": 192,
+    "rows": 270,
+    "unique_texts": 270
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "char:}": {
+   "ALLOW": {
+    "d54_groups": 41,
+    "generator_groups": 60,
+    "rows": 60,
+    "unique_texts": 60
+   },
+   "BLOCK": {
+    "d54_groups": 402,
+    "generator_groups": 403,
+    "rows": 524,
+    "unique_texts": 524
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 60
+   },
+   "benign_group_share": 0.1296,
+   "benign_support": "SUPPORTED"
+  },
+  "char:~": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 21,
+    "generator_groups": 21,
+    "rows": 31,
+    "unique_texts": 31
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%00": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 21,
+    "generator_groups": 21,
+    "rows": 21,
+    "unique_texts": 21
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%0A": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 11,
+    "generator_groups": 11,
+    "rows": 11,
+    "unique_texts": 11
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%0D": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 3,
+    "generator_groups": 3,
+    "rows": 3,
+    "unique_texts": 3
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%20": {
+   "ALLOW": {
+    "d54_groups": 1104,
+    "generator_groups": 1278,
+    "rows": 1278,
+    "unique_texts": 1278
+   },
+   "BLOCK": {
+    "d54_groups": 2331,
+    "generator_groups": 2331,
+    "rows": 2464,
+    "unique_texts": 2464
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 1278
+   },
+   "benign_group_share": 0.3541,
+   "benign_support": "SUPPORTED"
+  },
+  "encoding:%21": {
+   "ALLOW": {
+    "d54_groups": 19,
+    "generator_groups": 19,
+    "rows": 19,
+    "unique_texts": 19
+   },
+   "BLOCK": {
+    "d54_groups": 414,
+    "generator_groups": 416,
+    "rows": 632,
+    "unique_texts": 632
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 19
+   },
+   "benign_group_share": 0.0437,
+   "benign_support": "SCARCE"
+  },
+  "encoding:%22": {
+   "ALLOW": {
+    "d54_groups": 2,
+    "generator_groups": 2,
+    "rows": 2,
+    "unique_texts": 2
+   },
+   "BLOCK": {
+    "d54_groups": 1709,
+    "generator_groups": 1713,
+    "rows": 2422,
+    "unique_texts": 2422
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2
+   },
+   "benign_group_share": 0.0012,
+   "benign_support": "SCARCE"
+  },
+  "encoding:%23": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 622,
+    "generator_groups": 624,
+    "rows": 904,
+    "unique_texts": 904
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%25": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 3563,
+    "generator_groups": 3582,
+    "rows": 3987,
+    "unique_texts": 3987
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%27": {
+   "ALLOW": {
+    "d54_groups": 19,
+    "generator_groups": 19,
+    "rows": 19,
+    "unique_texts": 19
+   },
+   "BLOCK": {
+    "d54_groups": 1898,
+    "generator_groups": 1906,
+    "rows": 2525,
+    "unique_texts": 2525
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 19
+   },
+   "benign_group_share": 0.0099,
+   "benign_support": "SCARCE"
+  },
+  "encoding:%2E": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 7,
+    "generator_groups": 7,
+    "rows": 7,
+    "unique_texts": 7
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%2F": {
+   "ALLOW": {
+    "d54_groups": 567,
+    "generator_groups": 569,
+    "rows": 569,
+    "unique_texts": 569
+   },
+   "BLOCK": {
+    "d54_groups": 3984,
+    "generator_groups": 3987,
+    "rows": 4822,
+    "unique_texts": 4822
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 276,
+    "synthetic_benign": 293
+   },
+   "benign_group_share": 0.1249,
+   "benign_support": "SUPPORTED"
+  },
+  "encoding:%3B": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1407,
+    "generator_groups": 1412,
+    "rows": 1936,
+    "unique_texts": 1936
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%3C": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1935,
+    "generator_groups": 1939,
+    "rows": 2591,
+    "unique_texts": 2591
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:%7C": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 167,
+    "generator_groups": 170,
+    "rows": 231,
+    "unique_texts": 231
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:any_pct_triplet": {
+   "ALLOW": {
+    "d54_groups": 2571,
+    "generator_groups": 2748,
+    "rows": 3256,
+    "unique_texts": 3256
+   },
+   "BLOCK": {
+    "d54_groups": 8956,
+    "generator_groups": 8996,
+    "rows": 11287,
+    "unique_texts": 11287
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 908,
+    "synthetic_benign": 1840
+   },
+   "benign_group_share": 0.234,
+   "benign_support": "SUPPORTED"
+  },
+  "encoding:double_or_more": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 3125,
+    "generator_groups": 3142,
+    "rows": 3473,
+    "unique_texts": 3473
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "encoding:pct_in_body": {
+   "ALLOW": {
+    "d54_groups": 1924,
+    "generator_groups": 2092,
+    "rows": 2476,
+    "unique_texts": 2476
+   },
+   "BLOCK": {
+    "d54_groups": 4682,
+    "generator_groups": 4704,
+    "rows": 5805,
+    "unique_texts": 5805
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 662,
+    "synthetic_benign": 1430
+   },
+   "benign_group_share": 0.3078,
+   "benign_support": "SUPPORTED"
+  },
+  "encoding:pct_in_query": {
+   "ALLOW": {
+    "d54_groups": 647,
+    "generator_groups": 656,
+    "rows": 780,
+    "unique_texts": 780
+   },
+   "BLOCK": {
+    "d54_groups": 4615,
+    "generator_groups": 4633,
+    "rows": 5482,
+    "unique_texts": 5482
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 246,
+    "synthetic_benign": 410
+   },
+   "benign_group_share": 0.124,
+   "benign_support": "SUPPORTED"
+  },
+  "encoding:plus_in_query_or_form": {
+   "ALLOW": {
+    "d54_groups": 811,
+    "generator_groups": 811,
+    "rows": 2615,
+    "unique_texts": 2615
+   },
+   "BLOCK": {
+    "d54_groups": 1534,
+    "generator_groups": 1553,
+    "rows": 2413,
+    "unique_texts": 2413
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 811
+   },
+   "benign_group_share": 0.3431,
+   "benign_support": "SUPPORTED"
+  },
+  "encoding:raw_non_ascii": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "envelope:has_accept": {
+   "ALLOW": {
+    "d54_groups": 3389,
+    "generator_groups": 3588,
+    "rows": 5612,
+    "unique_texts": 5612
+   },
+   "BLOCK": {
+    "d54_groups": 4796,
+    "generator_groups": 4823,
+    "rows": 5525,
+    "unique_texts": 5525
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 579,
+    "synthetic_benign": 3009
+   },
+   "benign_group_share": 0.4266,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:has_accept-encoding": {
+   "ALLOW": {
+    "d54_groups": 1799,
+    "generator_groups": 1857,
+    "rows": 2962,
+    "unique_texts": 2962
+   },
+   "BLOCK": {
+    "d54_groups": 2631,
+    "generator_groups": 2647,
+    "rows": 2894,
+    "unique_texts": 2894
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 323,
+    "synthetic_benign": 1534
+   },
+   "benign_group_share": 0.4123,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:has_accept-language": {
+   "ALLOW": {
+    "d54_groups": 1993,
+    "generator_groups": 2068,
+    "rows": 3302,
+    "unique_texts": 3302
+   },
+   "BLOCK": {
+    "d54_groups": 2981,
+    "generator_groups": 2997,
+    "rows": 3297,
+    "unique_texts": 3297
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 343,
+    "synthetic_benign": 1725
+   },
+   "benign_group_share": 0.4083,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:has_authorization": {
+   "ALLOW": {
+    "d54_groups": 40,
+    "generator_groups": 42,
+    "rows": 42,
+    "unique_texts": 42
+   },
+   "BLOCK": {
+    "d54_groups": 59,
+    "generator_groups": 67,
+    "rows": 95,
+    "unique_texts": 95
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 42
+   },
+   "benign_group_share": 0.3853,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:has_connection": {
+   "ALLOW": {
+    "d54_groups": 1545,
+    "generator_groups": 1590,
+    "rows": 2486,
+    "unique_texts": 2486
+   },
+   "BLOCK": {
+    "d54_groups": 2325,
+    "generator_groups": 2346,
+    "rows": 2551,
+    "unique_texts": 2551
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 276,
+    "synthetic_benign": 1314
+   },
+   "benign_group_share": 0.404,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:has_content-length": {
+   "ALLOW": {
+    "d54_groups": 3,
+    "generator_groups": 3,
+    "rows": 3,
+    "unique_texts": 3
+   },
+   "BLOCK": {
+    "d54_groups": 5,
+    "generator_groups": 6,
+    "rows": 6,
+    "unique_texts": 6
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 3
+   },
+   "benign_group_share": 0.3333,
+   "benign_support": "SCARCE"
+  },
+  "envelope:has_cookie": {
+   "ALLOW": {
+    "d54_groups": 4091,
+    "generator_groups": 4398,
+    "rows": 6931,
+    "unique_texts": 6931
+   },
+   "BLOCK": {
+    "d54_groups": 5849,
+    "generator_groups": 5881,
+    "rows": 6952,
+    "unique_texts": 6952
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 712,
+    "synthetic_benign": 3686
+   },
+   "benign_group_share": 0.4279,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:has_origin": {
+   "ALLOW": {
+    "d54_groups": 27,
+    "generator_groups": 28,
+    "rows": 28,
+    "unique_texts": 28
+   },
+   "BLOCK": {
+    "d54_groups": 26,
+    "generator_groups": 26,
+    "rows": 38,
+    "unique_texts": 38
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 28
+   },
+   "benign_group_share": 0.5185,
+   "benign_support": "SCARCE"
+  },
+  "envelope:has_referer": {
+   "ALLOW": {
+    "d54_groups": 27,
+    "generator_groups": 28,
+    "rows": 28,
+    "unique_texts": 28
+   },
+   "BLOCK": {
+    "d54_groups": 26,
+    "generator_groups": 26,
+    "rows": 38,
+    "unique_texts": 38
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 28
+   },
+   "benign_group_share": 0.5185,
+   "benign_support": "SCARCE"
+  },
+  "envelope:has_transfer-encoding": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 3,
+    "generator_groups": 5,
+    "rows": 5,
+    "unique_texts": 5
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "envelope:has_x-requested-with": {
+   "ALLOW": {
+    "d54_groups": 762,
+    "generator_groups": 773,
+    "rows": 1222,
+    "unique_texts": 1222
+   },
+   "BLOCK": {
+    "d54_groups": 1217,
+    "generator_groups": 1224,
+    "rows": 1287,
+    "unique_texts": 1287
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 163,
+    "synthetic_benign": 610
+   },
+   "benign_group_share": 0.3871,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:header_count=1": {
+   "ALLOW": {
+    "d54_groups": 65,
+    "generator_groups": 67,
+    "rows": 87,
+    "unique_texts": 87
+   },
+   "BLOCK": {
+    "d54_groups": 79,
+    "generator_groups": 79,
+    "rows": 80,
+    "unique_texts": 80
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 28,
+    "synthetic_benign": 39
+   },
+   "benign_group_share": 0.4589,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:header_count=2": {
+   "ALLOW": {
+    "d54_groups": 446,
+    "generator_groups": 453,
+    "rows": 878,
+    "unique_texts": 878
+   },
+   "BLOCK": {
+    "d54_groups": 765,
+    "generator_groups": 769,
+    "rows": 817,
+    "unique_texts": 817
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 88,
+    "synthetic_benign": 365
+   },
+   "benign_group_share": 0.3707,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:header_count=3": {
+   "ALLOW": {
+    "d54_groups": 1487,
+    "generator_groups": 1547,
+    "rows": 2711,
+    "unique_texts": 2711
+   },
+   "BLOCK": {
+    "d54_groups": 2464,
+    "generator_groups": 2477,
+    "rows": 2709,
+    "unique_texts": 2709
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 250,
+    "synthetic_benign": 1297
+   },
+   "benign_group_share": 0.3844,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:header_count=4": {
+   "ALLOW": {
+    "d54_groups": 2368,
+    "generator_groups": 2469,
+    "rows": 3887,
+    "unique_texts": 3887
+   },
+   "BLOCK": {
+    "d54_groups": 3559,
+    "generator_groups": 3580,
+    "rows": 3998,
+    "unique_texts": 3998
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 419,
+    "synthetic_benign": 2050
+   },
+   "benign_group_share": 0.4082,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:header_count=5": {
+   "ALLOW": {
+    "d54_groups": 2129,
+    "generator_groups": 2220,
+    "rows": 3211,
+    "unique_texts": 3211
+   },
+   "BLOCK": {
+    "d54_groups": 2875,
+    "generator_groups": 2895,
+    "rows": 3177,
+    "unique_texts": 3177
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 387,
+    "synthetic_benign": 1833
+   },
+   "benign_group_share": 0.434,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:header_count=6+": {
+   "ALLOW": {
+    "d54_groups": 1263,
+    "generator_groups": 1311,
+    "rows": 1793,
+    "unique_texts": 1793
+   },
+   "BLOCK": {
+    "d54_groups": 1616,
+    "generator_groups": 1627,
+    "rows": 1786,
+    "unique_texts": 1786
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 238,
+    "synthetic_benign": 1073
+   },
+   "benign_group_share": 0.4462,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:host_ip_literal": {
+   "ALLOW": {
+    "d54_groups": 260,
+    "generator_groups": 264,
+    "rows": 389,
+    "unique_texts": 389
+   },
+   "BLOCK": {
+    "d54_groups": 369,
+    "generator_groups": 372,
+    "rows": 380,
+    "unique_texts": 380
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 71,
+    "synthetic_benign": 193
+   },
+   "benign_group_share": 0.4151,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:host_loopback": {
+   "ALLOW": {
+    "d54_groups": 257,
+    "generator_groups": 259,
+    "rows": 375,
+    "unique_texts": 375
+   },
+   "BLOCK": {
+    "d54_groups": 373,
+    "generator_groups": 374,
+    "rows": 380,
+    "unique_texts": 380
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 61,
+    "synthetic_benign": 198
+   },
+   "benign_group_share": 0.4092,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:host_loopback_name": {
+   "ALLOW": {
+    "d54_groups": 257,
+    "generator_groups": 259,
+    "rows": 375,
+    "unique_texts": 375
+   },
+   "BLOCK": {
+    "d54_groups": 373,
+    "generator_groups": 374,
+    "rows": 380,
+    "unique_texts": 380
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 61,
+    "synthetic_benign": 198
+   },
+   "benign_group_share": 0.4092,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:host_port=8000": {
+   "ALLOW": {
+    "d54_groups": 260,
+    "generator_groups": 264,
+    "rows": 389,
+    "unique_texts": 389
+   },
+   "BLOCK": {
+    "d54_groups": 369,
+    "generator_groups": 372,
+    "rows": 380,
+    "unique_texts": 380
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 71,
+    "synthetic_benign": 193
+   },
+   "benign_group_share": 0.4151,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:host_port=8080": {
+   "ALLOW": {
+    "d54_groups": 257,
+    "generator_groups": 259,
+    "rows": 375,
+    "unique_texts": 375
+   },
+   "BLOCK": {
+    "d54_groups": 373,
+    "generator_groups": 374,
+    "rows": 380,
+    "unique_texts": 380
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 61,
+    "synthetic_benign": 198
+   },
+   "benign_group_share": 0.4092,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:host_port=none": {
+   "ALLOW": {
+    "d54_groups": 6679,
+    "generator_groups": 7459,
+    "rows": 11803,
+    "unique_texts": 11803
+   },
+   "BLOCK": {
+    "d54_groups": 9283,
+    "generator_groups": 9333,
+    "rows": 11807,
+    "unique_texts": 11807
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1193,
+    "synthetic_benign": 6266
+   },
+   "benign_group_share": 0.4442,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=absent": {
+   "ALLOW": {
+    "d54_groups": 1114,
+    "generator_groups": 1148,
+    "rows": 1815,
+    "unique_texts": 1815
+   },
+   "BLOCK": {
+    "d54_groups": 1666,
+    "generator_groups": 1683,
+    "rows": 1784,
+    "unique_texts": 1784
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 206,
+    "synthetic_benign": 942
+   },
+   "benign_group_share": 0.4055,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=browser": {
+   "ALLOW": {
+    "d54_groups": 2200,
+    "generator_groups": 2300,
+    "rows": 3597,
+    "unique_texts": 3597
+   },
+   "BLOCK": {
+    "d54_groups": 3222,
+    "generator_groups": 3243,
+    "rows": 3620,
+    "unique_texts": 3620
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 372,
+    "synthetic_benign": 1928
+   },
+   "benign_group_share": 0.4149,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=curl": {
+   "ALLOW": {
+    "d54_groups": 382,
+    "generator_groups": 385,
+    "rows": 557,
+    "unique_texts": 557
+   },
+   "BLOCK": {
+    "d54_groups": 576,
+    "generator_groups": 579,
+    "rows": 596,
+    "unique_texts": 596
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 88,
+    "synthetic_benign": 297
+   },
+   "benign_group_share": 0.3994,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=mobile_app": {
+   "ALLOW": {
+    "d54_groups": 751,
+    "generator_groups": 759,
+    "rows": 1176,
+    "unique_texts": 1176
+   },
+   "BLOCK": {
+    "d54_groups": 1108,
+    "generator_groups": 1116,
+    "rows": 1162,
+    "unique_texts": 1162
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 143,
+    "synthetic_benign": 616
+   },
+   "benign_group_share": 0.4048,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=other": {
+   "ALLOW": {
+    "d54_groups": 2569,
+    "generator_groups": 2696,
+    "rows": 4179,
+    "unique_texts": 4179
+   },
+   "BLOCK": {
+    "d54_groups": 3761,
+    "generator_groups": 3779,
+    "rows": 4196,
+    "unique_texts": 4196
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 463,
+    "synthetic_benign": 2233
+   },
+   "benign_group_share": 0.4164,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=python": {
+   "ALLOW": {
+    "d54_groups": 394,
+    "generator_groups": 398,
+    "rows": 601,
+    "unique_texts": 601
+   },
+   "BLOCK": {
+    "d54_groups": 635,
+    "generator_groups": 637,
+    "rows": 648,
+    "unique_texts": 648
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 88,
+    "synthetic_benign": 310
+   },
+   "benign_group_share": 0.3845,
+   "benign_support": "SUPPORTED"
+  },
+  "envelope:ua_family=wget": {
+   "ALLOW": {
+    "d54_groups": 418,
+    "generator_groups": 426,
+    "rows": 642,
+    "unique_texts": 642
+   },
+   "BLOCK": {
+    "d54_groups": 549,
+    "generator_groups": 551,
+    "rows": 561,
+    "unique_texts": 561
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 95,
+    "synthetic_benign": 331
+   },
+   "benign_group_share": 0.436,
+   "benign_support": "SUPPORTED"
+  },
+  "field:address": {
+   "ALLOW": {
+    "d54_groups": 799,
+    "generator_groups": 799,
+    "rows": 799,
+    "unique_texts": 799
+   },
+   "BLOCK": {
+    "d54_groups": 794,
+    "generator_groups": 794,
+    "rows": 794,
+    "unique_texts": 794
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 799
+   },
+   "benign_group_share": 0.5016,
+   "benign_support": "SUPPORTED"
+  },
+  "field:address_value_number_and_words": {
+   "ALLOW": {
+    "d54_groups": 751,
+    "generator_groups": 751,
+    "rows": 751,
+    "unique_texts": 751
+   },
+   "BLOCK": {
+    "d54_groups": 727,
+    "generator_groups": 727,
+    "rows": 727,
+    "unique_texts": 727
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 751
+   },
+   "benign_group_share": 0.5081,
+   "benign_support": "SUPPORTED"
+  },
+  "field:email": {
+   "ALLOW": {
+    "d54_groups": 966,
+    "generator_groups": 967,
+    "rows": 967,
+    "unique_texts": 967
+   },
+   "BLOCK": {
+    "d54_groups": 1029,
+    "generator_groups": 1029,
+    "rows": 1036,
+    "unique_texts": 1036
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 799,
+    "synthetic_benign": 168
+   },
+   "benign_group_share": 0.4845,
+   "benign_support": "SUPPORTED"
+  },
+  "field:free_text_field_with_free_text": {
+   "ALLOW": {
+    "d54_groups": 713,
+    "generator_groups": 877,
+    "rows": 877,
+    "unique_texts": 877
+   },
+   "BLOCK": {
+    "d54_groups": 522,
+    "generator_groups": 522,
+    "rows": 820,
+    "unique_texts": 820
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 877
+   },
+   "benign_group_share": 0.6269,
+   "benign_support": "SUPPORTED"
+  },
+  "field:free_text_field_with_punctuation": {
+   "ALLOW": {
+    "d54_groups": 572,
+    "generator_groups": 722,
+    "rows": 722,
+    "unique_texts": 722
+   },
+   "BLOCK": {
+    "d54_groups": 997,
+    "generator_groups": 997,
+    "rows": 1460,
+    "unique_texts": 1460
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 722
+   },
+   "benign_group_share": 0.42,
+   "benign_support": "SUPPORTED"
+  },
+  "field:free_text_name": {
+   "ALLOW": {
+    "d54_groups": 715,
+    "generator_groups": 879,
+    "rows": 1412,
+    "unique_texts": 1412
+   },
+   "BLOCK": {
+    "d54_groups": 1044,
+    "generator_groups": 1044,
+    "rows": 1508,
+    "unique_texts": 1508
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 877
+   },
+   "benign_group_share": 0.4571,
+   "benign_support": "SUPPORTED"
+  },
+  "field:password": {
+   "ALLOW": {
+    "d54_groups": 1338,
+    "generator_groups": 1366,
+    "rows": 1366,
+    "unique_texts": 1366
+   },
+   "BLOCK": {
+    "d54_groups": 1254,
+    "generator_groups": 1254,
+    "rows": 1257,
+    "unique_texts": 1257
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1232,
+    "synthetic_benign": 134
+   },
+   "benign_group_share": 0.5214,
+   "benign_support": "SUPPORTED"
+  },
+  "field:password_value_alnum_mixed": {
+   "ALLOW": {
+    "d54_groups": 741,
+    "generator_groups": 765,
+    "rows": 765,
+    "unique_texts": 765
+   },
+   "BLOCK": {
+    "d54_groups": 750,
+    "generator_groups": 750,
+    "rows": 752,
+    "unique_texts": 752
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 649,
+    "synthetic_benign": 116
+   },
+   "benign_group_share": 0.505,
+   "benign_support": "SUPPORTED"
+  },
+  "field:password_value_has_symbol": {
+   "ALLOW": {
+    "d54_groups": 315,
+    "generator_groups": 315,
+    "rows": 315,
+    "unique_texts": 315
+   },
+   "BLOCK": {
+    "d54_groups": 540,
+    "generator_groups": 540,
+    "rows": 543,
+    "unique_texts": 543
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 315
+   },
+   "benign_group_share": 0.3684,
+   "benign_support": "SUPPORTED"
+  },
+  "field:payment": {
+   "ALLOW": {
+    "d54_groups": 799,
+    "generator_groups": 799,
+    "rows": 799,
+    "unique_texts": 799
+   },
+   "BLOCK": {
+    "d54_groups": 794,
+    "generator_groups": 794,
+    "rows": 794,
+    "unique_texts": 794
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 799
+   },
+   "benign_group_share": 0.5016,
+   "benign_support": "SUPPORTED"
+  },
+  "field:security_sensitive_name": {
+   "ALLOW": {
+    "d54_groups": 1780,
+    "generator_groups": 1977,
+    "rows": 1977,
+    "unique_texts": 1977
+   },
+   "BLOCK": {
+    "d54_groups": 2451,
+    "generator_groups": 2451,
+    "rows": 2550,
+    "unique_texts": 2550
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 1977
+   },
+   "benign_group_share": 0.4465,
+   "benign_support": "SUPPORTED"
+  },
+  "field:username": {
+   "ALLOW": {
+    "d54_groups": 1613,
+    "generator_groups": 1629,
+    "rows": 1629,
+    "unique_texts": 1629
+   },
+   "BLOCK": {
+    "d54_groups": 1647,
+    "generator_groups": 1647,
+    "rows": 1660,
+    "unique_texts": 1660
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1232,
+    "synthetic_benign": 397
+   },
+   "benign_group_share": 0.4973,
+   "benign_support": "SUPPORTED"
+  },
+  "form:body_fields=1": {
+   "ALLOW": {
+    "d54_groups": 3675,
+    "generator_groups": 4249,
+    "rows": 5052,
+    "unique_texts": 5052
+   },
+   "BLOCK": {
+    "d54_groups": 3737,
+    "generator_groups": 3744,
+    "rows": 4652,
+    "unique_texts": 4652
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 4247
+   },
+   "benign_group_share": 0.5316,
+   "benign_support": "SUPPORTED"
+  },
+  "form:body_fields=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "form:body_fields=3": {
+   "ALLOW": {
+    "d54_groups": 7,
+    "generator_groups": 7,
+    "rows": 368,
+    "unique_texts": 368
+   },
+   "BLOCK": {
+    "d54_groups": 134,
+    "generator_groups": 151,
+    "rows": 413,
+    "unique_texts": 413
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 5
+   },
+   "benign_group_share": 0.0443,
+   "benign_support": "SCARCE"
+  },
+  "form:body_fields=5": {
+   "ALLOW": {
+    "d54_groups": 318,
+    "generator_groups": 318,
+    "rows": 702,
+    "unique_texts": 702
+   },
+   "BLOCK": {
+    "d54_groups": 281,
+    "generator_groups": 284,
+    "rows": 321,
+    "unique_texts": 321
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 318
+   },
+   "benign_group_share": 0.5282,
+   "benign_support": "SUPPORTED"
+  },
+  "form:body_fields=6+": {
+   "ALLOW": {
+    "d54_groups": 589,
+    "generator_groups": 589,
+    "rows": 589,
+    "unique_texts": 589
+   },
+   "BLOCK": {
+    "d54_groups": 391,
+    "generator_groups": 391,
+    "rows": 391,
+    "unique_texts": 391
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 589
+   },
+   "benign_group_share": 0.601,
+   "benign_support": "SUPPORTED"
+  },
+  "form:punctuation_in_body_value": {
+   "ALLOW": {
+    "d54_groups": 1438,
+    "generator_groups": 1588,
+    "rows": 1972,
+    "unique_texts": 1972
+   },
+   "BLOCK": {
+    "d54_groups": 4370,
+    "generator_groups": 4391,
+    "rows": 5465,
+    "unique_texts": 5465
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 654,
+    "synthetic_benign": 934
+   },
+   "benign_group_share": 0.2656,
+   "benign_support": "SUPPORTED"
+  },
+  "json:array_inside": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "json:depth=1": {
+   "ALLOW": {
+    "d54_groups": 84,
+    "generator_groups": 103,
+    "rows": 103,
+    "unique_texts": 103
+   },
+   "BLOCK": {
+    "d54_groups": 861,
+    "generator_groups": 861,
+    "rows": 930,
+    "unique_texts": 930
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 103
+   },
+   "benign_group_share": 0.1068,
+   "benign_support": "SUPPORTED"
+  },
+  "json:depth=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 6,
+    "generator_groups": 6,
+    "rows": 6,
+    "unique_texts": 6
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "json:depth=3+": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "json:free_text_string": {
+   "ALLOW": {
+    "d54_groups": 49,
+    "generator_groups": 68,
+    "rows": 68,
+    "unique_texts": 68
+   },
+   "BLOCK": {
+    "d54_groups": 228,
+    "generator_groups": 228,
+    "rows": 247,
+    "unique_texts": 247
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 68
+   },
+   "benign_group_share": 0.2297,
+   "benign_support": "SUPPORTED"
+  },
+  "json:nested_object": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 7,
+    "generator_groups": 7,
+    "rows": 7,
+    "unique_texts": 7
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "json:null": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "json:string": {
+   "ALLOW": {
+    "d54_groups": 84,
+    "generator_groups": 103,
+    "rows": 103,
+    "unique_texts": 103
+   },
+   "BLOCK": {
+    "d54_groups": 867,
+    "generator_groups": 867,
+    "rows": 936,
+    "unique_texts": 936
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 103
+   },
+   "benign_group_share": 0.1062,
+   "benign_support": "SUPPORTED"
+  },
+  "json:top_keys=1": {
+   "ALLOW": {
+    "d54_groups": 84,
+    "generator_groups": 103,
+    "rows": 103,
+    "unique_texts": 103
+   },
+   "BLOCK": {
+    "d54_groups": 862,
+    "generator_groups": 862,
+    "rows": 931,
+    "unique_texts": 931
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 103
+   },
+   "benign_group_share": 0.1067,
+   "benign_support": "SUPPORTED"
+  },
+  "json:top_keys=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 6,
+    "generator_groups": 6,
+    "rows": 6,
+    "unique_texts": 6
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "json:url_string": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 49,
+    "generator_groups": 49,
+    "rows": 51,
+    "unique_texts": 51
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:admin": {
+   "ALLOW": {
+    "d54_groups": 37,
+    "generator_groups": 40,
+    "rows": 40,
+    "unique_texts": 40
+   },
+   "BLOCK": {
+    "d54_groups": 145,
+    "generator_groups": 146,
+    "rows": 173,
+    "unique_texts": 173
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 40
+   },
+   "benign_group_share": 0.2151,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:alert": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1388,
+    "generator_groups": 1390,
+    "rows": 2087,
+    "unique_texts": 2087
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:and": {
+   "ALLOW": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "BLOCK": {
+    "d54_groups": 248,
+    "generator_groups": 248,
+    "rows": 335,
+    "unique_texts": 335
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1
+   },
+   "benign_group_share": 0.004,
+   "benign_support": "SCARCE"
+  },
+  "lexical:call": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 13,
+    "generator_groups": 13,
+    "rows": 17,
+    "unique_texts": 17
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:callback": {
+   "ALLOW": {
+    "d54_groups": 42,
+    "generator_groups": 42,
+    "rows": 42,
+    "unique_texts": 42
+   },
+   "BLOCK": {
+    "d54_groups": 82,
+    "generator_groups": 82,
+    "rows": 91,
+    "unique_texts": 91
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 42
+   },
+   "benign_group_share": 0.3387,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:cat": {
+   "ALLOW": {
+    "d54_groups": 3,
+    "generator_groups": 3,
+    "rows": 3,
+    "unique_texts": 3
+   },
+   "BLOCK": {
+    "d54_groups": 116,
+    "generator_groups": 116,
+    "rows": 173,
+    "unique_texts": 173
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 3
+   },
+   "benign_group_share": 0.0252,
+   "benign_support": "SCARCE"
+  },
+  "lexical:delete": {
+   "ALLOW": {
+    "d54_groups": 2,
+    "generator_groups": 2,
+    "rows": 2,
+    "unique_texts": 2
+   },
+   "BLOCK": {
+    "d54_groups": 66,
+    "generator_groups": 70,
+    "rows": 104,
+    "unique_texts": 104
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 2
+   },
+   "benign_group_share": 0.0278,
+   "benign_support": "SCARCE"
+  },
+  "lexical:drop": {
+   "ALLOW": {
+    "d54_groups": 2,
+    "generator_groups": 2,
+    "rows": 2,
+    "unique_texts": 2
+   },
+   "BLOCK": {
+    "d54_groups": 103,
+    "generator_groups": 105,
+    "rows": 148,
+    "unique_texts": 148
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2
+   },
+   "benign_group_share": 0.0187,
+   "benign_support": "SCARCE"
+  },
+  "lexical:echo": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 41,
+    "generator_groups": 41,
+    "rows": 60,
+    "unique_texts": 60
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:etc": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1305,
+    "generator_groups": 1305,
+    "rows": 1385,
+    "unique_texts": 1385
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:eval": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 44,
+    "generator_groups": 44,
+    "rows": 59,
+    "unique_texts": 59
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:exec": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 288,
+    "generator_groups": 289,
+    "rows": 423,
+    "unique_texts": 423
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:file": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 166,
+    "generator_groups": 167,
+    "rows": 261,
+    "unique_texts": 261
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:free_text_value": {
+   "ALLOW": {
+    "d54_groups": 1503,
+    "generator_groups": 1695,
+    "rows": 2436,
+    "unique_texts": 2436
+   },
+   "BLOCK": {
+    "d54_groups": 3131,
+    "generator_groups": 3150,
+    "rows": 4585,
+    "unique_texts": 4585
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 511,
+    "synthetic_benign": 1184
+   },
+   "benign_group_share": 0.3498,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:from": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 317,
+    "generator_groups": 323,
+    "rows": 443,
+    "unique_texts": 443
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:http": {
+   "ALLOW": {
+    "d54_groups": 6,
+    "generator_groups": 7,
+    "rows": 7,
+    "unique_texts": 7
+   },
+   "BLOCK": {
+    "d54_groups": 535,
+    "generator_groups": 535,
+    "rows": 709,
+    "unique_texts": 709
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 7
+   },
+   "benign_group_share": 0.0129,
+   "benign_support": "SCARCE"
+  },
+  "lexical:https": {
+   "ALLOW": {
+    "d54_groups": 203,
+    "generator_groups": 203,
+    "rows": 203,
+    "unique_texts": 203
+   },
+   "BLOCK": {
+    "d54_groups": 121,
+    "generator_groups": 121,
+    "rows": 157,
+    "unique_texts": 157
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 203
+   },
+   "benign_group_share": 0.6265,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:include": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 99,
+    "generator_groups": 100,
+    "rows": 172,
+    "unique_texts": 172
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:insert": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 5,
+    "generator_groups": 5,
+    "rows": 7,
+    "unique_texts": 7
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:internal_address_literal": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 85,
+    "generator_groups": 85,
+    "rows": 101,
+    "unique_texts": 101
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:javascript": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 789,
+    "generator_groups": 789,
+    "rows": 1180,
+    "unique_texts": 1180
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:localhost": {
+   "ALLOW": {
+    "d54_groups": 8,
+    "generator_groups": 8,
+    "rows": 8,
+    "unique_texts": 8
+   },
+   "BLOCK": {
+    "d54_groups": 20,
+    "generator_groups": 20,
+    "rows": 24,
+    "unique_texts": 24
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 8
+   },
+   "benign_group_share": 0.2857,
+   "benign_support": "SCARCE"
+  },
+  "lexical:match": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 26,
+    "generator_groups": 26,
+    "rows": 37,
+    "unique_texts": 37
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:null": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 51,
+    "generator_groups": 51,
+    "rows": 67,
+    "unique_texts": 67
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:onerror": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 164,
+    "generator_groups": 164,
+    "rows": 243,
+    "unique_texts": 243
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:or": {
+   "ALLOW": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "BLOCK": {
+    "d54_groups": 184,
+    "generator_groups": 184,
+    "rows": 223,
+    "unique_texts": 223
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1
+   },
+   "benign_group_share": 0.0054,
+   "benign_support": "SCARCE"
+  },
+  "lexical:order": {
+   "ALLOW": {
+    "d54_groups": 2,
+    "generator_groups": 2,
+    "rows": 2,
+    "unique_texts": 2
+   },
+   "BLOCK": {
+    "d54_groups": 62,
+    "generator_groups": 62,
+    "rows": 82,
+    "unique_texts": 82
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 2
+   },
+   "benign_group_share": 0.0312,
+   "benign_support": "SCARCE"
+  },
+  "lexical:passwd": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 676,
+    "generator_groups": 676,
+    "rows": 747,
+    "unique_texts": 747
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:ping": {
+   "ALLOW": {
+    "d54_groups": 26,
+    "generator_groups": 28,
+    "rows": 28,
+    "unique_texts": 28
+   },
+   "BLOCK": {
+    "d54_groups": 56,
+    "generator_groups": 56,
+    "rows": 66,
+    "unique_texts": 66
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 28
+   },
+   "benign_group_share": 0.3333,
+   "benign_support": "SCARCE"
+  },
+  "lexical:please": {
+   "ALLOW": {
+    "d54_groups": 154,
+    "generator_groups": 168,
+    "rows": 168,
+    "unique_texts": 168
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 168
+   },
+   "benign_group_share": 0.9941,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:redirect": {
+   "ALLOW": {
+    "d54_groups": 42,
+    "generator_groups": 42,
+    "rows": 42,
+    "unique_texts": 42
+   },
+   "BLOCK": {
+    "d54_groups": 71,
+    "generator_groups": 71,
+    "rows": 75,
+    "unique_texts": 75
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 42
+   },
+   "benign_group_share": 0.3717,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:root": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 23,
+    "generator_groups": 23,
+    "rows": 27,
+    "unique_texts": 27
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:script": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 704,
+    "generator_groups": 707,
+    "rows": 1056,
+    "unique_texts": 1056
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:select": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 414,
+    "generator_groups": 416,
+    "rows": 553,
+    "unique_texts": 553
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:sleep": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 230,
+    "generator_groups": 230,
+    "rows": 293,
+    "unique_texts": 293
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:table": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 158,
+    "generator_groups": 160,
+    "rows": 231,
+    "unique_texts": 231
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:the": {
+   "ALLOW": {
+    "d54_groups": 373,
+    "generator_groups": 390,
+    "rows": 390,
+    "unique_texts": 390
+   },
+   "BLOCK": {
+    "d54_groups": 27,
+    "generator_groups": 27,
+    "rows": 41,
+    "unique_texts": 41
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1,
+    "synthetic_benign": 389
+   },
+   "benign_group_share": 0.9353,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:union": {
+   "ALLOW": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 1,
+    "unique_texts": 1
+   },
+   "BLOCK": {
+    "d54_groups": 174,
+    "generator_groups": 174,
+    "rows": 221,
+    "unique_texts": 221
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1
+   },
+   "benign_group_share": 0.0057,
+   "benign_support": "SCARCE"
+  },
+  "lexical:update": {
+   "ALLOW": {
+    "d54_groups": 276,
+    "generator_groups": 314,
+    "rows": 314,
+    "unique_texts": 314
+   },
+   "BLOCK": {
+    "d54_groups": 197,
+    "generator_groups": 197,
+    "rows": 211,
+    "unique_texts": 211
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 314
+   },
+   "benign_group_share": 0.6145,
+   "benign_support": "SUPPORTED"
+  },
+  "lexical:url": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 198,
+    "generator_groups": 198,
+    "rows": 300,
+    "unique_texts": 300
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "lexical:where": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 182,
+    "generator_groups": 184,
+    "rows": 250,
+    "unique_texts": 250
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:alnum_mixed_value": {
+   "ALLOW": {
+    "d54_groups": 3580,
+    "generator_groups": 4012,
+    "rows": 4012,
+    "unique_texts": 4012
+   },
+   "BLOCK": {
+    "d54_groups": 5873,
+    "generator_groups": 5876,
+    "rows": 7414,
+    "unique_texts": 7414
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1044,
+    "synthetic_benign": 2968
+   },
+   "benign_group_share": 0.4057,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_params=0": {
+   "ALLOW": {
+    "d54_groups": 2371,
+    "generator_groups": 2655,
+    "rows": 5753,
+    "unique_texts": 5753
+   },
+   "BLOCK": {
+    "d54_groups": 4865,
+    "generator_groups": 4890,
+    "rows": 5852,
+    "unique_texts": 5852
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 353,
+    "synthetic_benign": 2302
+   },
+   "benign_group_share": 0.3519,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_params=1": {
+   "ALLOW": {
+    "d54_groups": 3759,
+    "generator_groups": 4352,
+    "rows": 5155,
+    "unique_texts": 5155
+   },
+   "BLOCK": {
+    "d54_groups": 4538,
+    "generator_groups": 4545,
+    "rows": 5583,
+    "unique_texts": 5583
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 4350
+   },
+   "benign_group_share": 0.4892,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_params=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 7,
+    "generator_groups": 7,
+    "rows": 7,
+    "unique_texts": 7
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:body_params=3": {
+   "ALLOW": {
+    "d54_groups": 7,
+    "generator_groups": 7,
+    "rows": 368,
+    "unique_texts": 368
+   },
+   "BLOCK": {
+    "d54_groups": 134,
+    "generator_groups": 151,
+    "rows": 413,
+    "unique_texts": 413
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 5
+   },
+   "benign_group_share": 0.0443,
+   "benign_support": "SCARCE"
+  },
+  "structure:body_params=5": {
+   "ALLOW": {
+    "d54_groups": 318,
+    "generator_groups": 318,
+    "rows": 702,
+    "unique_texts": 702
+   },
+   "BLOCK": {
+    "d54_groups": 281,
+    "generator_groups": 284,
+    "rows": 321,
+    "unique_texts": 321
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 318
+   },
+   "benign_group_share": 0.5282,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_params=6+": {
+   "ALLOW": {
+    "d54_groups": 589,
+    "generator_groups": 589,
+    "rows": 589,
+    "unique_texts": 589
+   },
+   "BLOCK": {
+    "d54_groups": 391,
+    "generator_groups": 391,
+    "rows": 391,
+    "unique_texts": 391
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 589
+   },
+   "benign_group_share": 0.601,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_syntax=form_pairs": {
+   "ALLOW": {
+    "d54_groups": 4589,
+    "generator_groups": 5163,
+    "rows": 6711,
+    "unique_texts": 6711
+   },
+   "BLOCK": {
+    "d54_groups": 4544,
+    "generator_groups": 4571,
+    "rows": 5778,
+    "unique_texts": 5778
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 911,
+    "synthetic_benign": 4252
+   },
+   "benign_group_share": 0.5304,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_syntax=json_object": {
+   "ALLOW": {
+    "d54_groups": 84,
+    "generator_groups": 103,
+    "rows": 103,
+    "unique_texts": 103
+   },
+   "BLOCK": {
+    "d54_groups": 868,
+    "generator_groups": 868,
+    "rows": 937,
+    "unique_texts": 937
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 103
+   },
+   "benign_group_share": 0.1061,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_syntax=none": {
+   "ALLOW": {
+    "d54_groups": 2345,
+    "generator_groups": 2626,
+    "rows": 5724,
+    "unique_texts": 5724
+   },
+   "BLOCK": {
+    "d54_groups": 4777,
+    "generator_groups": 4799,
+    "rows": 5724,
+    "unique_texts": 5724
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 353,
+    "synthetic_benign": 2273
+   },
+   "benign_group_share": 0.3537,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:body_syntax=other": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 36,
+    "generator_groups": 39,
+    "rows": 40,
+    "unique_texts": 40
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:body_syntax=xml": {
+   "ALLOW": {
+    "d54_groups": 26,
+    "generator_groups": 29,
+    "rows": 29,
+    "unique_texts": 29
+   },
+   "BLOCK": {
+    "d54_groups": 69,
+    "generator_groups": 69,
+    "rows": 88,
+    "unique_texts": 88
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 29
+   },
+   "benign_group_share": 0.2959,
+   "benign_support": "SCARCE"
+  },
+  "structure:declared_ct=application/json": {
+   "ALLOW": {
+    "d54_groups": 710,
+    "generator_groups": 764,
+    "rows": 764,
+    "unique_texts": 764
+   },
+   "BLOCK": {
+    "d54_groups": 900,
+    "generator_groups": 905,
+    "rows": 987,
+    "unique_texts": 987
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 764
+   },
+   "benign_group_share": 0.4578,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:declared_ct=application/x-www-form-urlencoded": {
+   "ALLOW": {
+    "d54_groups": 3963,
+    "generator_groups": 4502,
+    "rows": 6050,
+    "unique_texts": 6050
+   },
+   "BLOCK": {
+    "d54_groups": 4519,
+    "generator_groups": 4543,
+    "rows": 5740,
+    "unique_texts": 5740
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 911,
+    "synthetic_benign": 3591
+   },
+   "benign_group_share": 0.4977,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:declared_ct=application/xml": {
+   "ALLOW": {
+    "d54_groups": 14,
+    "generator_groups": 15,
+    "rows": 15,
+    "unique_texts": 15
+   },
+   "BLOCK": {
+    "d54_groups": 44,
+    "generator_groups": 45,
+    "rows": 53,
+    "unique_texts": 53
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 15
+   },
+   "benign_group_share": 0.25,
+   "benign_support": "SCARCE"
+  },
+  "structure:declared_ct=none": {
+   "ALLOW": {
+    "d54_groups": 2345,
+    "generator_groups": 2626,
+    "rows": 5724,
+    "unique_texts": 5724
+   },
+   "BLOCK": {
+    "d54_groups": 4777,
+    "generator_groups": 4799,
+    "rows": 5724,
+    "unique_texts": 5724
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 353,
+    "synthetic_benign": 2273
+   },
+   "benign_group_share": 0.3537,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:declared_ct=text/xml": {
+   "ALLOW": {
+    "d54_groups": 12,
+    "generator_groups": 14,
+    "rows": 14,
+    "unique_texts": 14
+   },
+   "BLOCK": {
+    "d54_groups": 52,
+    "generator_groups": 52,
+    "rows": 63,
+    "unique_texts": 63
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 14
+   },
+   "benign_group_share": 0.2121,
+   "benign_support": "SCARCE"
+  },
+  "structure:declared_ct_body_mismatch": {
+   "ALLOW": {
+    "d54_groups": 626,
+    "generator_groups": 661,
+    "rows": 661,
+    "unique_texts": 661
+   },
+   "BLOCK": {
+    "d54_groups": 66,
+    "generator_groups": 74,
+    "rows": 85,
+    "unique_texts": 85
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 661
+   },
+   "benign_group_share": 0.8993,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:long_value_gt64": {
+   "ALLOW": {
+    "d54_groups": 32,
+    "generator_groups": 41,
+    "rows": 41,
+    "unique_texts": 41
+   },
+   "BLOCK": {
+    "d54_groups": 2192,
+    "generator_groups": 2192,
+    "rows": 2839,
+    "unique_texts": 2839
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 41
+   },
+   "benign_group_share": 0.0184,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:method=DELETE": {
+   "ALLOW": {
+    "d54_groups": 752,
+    "generator_groups": 875,
+    "rows": 875,
+    "unique_texts": 875
+   },
+   "BLOCK": {
+    "d54_groups": 864,
+    "generator_groups": 864,
+    "rows": 875,
+    "unique_texts": 875
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 875
+   },
+   "benign_group_share": 0.5032,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:method=GET": {
+   "ALLOW": {
+    "d54_groups": 897,
+    "generator_groups": 978,
+    "rows": 4076,
+    "unique_texts": 4076
+   },
+   "BLOCK": {
+    "d54_groups": 3314,
+    "generator_groups": 3335,
+    "rows": 4076,
+    "unique_texts": 4076
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 353,
+    "synthetic_benign": 625
+   },
+   "benign_group_share": 0.2268,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:method=HEAD": {
+   "ALLOW": {
+    "d54_groups": 696,
+    "generator_groups": 773,
+    "rows": 773,
+    "unique_texts": 773
+   },
+   "BLOCK": {
+    "d54_groups": 764,
+    "generator_groups": 765,
+    "rows": 773,
+    "unique_texts": 773
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 773
+   },
+   "benign_group_share": 0.5026,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:method=PATCH": {
+   "ALLOW": {
+    "d54_groups": 1136,
+    "generator_groups": 1316,
+    "rows": 1316,
+    "unique_texts": 1316
+   },
+   "BLOCK": {
+    "d54_groups": 1258,
+    "generator_groups": 1259,
+    "rows": 1316,
+    "unique_texts": 1316
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 1316
+   },
+   "benign_group_share": 0.5111,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:method=POST": {
+   "ALLOW": {
+    "d54_groups": 2366,
+    "generator_groups": 2597,
+    "rows": 4145,
+    "unique_texts": 4145
+   },
+   "BLOCK": {
+    "d54_groups": 3301,
+    "generator_groups": 3327,
+    "rows": 4145,
+    "unique_texts": 4145
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 911,
+    "synthetic_benign": 1686
+   },
+   "benign_group_share": 0.4384,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:method=PUT": {
+   "ALLOW": {
+    "d54_groups": 1197,
+    "generator_groups": 1382,
+    "rows": 1382,
+    "unique_texts": 1382
+   },
+   "BLOCK": {
+    "d54_groups": 1297,
+    "generator_groups": 1300,
+    "rows": 1382,
+    "unique_texts": 1382
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 1382
+   },
+   "benign_group_share": 0.5153,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:numeric_value": {
+   "ALLOW": {
+    "d54_groups": 1267,
+    "generator_groups": 1477,
+    "rows": 2558,
+    "unique_texts": 2558
+   },
+   "BLOCK": {
+    "d54_groups": 1221,
+    "generator_groups": 1250,
+    "rows": 1741,
+    "unique_texts": 1741
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 809,
+    "synthetic_benign": 668
+   },
+   "benign_group_share": 0.5416,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:path_depth=1": {
+   "ALLOW": {
+    "d54_groups": 2618,
+    "generator_groups": 3151,
+    "rows": 3151,
+    "unique_texts": 3151
+   },
+   "BLOCK": {
+    "d54_groups": 4031,
+    "generator_groups": 4033,
+    "rows": 4276,
+    "unique_texts": 4276
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 3151
+   },
+   "benign_group_share": 0.4386,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:path_depth=2": {
+   "ALLOW": {
+    "d54_groups": 4080,
+    "generator_groups": 4399,
+    "rows": 8766,
+    "unique_texts": 8766
+   },
+   "BLOCK": {
+    "d54_groups": 5905,
+    "generator_groups": 5952,
+    "rows": 7683,
+    "unique_texts": 7683
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1262,
+    "synthetic_benign": 3137
+   },
+   "benign_group_share": 0.425,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:path_depth=3": {
+   "ALLOW": {
+    "d54_groups": 346,
+    "generator_groups": 371,
+    "rows": 650,
+    "unique_texts": 650
+   },
+   "BLOCK": {
+    "d54_groups": 554,
+    "generator_groups": 558,
+    "rows": 588,
+    "unique_texts": 588
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 2,
+    "synthetic_benign": 369
+   },
+   "benign_group_share": 0.3994,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:path_depth=4": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1,
+    "generator_groups": 1,
+    "rows": 8,
+    "unique_texts": 8
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:path_depth=5": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 2,
+    "generator_groups": 2,
+    "rows": 12,
+    "unique_texts": 12
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:path_has_extension": {
+   "ALLOW": {
+    "d54_groups": 1263,
+    "generator_groups": 1265,
+    "rows": 5911,
+    "unique_texts": 5911
+   },
+   "BLOCK": {
+    "d54_groups": 1754,
+    "generator_groups": 1792,
+    "rows": 3109,
+    "unique_texts": 3109
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1264,
+    "synthetic_benign": 1
+   },
+   "benign_group_share": 0.4138,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:path_valued_param": {
+   "ALLOW": {
+    "d54_groups": 95,
+    "generator_groups": 97,
+    "rows": 97,
+    "unique_texts": 97
+   },
+   "BLOCK": {
+    "d54_groups": 1486,
+    "generator_groups": 1487,
+    "rows": 1513,
+    "unique_texts": 1513
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 7,
+    "synthetic_benign": 90
+   },
+   "benign_group_share": 0.0612,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:query_params=0": {
+   "ALLOW": {
+    "d54_groups": 4715,
+    "generator_groups": 5313,
+    "rows": 9363,
+    "unique_texts": 9363
+   },
+   "BLOCK": {
+    "d54_groups": 5440,
+    "generator_groups": 5470,
+    "rows": 6863,
+    "unique_texts": 6863
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 929,
+    "synthetic_benign": 4384
+   },
+   "benign_group_share": 0.4927,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:query_params=1": {
+   "ALLOW": {
+    "d54_groups": 1994,
+    "generator_groups": 2273,
+    "rows": 2683,
+    "unique_texts": 2683
+   },
+   "BLOCK": {
+    "d54_groups": 3978,
+    "generator_groups": 3982,
+    "rows": 4626,
+    "unique_texts": 4626
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 3,
+    "synthetic_benign": 2270
+   },
+   "benign_group_share": 0.3634,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:query_params=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 5,
+    "generator_groups": 5,
+    "rows": 5,
+    "unique_texts": 5
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:query_params=3": {
+   "ALLOW": {
+    "d54_groups": 4,
+    "generator_groups": 4,
+    "rows": 66,
+    "unique_texts": 66
+   },
+   "BLOCK": {
+    "d54_groups": 133,
+    "generator_groups": 146,
+    "rows": 371,
+    "unique_texts": 371
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 1,
+    "synthetic_benign": 3
+   },
+   "benign_group_share": 0.0267,
+   "benign_support": "SCARCE"
+  },
+  "structure:query_params=5": {
+   "ALLOW": {
+    "d54_groups": 121,
+    "generator_groups": 121,
+    "rows": 245,
+    "unique_texts": 245
+   },
+   "BLOCK": {
+    "d54_groups": 255,
+    "generator_groups": 260,
+    "rows": 299,
+    "unique_texts": 299
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 121
+   },
+   "benign_group_share": 0.3176,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:query_params=6+": {
+   "ALLOW": {
+    "d54_groups": 210,
+    "generator_groups": 210,
+    "rows": 210,
+    "unique_texts": 210
+   },
+   "BLOCK": {
+    "d54_groups": 403,
+    "generator_groups": 403,
+    "rows": 403,
+    "unique_texts": 403
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 210
+   },
+   "benign_group_share": 0.3426,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:repeated_param_names": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 17,
+    "generator_groups": 17,
+    "rows": 17,
+    "unique_texts": 17
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:rf_total_param_count=0": {
+   "ALLOW": {
+    "d54_groups": 668,
+    "generator_groups": 708,
+    "rows": 3210,
+    "unique_texts": 3210
+   },
+   "BLOCK": {
+    "d54_groups": 116,
+    "generator_groups": 122,
+    "rows": 186,
+    "unique_texts": 186
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 18,
+    "synthetic_benign": 690
+   },
+   "benign_group_share": 0.853,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:rf_total_param_count=1": {
+   "ALLOW": {
+    "d54_groups": 5127,
+    "generator_groups": 5964,
+    "rows": 7177,
+    "unique_texts": 7177
+   },
+   "BLOCK": {
+    "d54_groups": 8046,
+    "generator_groups": 8054,
+    "rows": 10170,
+    "unique_texts": 10170
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 5,
+    "synthetic_benign": 5959
+   },
+   "benign_group_share": 0.4255,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:rf_total_param_count=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 7,
+    "generator_groups": 7,
+    "rows": 7,
+    "unique_texts": 7
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:rf_total_param_count=3": {
+   "ALLOW": {
+    "d54_groups": 11,
+    "generator_groups": 11,
+    "rows": 434,
+    "unique_texts": 434
+   },
+   "BLOCK": {
+    "d54_groups": 267,
+    "generator_groups": 297,
+    "rows": 784,
+    "unique_texts": 784
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 3,
+    "synthetic_benign": 8
+   },
+   "benign_group_share": 0.0357,
+   "benign_support": "SCARCE"
+  },
+  "structure:rf_total_param_count=4": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 6,
+    "generator_groups": 6,
+    "rows": 6,
+    "unique_texts": 6
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:rf_total_param_count=5": {
+   "ALLOW": {
+    "d54_groups": 439,
+    "generator_groups": 439,
+    "rows": 947,
+    "unique_texts": 947
+   },
+   "BLOCK": {
+    "d54_groups": 536,
+    "generator_groups": 544,
+    "rows": 620,
+    "unique_texts": 620
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 439
+   },
+   "benign_group_share": 0.4466,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:rf_total_param_count=6+": {
+   "ALLOW": {
+    "d54_groups": 799,
+    "generator_groups": 799,
+    "rows": 799,
+    "unique_texts": 799
+   },
+   "BLOCK": {
+    "d54_groups": 794,
+    "generator_groups": 794,
+    "rows": 794,
+    "unique_texts": 794
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 799
+   },
+   "benign_group_share": 0.5016,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:total_params=0": {
+   "ALLOW": {
+    "d54_groups": 42,
+    "generator_groups": 47,
+    "rows": 2549,
+    "unique_texts": 2549
+   },
+   "BLOCK": {
+    "d54_groups": 91,
+    "generator_groups": 94,
+    "rows": 148,
+    "unique_texts": 148
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 18,
+    "synthetic_benign": 29
+   },
+   "benign_group_share": 0.3333,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:total_params=1": {
+   "ALLOW": {
+    "d54_groups": 5753,
+    "generator_groups": 6625,
+    "rows": 7838,
+    "unique_texts": 7838
+   },
+   "BLOCK": {
+    "d54_groups": 8061,
+    "generator_groups": 8072,
+    "rows": 10209,
+    "unique_texts": 10209
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 5,
+    "synthetic_benign": 6620
+   },
+   "benign_group_share": 0.4508,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:total_params=2": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 12,
+    "generator_groups": 12,
+    "rows": 12,
+    "unique_texts": 12
+   },
+   "attack_support": "SCARCE",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "structure:total_params=3": {
+   "ALLOW": {
+    "d54_groups": 11,
+    "generator_groups": 11,
+    "rows": 434,
+    "unique_texts": 434
+   },
+   "BLOCK": {
+    "d54_groups": 267,
+    "generator_groups": 297,
+    "rows": 784,
+    "unique_texts": 784
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 3,
+    "synthetic_benign": 8
+   },
+   "benign_group_share": 0.0357,
+   "benign_support": "SCARCE"
+  },
+  "structure:total_params=5": {
+   "ALLOW": {
+    "d54_groups": 439,
+    "generator_groups": 439,
+    "rows": 947,
+    "unique_texts": 947
+   },
+   "BLOCK": {
+    "d54_groups": 536,
+    "generator_groups": 544,
+    "rows": 620,
+    "unique_texts": 620
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 439
+   },
+   "benign_group_share": 0.4466,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:total_params=6+": {
+   "ALLOW": {
+    "d54_groups": 799,
+    "generator_groups": 799,
+    "rows": 799,
+    "unique_texts": 799
+   },
+   "BLOCK": {
+    "d54_groups": 794,
+    "generator_groups": 794,
+    "rows": 794,
+    "unique_texts": 794
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 799
+   },
+   "benign_group_share": 0.5016,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:url_valued_param": {
+   "ALLOW": {
+    "d54_groups": 203,
+    "generator_groups": 203,
+    "rows": 203,
+    "unique_texts": 203
+   },
+   "BLOCK": {
+    "d54_groups": 214,
+    "generator_groups": 214,
+    "rows": 241,
+    "unique_texts": 241
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 203
+   },
+   "benign_group_share": 0.4868,
+   "benign_support": "SUPPORTED"
+  },
+  "structure:value_with_space": {
+   "ALLOW": {
+    "d54_groups": 2003,
+    "generator_groups": 2199,
+    "rows": 4003,
+    "unique_texts": 4003
+   },
+   "BLOCK": {
+    "d54_groups": 4293,
+    "generator_groups": 4312,
+    "rows": 5842,
+    "unique_texts": 5842
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 811,
+    "synthetic_benign": 1388
+   },
+   "benign_group_share": 0.3377,
+   "benign_support": "SUPPORTED"
+  },
+  "value_char:%": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 1644,
+    "generator_groups": 1646,
+    "rows": 1738,
+    "unique_texts": 1738
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "value_char:&": {
+   "ALLOW": {
+    "d54_groups": 0,
+    "generator_groups": 0,
+    "rows": 0,
+    "unique_texts": 0
+   },
+   "BLOCK": {
+    "d54_groups": 492,
+    "generator_groups": 492,
+    "rows": 706,
+    "unique_texts": 706
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {},
+   "benign_group_share": 0.0,
+   "benign_support": "ABSENT"
+  },
+  "value_char:+": {
+   "ALLOW": {
+    "d54_groups": 16,
+    "generator_groups": 16,
+    "rows": 16,
+    "unique_texts": 16
+   },
+   "BLOCK": {
+    "d54_groups": 615,
+    "generator_groups": 619,
+    "rows": 952,
+    "unique_texts": 952
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 16
+   },
+   "benign_group_share": 0.0252,
+   "benign_support": "SCARCE"
+  },
+  "value_char:,": {
+   "ALLOW": {
+    "d54_groups": 1040,
+    "generator_groups": 1118,
+    "rows": 1118,
+    "unique_texts": 1118
+   },
+   "BLOCK": {
+    "d54_groups": 1528,
+    "generator_groups": 1529,
+    "rows": 1943,
+    "unique_texts": 1943
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 628,
+    "synthetic_benign": 490
+   },
+   "benign_group_share": 0.4224,
+   "benign_support": "SUPPORTED"
+  },
+  "value_char:/": {
+   "ALLOW": {
+    "d54_groups": 593,
+    "generator_groups": 598,
+    "rows": 598,
+    "unique_texts": 598
+   },
+   "BLOCK": {
+    "d54_groups": 4358,
+    "generator_groups": 4362,
+    "rows": 5386,
+    "unique_texts": 5386
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 276,
+    "synthetic_benign": 322
+   },
+   "benign_group_share": 0.1206,
+   "benign_support": "SUPPORTED"
+  },
+  "value_char::": {
+   "ALLOW": {
+    "d54_groups": 371,
+    "generator_groups": 459,
+    "rows": 459,
+    "unique_texts": 459
+   },
+   "BLOCK": {
+    "d54_groups": 2813,
+    "generator_groups": 2814,
+    "rows": 4050,
+    "unique_texts": 4050
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 459
+   },
+   "benign_group_share": 0.1402,
+   "benign_support": "SUPPORTED"
+  },
+  "value_char:=": {
+   "ALLOW": {
+    "d54_groups": 122,
+    "generator_groups": 125,
+    "rows": 125,
+    "unique_texts": 125
+   },
+   "BLOCK": {
+    "d54_groups": 2826,
+    "generator_groups": 2828,
+    "rows": 4133,
+    "unique_texts": 4133
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "synthetic_benign": 125
+   },
+   "benign_group_share": 0.0423,
+   "benign_support": "SUPPORTED"
+  },
+  "value_char:?": {
+   "ALLOW": {
+    "d54_groups": 393,
+    "generator_groups": 405,
+    "rows": 405,
+    "unique_texts": 405
+   },
+   "BLOCK": {
+    "d54_groups": 1107,
+    "generator_groups": 1110,
+    "rows": 1426,
+    "unique_texts": 1426
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 194,
+    "synthetic_benign": 211
+   },
+   "benign_group_share": 0.2673,
+   "benign_support": "SUPPORTED"
+  },
+  "value_char:@": {
+   "ALLOW": {
+    "d54_groups": 966,
+    "generator_groups": 967,
+    "rows": 967,
+    "unique_texts": 967
+   },
+   "BLOCK": {
+    "d54_groups": 1052,
+    "generator_groups": 1052,
+    "rows": 1190,
+    "unique_texts": 1190
+   },
+   "attack_support": "SUPPORTED",
+   "benign_generator_groups_by_source": {
+    "csic_benign": 799,
+    "synthetic_benign": 168
+   },
+   "benign_group_share": 0.4789,
+   "benign_support": "SUPPORTED"
+  }
+ },
+ "non_claims": [
+  "Counts on V4-clean TRAIN describe the training distribution; they are not rates.",
+  "Development counts (#57, #60) are diagnostic counts on author-chosen compositions, never FPR / recall / prevalence (D42).",
+  "A marker co-occurring with V4 BLOCK decisions is a correlation, not a cause.",
+  "Envelope markers are audited only; D44 forbids them as model features."
+ ],
+ "support_rule": {
+  "ABSENT": "0",
+  "SCARCE": "1-29",
+  "SUPPORTED": ">= 30 (D18)",
+  "unit": "benign V4 generator groups (D16/D54 provenance)"
+ },
+ "totals": {
+  "ALLOW": {
+   "d54_groups": 7044,
+   "generator_groups": 7921,
+   "rows": 12567,
+   "unique_texts": 12567
+  },
+  "BLOCK": {
+   "d54_groups": 9759,
+   "generator_groups": 9811,
+   "rows": 12567,
+   "unique_texts": 12567
+  }
+ }
+}

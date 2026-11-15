@@ -1,0 +1,123 @@
+{
+  "stage": "bench",
+  "run": "run-002",
+  "created_utc": "2026-10-04T06:10:42Z",
+  "data": "VALIDATION requests (fitted rows); D1 text from V4-clean train joined by row_id for the extraction column",
+  "mode": "one request per call, single thread, fresh process per model",
+  "percentiles": "nearest-rank",
+  "units": "milliseconds",
+  "environment": {
+    "python": "3.12.15",
+    "numpy": "2.5.3",
+    "scikit_learn": "1.9.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "logical_cpus": 32,
+    "interpreter": "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python"
+  },
+  "models": {
+    "recommended": {
+      "model": "model-output-hybrid-analyzer-v2/recommended.pkl",
+      "artifact_bytes": 8866799,
+      "artifact_sha256": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b",
+      "analyzer_version": "hybrid-analyzer-v2/attack=hist_gb,category=hist_gb",
+      "threads_env": {
+        "OMP_NUM_THREADS": "1",
+        "OPENBLAS_NUM_THREADS": "1",
+        "MKL_NUM_THREADS": "1"
+      },
+      "import_seconds (numpy + sklearn + module)": 0.4328,
+      "load_seconds (pickle.load)": 0.0287,
+      "rss_kib": {
+        "process_start": 21424,
+        "after_imports": 142684,
+        "after_model_load": 158240,
+        "model_load_delta": 15556,
+        "peak_maxrss": 199368
+      },
+      "first_call_ms": 9.895,
+      "warmup_calls": 500,
+      "requests": 4935,
+      "passes": 2,
+      "latency_ms": {
+        "extraction": {
+          "n": 9870,
+          "min": 0.0399,
+          "mean": 0.0682,
+          "p50": 0.0665,
+          "p95": 0.0884,
+          "p99": 0.0977,
+          "max": 0.1511
+        },
+        "preprocessing": {
+          "n": 9870,
+          "min": 0.0102,
+          "mean": 0.0177,
+          "p50": 0.0177,
+          "p95": 0.0212,
+          "p99": 0.0243,
+          "max": 0.0574
+        },
+        "attack_inference": {
+          "n": 9870,
+          "min": 0.3953,
+          "mean": 0.4934,
+          "p50": 0.4938,
+          "p95": 0.5419,
+          "p99": 0.573,
+          "max": 1.2596
+        },
+        "category_inference": {
+          "n": 9870,
+          "min": 7.8125,
+          "mean": 8.3924,
+          "p50": 8.3894,
+          "p95": 8.6621,
+          "p99": 8.8452,
+          "max": 19.9667
+        },
+        "contract": {
+          "n": 9870,
+          "min": 0.0122,
+          "mean": 0.0219,
+          "p50": 0.0219,
+          "p95": 0.0282,
+          "p99": 0.0329,
+          "max": 0.0536
+        },
+        "analyzer_segmented_total": {
+          "n": 9870,
+          "min": 8.2672,
+          "mean": 8.9253,
+          "p50": 8.9239,
+          "p95": 9.2254,
+          "p99": 9.4413,
+          "max": 20.5977
+        },
+        "analyzer_call": {
+          "n": 9870,
+          "min": 8.1375,
+          "mean": 8.9141,
+          "p50": 8.9187,
+          "p95": 9.2247,
+          "p99": 9.4281,
+          "max": 15.7581
+        },
+        "extraction_plus_analyzer": {
+          "n": 9870,
+          "min": 8.3197,
+          "mean": 8.9935,
+          "p50": 8.9924,
+          "p95": 9.2975,
+          "p99": 9.5171,
+          "max": 20.6728
+        }
+      },
+      "throughput_rps_single_thread (tight analyze() loop)": 111.5,
+      "contract_violations": 0
+    }
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "adapter": "model-output-v4-clean",
+  "format": "v4",
+  "inputs": "64 synthetic fixture texts (manifest 4b66c311fc9c)",
+  "note": "fidelity between runtimes on synthetic inputs; NOT accuracy. Timings: CPU build diagnostic only, not a D31/D32 benchmark and not a D36 result",
+  "reference": {
+    "decisions": {
+      "ALLOW": 5,
+      "BLOCK": 59,
+      "INVALID": 0
+    },
+    "runtime": "HF 4-bit NF4 + PEFT adapter (GPU)",
+    "seconds_total": 11.83
+  },
+  "results": {
+    "v4-clean-nf4faithful-Q4_K_M.gguf": {
+      "decisions": {
+        "ALLOW": 14,
+        "BLOCK": 50,
+        "INVALID": 0
+      },
+      "differences": [
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Cross-site scripting payload detected.",
+          "i": 0
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 1
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 3
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 4
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 6
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 7
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Cross-site scripting payload detected.",
+          "i": 20
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Cross-site scripting payload detected.",
+          "i": 22
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 24
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 27
+        }
+      ],
+      "ended_on_eos": 64,
+      "file_bytes": 667815200,
+      "identical_decisions": "55/64",
+      "identical_generations": "34/64",
+      "model_ms_cpu": {
+        "max": 724.1,
+        "median": 558.9,
+        "n": 64,
+        "p95": 664.9
+      },
+      "sha256": "dadee91d96471cfee370280d0d175b543322319a583a1d9e10b873125aa2bc5e",
+      "token_parity_text": "0/64"
+    },
+    "v4-clean-nf4faithful-Q8_0.gguf": {
+      "decisions": {
+        "ALLOW": 4,
+        "BLOCK": 60,
+        "INVALID": 0
+      },
+      "differences": [
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "i": 18
+        },
+        {
+          "gguf": "BLOCK | SQL injection payload detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 34
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 42
+        },
+        {
+          "gguf": "BLOCK | HTTP parameter pollution detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 60
+        }
+      ],
+      "ended_on_eos": 64,
+      "file_bytes": 1169808672,
+      "identical_decisions": "63/64",
+      "identical_generations": "60/64",
+      "model_ms_cpu": {
+        "max": 947.7,
+        "median": 796.0,
+        "n": 64,
+        "p95": 888.9
+      },
+      "sha256": "5f2733ede0dbbd7849add7b55bf15a542de79ce583d04836ae4400851c7f66b8",
+      "token_parity_text": "0/64"
+    },
+    "v4-clean-nf4faithful-bf16.gguf": {
+      "decisions": {
+        "ALLOW": 4,
+        "BLOCK": 60,
+        "INVALID": 0
+      },
+      "differences": [
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "i": 18
+        },
+        {
+          "gguf": "BLOCK | Cross-site scripting payload detected.",
+          "hf": "BLOCK | SQL injection payload detected.",
+          "i": 42
+        }
+      ],
+      "ended_on_eos": 64,
+      "file_bytes": 2201017632,
+      "identical_decisions": "63/64",
+      "identical_generations": "62/64",
+      "model_ms_cpu": {
+        "max": 980.1,
+        "median": 799.5,
+        "n": 64,
+        "p95": 934.5
+      },
+      "sha256": "5d4877afb7cb5ef94f864ca077c2f7ecbfe0d9b9f5ce725dcf92173eac4a9f06",
+      "token_parity_text": "0/64"
+    }
+  },
+  "schema": "v5-gguf-fidelity/v1",
+  "server": {
+    "binary": "/home/sebas/opt/llama.cpp/build/bin/llama-server",
+    "threads": 16
+  }
+}

@@ -1,5 +1,9 @@
 # firewall-IA — Repository Migration & GitHub Backlog
 
+> **Historical record (2026-08-17).** Kept unchanged as the record of the repository
+> reorganization and the initial backlog. It is not the current plan or issue state: see
+> [`../CONTEXT.md`](../CONTEXT.md) §0 and the GitHub issues. *(Note added 2026-10-04.)*
+
 **Date:** 2026-08-17
 **Purpose:** Reorganise the repository for the course Git/GitHub grading criteria
 (Conventional Commits, branch workflow, Issues, Milestones, clean history).

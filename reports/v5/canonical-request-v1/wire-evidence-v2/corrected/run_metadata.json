@@ -1,0 +1,69 @@
+{
+  "config_yaml_provenance": "The prior v2 run recorded config_yaml_sha256=23c1854\u2026 ; this corrected run records the CURRENT config.yaml SHA above. The only difference is a coordinator COMMENT-ONLY edit ('D70 PROPOSED' -> 'D70') made after the prior run; no runtime setting or gateway behaviour changed. The prior metadata is not overwritten.",
+  "config_yaml_sha256": "94adc6047383323ba3bb17df48241c32a7128d00ac99e54ec07424b1be6a3019",
+  "d70_status": "D70 APPROVED (was PROPOSED). This CORRECTED run is against the gateway after defects A (framing requires EXACTLY HTTP/1.1; HTTP/1.0 OK+ACCEPT -> UNATTESTABLE HTTP_VERSION_NOT_11), B (mode validation checks transport+address: reverse+http+loopback), and C (reservation ownership) were fixed. Observe-only / default-off invariants unchanged.",
+  "effective_options": {
+    "body_size_limit": "None",
+    "connection_strategy": "'lazy'",
+    "http2": "False",
+    "mode": "['reverse:http://127.0.0.1:40717']",
+    "present": true,
+    "stream_large_bodies": "None",
+    "validate_inbound_headers": "True"
+  },
+  "extends": "reports/v5/canonical-request-v1/wire-evidence-v1 (PRESERVED UNCHANGED) and the PRIOR reports/v5/canonical-request-v1/wire-evidence-v2 run (also PRESERVED; this corrected run is written to its own directory and does NOT rewrite prior hashes). v2 adds the shadow FRAMING observer on top of the canonical observer, five per-vector dimensions, the framing outcome under vih drift, and (corrected) the HTTP/1.0 vs HTTP/1.1 version boundary.",
+  "generated_at": "2026-10-22T10:32:48-0600",
+  "lab_profile": {
+    "canonical_observer": "canonical-request/v1 observer ENABLED via lab_addon (config.yaml / data_plane.py untouched)",
+    "caps": {
+      "max_body_bytes": 1048576,
+      "max_decoded_body": 1048576,
+      "token_budget": "UNSET (size stays UNCHECKED; Fast Path ineligible)"
+    },
+    "classifier": "local deterministic ALLOW stub",
+    "effective_options": {
+      "body_size_limit": "None",
+      "connection_strategy": "'lazy'",
+      "http2": "False",
+      "mode": "['reverse:http://127.0.0.1:40717']",
+      "present": true,
+      "stream_large_bodies": "None",
+      "validate_inbound_headers": "True"
+    },
+    "framing_observer": "shadow framing observer ENABLED (WIRE_LAB_FRAMING=1); the gateway's own configure() hook samples the EFFECTIVE profile and the FRAMING OBS line is logged beside each CANONICAL OBS line",
+    "note": "Evidence establishes behaviour of THIS tested profile only; runtime framing stays UNAVAILABLE/UNVERIFIED globally. PROFILE_MATCHED means only 'profile + observed snapshot met the defined conditions' \u2014 never VERIFIED / safe to forward / Fast-Path eligible / wire-equivalent.",
+    "profile_marker": "reverse_proxy:loopback_dynamic_port",
+    "proxy": "mitmdump reverse proxy -> local sink (dynamic loopback port)",
+    "requested_options": {
+      "connection_strategy": "lazy",
+      "flow_detail": "0",
+      "http2": "false",
+      "mode": "reverse:http://127.0.0.1:40717",
+      "stream_large_bodies": "<unset: mitmproxy default (never stream); buffers raw_content>",
+      "termlog_verbosity": "info",
+      "validate_inbound_headers": "true"
+    }
+  },
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.12.15",
+  "report": "wire-evidence-v2 (corrected)",
+  "source_provenance": {
+    "files": {
+      "data_plane/canonical_adapter.py": "923b9cc6896e619c0a52b7132fc622ae40d96405a48954201c7d317a76ba57b6",
+      "data_plane/canonical_observer.py": "f68e577f72daa80eb516aa14d988d9834e08e41d0f0eb1f700baa994c91e1d74",
+      "data_plane/canonical_request.py": "991c1a11ebdb0c22e6c05102ae9a0e1e9756247ec654ab874e2c78d92f1f58b4",
+      "data_plane/data_plane.py": "425e31bdd9d7fd611b8b25599a8a4670366b1f57e72b8893b5caba6f51a220c2",
+      "data_plane/framing_evidence.py": "8e60ca5700a09fab9925d0e37f6ce24fdf20044a1ded3f9746b7e054a50e60fd",
+      "scripts/wire_evidence/harness.py": "8bd1d84666ef01a29f4a227328ded4cd759a2970106c59d8b79e25c92d2fd1d1",
+      "scripts/wire_evidence/lab_addon.py": "9ff3f6c1afa0124ebf75916155c584ca544d4b34096c9acbc5a29cd99027eefb",
+      "scripts/wire_evidence/run_wire_evidence_v2.py": "0e332d184698945aaaae7f0c8be013705f37daecd68ccee9e309ea40cc68fc44"
+    },
+    "note": "SHA-256 of the implementation files used by this lab run (the corrected gateway sources + the lab harness). data_plane/* are the coordinator's/Track A's corrected files, imported by lab_addon.py and NEVER modified by this track."
+  },
+  "version_pins_note": "mitmproxy==12.2.3 is a PINNED data-plane dependency (requirements-data-plane.txt). Brotli and zstandard are reported as OBSERVED in .venv-dataplane (transitive deps); they are NOT ratified direct deployment pins. Version/profile claims derive from this runtime metadata, not asserted independently.",
+  "versions": {
+    "brotli": "1.2.0",
+    "mitmproxy": "12.2.3",
+    "zstandard": "0.25.0"
+  }
+}

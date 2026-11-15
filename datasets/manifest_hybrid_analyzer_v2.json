@@ -1,0 +1,468 @@
+{
+  "dataset_name": "hybrid_analyzer_v2",
+  "status": "D54; immutable once a model is trained on it — any change is hybrid_analyzer_v3",
+  "supersedes_for_development": "hybrid_analyzer_v1 (D51), kept unchanged with run-001",
+  "issue": 53,
+  "feature_schema": "request-features/v2",
+  "feature_fields": [
+    "method",
+    "path_length",
+    "query_length",
+    "body_length",
+    "has_body",
+    "content_type",
+    "body_format",
+    "query_param_count",
+    "body_param_count",
+    "total_param_count",
+    "repeated_param_name_count",
+    "alnum_ratio",
+    "symbol_count",
+    "symbol_ratio",
+    "non_ascii_count",
+    "percent_encoded_count",
+    "percent_encoded_ratio",
+    "has_percent_encoding",
+    "longest_char_run",
+    "entropy_bits_per_char",
+    "path_depth",
+    "json_depth",
+    "single_quote_count",
+    "double_quote_count",
+    "parenthesis_count",
+    "semicolon_count",
+    "slash_count",
+    "backslash_count",
+    "angle_bracket_count",
+    "pipe_count",
+    "ampersand_count",
+    "equals_count",
+    "percent_count",
+    "brace_count"
+  ],
+  "target_schema": "analyzer-targets/v1",
+  "source": {
+    "dataset": "datasets/v4_clean",
+    "manifest": "datasets/manifest_v4_clean.json",
+    "sha256": {
+      "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+      "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
+    },
+    "v4_generator_git_commit": "1bf412fb843992399665e96ec034016462feda7f",
+    "modified": false
+  },
+  "builder": {
+    "head": "97a862b94cd2f669ee03cc077bb9f94836093f39",
+    "code_sha256": {
+      "scripts/dataset/build_hybrid_analyzer_v2.py": "c8208a0752ee8f282c6fc8a9f202f9fd69e47af7033af34bff4a68cce92ff7ea",
+      "scripts/dataset/recover_v4_provenance.py": "23f8c6b2e5ea1e843b94d3744b6ff9f117555a66f1c885beb437e09a0700ee8b",
+      "scripts/dataset/build_hybrid_analyzer_v1.py": "4574ef7c18de5b77e306d246899f55a4f400a22a2d6f8cd677655aa68ca3e1d6",
+      "scripts/dataset/analyze_analyzer_targets.py": "be8c804abcaae07f04dcfc40191cb9481316c6af309af91fb004bf3ad3786caf",
+      "scripts/dataset/parse_dataset_v4.py": "df24ca59892fbc6f605be775c051ff9bc9548fb2d8332f4166d64d9dfe9b3c5b"
+    },
+    "committed_unchanged": false
+  },
+  "external_test_v1": "not read",
+  "mapping": {
+    "attack": {
+      "ALLOW": 0,
+      "BLOCK": 1
+    },
+    "category": {
+      "SQL Injection": "sql_injection",
+      "XSS Injection": "xss",
+      "Directory Traversal": "path_file_access",
+      "File Inclusion": "path_file_access",
+      "Command Injection": "command_injection",
+      "Server Side Template Injection": "ssti",
+      "Open Redirect": "open_redirect",
+      "Server Side Request Forgery": "ssrf",
+      "<every other BLOCK category>": "other_attack"
+    },
+    "not_fitted": {
+      "JSON Web Token": "unsupported_jwt"
+    }
+  },
+  "grouping": "connected components over V4 train of 'same canonical request OR same feature vector OR same V4 generator group'; canonical request = parse_dataset_v4.canonical_key(f'{method} {path}?{query}\\n{content_type}\\n{body}'); feature vector = the 34 RequestFeatures v2 values; generator group = the generator's in-memory _gid, recovered by byte-identical regeneration (scripts/dataset/recover_v4_provenance.py); group key = smallest canonical request of the component",
+  "validation": {
+    "salt": "hybrid-analyzer-v2-validation",
+    "fraction": 0.2,
+    "rule": "per stratum (group target or 'mixed'), groups ordered by sha256(salt NUL group_key); a group joins VALIDATION when that brings the stratum's VALIDATION rows closer to fraction x rows"
+  },
+  "views": {
+    "internal_test_full": "role == internal_test and slice is null",
+    "internal_test_feature_disjoint": "internal_test_full and not meta_feature_vector_in_train",
+    "unsupported_jwt": "slice == unsupported_jwt",
+    "flag_reference_set": "TRAIN u VALIDATION (development set), JWT excluded",
+    "meta_group_id": "D54 component id; for eval rows, components of the same relation inside V4 eval (used for group-weighted metrics)"
+  },
+  "model_inputs": "only the `features` object; every other field is offline metadata",
+  "counts": {
+    "train_rows": 20175,
+    "validation_rows": 4959,
+    "train_fitted_rows": 20104,
+    "validation_fitted_rows": 4935,
+    "validation_share_of_v4_train": 0.1973,
+    "internal_test_full_rows": 6190,
+    "internal_test_feature_disjoint_rows": 5456,
+    "unsupported_jwt_eval_rows": 16,
+    "flag_feature_vector_in_train": 734,
+    "flag_canonical_request_in_train": 127,
+    "flag_generator_family_in_train": 0,
+    "train_validation_overlap": {
+      "canonical_request": 0,
+      "feature_vector": 0,
+      "generator_family": 0,
+      "d54_group": 0
+    }
+  },
+  "counts_expected_unchanged_from_v1": {
+    "internal_test_full_rows": 6190,
+    "internal_test_feature_disjoint_rows": 5456,
+    "unsupported_jwt_eval_rows": 16,
+    "flag_feature_vector_in_train": 734,
+    "flag_canonical_request_in_train": 127,
+    "flag_generator_family_in_train": 0
+  },
+  "provenance": {
+    "v4_sha256": {
+      "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+      "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
+    },
+    "payloadsallthethings_commit": "e961fef231d8327bae83b563fab50aec2e6b77c0",
+    "csic_sha256": "c420f0bc0464376de75b6c419a0ac226fe69fe12c8ac4908843273721e44e637",
+    "generator_log_lines": 56
+  },
+  "groups": {
+    "development (V4 train)": {
+      "groups": 16791,
+      "largest": 417,
+      "groups_by_size": {
+        "1": 14305,
+        "2": 2110,
+        "3-5": 237,
+        "6-10": 93,
+        "11-50": 18,
+        "51-200": 23,
+        ">200": 5
+      },
+      "rows_in_groups_of_10_or_more": 5151
+    },
+    "internal_test (V4 eval)": {
+      "groups": 4443,
+      "largest": 343,
+      "groups_by_size": {
+        "1": 3947,
+        "2": 431,
+        "3-5": 32,
+        "6-10": 26,
+        "11-50": 2,
+        "51-200": 2,
+        ">200": 3
+      },
+      "rows_in_groups_of_10_or_more": 1122
+    },
+    "train": {
+      "groups": 13575,
+      "largest": 417,
+      "groups_by_size": {
+        "1": 11595,
+        "2": 1679,
+        "3-5": 187,
+        "6-10": 76,
+        "11-50": 15,
+        "51-200": 19,
+        ">200": 4
+      },
+      "rows_in_groups_of_10_or_more": 4049
+    },
+    "validation": {
+      "groups": 3216,
+      "largest": 395,
+      "groups_by_size": {
+        "1": 2710,
+        "2": 431,
+        "3-5": 50,
+        "6-10": 17,
+        "11-50": 3,
+        "51-200": 4,
+        ">200": 1
+      },
+      "rows_in_groups_of_10_or_more": 1102
+    },
+    "generator_groups_in_development": 17732,
+    "generator_groups_split_across_train_validation": 0
+  },
+  "strata": {
+    "BENIGN": {
+      "groups": 7032,
+      "rows": 12193,
+      "validation_rows": 2439,
+      "validation_share": 0.2
+    },
+    "command_injection": {
+      "groups": 456,
+      "rows": 607,
+      "validation_rows": 121,
+      "validation_share": 0.1993
+    },
+    "mixed": {
+      "groups": 12,
+      "rows": 462,
+      "validation_rows": 23,
+      "validation_share": 0.0498
+    },
+    "open_redirect": {
+      "groups": 195,
+      "rows": 208,
+      "validation_rows": 42,
+      "validation_share": 0.2019
+    },
+    "other_attack": {
+      "groups": 592,
+      "rows": 869,
+      "validation_rows": 174,
+      "validation_share": 0.2002
+    },
+    "path_file_access": {
+      "groups": 4012,
+      "rows": 4103,
+      "validation_rows": 821,
+      "validation_share": 0.2001
+    },
+    "sql_injection": {
+      "groups": 1968,
+      "rows": 3107,
+      "validation_rows": 622,
+      "validation_share": 0.2002
+    },
+    "ssrf": {
+      "groups": 153,
+      "rows": 186,
+      "validation_rows": 37,
+      "validation_share": 0.1989
+    },
+    "ssti": {
+      "groups": 305,
+      "rows": 393,
+      "validation_rows": 79,
+      "validation_share": 0.201
+    },
+    "unsupported_jwt": {
+      "groups": 55,
+      "rows": 89,
+      "validation_rows": 18,
+      "validation_share": 0.2022
+    },
+    "xss": {
+      "groups": 2011,
+      "rows": 2917,
+      "validation_rows": 583,
+      "validation_share": 0.1999
+    }
+  },
+  "within_split_duplication (not leakage)": {
+    "train": {
+      "rows": 20175,
+      "distinct_canonical_requests": 16564,
+      "distinct_feature_vectors": 15148,
+      "distinct_generator_groups": 14343,
+      "distinct_d54_groups": 13575,
+      "rows_sharing_a_vector_with_another_row": 5907
+    },
+    "validation": {
+      "rows": 4959,
+      "distinct_canonical_requests": 3774,
+      "distinct_feature_vectors": 3600,
+      "distinct_generator_groups": 3389,
+      "distinct_d54_groups": 3216,
+      "rows_sharing_a_vector_with_another_row": 1559
+    },
+    "internal_test": {
+      "rows": 6206,
+      "distinct_canonical_requests": 5139,
+      "distinct_feature_vectors": 4917,
+      "distinct_generator_groups": 4498,
+      "distinct_d54_groups": 4443,
+      "rows_sharing_a_vector_with_another_row": 1419
+    }
+  },
+  "unsupported_jwt_rows_by_role": {
+    "train": 71,
+    "validation": 24,
+    "internal_test": 16
+  },
+  "targets": {
+    "train": {
+      "BENIGN": 10117,
+      "command_injection": 486,
+      "open_redirect": 166,
+      "other_attack": 695,
+      "path_file_access": 3282,
+      "sql_injection": 2561,
+      "ssrf": 149,
+      "ssti": 314,
+      "xss": 2334
+    },
+    "validation": {
+      "BENIGN": 2450,
+      "command_injection": 121,
+      "open_redirect": 42,
+      "other_attack": 174,
+      "path_file_access": 824,
+      "sql_injection": 622,
+      "ssrf": 37,
+      "ssti": 79,
+      "xss": 586
+    },
+    "internal_test_full": {
+      "BENIGN": 3103,
+      "command_injection": 134,
+      "open_redirect": 51,
+      "other_attack": 226,
+      "path_file_access": 1000,
+      "sql_injection": 817,
+      "ssrf": 63,
+      "ssti": 88,
+      "xss": 708
+    },
+    "internal_test_feature_disjoint": {
+      "BENIGN": 2423,
+      "command_injection": 134,
+      "open_redirect": 50,
+      "other_attack": 226,
+      "path_file_access": 1000,
+      "sql_injection": 765,
+      "ssrf": 63,
+      "ssti": 88,
+      "xss": 707
+    }
+  },
+  "attack": {
+    "train": {
+      "0": 10117,
+      "1": 9987
+    },
+    "validation": {
+      "0": 2450,
+      "1": 2485
+    },
+    "internal_test_full": {
+      "0": 3103,
+      "1": 3087
+    },
+    "internal_test_feature_disjoint": {
+      "0": 2423,
+      "1": 3033
+    }
+  },
+  "v4_reasons": {
+    "train": {
+      "BENIGN": 10117,
+      "CRLF Injection": 328,
+      "Command Injection": 486,
+      "Cross-Site Request Forgery": 29,
+      "Directory Traversal": 1592,
+      "File Inclusion": 1690,
+      "GraphQL Injection": 59,
+      "HTTP Parameter Pollution": 12,
+      "Insecure Deserialization": 6,
+      "LDAP Injection": 64,
+      "NoSQL Injection": 79,
+      "Open Redirect": 166,
+      "Request Smuggling": 7,
+      "SQL Injection": 2561,
+      "Server Side Request Forgery": 149,
+      "Server Side Template Injection": 314,
+      "XPath Injection": 24,
+      "XSS Injection": 2334,
+      "XXE Injection": 87
+    },
+    "validation": {
+      "BENIGN": 2450,
+      "CRLF Injection": 71,
+      "Command Injection": 121,
+      "Cross-Site Request Forgery": 9,
+      "Directory Traversal": 413,
+      "File Inclusion": 411,
+      "GraphQL Injection": 16,
+      "HTTP Parameter Pollution": 5,
+      "Insecure Deserialization": 5,
+      "LDAP Injection": 16,
+      "NoSQL Injection": 18,
+      "Open Redirect": 42,
+      "SQL Injection": 622,
+      "Server Side Request Forgery": 37,
+      "Server Side Template Injection": 79,
+      "XPath Injection": 5,
+      "XSS Injection": 586,
+      "XXE Injection": 29
+    },
+    "internal_test_full": {
+      "BENIGN": 3103,
+      "CRLF Injection": 112,
+      "Command Injection": 134,
+      "Cross-Site Request Forgery": 8,
+      "Directory Traversal": 506,
+      "File Inclusion": 494,
+      "GraphQL Injection": 22,
+      "HTTP Parameter Pollution": 3,
+      "Insecure Deserialization": 5,
+      "LDAP Injection": 21,
+      "NoSQL Injection": 17,
+      "Open Redirect": 51,
+      "SQL Injection": 817,
+      "Server Side Request Forgery": 63,
+      "Server Side Template Injection": 88,
+      "XPath Injection": 11,
+      "XSS Injection": 708,
+      "XXE Injection": 27
+    },
+    "internal_test_feature_disjoint": {
+      "BENIGN": 2423,
+      "CRLF Injection": 112,
+      "Command Injection": 134,
+      "Cross-Site Request Forgery": 8,
+      "Directory Traversal": 506,
+      "File Inclusion": 494,
+      "GraphQL Injection": 22,
+      "HTTP Parameter Pollution": 3,
+      "Insecure Deserialization": 5,
+      "LDAP Injection": 21,
+      "NoSQL Injection": 17,
+      "Open Redirect": 50,
+      "SQL Injection": 765,
+      "Server Side Request Forgery": 63,
+      "Server Side Template Injection": 88,
+      "XPath Injection": 11,
+      "XSS Injection": 707,
+      "XXE Injection": 27
+    }
+  },
+  "generator_source": {
+    "train": {
+      "attack": 7477,
+      "csic_attack": 2510,
+      "csic_benign": 4631,
+      "synthetic_benign": 5486
+    },
+    "validation": {
+      "attack": 1905,
+      "csic_attack": 580,
+      "csic_benign": 1279,
+      "synthetic_benign": 1171
+    },
+    "internal_test_full": {
+      "attack": 2271,
+      "csic_attack": 816,
+      "csic_benign": 1363,
+      "synthetic_benign": 1740
+    }
+  },
+  "artifact": {
+    "path": "datasets/hybrid_analyzer_v2/hybrid_analyzer_v2.jsonl",
+    "rows": 31340,
+    "bytes": 54308828,
+    "sha256": "e8da8674435ed65057161bb4c74b41dc4aa1d8bf876b0327c53ecba7c0d99b75"
+  }
+}

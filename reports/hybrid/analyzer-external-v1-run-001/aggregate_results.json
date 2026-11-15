@@ -1,0 +1,764 @@
+{
+  "run_id": "analyzer-external-v1-run-001",
+  "type": "EVALUATION — offline, aggregate only (D53)",
+  "label": "One post-freeze aggregate evaluation of the frozen Analyzer on External Test v1. Not a gateway or cascade evaluation. 0.5 is reporting-only (D55).",
+  "analyzer_version": "hybrid-analyzer-v2/attack=hist_gb,category=hist_gb",
+  "model_sha256": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b",
+  "external_v1": {
+    "cases_sha256": "721dfdaa6425463ae0ce26520f6d47986fdc7388468b55d7b1a5bffed822d342",
+    "integrity_hash": "ccac5f55eee27f94a79295f0022edf6eac792abe828ed1a1fe5f43ac85c5e52b",
+    "n": 400,
+    "allow": 200,
+    "block": 200,
+    "per_cell": {
+      "browser-navigation": 40,
+      "browser-forms-session": 40,
+      "api-json": 40,
+      "api-query": 40,
+      "unseen-structure": 40,
+      "sqli": 40,
+      "cmdi": 40,
+      "xss": 40,
+      "path-traversal": 40,
+      "ssrf": 40
+    }
+  },
+  "input": "frozen D1 text of each case, verbatim -> request_features.extract_features (request-features/v2, 34 fields) -> encoders frozen in the artifact",
+  "dev_vector_relation": {
+    "dev_rows_used": 25039,
+    "hash_recomputed_ok": 25039
+  },
+  "attack_headline": {
+    "n": 400,
+    "positives_block": 200,
+    "negatives_allow": 200,
+    "prevalence_block": 0.5,
+    "prevalence_note": "50/50 by construction (D42); not an operational prevalence",
+    "threshold_free": {
+      "roc_auc": 0.943137,
+      "pr_auc": 0.945592,
+      "pr_auc_chance_level": 0.5,
+      "brier": 0.127346,
+      "log_loss": 0.47104
+    },
+    "at_reporting_threshold_0_5": {
+      "note": "D55: reporting-only; not an operating point; nothing tuned on it",
+      "tp": 188,
+      "tn": 150,
+      "fp": 50,
+      "fn": 12,
+      "confusion_matrix (methodology §6)": {
+        "Real ALLOW": {
+          "Pred ALLOW": 150,
+          "Pred BLOCK": 50
+        },
+        "Real BLOCK": {
+          "Pred ALLOW": 12,
+          "Pred BLOCK": 188
+        }
+      },
+      "accuracy": {
+        "num": 338,
+        "den": 400,
+        "value": 0.845,
+        "wilson95": [
+          0.806269,
+          0.877167
+        ]
+      },
+      "precision_block": {
+        "num": 188,
+        "den": 238,
+        "value": 0.789916,
+        "wilson95": [
+          0.733763,
+          0.836859
+        ]
+      },
+      "recall_block": {
+        "num": 188,
+        "den": 200,
+        "value": 0.94,
+        "wilson95": [
+          0.898068,
+          0.965348
+        ]
+      },
+      "f1_block": 0.858447,
+      "fpr": {
+        "num": 50,
+        "den": 200,
+        "value": 0.25,
+        "wilson95": [
+          0.195082,
+          0.314341
+        ]
+      },
+      "fnr": {
+        "num": 12,
+        "den": 200,
+        "value": 0.06,
+        "wilson95": [
+          0.034652,
+          0.101932
+        ]
+      },
+      "zero_error_bounds": {
+        "fpr": null,
+        "fnr": null
+      }
+    }
+  },
+  "attack_calibration": {
+    "ece_15_bins": 0.12626,
+    "reliability": {
+      "n_bins": 15,
+      "ece": 0.12626,
+      "mce_over_published_bins": 0.378751,
+      "suppression_rule": "bins with fewer than 10 cases publish no n, mean or frequency; if the hidden pool would hold 1-9 cases, the smallest published bins are hidden as well",
+      "hidden_cases": 53,
+      "bins": [
+        {
+          "bin": [
+            0.0,
+            0.06666666666666667
+          ],
+          "n": 114,
+          "mean_predicted": 0.012948,
+          "observed_frequency": 0.008772
+        },
+        {
+          "bin": [
+            0.06666666666666667,
+            0.13333333333333333
+          ],
+          "n": 15,
+          "mean_predicted": 0.108819,
+          "observed_frequency": 0.133333
+        },
+        {
+          "bin": [
+            0.13333333333333333,
+            0.2
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.2,
+            0.26666666666666666
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.26666666666666666,
+            0.3333333333333333
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.3333333333333333,
+            0.4
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.4,
+            0.4666666666666667
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.4666666666666667,
+            0.5333333333333333
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.5333333333333333,
+            0.6
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.6,
+            0.6666666666666666
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.6666666666666666,
+            0.7333333333333333
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.7333333333333333,
+            0.8
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.8,
+            0.8666666666666667
+          ],
+          "n": "suppressed"
+        },
+        {
+          "bin": [
+            0.8666666666666667,
+            0.9333333333333333
+          ],
+          "n": 21,
+          "mean_predicted": 0.902561,
+          "observed_frequency": 0.52381
+        },
+        {
+          "bin": [
+            0.9333333333333333,
+            1.0
+          ],
+          "n": 197,
+          "mean_predicted": 0.989838,
+          "observed_frequency": 0.847716
+        }
+      ]
+    }
+  },
+  "attack_bootstrap": {
+    "method": "class-stratified case bootstrap, percentile",
+    "n_boot": 2000,
+    "seed": 14087384209713621733,
+    "caveat": "cases share one lab application and its flows; not independent draws, so the intervals are optimistic",
+    "ci95": {
+      "roc_auc": [
+        0.922023,
+        0.96058
+      ],
+      "pr_auc": [
+        0.925857,
+        0.962353
+      ],
+      "brier": [
+        0.102017,
+        0.155535
+      ],
+      "log_loss": [
+        0.372182,
+        0.583703
+      ]
+    }
+  },
+  "per_cell": {
+    "browser-navigation": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.111172,
+      "brier_within_cell": 0.053648,
+      "fp": 4,
+      "tn": 36,
+      "fpr_at_0_5": {
+        "num": 4,
+        "den": 40,
+        "value": 0.1,
+        "wilson95": [
+          0.03958,
+          0.230518
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_vs_all_block": 0.988812
+    },
+    "browser-forms-session": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.132473,
+      "brier_within_cell": 0.091617,
+      "fp": 4,
+      "tn": 36,
+      "fpr_at_0_5": {
+        "num": 4,
+        "den": 40,
+        "value": 0.1,
+        "wilson95": [
+          0.03958,
+          0.230518
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_vs_all_block": 0.978
+    },
+    "api-json": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.681274,
+      "brier_within_cell": 0.632002,
+      "fp": 29,
+      "tn": 11,
+      "fpr_at_0_5": {
+        "num": 29,
+        "den": 40,
+        "value": 0.725,
+        "wilson95": [
+          0.57165,
+          0.83892
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_vs_all_block": 0.842875
+    },
+    "api-query": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.37101,
+      "brier_within_cell": 0.290563,
+      "fp": 13,
+      "tn": 27,
+      "fpr_at_0_5": {
+        "num": 13,
+        "den": 40,
+        "value": 0.325,
+        "wilson95": [
+          0.200845,
+          0.479823
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_vs_all_block": 0.91375
+    },
+    "unseen-structure": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.081108,
+      "brier_within_cell": 0.031002,
+      "fp": 0,
+      "tn": 40,
+      "fpr_at_0_5": {
+        "num": 0,
+        "den": 40,
+        "value": 0.0,
+        "wilson95": [
+          0.0,
+          0.087622
+        ]
+      },
+      "zero_error_bound": "zero errors on 40: one-sided approximate 95% upper bound on the error rate ~ 3/40 = 0.075 (rule of three; the two-sided Wilson upper bound is 0.087622)",
+      "roc_auc_vs_all_block": 0.99225
+    },
+    "sqli": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.968715,
+      "brier_within_cell": 0.01727,
+      "tp": 39,
+      "fn": 1,
+      "recall_at_0_5": {
+        "num": 39,
+        "den": 40,
+        "value": 0.975,
+        "wilson95": [
+          0.871186,
+          0.995573
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_all_allow_vs_cell": 0.979437
+    },
+    "cmdi": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.831388,
+      "brier_within_cell": 0.103387,
+      "tp": 32,
+      "fn": 8,
+      "recall_at_0_5": {
+        "num": 32,
+        "den": 40,
+        "value": 0.8,
+        "wilson95": [
+          0.652427,
+          0.895
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_all_allow_vs_cell": 0.888375
+    },
+    "xss": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.960705,
+      "brier_within_cell": 0.022519,
+      "tp": 38,
+      "fn": 2,
+      "recall_at_0_5": {
+        "num": 38,
+        "den": 40,
+        "value": 0.95,
+        "wilson95": [
+          0.834961,
+          0.986179
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_all_allow_vs_cell": 0.97
+    },
+    "path-traversal": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.996332,
+      "brier_within_cell": 0.00013,
+      "tp": 40,
+      "fn": 0,
+      "recall_at_0_5": {
+        "num": 40,
+        "den": 40,
+        "value": 1.0,
+        "wilson95": [
+          0.912378,
+          1.0
+        ]
+      },
+      "zero_error_bound": "zero errors on 40: one-sided approximate 95% upper bound on the error rate ~ 3/40 = 0.075 (rule of three; the two-sided Wilson upper bound is 0.087622)",
+      "roc_auc_all_allow_vs_cell": 0.99175
+    },
+    "ssrf": {
+      "n": 40,
+      "support_status": "OK",
+      "mean_attack": 0.911352,
+      "brier_within_cell": 0.03132,
+      "tp": 39,
+      "fn": 1,
+      "recall_at_0_5": {
+        "num": 39,
+        "den": 40,
+        "value": 0.975,
+        "wilson95": [
+          0.871186,
+          0.995573
+        ]
+      },
+      "zero_error_bound": null,
+      "roc_auc_all_allow_vs_cell": 0.886125
+    }
+  },
+  "block_by_payload_visibility": {
+    "mapping": {
+      "query": "visible",
+      "path": "visible",
+      "form": "visible",
+      "json": "visible",
+      "header": "invisible",
+      "cookie": "invisible"
+    },
+    "note": "header / cookie payloads are invisible to the Analyzer by construction (D44): a structural blind spot like JWT (D48), not a generalization result",
+    "visible": {
+      "block_cases": 195,
+      "support_status": "OK",
+      "tp": 188,
+      "fn": 7,
+      "recall_at_0_5": {
+        "num": 188,
+        "den": 195,
+        "value": 0.964103,
+        "wilson95": [
+          0.927769,
+          0.982504
+        ]
+      },
+      "mean_attack": "suppressed (a part has < 10 cases)"
+    },
+    "invisible": {
+      "block_cases": 5,
+      "support_status": "INSUFFICIENT DATA",
+      "tp": 0,
+      "fn": 5,
+      "recall_at_0_5": {
+        "num": 0,
+        "den": 5,
+        "value": 0.0,
+        "wilson95": [
+          0.0,
+          0.434482
+        ]
+      },
+      "mean_attack": "suppressed (a part has < 10 cases)"
+    }
+  },
+  "group_weighted_diagnostic (D55)": {
+    "n_groups": 324,
+    "groups_with_more_than_one_case": 17,
+    "cases_in_groups_with_more_than_one_case": 93,
+    "status": "SUPPRESSED (k-rule: a cell x group-size part holds 1 < 10 cases)"
+  },
+  "category_on_block": {
+    "n": 200,
+    "mapping": {
+      "sqli": "sql_injection",
+      "cmdi": "command_injection",
+      "xss": "xss",
+      "path-traversal": "path_file_access",
+      "ssrf": "ssrf"
+    },
+    "note": "auxiliary context (D46), not a security decision; evaluated on ground-truth BLOCK cases; macro-F1 over the 5 sampled categories is NOT comparable with the 8-class internal macro-F1",
+    "top1_accuracy": {
+      "num": 74,
+      "den": 200,
+      "value": 0.37,
+      "wilson95": [
+        0.306126,
+        0.438774
+      ]
+    },
+    "macro_f1_5_sampled": 0.350753,
+    "per_category": {
+      "sql_injection": {
+        "precision": 0.5,
+        "recall": 0.3,
+        "f1": 0.375,
+        "support": 40,
+        "support_status": "OK"
+      },
+      "command_injection": {
+        "precision": 0.4,
+        "recall": 0.05,
+        "f1": 0.088889,
+        "support": 40,
+        "support_status": "OK"
+      },
+      "xss": {
+        "precision": 0.630435,
+        "recall": 0.725,
+        "f1": 0.674419,
+        "support": 40,
+        "support_status": "OK"
+      },
+      "path_file_access": {
+        "precision": 0.405797,
+        "recall": 0.7,
+        "f1": 0.513761,
+        "support": 40,
+        "support_status": "OK"
+      },
+      "ssrf": {
+        "precision": 0.157895,
+        "recall": 0.075,
+        "f1": 0.101695,
+        "support": 40,
+        "support_status": "OK"
+      }
+    },
+    "not_evaluable_not_sampled": [
+      "ssti",
+      "open_redirect",
+      "other_attack"
+    ],
+    "confusion_true_rows": {
+      "labels_pred_cols": [
+        "sql_injection",
+        "xss",
+        "path_file_access",
+        "command_injection",
+        "ssti",
+        "open_redirect",
+        "ssrf",
+        "other_attack"
+      ],
+      "rows": {
+        "sql_injection": [
+          12,
+          7,
+          8,
+          1,
+          4,
+          3,
+          5,
+          0
+        ],
+        "command_injection": [
+          3,
+          8,
+          14,
+          2,
+          2,
+          6,
+          3,
+          2
+        ],
+        "xss": [
+          2,
+          29,
+          3,
+          1,
+          4,
+          0,
+          1,
+          0
+        ],
+        "path_file_access": [
+          3,
+          0,
+          28,
+          0,
+          0,
+          2,
+          7,
+          0
+        ],
+        "ssrf": [
+          4,
+          2,
+          16,
+          1,
+          1,
+          11,
+          3,
+          2
+        ]
+      }
+    },
+    "predicted_into_unsampled_categories": 37,
+    "log_loss_multiclass": 4.314415,
+    "brier_multiclass": 1.006506,
+    "mean_top1_probability": 0.823242
+  },
+  "descriptive": {
+    "distinct_feature_vectors": 325,
+    "cases_in_vectors_shared_by_allow_and_block": 6,
+    "feature_vector_in_dev_train_validation": {
+      "allow": 2,
+      "block": 0
+    },
+    "encoded_as_unseen_other": {
+      "method": {
+        "allow": 5,
+        "block": 0
+      },
+      "content_type": {
+        "allow": 5,
+        "block": 0
+      }
+    }
+  },
+  "feature_disjoint_view": {
+    "status": "SUPPRESSED (k-rule: a cell x in-development part holds 1 < 10 cases; differencing with the per-cell figures would reveal individual cases)",
+    "allow": 198,
+    "block": 200
+  },
+  "not_applicable": {
+    "generator-family component of the D54 group relation": "NOT APPLICABLE: External v1 has no generator; groups use the other two D54 relations",
+    "unsupported_jwt (D48)": "NOT EVALUABLE: no JWT case in External v1",
+    "categories ssti, open_redirect, other_attack": "NOT EVALUABLE: not sampled",
+    "14 of 19 V4 attack reasons": "NOT EVALUABLE: External v1 samples 5 categories",
+    "L2 / L3 / latency": "NOT APPLICABLE: offline evaluation",
+    "secondary breakdowns": "NOT COMPUTED: not pre-registered for the Analyzer",
+    "operating threshold / threshold sweep / calibrator": "NOT COMPUTED (D53, D55)",
+    "joint V4 x Analyzer counts": "NOT COMPUTED: disagreement analysis starts on development or diagnostic data; on External v1 it would size a Hybrid component from test cases (D45)"
+  },
+  "internal_reference_second_look": {
+    "source": "reports/hybrid/phase2b-analyzer-v2-run-002/internal_test_results.json",
+    "sha256": "74619d87177299da4719a6475d0cd1607bfd485195ce4830b940a9693e8d2394",
+    "label": "SECOND-LOOK INTERNAL EVALUATION AFTER METHODOLOGY CORRECTION — NOT AN UNTOUCHED TEST",
+    "view": "internal_test_feature_disjoint",
+    "n": 5456,
+    "prevalence_block": 0.555902,
+    "comparable": {
+      "roc_auc": 0.993594,
+      "brier": 0.03348,
+      "log_loss": 0.105619,
+      "ece": 0.024051,
+      "recall": 0.959116,
+      "fpr": 0.05943
+    },
+    "pr_auc_note": "PR-AUC, precision and accuracy depend on prevalence (internal 0.555902, External v1 0.5): not compared",
+    "group_weighted_fpr_recall": {
+      "fpr": 0.030454,
+      "recall": 0.966844
+    },
+    "category_macro_f1_8_classes": 0.664369
+  },
+  "contract_check": {
+    "contract_violations": 0,
+    "analyze_vs_batch_attack_mismatches": 0,
+    "non_finite_attack": 0
+  },
+  "v4_published_marginals_for_side_by_side": {
+    "source": "reports/external/external-v1-run-001/summary.json",
+    "measured_as": "L1 of the gateway run external-v1-run-001 (repetition 1, full gateway); NOT offline, NOT a cascade component",
+    "tp": 199,
+    "tn": 132,
+    "fp": 68,
+    "fn": 1,
+    "recall_block": {
+      "num": 199,
+      "den": 200,
+      "pct": 99.5
+    },
+    "fpr": {
+      "num": 68,
+      "den": 200,
+      "pct": 34.0
+    },
+    "per_cell_fpr_or_recall": {
+      "browser-navigation": {
+        "num": 7,
+        "den": 40,
+        "pct": 17.5
+      },
+      "browser-forms-session": {
+        "num": 4,
+        "den": 40,
+        "pct": 10.0
+      },
+      "api-json": {
+        "num": 21,
+        "den": 40,
+        "pct": 52.5
+      },
+      "api-query": {
+        "num": 12,
+        "den": 40,
+        "pct": 30.0
+      },
+      "unseen-structure": {
+        "num": 24,
+        "den": 40,
+        "pct": 60.0
+      },
+      "sqli": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "cmdi": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "xss": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "path-traversal": {
+        "num": 40,
+        "den": 40,
+        "pct": 100.0
+      },
+      "ssrf": {
+        "num": 39,
+        "den": 40,
+        "pct": 97.5
+      }
+    }
+  },
+  "warnings_during_run": {}
+}

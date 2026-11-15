@@ -1,0 +1,50 @@
+{"sample_id":"03ac57fef98666bb","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"SQL Server command execution through xp_cmdshell; injection requires a sink that permits stacked statements."}
+{"sample_id":"061c04f1b4aea136","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests a database-name prefix."}
+{"sample_id":"074aa377a635f5d0","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"PostgreSQL PG_SLEEP is embedded in a concatenation-based predicate."}
+{"sample_id":"0c698e4018ba1dc4","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"UNION SELECT with a comment suffix is a recognizable SQL injection pattern."}
+{"sample_id":"17aa955f4be3d1c0","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"UNION SELECT reads information_schema.processlist and concatenates its fields."}
+{"sample_id":"17dba5c55034ac3d","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests a database-name prefix."}
+{"sample_id":"1b361aeccd633eeb","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Query-parameter text contains a MySQL EXTRACTVALUE error-based expression; use depends on URL parsing and the SQL sink."}
+{"sample_id":"1d7695e951ecf4ec","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"SQLite LIKE and RANDOMBLOB form a resource-intensive injected predicate."}
+{"sample_id":"2363e1fd8a147378","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Quote, OR condition, and comment suffix form a recognizable tautology injection."}
+{"sample_id":"26cb5e5908bc413e","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"MySQL BENCHMARK suggests a delay probe, but the surrounding plus signs require a compatible expression context."}
+{"sample_id":"2859614af82369f9","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Casting @@version to an integer suggests error-based extraction but requires an expression sink."}
+{"sample_id":"29d30c162a153574","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Parameter assignment, quote breakout, WAITFOR DELAY, and comment show a SQL Server time-delay injection."}
+{"sample_id":"2bdbeae8940007b0","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"xp_cmdshell is a SQL Server command-execution mechanism, but this standalone statement needs a compatible statement sink."}
+{"sample_id":"2c60a054fea1094f","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Query-parameter text contains a conditional MySQL SLEEP probe, with an open quote requiring compatible surrounding syntax."}
+{"sample_id":"32c07dd08d805405","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Query-parameter text contains a conditional BENCHMARK timing probe; use depends on parameter parsing and sink context."}
+{"sample_id":"3c2ba7a7ec956e4b","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Double-quoted OR equality can be a tautology only with compatible quoting and surrounding SQL."}
+{"sample_id":"3dc2d510333f4943","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"MySQL UPDATEXML with version concatenation is an error-based injection expression."}
+{"sample_id":"436f0ad19b843af8","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Quote breakout and conditional MySQL SLEEP probe test a version character."}
+{"sample_id":"477d99fc63f06d1a","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests a database-name prefix."}
+{"sample_id":"4c224089e16bed72","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Derived-table subquery invokes conditional MySQL SLEEP."}
+{"sample_id":"51cacf94e88ee326","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"UNION SELECT attempts to return file contents through MySQL LOAD_FILE."}
+{"sample_id":"59ae1b29d3340b66","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests the database name against a pattern."}
+{"sample_id":"619f196427400624","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Standalone MySQL LOAD_FILE query suggests file access, but injection requires a statement-compatible sink."}
+{"sample_id":"62047921e93a56a5","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Parameter assignment followed by WAITFOR DELAY and a comment is a SQL Server timing injection."}
+{"sample_id":"63893c5f5be0176b","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"MySQL subquery combines @@VERSION with RAND and GROUP BY for an error-based probe."}
+{"sample_id":"6739d94331863fc5","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Encoded prefix followed by OR 1=1 and a comment depends on decoding and character-set handling."}
+{"sample_id":"6bbdff23d6c3dd7e","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"OPENQUERY embeds an xp_cmdshell command, but linked-server configuration and quoting determine whether it works."}
+{"sample_id":"6e8aa6cc22ea397a","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"MySQL XOR expression contains a conditional SLEEP call; use requires a compatible expression context."}
+{"sample_id":"7477250727b4aa40","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Open-ended quote and OR fragment can alter a predicate only with a matching SQL suffix."}
+{"sample_id":"759c64c3fa141f29","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"DB2 predicates probe catalog row counts and a character of the current user."}
+{"sample_id":"7ee95f785fdd6e0f","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Encoded prefix and quote before OR 1=1 require decoding and compatible character-set handling."}
+{"sample_id":"8da706cb05af44a7","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Standalone PostgreSQL SELECT invokes pg_sleep, but injection requires a statement-compatible sink."}
+{"sample_id":"979d9ca500d85cf8","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Standalone PostgreSQL query uses conditional pg_sleep on a table-name character; it needs a compatible statement sink."}
+{"sample_id":"9b252491d0022937","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP subquery checks metadata for a password-like column."}
+{"sample_id":"9e636964a64a5dd1","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"UNION SELECT with a comment suffix is a recognizable SQL injection pattern."}
+{"sample_id":"a1afc88f5c5fd5b9","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Oracle DBMS_PIPE.RECEIVE_MESSAGE inside CASE is a conditional timing predicate."}
+{"sample_id":"a4b0d978acf7c171","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Encoded prefix before OR 1=1 relies on decoding and compatible character-set handling."}
+{"sample_id":"a78869058704293c","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests a database-name prefix."}
+{"sample_id":"b3a5452d32469bd0","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Quoted BENCHMARK expression suggests a timing probe but needs a compatible surrounding expression."}
+{"sample_id":"c8b544c67d296fe5","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests a database-name prefix."}
+{"sample_id":"d2d558af7582af91","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Quote and parenthesis breakout precede SQL Server WAITFOR DELAY and a comment."}
+{"sample_id":"dc95dd8b063ff71e","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Quoted SQL Server expression casts @@version to integer to provoke an error."}
+{"sample_id":"dd20b0210ef0fe1c","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"PostgreSQL predicate casts the database name to integer for error-based disclosure."}
+{"sample_id":"e0af7fbbed1c242a","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"MySQL UPDATEXML with version concatenation is an error-based probe."}
+{"sample_id":"e10e626ac8190c49","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Standalone SQL Server IF and WAITFOR statements form a timing probe but need a statement-compatible sink."}
+{"sample_id":"e8c74465d0b97d72","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Quote breakout and conditional MySQL SLEEP probe test a version character."}
+{"sample_id":"e9c735cfb8e47d1e","label_class":"PROBABLY_CORRECT","failure_mode":null,"better_category":null,"note":"Semicolon and pg_sleep subquery suggest a stacked timing probe; the parent statement must accept the appended expression."}
+{"sample_id":"eb425dfe0a432ebf","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests a database-name prefix."}
+{"sample_id":"f00f9b3a2a97aec0","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"UNION SELECT with a comment suffix is a recognizable SQL injection pattern."}
+{"sample_id":"f1dd47023d9fb532","label_class":"VERIFIABLE","failure_mode":null,"better_category":null,"note":"Conditional MySQL SLEEP call tests the database name against a pattern."}

@@ -1,0 +1,9 @@
+# Pinned family-name acquisition
+
+The acquisition code accepts the archived Wikidata Q101352 snapshot using LIMIT 20000. The limit is an acquisition setting, not a change to the approved source or minimum pool-size contract. Raw source data remains outside Git. The stored source SHA-256 is `039882220480b029074243f740f4eec07646029a0b6de8ce70f99454686d3ead`.
+
+The source and its sidecar were installed locally under `datasets/v5_sources/raw/`. Building with the existing attack-pool exact-match oracle produced 12,104 accepted family-name values; no source pool remained blocked and all survival fixtures passed. The other accepted counts were names_given 26,050, prose_en 34,048, streets 12,604, symbols 295.
+
+Reproducibility relies on the archived snapshot and checksum, not repeating a live WDQS query. The subset is arbitrary and no representativeness claim is made.
+
+Generator wiring (I-14, uncommitted on `feat/v5-pool-integration`, 2026-10-21): `names_family` is now listed in `SLOT_POOLS` (`scripts/dataset/v5_catalog.py`) as an available benign pool for `free_string`/`json_leaf` slots, and the generator's `D64_C_NAMES_FAMILY` precondition clears once the pool is loaded. This is a catalogue capability plus synthetic-fixture exercise only; it cannot unlock a real build (every other `real_build_preconditions` gate still refuses). The real-build **value precedence** for `names_family` (Option B, five pools only), the **dataset-source use** of this snapshot/pool, and the **scoped `names_family` ß/ss** representative handling are now ratified by **D68** (2026-10-21). The gated real-data build, dataset freeze and training remain separate and unauthorised. See `reports/v5/data-readiness/names_family-integration/README.md`. This change does not approve a final dataset or authorize training.

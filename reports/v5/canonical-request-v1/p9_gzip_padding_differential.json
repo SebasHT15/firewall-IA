@@ -1,0 +1,109 @@
+{
+  "vectors": {
+    "member_nul_member": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "ok:alpha=1&beta=2",
+      "cpython_3.12.15_gzip.decompress": "ok:alpha=1&beta=2",
+      "gnu_gzip_-dc": "warning:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "ok:alpha=1",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "66b6482fae7f345fae640481acd5b4e7290e294f188716453bd8506e154ef7d7"
+    },
+    "nul_pad_1": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "ok:alpha=1",
+      "cpython_3.12.15_gzip.decompress": "ok:alpha=1",
+      "gnu_gzip_-dc": "ok:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "ok:alpha=1",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "17528cae64b1ca3ada5864eda87e65df641178f1f326316a8d6e0727dac0291a"
+    },
+    "nul_pad_1000": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "ok:alpha=1",
+      "cpython_3.12.15_gzip.decompress": "ok:alpha=1",
+      "gnu_gzip_-dc": "ok:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "ok:alpha=1",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "524a5d6fd9b233c1eb2195e48ff8e387e9ef89a472aca6659c597104f9b3ba40"
+    },
+    "nul_then_garbage": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "error:zlib.error",
+      "cpython_3.12.15_gzip.decompress": "error:BadGzipFile",
+      "gnu_gzip_-dc": "warning:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "ok:alpha=1",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "46b38d6d98eed860251955802803ee5d9c351c11aba50bcffc0f749bb5e167b0"
+    },
+    "partial_magic": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "error:zlib.error",
+      "cpython_3.12.15_gzip.decompress": "error:BadGzipFile",
+      "gnu_gzip_-dc": "error:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "error:Z_BUF_ERROR",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "2d6c01a6550ad8a5921424e7ea7094f4c45c5d82163248919cbb50c13bc82308"
+    },
+    "single_member": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "ok:alpha=1",
+      "cpython_3.12.15_gzip.decompress": "ok:alpha=1",
+      "gnu_gzip_-dc": "ok:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "ok:alpha=1",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "df67cebad8d92e96a4d6802bb38d070d8daf382dfd6feb43a766afadb7de38a0"
+    },
+    "trailing_garbage": {
+      "busybox_gunzip_-c": "ok:alpha=1",
+      "canonical_request": "error:zlib.error",
+      "cpython_3.12.15_gzip.decompress": "error:BadGzipFile",
+      "gnu_gzip_-dc": "warning:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "error:Z_DATA_ERROR",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "5f235aa3735c4c73cd71a741160b42d73e3cf6b50ca6931c3435f83e21ca5a4e"
+    },
+    "truncated": {
+      "busybox_gunzip_-c": "error:alpha=1",
+      "canonical_request": "error:zlib.error",
+      "cpython_3.12.15_gzip.decompress": "error:EOFError",
+      "gnu_gzip_-dc": "error:alpha=1",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "error:Z_BUF_ERROR",
+      "pigz_-dc": "error:alpha=1",
+      "sha256": "18b5dcc48526553a7e7f861c49cc0251d9077ba3c6971ce3ca236b49180dde3e"
+    },
+    "two_members": {
+      "busybox_gunzip_-c": "ok:alpha=1&beta=2",
+      "canonical_request": "ok:alpha=1&beta=2",
+      "cpython_3.12.15_gzip.decompress": "ok:alpha=1&beta=2",
+      "gnu_gzip_-dc": "ok:alpha=1&beta=2",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "ok:alpha=1&beta=2",
+      "pigz_-dc": "ok:alpha=1&beta=2",
+      "sha256": "647265c258f8f8c219e11cf707d2874c6b2807d369ad8da0c147f229a588227b"
+    },
+    "zlib_not_gzip": {
+      "busybox_gunzip_-c": "error:gunzip: invalid magic",
+      "canonical_request": "error:zlib.error",
+      "cpython_3.12.15_gzip.decompress": "error:BadGzipFile",
+      "gnu_gzip_-dc": "error:gzip: stdin: not in gzip format",
+      "mitmproxy_net_encoding.decode": "ok:alpha=1",
+      "node_zlib.gunzipSync": "error:Z_DATA_ERROR",
+      "pigz_-dc": "ok:alpha=1",
+      "sha256": "6f52731d0def651319c116243aae8239a5ffcc6c7841ef03dbbeabd24884ae2b"
+    }
+  },
+  "versions": {
+    "gzip": "gzip 1.14",
+    "node": "v22.22.1",
+    "python": "3.12.15"
+  }
+}

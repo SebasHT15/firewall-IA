@@ -1,0 +1,54 @@
+{
+  "config_yaml_sha256": "23c1854fcc9197d2a454a56ed4c8f5244b5e21f45a678d4f84afbf88810e98d9",
+  "effective_options": {
+    "body_size_limit": "None",
+    "connection_strategy": "'lazy'",
+    "http2": "False",
+    "mode": "['reverse:http://127.0.0.1:44771']",
+    "present": true,
+    "stream_large_bodies": "None",
+    "validate_inbound_headers": "True"
+  },
+  "extends": "reports/v5/canonical-request-v1/wire-evidence-v1 (PRESERVED UNCHANGED). v2 adds the shadow FRAMING observer on top of the canonical observer and records five separate per-vector dimensions plus the framing outcome under vih drift.",
+  "generated_at": "2026-10-21T22:12:21-0600",
+  "lab_profile": {
+    "canonical_observer": "canonical-request/v1 observer ENABLED via lab_addon (config.yaml / data_plane.py untouched)",
+    "caps": {
+      "max_body_bytes": 1048576,
+      "max_decoded_body": 1048576,
+      "token_budget": "UNSET (size stays UNCHECKED; Fast Path ineligible)"
+    },
+    "classifier": "local deterministic ALLOW stub",
+    "effective_options": {
+      "body_size_limit": "None",
+      "connection_strategy": "'lazy'",
+      "http2": "False",
+      "mode": "['reverse:http://127.0.0.1:44771']",
+      "present": true,
+      "stream_large_bodies": "None",
+      "validate_inbound_headers": "True"
+    },
+    "framing_observer": "shadow framing observer ENABLED (WIRE_LAB_FRAMING=1); the gateway's own configure() hook samples the EFFECTIVE profile and the FRAMING OBS line is logged beside each CANONICAL OBS line",
+    "note": "Evidence establishes behaviour of THIS tested profile only; runtime framing stays UNAVAILABLE/UNVERIFIED globally. PROFILE_MATCHED means only 'profile + observed snapshot met the defined conditions' \u2014 never VERIFIED / safe to forward / Fast-Path eligible / wire-equivalent.",
+    "profile_marker": "reverse_proxy:loopback_dynamic_port",
+    "proxy": "mitmdump reverse proxy -> local sink (dynamic loopback port)",
+    "requested_options": {
+      "connection_strategy": "lazy",
+      "flow_detail": "0",
+      "http2": "false",
+      "mode": "reverse:http://127.0.0.1:44771",
+      "stream_large_bodies": "<unset: mitmproxy default (never stream); buffers raw_content>",
+      "termlog_verbosity": "info",
+      "validate_inbound_headers": "true"
+    }
+  },
+  "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+  "python": "3.12.15",
+  "report": "wire-evidence-v2",
+  "version_pins_note": "mitmproxy==12.2.3 is a PINNED data-plane dependency (requirements-data-plane.txt). Brotli and zstandard are reported as OBSERVED in .venv-dataplane (transitive deps); they are NOT ratified direct deployment pins. Version/profile claims derive from this runtime metadata, not asserted independently.",
+  "versions": {
+    "brotli": "1.2.0",
+    "mitmproxy": "12.2.3",
+    "zstandard": "0.25.0"
+  }
+}

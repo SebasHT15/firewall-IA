@@ -1,0 +1,39 @@
+[19:35:06.274] Loading script /home/sebas/Desktop/firewall-IA/data_plane/cascade_addon.py
+[19:35:06.328] reverse proxy to http://127.0.0.1:54751 listening at 127.0.0.1:36509.
+[19:35:06.328][127.0.0.1:41242] client connect
+[19:35:06.328] data plane ready: classifier=http://127.0.0.1:36439/classify timeout=1.0s policy=fail-closed
+[19:35:06.328] feature extraction: shadow (logged only, never used for decisions)
+[19:35:06.328] hybrid shadow analyzer: off
+[19:35:06.328] fast path: off
+[19:35:06.328] canonical observer: off
+[19:35:06.328] cascade: mode=CASCADE_ACTIVE profile=lab manifest=dev-fixture-v5-final-v4-baseline34 framing=gateway-framing/v1
+[19:35:06.330][127.0.0.1:41242] client disconnect
+[19:35:06.870][127.0.0.1:41248] client connect
+[19:35:06.874] [898b80ba7e2d] FORWARD stage=v5
+[19:35:06.875][127.0.0.1:41248] server connect 127.0.0.1:54751
+[19:35:06.877][127.0.0.1:41248] client disconnect
+[19:35:06.877][127.0.0.1:41248] server disconnect 127.0.0.1:54751
+[19:35:06.932][127.0.0.1:41256] client connect
+[19:35:06.934] return to V4 ACTIVE: V4 decides every request
+[19:35:06.934] [dae9bcaf] received GET shop.local:54751/catalog/widgets (body 0 bytes)
+[19:35:06.960] [dae9bcaf] FEATURE EXTRACTION (shadow) 0.051 ms request-features/v2 method=GET content_type='' body_format=none len=16/0/0 params=0/0 repeated=0 pct_encoded=0 symbols=2 (0.125) non_ascii=0 entropy=3.500
+[19:35:06.960] [dae9bcaf] ALLOW GET shop.local:54751/catalog/widgets reason=None (classifier 26 ms)
+[19:35:06.961][127.0.0.1:41256] server connect 127.0.0.1:54751
+[19:35:06.963][127.0.0.1:41256] client disconnect
+[19:35:06.963][127.0.0.1:41256] server disconnect 127.0.0.1:54751
+[19:35:07.019][127.0.0.1:41266] client connect
+[19:35:07.020] [faf0fd86] received GET shop.local:54751/search (body 0 bytes)
+[19:35:07.034] [faf0fd86] FEATURE EXTRACTION (shadow) 0.063 ms request-features/v2 method=GET content_type='' body_format=none len=7/6/0 params=1/0 repeated=0 pct_encoded=0 symbols=2 (0.154) non_ascii=0 entropy=3.547
+[19:35:07.034] [faf0fd86] BLOCK GET shop.local:54751/search reason=None (classifier 13 ms)
+[19:35:07.035][127.0.0.1:41266] client disconnect
+[19:35:07.089][127.0.0.1:41278] client connect
+[19:35:07.091] [6745952d] received GET shop.local:54751/catalog/widgets (body 0 bytes)
+[19:35:07.107] [6745952d] FEATURE EXTRACTION (shadow) 0.088 ms request-features/v2 method=GET content_type='' body_format=none len=16/0/0 params=0/0 repeated=0 pct_encoded=0 symbols=2 (0.125) non_ascii=0 entropy=3.500
+[19:35:07.107] [6745952d] BLOCK (fail-closed) GET shop.local:54751/catalog/widgets cause=classifier returned HTTP 500 (after 16 ms)
+[19:35:07.108][127.0.0.1:41278] client disconnect
+[19:35:07.163] return to V4 cleared
+[19:35:07.166][127.0.0.1:41286] client connect
+[19:35:07.172] [89ad9999cbe0] FORWARD stage=v5
+[19:35:07.174][127.0.0.1:41286] server connect 127.0.0.1:54751
+[19:35:07.178][127.0.0.1:41286] client disconnect
+[19:35:07.178][127.0.0.1:41286] server disconnect 127.0.0.1:54751

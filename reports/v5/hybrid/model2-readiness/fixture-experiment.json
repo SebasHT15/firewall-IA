@@ -1,0 +1,180 @@
+{
+  "feature_schema": "request-features/v2",
+  "limitations": [
+    "Artificial labels check wiring only; metrics do not measure security quality.",
+    "Baseline 34 features are not complete C1; C2 is absent.",
+    "Omitting path_length/path_depth does not remove all path-derived information.",
+    "Fixture pair disjointness is not the full V5 identity/leakage protocol.",
+    "No V5 exchange loader exercised; no real data or trained candidate produced.",
+    "Canonical ACCEPT uses fixture limits, no ratified B; size remains unchecked.",
+    "No threshold selection, uncertainty estimate, gateway integration or enforcement."
+  ],
+  "operational_policy_approved": false,
+  "python": "3.12.15",
+  "recipe": {
+    "C": 1.0,
+    "encoder_fit": "TRAIN_only",
+    "learner": "LogisticRegression",
+    "max_iter": 500,
+    "random_state": 0,
+    "scaler": "StandardScaler(with_mean=False)",
+    "scaler_fit": "TRAIN_only",
+    "solver": "lbfgs",
+    "tol": 1e-06
+  },
+  "representation": "canonical-request/v1",
+  "schema": "model2-fixture-experiment/v1",
+  "scope": "FIXTURE_ONLY",
+  "selected_variant": null,
+  "sklearn": "1.9.1",
+  "source_sha256": {
+    "data_plane/canonical_request.py": "991c1a11ebdb0c22e6c05102ae9a0e1e9756247ec654ab874e2c78d92f1f58b4",
+    "data_plane/request_features.py": "de16da96c5da2cded632b5332db25edf696a816577cefcce0c354b05df4d3db5",
+    "scripts/model2/contracts.py": "78885adc21e8df1822f31cbff2e1f4a47b16bf3fa41e9bacb32bc45fa7c4b515",
+    "scripts/model2/evaluation.py": "fd28ea73d49de8500512414626c34b08b66b3ece861d35948fbeb1f8b43b14f6",
+    "scripts/model2/fixture_experiment.py": "c05deb9dfe9cacc9d04bbc5df5ae45d9e87d98cb56b442fc63814d68c08ac6d6"
+  },
+  "train_rows": 24,
+  "validation_rows": 8,
+  "variants": [
+    {
+      "encoded_features": [
+        "alnum_ratio",
+        "ampersand_count",
+        "angle_bracket_count",
+        "backslash_count",
+        "body_format=none",
+        "body_length",
+        "body_param_count",
+        "brace_count",
+        "content_type=",
+        "double_quote_count",
+        "entropy_bits_per_char",
+        "equals_count",
+        "has_body",
+        "has_percent_encoding",
+        "json_depth",
+        "longest_char_run",
+        "method=GET",
+        "non_ascii_count",
+        "parenthesis_count",
+        "path_depth",
+        "path_length",
+        "percent_count",
+        "percent_encoded_count",
+        "percent_encoded_ratio",
+        "pipe_count",
+        "query_length",
+        "query_param_count",
+        "repeated_param_name_count",
+        "semicolon_count",
+        "single_quote_count",
+        "slash_count",
+        "symbol_count",
+        "symbol_ratio",
+        "total_param_count"
+      ],
+      "input_fields": 34,
+      "validation": {
+        "attack_early_block_rate": {
+          "denominator": 4,
+          "numerator": 4,
+          "value": 1.0
+        },
+        "block_precision": {
+          "denominator": 4,
+          "numerator": 4,
+          "value": 1.0
+        },
+        "defer_rate": {
+          "denominator": 8,
+          "numerator": 4,
+          "value": 0.5
+        },
+        "early_block_false_positive_rate": {
+          "denominator": 4,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "groups": 4,
+        "label_provenance": "fixture_synthetic",
+        "operational_policy_approved": false,
+        "population": "all_traffic_fast_path_ineligible",
+        "records": 8,
+        "threshold": 0.5,
+        "threshold_status": "caller_supplied_not_approved",
+        "uncertainty": "not_estimated; point_estimates_only"
+      },
+      "variant": "baseline_34"
+    },
+    {
+      "encoded_features": [
+        "alnum_ratio",
+        "ampersand_count",
+        "angle_bracket_count",
+        "backslash_count",
+        "body_format=none",
+        "body_length",
+        "body_param_count",
+        "brace_count",
+        "content_type=",
+        "double_quote_count",
+        "entropy_bits_per_char",
+        "equals_count",
+        "has_body",
+        "has_percent_encoding",
+        "json_depth",
+        "longest_char_run",
+        "method=GET",
+        "non_ascii_count",
+        "parenthesis_count",
+        "percent_count",
+        "percent_encoded_count",
+        "percent_encoded_ratio",
+        "pipe_count",
+        "query_length",
+        "query_param_count",
+        "repeated_param_name_count",
+        "semicolon_count",
+        "single_quote_count",
+        "slash_count",
+        "symbol_count",
+        "symbol_ratio",
+        "total_param_count"
+      ],
+      "input_fields": 32,
+      "validation": {
+        "attack_early_block_rate": {
+          "denominator": 4,
+          "numerator": 4,
+          "value": 1.0
+        },
+        "block_precision": {
+          "denominator": 4,
+          "numerator": 4,
+          "value": 1.0
+        },
+        "defer_rate": {
+          "denominator": 8,
+          "numerator": 4,
+          "value": 0.5
+        },
+        "early_block_false_positive_rate": {
+          "denominator": 4,
+          "numerator": 0,
+          "value": 0.0
+        },
+        "groups": 4,
+        "label_provenance": "fixture_synthetic",
+        "operational_policy_approved": false,
+        "population": "all_traffic_fast_path_ineligible",
+        "records": 8,
+        "threshold": 0.5,
+        "threshold_status": "caller_supplied_not_approved",
+        "uncertainty": "not_estimated; point_estimates_only"
+      },
+      "variant": "omit_direct_path_fields"
+    }
+  ],
+  "weights_saved": false
+}

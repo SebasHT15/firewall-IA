@@ -1,0 +1,351 @@
+{
+  "provenance_note": "DEVELOPMENT run on legacy non-protected eval.jsonl; mechanism/route/cost measurement, NOT a generalization or security headline. No protected set used.",
+  "population": {
+    "n_total": 600,
+    "wire_rejected": 22,
+    "canonical_outcomes": {
+      "ACCEPT": 578,
+      "null": 22
+    },
+    "n_accept": 578,
+    "label_counts": {
+      "ALLOW": 300,
+      "BLOCK": 300
+    },
+    "provenance": "measured"
+  },
+  "v5_only": {
+    "confusion": {
+      "TP": 185,
+      "TN": 297,
+      "FP": 3,
+      "FN": 89,
+      "invalid": 4,
+      "N_valid": 574,
+      "N_total": 578,
+      "accuracy": 0.8397212543554007,
+      "precision_block": 0.9840425531914894,
+      "recall_block": 0.6751824817518248,
+      "fpr": 0.01,
+      "fnr": 0.3248175182481752,
+      "f1_block": 0.8008658008658008,
+      "invalid_rate": 0.006920415224913495
+    },
+    "provenance": "measured (binary); invalid counts as error (E5)"
+  },
+  "model2_baseline34": {
+    "n_reaching_model2": 578,
+    "threshold": 0.9,
+    "early_block_fp_rate": 0.02666666666666667,
+    "early_block_fp_count": 8,
+    "benign_reaching": 300,
+    "attack_early_block_rate": 0.420863309352518,
+    "attack_early_block_count": 117,
+    "attack_reaching": 278,
+    "block_precision": 0.936,
+    "block_count": 125,
+    "defer_count": 453,
+    "defer_rate": 0.7837370242214533,
+    "provenance": "measured (selective; Model 2 has no ALLOW class, DEFER is not FN)"
+  },
+  "model2_ablation32": {
+    "n_reaching_model2": 578,
+    "threshold": 0.9,
+    "early_block_fp_rate": 0.03333333333333333,
+    "early_block_fp_count": 10,
+    "benign_reaching": 300,
+    "attack_early_block_rate": 0.3489208633093525,
+    "attack_early_block_count": 97,
+    "attack_reaching": 278,
+    "block_precision": 0.9065420560747663,
+    "block_count": 107,
+    "defer_count": 471,
+    "defer_rate": 0.8148788927335641,
+    "provenance": "measured (selective; Model 2 has no ALLOW class, DEFER is not FN)"
+  },
+  "cascade_baseline34": {
+    "confusion": {
+      "TP": 199,
+      "TN": 289,
+      "FP": 11,
+      "FN": 77,
+      "invalid": 2,
+      "N_valid": 576,
+      "N_total": 578,
+      "accuracy": 0.8472222222222222,
+      "precision_block": 0.9476190476190476,
+      "recall_block": 0.7210144927536232,
+      "fpr": 0.03666666666666667,
+      "fnr": 0.27898550724637683,
+      "f1_block": 0.8189300411522634,
+      "invalid_rate": 0.0034602076124567475
+    },
+    "deciding_stage_counts": {
+      "model2": 125,
+      "v5": 453
+    },
+    "v5_calls": 453,
+    "v5_calls_avoided_vs_v5only": 125,
+    "v5_call_fraction": 0.7837370242214533,
+    "provenance": "measured (Fast Path CONTINUE; no positive policy in this pass)"
+  },
+  "cascade_ablation32": {
+    "confusion": {
+      "TP": 194,
+      "TN": 287,
+      "FP": 13,
+      "FN": 82,
+      "invalid": 2,
+      "N_valid": 576,
+      "N_total": 578,
+      "accuracy": 0.8350694444444444,
+      "precision_block": 0.9371980676328503,
+      "recall_block": 0.7028985507246377,
+      "fpr": 0.043333333333333335,
+      "fnr": 0.2971014492753623,
+      "f1_block": 0.8033126293995859,
+      "invalid_rate": 0.0034602076124567475
+    },
+    "deciding_stage_counts": {
+      "model2": 107,
+      "v5": 471
+    },
+    "v5_calls": 471,
+    "v5_calls_avoided_vs_v5only": 107,
+    "v5_call_fraction": 0.8148788927335641,
+    "provenance": "measured (Fast Path CONTINUE; no positive policy in this pass)"
+  },
+  "complementarity_baseline_vs_v5only": {
+    "early_block_correct": 117,
+    "early_block_added_fp": 8,
+    "early_block_on_attack_v5_would_miss": 12,
+    "early_block_on_attack_v5_would_catch": 103,
+    "provenance": "measured; V5's counterfactual decision is recorded for every ACCEPT"
+  },
+  "latency_ms": {
+    "canonicalization": {
+      "n": 578,
+      "mean": 0.04685123356743587,
+      "p50": 0.04453499786905013,
+      "p95": 0.06512500112876296,
+      "p99": 0.09168800170300528,
+      "min": 0.03094800194958225,
+      "max": 0.17374600065522827,
+      "std": 0.013501296484802925,
+      "provenance": "measured"
+    },
+    "fast_path": {
+      "n": 578,
+      "mean": 0.012985693844859843,
+      "p50": 0.011894000635948032,
+      "p95": 0.018087997887050733,
+      "p99": 0.024085999029921368,
+      "min": 0.010289000783814117,
+      "max": 0.09147099990514107,
+      "std": 0.004205169239415877,
+      "provenance": "measured"
+    },
+    "model2_baseline34_score": {
+      "n": 578,
+      "mean": 0.1014946505555659,
+      "p50": 0.09745799980009906,
+      "p95": 0.13178600056562573,
+      "p99": 0.15278299906640314,
+      "min": 0.08011899990378879,
+      "max": 0.29933499899925664,
+      "std": 0.017878893553811902,
+      "provenance": "measured"
+    },
+    "model2_ablation32_score": {
+      "n": 578,
+      "mean": 0.0612502956607723,
+      "p50": 0.05880500248167664,
+      "p95": 0.08114199954434298,
+      "p99": 0.10024699804489501,
+      "min": 0.046907000069040805,
+      "max": 0.12612199861905538,
+      "std": 0.010258491457385718,
+      "provenance": "measured"
+    },
+    "v5_generate": {
+      "n": 578,
+      "mean": 263.7994073494159,
+      "p50": 282.6904760004254,
+      "p95": 292.6775630003249,
+      "p99": 297.67142299897387,
+      "min": 0.0,
+      "max": 372.91184199784766,
+      "std": 38.64998985537098,
+      "provenance": "measured (model-side generate only; NOT D36 pipeline)"
+    },
+    "v5_http_roundtrip": {
+      "n": 578,
+      "mean": 265.59907839784256,
+      "p50": 284.46278600313235,
+      "p95": 294.57509399799164,
+      "p99": 299.9974779995682,
+      "min": 1.6816899988043588,
+      "max": 374.43712900130777,
+      "std": 38.634744746995125,
+      "provenance": "measured (client->service->client incl. queue)"
+    },
+    "note": "P95/P99 are per-request measured, never summed across stages. V5 generate excludes warm-up separation; see the dedicated latency run for D31/D36 scope."
+  },
+  "per_category_block_rate": {
+    "rows": [
+      {
+        "category": "CRLF injection payload detected.",
+        "in_v5_vocab": false,
+        "n": 17,
+        "v5_block": 17,
+        "v5_block_rate": 1.0,
+        "model2_block": 0
+      },
+      {
+        "category": "CSRF attack pattern detected.",
+        "in_v5_vocab": false,
+        "n": 8,
+        "v5_block": 4,
+        "v5_block_rate": 0.5,
+        "model2_block": 4
+      },
+      {
+        "category": "Command injection payload detected.",
+        "in_v5_vocab": true,
+        "n": 16,
+        "v5_block": 6,
+        "v5_block_rate": 0.375,
+        "model2_block": 4
+      },
+      {
+        "category": "Cross-site scripting payload detected.",
+        "in_v5_vocab": true,
+        "n": 17,
+        "v5_block": 17,
+        "v5_block_rate": 1.0,
+        "model2_block": 13
+      },
+      {
+        "category": "File inclusion attack detected.",
+        "in_v5_vocab": true,
+        "n": 17,
+        "v5_block": 17,
+        "v5_block_rate": 1.0,
+        "model2_block": 12
+      },
+      {
+        "category": "GraphQL injection payload detected.",
+        "in_v5_vocab": false,
+        "n": 16,
+        "v5_block": 5,
+        "v5_block_rate": 0.3125,
+        "model2_block": 4
+      },
+      {
+        "category": "HTTP parameter pollution detected.",
+        "in_v5_vocab": false,
+        "n": 17,
+        "v5_block": 0,
+        "v5_block_rate": 0.0,
+        "model2_block": 0
+      },
+      {
+        "category": "HTTP request smuggling attack detected.",
+        "in_v5_vocab": false,
+        "n": 6,
+        "v5_block": 3,
+        "v5_block_rate": 0.5,
+        "model2_block": 1
+      },
+      {
+        "category": "Insecure deserialization payload detected.",
+        "in_v5_vocab": false,
+        "n": 16,
+        "v5_block": 11,
+        "v5_block_rate": 0.6875,
+        "model2_block": 9
+      },
+      {
+        "category": "JWT token manipulation attack detected.",
+        "in_v5_vocab": false,
+        "n": 17,
+        "v5_block": 3,
+        "v5_block_rate": 0.17647058823529413,
+        "model2_block": 2
+      },
+      {
+        "category": "LDAP injection payload detected.",
+        "in_v5_vocab": false,
+        "n": 15,
+        "v5_block": 6,
+        "v5_block_rate": 0.4,
+        "model2_block": 8
+      },
+      {
+        "category": "NoSQL injection payload detected.",
+        "in_v5_vocab": false,
+        "n": 13,
+        "v5_block": 11,
+        "v5_block_rate": 0.8461538461538461,
+        "model2_block": 9
+      },
+      {
+        "category": "Open redirect payload detected.",
+        "in_v5_vocab": false,
+        "n": 17,
+        "v5_block": 13,
+        "v5_block_rate": 0.7647058823529411,
+        "model2_block": 3
+      },
+      {
+        "category": "Path traversal attack detected.",
+        "in_v5_vocab": true,
+        "n": 17,
+        "v5_block": 17,
+        "v5_block_rate": 1.0,
+        "model2_block": 13
+      },
+      {
+        "category": "SQL injection payload detected.",
+        "in_v5_vocab": true,
+        "n": 17,
+        "v5_block": 12,
+        "v5_block_rate": 0.7058823529411765,
+        "model2_block": 6
+      },
+      {
+        "category": "Server-side request forgery attack detected.",
+        "in_v5_vocab": false,
+        "n": 13,
+        "v5_block": 8,
+        "v5_block_rate": 0.6153846153846154,
+        "model2_block": 3
+      },
+      {
+        "category": "Server-side template injection payload detected.",
+        "in_v5_vocab": true,
+        "n": 13,
+        "v5_block": 13,
+        "v5_block_rate": 1.0,
+        "model2_block": 10
+      },
+      {
+        "category": "XML external entity injection detected.",
+        "in_v5_vocab": false,
+        "n": 12,
+        "v5_block": 8,
+        "v5_block_rate": 0.6666666666666666,
+        "model2_block": 4
+      },
+      {
+        "category": "XPath injection payload detected.",
+        "in_v5_vocab": false,
+        "n": 14,
+        "v5_block": 14,
+        "v5_block_rate": 1.0,
+        "model2_block": 12
+      }
+    ],
+    "provenance": "measured binary block rate; out-of-vocab categories measure only whether V5 fires, never trained recall (13/19 categories are out of V5's 6-category vocabulary)."
+  }
+}

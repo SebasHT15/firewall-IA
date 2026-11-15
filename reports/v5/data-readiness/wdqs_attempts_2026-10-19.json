@@ -1,0 +1,33 @@
+{
+  "issue": 75,
+  "purpose": "names_family acquisition: pinned Wikidata family-name snapshot (Q101352, labels en/mul, LIMIT 50000), query text unchanged from build_v5_benign_pools.FAMILY_NAME_QUERY",
+  "policy": "bounded attempts, no retry loop; stopped after the last attempt below",
+  "ua_old": "firewall-IA-v5-dataset/0.1 (research; contact via repo)",
+  "ua_new": "firewall-IA-v5-dataset/0.2 (https://github.com/SebasHT15/firewall-IA; research dataset build) Python-urllib/3.14",
+  "attempts": [
+    {"n": 1, "utc": "2026-10-19T14:00 (approx.)", "client": "curl", "endpoint": "https://query.wikidata.org/sparql", "ua": "old",
+     "query": "COUNT(*) / COUNT(DISTINCT ?item) of the same pattern (probe, not the pinned query)",
+     "result": "HTTP 504 'upstream request timeout' after 65.3 s"},
+    {"n": 2, "utc": "2026-10-19T14:02 (approx.)", "client": "builder acquire", "endpoint": "https://query.wikidata.org/sparql", "ua": "old",
+     "result": "HTTP 429 'Aggressively rate-limiting to 1 req / min - this rule was created during active wdqs outage (797a132)' in 0.37 s"},
+    {"n": 3, "utc": "2026-10-19T14:03:08", "client": "builder acquire (after 75 s quiet)", "endpoint": "https://query.wikidata.org/sparql", "ua": "old",
+     "result": "HTTP 429, same message, 0.40 s"},
+    {"n": 4, "utc": "2026-10-19T14:03:54", "client": "curl", "endpoint": "https://query-main.wikidata.org/sparql", "ua": "old",
+     "query": "same pattern, LIMIT 3 (availability probe)",
+     "result": "HTTP 200, 779 bytes, 0.52 s, x-served-by wdqs1034 (Wikimedia)"},
+    {"n": 5, "utc": "2026-10-19T14:05 (approx.)", "client": "builder acquire --endpoint query-main", "endpoint": "https://query-main.wikidata.org/sparql", "ua": "old",
+     "result": "HTTP 429, same outage-rule message, 0.36 s"},
+    {"n": 6, "utc": "2026-10-19T14:06:16", "client": "builder acquire (after 70 s quiet)", "endpoint": "https://query-main.wikidata.org/sparql", "ua": "old",
+     "result": "HTTP 429, same message, 0.36 s"},
+    {"n": 7, "utc": "2026-10-19T14:06:42", "client": "builder acquire", "endpoint": "https://query-main.wikidata.org/sparql", "ua": "new",
+     "result": "no 429; the request ran 60.4 s and the response was refused by the builder's SPARQL-JSON validation (truncated); nothing written"},
+    {"n": 8, "utc": "2026-10-19T14:08 (approx.)", "client": "builder acquire (repeat of 7 to read the message; one request more than needed)", "endpoint": "https://query-main.wikidata.org/sparql", "ua": "new",
+     "result": "REFUSED: pinned WDQS file is not valid SPARQL JSON results: Expecting value: line 86701 column 16 (char 1979041)"}
+  ],
+  "observations": [
+    "The 429 outage rule of 2026-10-14 is still active on 2026-10-19.",
+    "Every request with the old UA through the builder got 429 in < 0.5 s on both hosts; the first request with a UA carrying a usable contact URL was not rate-limited (attempts 7-8). Consistent with the Wikimedia User-Agent policy throttling non-compliant clients; not proven (two requests).",
+    "With the rate limit passed, the query hits the WDQS 60 s query timeout and the server truncates the JSON stream at about 1.98 MB (line 86,701; roughly 7.9k bindings at the observed ~11 pretty-printed lines per binding, an estimate). LIMIT 50000 would need several minutes at that rate, so the pinned query is infeasible on WDQS as written, independent of the outage rule (inference from two requests)."
+  ],
+  "nothing_written": "datasets/v5_sources/raw/ unchanged: no wikidata_family_names.json, no sidecar"
+}

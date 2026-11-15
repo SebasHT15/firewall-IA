@@ -1,0 +1,118 @@
+{
+  "ready": true,
+  "work": "/home/sebas/Documents/Codex/2026-10-26/ta/work/local-stack-2026-11-04/checks-2/crs-check/stack",
+  "endpoints": {
+    "front_tls": "https://notes.fwlab.test:8443",
+    "front_status": "http://127.0.0.1:8444",
+    "gateway_plain": "http://127.0.0.1:8080",
+    "gateway_admin": "http://127.0.0.1:8090",
+    "v5": null,
+    "app_direct": "http://172.30.160.2:9300",
+    "crs": "http://127.0.0.1:8460"
+  },
+  "mode": "V5_ONLY",
+  "v5": "double"
+}
+{
+  "app": "removed",
+  "app-network": "removed",
+  "crs": "removed",
+  "front": "removed"
+}
+{
+  "passed": true,
+  "summary": {
+    "direct": {
+      "requests": 63,
+      "by_layer": {
+        "app": 28,
+        "app_rejected": 35
+      }
+    },
+    "tls_h1": {
+      "requests": 63,
+      "by_layer": {
+        "app": 24,
+        "app_rejected": 33,
+        "firewall": 6
+      }
+    },
+    "tls_h2": {
+      "requests": 63,
+      "by_layer": {
+        "app": 24,
+        "app_rejected": 33,
+        "firewall": 6
+      }
+    }
+  },
+  "crs_blocked_steps": {
+    "token_not_json": {
+      "tls_h1": [
+        "920420",
+        "949110"
+      ],
+      "tls_h2": [
+        "920420",
+        "949110"
+      ]
+    },
+    "json_malformed": {
+      "tls_h1": [
+        "200002"
+      ],
+      "tls_h2": [
+        "200002"
+      ]
+    },
+    "delete_api": {
+      "tls_h1": [
+        "911100",
+        "949110"
+      ],
+      "tls_h2": [
+        "911100",
+        "949110"
+      ]
+    },
+    "effect_sql_attack": {
+      "tls_h1": [
+        "942100",
+        "949110"
+      ],
+      "tls_h2": [
+        "942100",
+        "949110"
+      ]
+    },
+    "effect_files_attack": {
+      "tls_h1": [
+        "930110",
+        "949110"
+      ],
+      "tls_h2": [
+        "930110",
+        "949110"
+      ]
+    },
+    "effect_xss_attack": {
+      "tls_h1": [
+        "941100",
+        "941110",
+        "941160",
+        "941390",
+        "949110"
+      ],
+      "tls_h2": [
+        "941100",
+        "941110",
+        "941160",
+        "941390",
+        "949110"
+      ]
+    }
+  },
+  "cross_path_problems": [],
+  "failed": [],
+  "clean": true
+}

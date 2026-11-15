@@ -1,0 +1,49 @@
+{
+  "ready": true,
+  "work": "/home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/model2-guarded-real-v51-20261105/v51_only",
+  "endpoints": {
+    "front_tls": "https://notes.fwlab.test:8443",
+    "front_status": "http://127.0.0.1:8444",
+    "gateway_plain": "http://127.0.0.1:8080",
+    "gateway_admin": "http://127.0.0.1:8090",
+    "v5": "http://127.0.0.1:8001",
+    "app_direct": "http://172.30.160.2:9300",
+    "crs": null
+  },
+  "mode": "V5_ONLY",
+  "v5": "real"
+}
+
+== Firewall-IA local demo — mode V5_ONLY, V5 = real service of manifest v51-model2-defer-only-analysis-20261105; Fast Path off; V4 not running ==
+
+ #  path    request                                  status  layer          control/reason
+ 1  tls_h2  home page                                   200  app            
+ 2  tls_h2  login page (sets session, CSRF token)       200  app            
+ 3  tls_h2  login without CSRF token                    403  app_rejected   csrf/token_missing
+ 4  tls_h2  login with CSRF token                       303  app            
+ 5  tls_h2  notes of the session                        200  app            
+ 6  tls_h2  search with the double's marker             200  app            
+ 7  tls_h2  SQL-injection-shaped search                 403  firewall       stage v5
+ 8  tls_h1  API token                                   200  app            
+ 9  tls_h1  API with the token                          200  app            
+10  tls_h1  API with alg=none token                     401  app_rejected   jwt/alg_not_allowed
+11  tls_h1  API with an expired token                   401  app_rejected   jwt/expired
+12  tls_h1  traversal-shaped path                       400  front          
+
+Manual requests while the stack is up:
+  curl --noproxy '*' --cacert /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/model2-guarded-real-v51-20261105/v51_only/pki/ca.crt --resolve notes.fwlab.test:8443:127.0.0.1 --http2 https://notes.fwlab.test:8443/
+  logs: /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/model2-guarded-real-v51-20261105/v51_only/front/logs/front-access.jsonl, /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/model2-guarded-real-v51-20261105/v51_only/gateway/decisions.jsonl, /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/model2-guarded-real-v51-20261105/v51_only/app/notes-app.jsonl
+{
+  "app": "removed",
+  "app-network": "removed",
+  "front": "removed",
+  "gateway": "terminated",
+  "v5-real": "terminated"
+}
+{
+  "checked_utc": 1793894288.5441377,
+  "clean": true,
+  "leftovers": [],
+  "run_id": "20261105T095759-5cbfea",
+  "schema": "firewall-local-stack-clean/v1"
+}

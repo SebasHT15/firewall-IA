@@ -1,0 +1,222 @@
+{
+  "checks": {
+    "base_model": {
+      "cache": "/home/sebas/.cache/huggingface/hub",
+      "detail": "TinyLlama/TinyLlama-1.1B-Chat-v1.0@fe8a4ea1ffed local_files_only",
+      "has_tokenizer": true,
+      "has_weights": true,
+      "ok": true,
+      "reason": null,
+      "snapshot_present": true
+    },
+    "disk": {
+      "detail": "556.9 GiB free at /home/sebas/Desktop/firewall-IA",
+      "free_GiB": 556.9,
+      "need_GiB_estimate": 20,
+      "ok": true,
+      "reason": null
+    },
+    "final_gate": {
+      "detail": "trainer FINAL gate on manifest metadata (no rows read)",
+      "ok": true,
+      "unmet": []
+    },
+    "gpu": {
+      "detail": "GPU / CUDA / VRAM",
+      "devices": [
+        {
+          "capability": "8.9",
+          "free_MiB": 14956,
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 4090 Laptop GPU",
+          "total_MiB": 15921
+        }
+      ],
+      "nvidia_smi": [
+        "NVIDIA GeForce RTX 4090 Laptop GPU, 16376 MiB, 14957 MiB, 595.99.02"
+      ],
+      "ok": true,
+      "reason": null,
+      "torch_cuda": true,
+      "torch_version": "2.6.0+cu124"
+    },
+    "interpreter": {
+      "detail": "python 3.12",
+      "ok": true,
+      "pinned": "3.12",
+      "running": "3.12"
+    },
+    "libraries": {
+      "detail": "pinned libraries vs installed",
+      "libraries": {
+        "accelerate": {
+          "installed": "1.13.0",
+          "ok": true,
+          "pinned": "1.13.0"
+        },
+        "bitsandbytes": {
+          "installed": "0.49.2",
+          "ok": true,
+          "pinned": "0.49.2"
+        },
+        "datasets": {
+          "installed": "4.8.5",
+          "ok": true,
+          "pinned": "4.8.5"
+        },
+        "peft": {
+          "installed": "0.19.1",
+          "ok": true,
+          "pinned": "0.19.1"
+        },
+        "torch": {
+          "installed": "2.6.0+cu124",
+          "ok": true,
+          "pinned": "2.6.0+cu124"
+        },
+        "transformers": {
+          "installed": "5.8.0",
+          "ok": true,
+          "pinned": "5.8.0"
+        },
+        "trl": {
+          "installed": "1.4.0",
+          "ok": true,
+          "pinned": "1.4.0"
+        }
+      },
+      "ok": true
+    },
+    "recipe_ratification": {
+      "detail": "recipe sections ratified (D71 + pending)",
+      "not_ratified": {},
+      "note": "FINAL requires all RATIFIED; this preflight never marks them",
+      "ok": true,
+      "ratified": [
+        "base_model",
+        "library_pins",
+        "lora",
+        "loss",
+        "optimization",
+        "quantization",
+        "recipe",
+        "seed",
+        "template",
+        "token_budget",
+        "vocabulary"
+      ]
+    },
+    "schedule": {
+      "detail": "effective schedule from manifest TRAIN count (metadata, no rows)",
+      "ok": true,
+      "reason": null,
+      "schedule": {
+        "derivation": "effective_eval=save = max(1, min(recipe_eval_steps, total_steps // 4)); epochs/batch/accum from the ratified recipe; eval==save for load_best_model_at_end; recorded before training, not a silent recipe change",
+        "effective_batch": 32,
+        "effective_eval_steps": 97,
+        "effective_logging_steps": 50,
+        "effective_save_steps": 97,
+        "expected_evaluations": 4,
+        "gradient_accumulation_steps": 8,
+        "num_devices": 1,
+        "num_train_epochs": 4,
+        "per_device_train_batch_size": 4,
+        "recipe_eval_steps": 200,
+        "steps_per_epoch": 97,
+        "total_optimizer_steps": 388,
+        "train_rows_eligible": 3080
+      },
+      "source": "manifest.counts.by_split_disposition['TRAIN|split']"
+    }
+  },
+  "disclaimers": [
+    "No weights loaded, no model downloaded, no dataset row or protected evaluation read.",
+    "Preparing a launch is not training and not a ratification (D71 only). RATIFIED is never set and no authorization is signed here."
+  ],
+  "env_ready": true,
+  "launch_readiness_scope": "metadata only; the real trainer --gate-only must verify eligible row bytes before training",
+  "pending": [],
+  "ready_for_trainer_gate_only": true,
+  "ready_to_launch": false,
+  "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+  "resources": {
+    "estimated": {
+      "estimate_basis": {
+        "base_params": "~1.1B",
+        "compute_dtype": "bfloat16",
+        "load_in_4bit": true
+      },
+      "estimated_peak_vram_GiB": "~4-8 (ESTIMATE: 1.1B nf4 4-bit base + LoRA + paged_adamw_8bit optimizer states + activations at the recipe batch/accum; not measured)",
+      "note": "A measurement requires actually loading the model (out of scope: preflight loads no weights)."
+    },
+    "measured_disk_free_GiB": 556.9,
+    "measured_gpu": [
+      {
+        "capability": "8.9",
+        "free_MiB": 14956,
+        "index": 0,
+        "name": "NVIDIA GeForce RTX 4090 Laptop GPU",
+        "total_MiB": 15921
+      }
+    ]
+  },
+  "schema": "v5-launch-preflight/v1",
+  "train_command": {
+    "artifacts": {
+      "adapter": "model-output-v5/final/final-v4-owner-launch/adapter",
+      "checkpoints": "model-output-v5/final/final-v4-owner-launch/checkpoints",
+      "run_record": "model-output-v5/final/final-v4-owner-launch/run_record.json"
+    },
+    "final_argv": [
+      "/usr/bin/python3.12",
+      "scripts/training/finetune_v5.py",
+      "--mode",
+      "final",
+      "--dataset",
+      "datasets/v5_sources/final_source_2026-10-26-v4",
+      "--recipe",
+      "/home/sebas/Desktop/firewall-IA/scripts/training/v5_training_recipe_v1.json",
+      "--dataset-prereg",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/preregistration.json",
+      "--freeze-record",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/freeze-record.json",
+      "--training-prereg",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-training-preregistration.json",
+      "--run-id",
+      "final-v4-owner-launch",
+      "--report-dir",
+      "model-output-v5/gate-reports/final-v4-owner-launch",
+      "--ai-audit-authorization",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-ai-audit-training-authorization.json"
+    ],
+    "final_run": "/usr/bin/python3.12 scripts/training/finetune_v5.py --mode final --dataset datasets/v5_sources/final_source_2026-10-26-v4 --recipe /home/sebas/Desktop/firewall-IA/scripts/training/v5_training_recipe_v1.json --dataset-prereg reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/preregistration.json --freeze-record reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/freeze-record.json --training-prereg reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-training-preregistration.json --run-id final-v4-owner-launch --report-dir model-output-v5/gate-reports/final-v4-owner-launch --ai-audit-authorization reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-ai-audit-training-authorization.json",
+    "flags_verified_against": "scripts/training/finetune_v5.py:parse_args",
+    "gate_only_argv": [
+      "/usr/bin/python3.12",
+      "scripts/training/finetune_v5.py",
+      "--mode",
+      "final",
+      "--dataset",
+      "datasets/v5_sources/final_source_2026-10-26-v4",
+      "--recipe",
+      "/home/sebas/Desktop/firewall-IA/scripts/training/v5_training_recipe_v1.json",
+      "--dataset-prereg",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/preregistration.json",
+      "--freeze-record",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/freeze-record.json",
+      "--training-prereg",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-training-preregistration.json",
+      "--run-id",
+      "final-v4-owner-launch",
+      "--report-dir",
+      "model-output-v5/gate-reports/final-v4-owner-launch",
+      "--ai-audit-authorization",
+      "reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-ai-audit-training-authorization.json",
+      "--gate-only"
+    ],
+    "gate_only_first": "/usr/bin/python3.12 scripts/training/finetune_v5.py --mode final --dataset datasets/v5_sources/final_source_2026-10-26-v4 --recipe /home/sebas/Desktop/firewall-IA/scripts/training/v5_training_recipe_v1.json --dataset-prereg reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/preregistration.json --freeze-record reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/freeze-record.json --training-prereg reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-training-preregistration.json --run-id final-v4-owner-launch --report-dir model-output-v5/gate-reports/final-v4-owner-launch --ai-audit-authorization reports/v5/dataset-preregistration-v1/final-run-2026-10-26-v4/v5-ai-audit-training-authorization.json --gate-only",
+    "output_dir": "model-output-v5/final/final-v4-owner-launch",
+    "report_dir": "model-output-v5/gate-reports/final-v4-owner-launch",
+    "resume": "no --resume CLI flag exists; checkpoints are retained; existing output dirs are refused"
+  }
+}

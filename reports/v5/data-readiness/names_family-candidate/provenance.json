@@ -1,0 +1,130 @@
+{
+  "issue": 75,
+  "status": "CANDIDATE_NOT_ADOPTED",
+  "date_utc": "2026-10-20",
+  "written_by": "side session (Sonnet 5.5); no builder/pool/dataset file was modified",
+  "source": {
+    "name": "Wikidata family-name items (instance of Q101352)",
+    "licence": "CC0-1.0",
+    "licence_evidence_url": "https://www.wikidata.org/wiki/Wikidata:Licensing",
+    "endpoint": "https://query-main.wikidata.org/sparql (first-party Wikimedia WDQS, main graph; served by wdqs1021)",
+    "total_items_in_wikidata_at_probe": 700962,
+    "total_items_probe_utc": "2026-10-20T20:25-20:26Z",
+    "total_items_note": "COUNT(?item) of ?item wdt:P31 wd:Q101352, 14.6 s, HTTP 200"
+  },
+  "query": "SELECT ?item ?label WHERE {\n  ?item wdt:P31 wd:Q101352 ;\n        rdfs:label ?label .\n  FILTER(LANG(?label) IN (\"en\",\"mul\"))\n}\nLIMIT 20000",
+  "query_sha256": "496cf014b3cfa24caa8a78b78d8b55c4663ad9382d74060a692ebacadad640e2",
+  "query_difference_vs_builder": "only 'LIMIT 20000' instead of 'LIMIT 50000'; text otherwise byte-identical to FAMILY_NAME_QUERY",
+  "snapshot": {
+    "file": "wikidata_family_names.limit20000.json",
+    "sidecar": "wikidata_family_names.limit20000.json.source.json",
+    "retrieved_at": "2026-10-20T20:31:02Z",
+    "elapsed_s": 19.4,
+    "bytes": 4575583,
+    "sha256": "039882220480b029074243f740f4eec07646029a0b6de8ce70f99454686d3ead",
+    "bindings": 20000,
+    "distinct_items": 11671,
+    "malformed_rows": 0,
+    "complete": true,
+    "complete_evidence": "HTTP 200, valid SPARQL JSON via builder parse_wdqs, 20000 bindings == LIMIT (LIMIT bound, not timeout truncation), 0 malformed"
+  },
+  "determinism": {
+    "re_execution_reproduces_snapshot": false,
+    "evidence": "Two executions of the same LIMIT 20000 query (2026-10-20 ~20:26Z and 20:31Z) returned 11,680 vs 11,671 distinct items sharing 10,866 (93%); 18,602 of 20,000 (item,label,lang) triples shared; byte-different. A 5000-row run covered only items present in the first 20000-row run (prefix at item level) but row order/boundary differ.",
+    "consequence": "Without ORDER BY the LIMIT subset is arbitrary: reproducibility is guaranteed ONLY by archiving the pinned file and its SHA-256 (already the builder's policy), never by re-running the query. Full ordered acquisition of all 700,962 items is infeasible on WDQS within the 60 s timeout."
+  },
+  "builder_pipeline_offline_check": {
+    "how": "build_v5_benign_pools.parse_wdqs + run_pipeline(name_reason 'family') imported read-only, exact oracle from datasets/v5_sources/attack/attack_pool.jsonl (3,924 canonical keys); nothing written outside this directory",
+    "counts": {
+      "accepted": 12104,
+      "excluded": 7896,
+      "excl": {
+        "duplicate_value": 7883,
+        "non_name_char": 6,
+        "too_many_tokens": 2,
+        "parenthesis_or_disambiguation": 4,
+        "contains_digit": 1
+      },
+      "flags": {
+        "non_ascii": 1427,
+        "has_apostrophe": 35,
+        "has_symbol": 35,
+        "has_hyphen": 55
+      },
+      "overlap": {
+        "names_given": 783,
+        "prose_en": 0,
+        "streets": 0,
+        "symbols": 3
+      },
+      "cf_dups": 8
+    },
+    "meets_min_pool_size_200": true
+  },
+  "attempts_this_session": [
+    {
+      "utc": "2026-10-20T20:25:15Z",
+      "endpoint": "query-main",
+      "query": "ORDER BY ?item LIMIT 5 (items only)",
+      "result": "HTTP 200, 24.0 s"
+    },
+    {
+      "utc": "~20:25:50Z",
+      "endpoint": "query-main",
+      "query": "COUNT(?item)",
+      "result": "HTTP 200, 14.6 s, 700962"
+    },
+    {
+      "utc": "~20:26Z",
+      "endpoint": "query-main",
+      "query": "pinned pattern LIMIT 3",
+      "result": "HTTP 200, 0.5 s"
+    },
+    {
+      "utc": "~20:26:16Z",
+      "endpoint": "query-main",
+      "query": "pinned pattern LIMIT 5000",
+      "result": "HTTP 200, 9.3 s, 5000 rows",
+      "body_sha256": "1efb976d569ecf001c56cf2f9236a68541e1db4ec7c21651fe2e903f0c6aeb67"
+    },
+    {
+      "utc": "~20:26:46Z",
+      "endpoint": "query-main",
+      "query": "pinned pattern LIMIT 20000",
+      "result": "HTTP 200, 26.4 s, 20000 rows (scratch only, not the pin)",
+      "body_sha256": "c32de8c315245dcafd9e012d86af5f2368d9fb7140e16167d151fc7d055c853f"
+    },
+    {
+      "utc": "2026-10-20T20:27:21Z",
+      "endpoint": "query-main",
+      "query": "EXACT builder query (LIMIT 50000), UA 0.2",
+      "result": "HTTP 200 but TRUNCATED at WDQS 60 s timeout: 1,094,647 bytes, JSON invalid (line 47,659); rejected",
+      "body_sha256": "89213e606c624de655aa80aeda0db60e5f3cd3515cef883649694e093b8f2e0a"
+    },
+    {
+      "utc": "~20:29:30Z",
+      "endpoint": "query-main",
+      "query": "subselect item OFFSET 40000 LIMIT 10000 + label join",
+      "result": "HTTP 200 but TRUNCATED at 60 s (37,911 bytes, invalid JSON): OFFSET paging is not viable",
+      "body_sha256": "2f16b234e0d700c492f7c4026140b3c904b54ade5a51829547ad774d02d8863c"
+    },
+    {
+      "utc": "2026-10-20T20:31:02Z",
+      "endpoint": "query-main",
+      "query": "LIMIT 20000 (the pinned candidate)",
+      "result": "HTTP 200, 19.4 s, complete",
+      "body_sha256": "039882220480b029074243f740f4eec07646029a0b6de8ce70f99454686d3ead"
+    }
+  ],
+  "prior_attempts": "reports/v5/data-readiness/wdqs_attempts_2026-10-19.json (8 requests, 429 outage rule then truncation)",
+  "findings": [
+    "The 2026-10-14 outage rate-limit (429) did NOT occur today with the compliant UA on query-main; consistent with the UA hypothesis, still unproven.",
+    "Run time is highly variable (LIMIT 20000: 26 s then 19 s; LIMIT 50000: truncated at 60 s after ~4.3k rows today, ~7.9k on 2026-10-19): LIMIT 50000 is not reliably acquirable; LIMIT 20000 finished at ~1/3 of the timeout twice in a row.",
+    "Subset is first-N by the store's index order, not random: a possible (unmeasured) bias toward items with early internal term ids; QID range of the candidate 18,549..12,561,989 (median 5.18M)."
+  ],
+  "not_done": [
+    "no change to build_v5_benign_pools.py, raw/ or benign/ pools; no rebuild",
+    "candidate NOT adopted: query differs from the pinned builder query",
+    "cross-pool closure resolution (NFC+casefold precedence) is done downstream by the stage-3 identity code (D64/D-3, policy B); only counted here"
+  ]
+}

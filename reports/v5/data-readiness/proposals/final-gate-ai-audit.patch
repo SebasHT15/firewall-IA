@@ -1,0 +1,665 @@
+diff --git a/scripts/training/finetune_v5.py b/scripts/training/finetune_v5.py
+index 755ea04..81f460d 100644
+--- a/scripts/training/finetune_v5.py
++++ b/scripts/training/finetune_v5.py
+@@ -87,6 +87,9 @@ def parse_args(argv=None):
+     ap.add_argument("--dataset-prereg", default=None, help="FINAL: committed dataset preregistration file")
+     ap.add_argument("--freeze-record", default=None, help="FINAL: committed v5-dataset-freeze-record/v1 JSON")
+     ap.add_argument("--training-prereg", default=None, help="FINAL: committed v5-training-preregistration/v1 JSON")
++    ap.add_argument("--ai-audit-authorization", default=None,
++                    help="FINAL, ai_audited datasets only (PROPOSED): committed owner authorization record, separate from "
++                         "the other FINAL records; refused while no schema is ratified")
+     ap.add_argument("--gate-only", action="store_true", help="run the gates and the tokenization checks, load no model")
+     ap.add_argument("--max-steps", type=int, default=None, help="SMOKE only; capped by recipe smoke.max_steps_hard_cap")
+     return ap.parse_args(argv)
+@@ -130,6 +133,7 @@ def main(argv=None) -> int:
+         prep = D.prepare(mode, args.dataset, out_dir, recipe, recipe_sha, authorization=args.authorization,
+                          dataset_prereg=args.dataset_prereg, freeze_record=args.freeze_record,
+                          training_prereg=args.training_prereg, installed_versions=versions, git=git,
++                         ai_audit_authorization=args.ai_audit_authorization,
+                          code_paths=CODE_FILES + (os.path.abspath(args.recipe),))
+     except D.GateRefused as e:
+         print(str(e), file=sys.stderr, flush=True)
+diff --git a/scripts/training/v5_train_data.py b/scripts/training/v5_train_data.py
+index 193618b..bf92dce 100644
+--- a/scripts/training/v5_train_data.py
++++ b/scripts/training/v5_train_data.py
+@@ -65,6 +65,9 @@ AUTH_SCHEMA = "v5-experimental-authorization/v1"
+ FREEZE_SCHEMA = "v5-dataset-freeze-record/v1"
+ TRAINING_PREREG_SCHEMA = "v5-training-preregistration/v1"
+ 
++# ACTIVE: r3 only. V5-DATA-SPEC-r4 (D67) is deliberately NOT supported here: adding it to this tuple is the
++# one-line, owner-reviewed activation step (see the PROPOSED block below). Until then an r4 manifest is
++# refused with SPEC_UNSUPPORTED, whatever else it contains.
+ SUPPORTED_SPECS = ("V5-DATA-SPEC-r3",)
+ READ_SPLITS = ("TRAIN", "VALIDATION")
+ NEVER_READ_SPLITS = ("INTERNAL_TEST", "E6_RESERVE")
+@@ -89,8 +92,43 @@ FREEZE_ITEMS = {
+         "stab_held_sealed",                # 5. STAB-HELD built and sealed
+         "dataset_freeze_report",           # 6. the dataset freeze report (C §8)
+     ),
++    # PROPOSED (D67 / V5-DATA-SPEC-r4 §11.3). Inert while "V5-DATA-SPEC-r4" is not in SUPPORTED_SPECS.
++    # Item 1 (`human_review_prefilter_sample`) is RETIRED by D67 and is removed HERE, explicitly, in this
++    # table only; the r3 row above is untouched. Item 2 stays and is bound to the §7 AI-assisted protocol by
++    # the audit-provenance gates below (F3a–F3d) — retiring item 1 does not relax anything else.
++    "V5-DATA-SPEC-r4": (
++        "post_filter_audit",
++        "blocking_checks",
++        "dataset_preregistration",
++        "stab_held_sealed",
++        "dataset_freeze_report",
++    ),
+ }
+ 
++# ── Audit provenance vs category outcome vs row status vs owner authorization: FOUR DISTINCT CONCEPTS ──
++# (1) audit provenance — who audited. Manifest field `audit_type` (PROPOSED field; absent in every
++#     manifest produced today -> FINAL refuses). Never inferred from `attack_label_basis`.
++AUDIT_HUMAN, AUDIT_AI = "human", "ai_audited"
++AUDIT_TYPES = (AUDIT_HUMAN, AUDIT_AI)
++# Which provenance each spec revision's §11.3 allows. Anything else (unknown type, or a type that the
++# spec revision does not define) is refused, not downgraded: r3 demands the human review, r4 is AI-assisted.
++SPEC_AUDIT_TYPES = {"V5-DATA-SPEC-r3": (AUDIT_HUMAN,), "V5-DATA-SPEC-r4": (AUDIT_AI,)}
++# (2) category audit outcome (r4 prereg `status_semantics`). Only PASS_AI_AUDITED makes a category eligible.
++#     It is NOT a label_status and is never written to / compared as one.
++OUTCOME_PASS = "PASS_AI_AUDITED"
++AUDIT_OUTCOMES = (OUTCOME_PASS, "FAIL", "INSUFFICIENT_EVIDENCE")
++AUDIT_OUTCOME_TOKENS = frozenset(AUDIT_OUTCOMES) | {"AI_AUDITED", "PENDING"}   # tokens that are NOT label statuses
++# (3) row label_status: TRAINABLE_LABEL_STATUSES above. VERIFIED = independently established, never
++#     conferred by an audit pass or by model agreement (r4 prereg `status_semantics.VERIFIED`).
++#     PROPOSED per-row field `label_status_basis`, required on attack rows of an ai_audited dataset only.
++LABEL_BASES = ("independent_evidence", "policy_defined", "ai_audit")
++# (4) owner authorization to train on ai_audited data: a SEPARATE committed record, distinct from the dataset
++#     preregistration, the freeze record and the training preregistration. No such schema is ratified, so
++#     the schema id is None: while it is None EVERY ai_audited FINAL run is refused, even with a record.
++#     The id below is a PROPOSAL used by tests (via mock.patch) to exercise the validator; it confers nothing.
++AI_AUDIT_AUTH_SCHEMA = None
++PROPOSED_AI_AUDIT_AUTH_SCHEMA = "v5-ai-audit-training-authorization/v1-PROPOSED"
++
+ TEMPLATES = {"V5_CANDIDATE_TEMPLATE": T.V5_CANDIDATE_TEMPLATE}
+ VOCABULARIES = {"PILOT_VOCABULARY": OC.PILOT_VOCABULARY, "VOCABULARY_ALT_A": OC.VOCABULARY_ALT_A,
+                 "VOCABULARY_ALT_B": OC.VOCABULARY_ALT_B}
+@@ -103,7 +141,9 @@ ROW_CODES = frozenset({"META_NOT_ALIGNED", "ROW_SCHEMA", "ROW_SPLIT_MISMATCH", "
+                        "LABEL_NOT_TRAINABLE", "EXCLUDED_ROW_IN_SPLIT", "OUTPUT_NOT_IN_VOCABULARY",
+                        "LABEL_OUTPUT_INCONSISTENT", "CONTENT_SPECIAL_IDS", "CONTENT_OVER_BUDGET",
+                        "PROMPT_PREFIX_MISMATCH", "EOS_INVALID", "SPECIAL_LAYOUT", "TRUNCATION_REQUIRED",
+-                       "OUTPUT_ROUNDTRIP"})
++                       "OUTPUT_ROUNDTRIP", "LABEL_STATUS_IS_AUDIT_OUTCOME", "AUDIT_ROW_BASIS_MISSING",
++                       "AUDIT_ROW_BASIS_INCONSISTENT", "AUDIT_CONFERRED_VERIFIED", "AUDIT_ROW_BASIS_CONTRADICTS_MANIFEST",
++                       "AUDIT_CATEGORY_OUTCOME_MISSING", "AUDIT_CATEGORY_NOT_PASSED"})
+ 
+ 
+ # ───────────────────────────── diagnostics ─────────────────────────────
+@@ -295,6 +335,10 @@ def check_rows(rows: list, vocabulary) -> list:
+         m, where = r["meta"], f"{r['split']}[{r['index']}]"
+         if m.get("label_status") not in TRAINABLE_LABEL_STATUSES:
+             diags.append(Diag("LABEL_NOT_TRAINABLE", f"{where}: label_status={m.get('label_status')!r}"))
++        if m.get("label_status") in AUDIT_OUTCOME_TOKENS:
++            # an audit outcome smuggled into the row-status field is a conflation of concepts (2) and (3)
++            diags.append(Diag("LABEL_STATUS_IS_AUDIT_OUTCOME",
++                              f"{where}: label_status={m.get('label_status')!r} is a category audit outcome, not a row status"))
+         if m.get("exclusion_reason") is not None or m.get("slice") is not None:
+             diags.append(Diag("EXCLUDED_ROW_IN_SPLIT", f"{where}: exclusion_reason={m.get('exclusion_reason')!r}"))
+         if r["output"] not in vocab:
+@@ -305,6 +349,49 @@ def check_rows(rows: list, vocabulary) -> list:
+     return diags
+ 
+ 
++def check_audit_rows(rows: list, audit_type) -> list:
++    """Row-level provenance checks tying concept (3) to concept (1). PROPOSED field `label_status_basis`.
++
++    * A row that says its label rests on `ai_audit` inside a dataset whose manifest does not declare
++      `audit_type == ai_audited` is a provenance contradiction -> refused (an AI-audited row can never ride
++      in under a `human` / missing manifest declaration).
++    * In an ai_audited dataset every attack (BLOCK) row must name a known basis, and an audit-based label can
++      NEVER be VERIFIED (D67: an audit pass confers no VERIFIED). `independent_evidence` <-> VERIFIED and
++      `policy_defined` <-> POLICY_DEFINED must agree.
++    Which row status an `ai_audit`-based attack label MAY carry (POLICY_DEFINED?) is an OPEN OWNER DECISION;
++    nothing here grants it — the dataset-level authorization (F10) is required whatever the row statuses."""
++    diags = []
++    ai = audit_type == AUDIT_AI
++    for r in rows:
++        m, where = r["meta"], f"{r['split']}[{r['index']}]"
++        basis, status = m.get("label_status_basis"), m.get("label_status")
++        if basis == "ai_audit" and not ai:
++            diags.append(Diag("AUDIT_ROW_BASIS_CONTRADICTS_MANIFEST",
++                              f"{where}: label_status_basis='ai_audit' but manifest audit_type={audit_type!r}"))
++        if not ai or m.get("label") != "BLOCK":
++            continue
++        if basis not in LABEL_BASES:
++            diags.append(Diag("AUDIT_ROW_BASIS_MISSING", f"{where}: label_status_basis={basis!r} not in {LABEL_BASES}"))
++        elif basis == "ai_audit" and status == "VERIFIED":
++            diags.append(Diag("AUDIT_CONFERRED_VERIFIED", f"{where}: an ai_audit-based label cannot be VERIFIED"))
++        elif (basis, status) in (("independent_evidence", "POLICY_DEFINED"), ("policy_defined", "VERIFIED")):
++            diags.append(Diag("AUDIT_ROW_BASIS_INCONSISTENT", f"{where}: basis={basis!r} with label_status={status!r}"))
++    return diags
++
++
++def check_audit_category_outcomes(rows: list, outcomes) -> list:
++    """ai_audited FINAL: every attack category that has rows in TRAIN/VALIDATION needs a recorded category
++    outcome of exactly PASS_AI_AUDITED. FAIL / INSUFFICIENT_EVIDENCE / unknown / missing -> refused."""
++    diags, outcomes = [], (outcomes if isinstance(outcomes, dict) else {})
++    cats = sorted({r["meta"].get("attack_category") for r in rows if r["meta"].get("label") == "BLOCK"} - {None})
++    for cat in cats:
++        if cat not in outcomes:
++            diags.append(Diag("AUDIT_CATEGORY_OUTCOME_MISSING", f"{cat}: no category audit outcome recorded"))
++        elif outcomes[cat] != OUTCOME_PASS:
++            diags.append(Diag("AUDIT_CATEGORY_NOT_PASSED", f"{cat}: outcome {outcomes[cat]!r}; only {OUTCOME_PASS!r} is eligible"))
++    return diags
++
++
+ def _identity_set(rows, key) -> set:
+     s = set()
+     for r in rows:
+@@ -366,6 +453,8 @@ def gate_experimental(manifest: dict, manifest_sha: str, authorization_path: str
+         diags.append(Diag("EXPERIMENTAL_REFUSES_FIXTURE", "fixture builds are SMOKE material only"))
+     if manifest.get("attack_label_basis") == "fixture_synthetic":
+         diags.append(Diag("EXPERIMENTAL_REFUSES_FIXTURE", "attack_label_basis=fixture_synthetic"))
++    if "audit_type" in manifest and manifest["audit_type"] not in AUDIT_TYPES:
++        diags.append(Diag("F3_AUDIT_TYPE_UNKNOWN", f"audit_type={manifest['audit_type']!r} not in {AUDIT_TYPES}"))
+     if not authorization_path:
+         diags.append(Diag("AUTHORIZATION_MISSING", "--authorization is required: a v5-experimental-authorization/v1 "
+                                                    "record naming this dataset manifest"))
+@@ -412,7 +501,7 @@ def _committed_hashed_file(path, expected_sha, code, what, under=None) -> list:
+ 
+ def gate_final(manifest: dict, manifest_sha: str, recipe: dict, recipe_sha: str, *,
+                dataset_prereg: str | None, freeze_record: str | None, training_prereg: str | None,
+-               installed_versions: dict, git: dict, code_paths=()) -> list:
++               installed_versions: dict, git: dict, code_paths=(), ai_audit_authorization: str | None = None) -> list:
+     """Every unmet FINAL condition. Empty list = FINAL may start."""
+     d = []
+     # F1 — a real, gated build (not a fixture, not provisional).
+@@ -431,6 +520,19 @@ def gate_final(manifest: dict, manifest_sha: str, recipe: dict, recipe_sha: str,
+     if manifest.get("attack_label_basis") != "post_filter_audit":
+         d.append(Diag("F3_LABEL_BASIS", f"attack_label_basis={manifest.get('attack_label_basis')!r}; FINAL requires "
+                                         "'post_filter_audit' (spec §7)"))
++    # F3a–F3b — audit PROVENANCE is its own fact (concept 1): declared, known, and allowed by the spec revision.
++    # `attack_label_basis` says WHERE labels come from, never WHO audited; it is not consulted for provenance.
++    audit_type = manifest.get("audit_type")
++    if audit_type not in AUDIT_TYPES:
++        d.append(Diag("F3_AUDIT_TYPE_UNKNOWN", f"manifest audit_type={audit_type!r}; must be one of {AUDIT_TYPES} (missing or "
++                                               "unknown provenance is refused, never defaulted)"))
++    elif audit_type not in SPEC_AUDIT_TYPES.get(manifest.get("spec"), ()):
++        d.append(Diag("F3_AUDIT_TYPE_SPEC_MISMATCH", f"audit_type={audit_type!r} is not allowed under spec "
++                                                     f"{manifest.get('spec')!r} (allowed: {SPEC_AUDIT_TYPES.get(manifest.get('spec'), ())})"))
++    # F10 — a SEPARATE owner authorization (concept 4) whenever the audit was AI-assisted.
++    if audit_type == AUDIT_AI:
++        d += _check_ai_audit_authorization(ai_audit_authorization, manifest_sha, freeze_record,
++                                           (dataset_prereg, freeze_record, training_prereg))
+     # F4 — dataset preregistration, committed, hash recorded in the manifest.
+     prereg_sha = manifest.get("preregistration_sha256")
+     if not prereg_sha:
+@@ -505,6 +607,67 @@ def _check_freeze_record(path, manifest, manifest_sha) -> list:
+             p = os.path.join(REPO_ROOT, ev.get("path", ""))
+             if not os.path.isfile(p) or sha256_file(p) != ev.get("sha256"):
+                 d.append(Diag(code, f"§11.3 item {item!r}: evidence {ev.get('path')!r} missing or hash mismatch"))
++    # Audit provenance must be stated by the freeze record's audit item too, and must AGREE with the manifest
++    # (a manifest cannot claim `human` while the signed-off audit evidence says ai_audited, or vice versa).
++    aud = items.get("post_filter_audit") or {}
++    if aud.get("audit_type") not in AUDIT_TYPES or aud.get("audit_type") != manifest.get("audit_type"):
++        d.append(Diag(code, f"post_filter_audit.audit_type {aud.get('audit_type')!r} != manifest audit_type "
++                            f"{manifest.get('audit_type')!r} (both must be a known, equal provenance)"))
++    if aud.get("audit_type") == AUDIT_AI:
++        outs = aud.get("category_outcomes")
++        if not isinstance(outs, dict) or not outs:
++            d.append(Diag(code, "post_filter_audit.category_outcomes missing for an ai_audited record"))
++        else:
++            for cat, o in sorted(outs.items()):
++                if o not in AUDIT_OUTCOMES:
++                    d.append(Diag(code, f"category {cat!r}: unknown audit outcome {o!r}; allowed {AUDIT_OUTCOMES}"))
++    return d
++
++
++def audit_item(freeze_record_path) -> dict:
++    """The freeze record's `post_filter_audit` item, or {} if unreadable (callers report that elsewhere)."""
++    try:
++        return (_load_json(freeze_record_path).get("items") or {}).get("post_filter_audit") or {}
++    except (OSError, ValueError, TypeError, AttributeError):
++        return {}
++
++
++def _check_ai_audit_authorization(path, manifest_sha, freeze_record, other_record_paths) -> list:
++    """PROPOSED gate for concept (4). Default = refuse: no schema is ratified (AI_AUDIT_AUTH_SCHEMA is None)."""
++    code, d = "F10_AI_AUDIT_AUTHORIZATION", []
++    if AI_AUDIT_AUTH_SCHEMA is None:
++        d.append(Diag(code, "no ratified ai-audit training-authorization schema exists; ai_audited data cannot "
++                            "feed FINAL until the owner ratifies one (this refusal holds even if a record is supplied)"))
++    if not path:
++        return d + [Diag(code, "ai_audited dataset: --ai-audit-authorization (a record separate from the dataset "
++                               "preregistration, freeze record and training preregistration) is required")]
++    if not os.path.isfile(path):
++        return d + [Diag(code, f"{path} does not exist")]
++    real = os.path.realpath(path)
++    if any(o and os.path.realpath(o) == real for o in other_record_paths):
++        d.append(Diag(code, "the authorization must be its own record, not one of the other FINAL records"))
++    if not git_committed_unmodified(path):
++        d.append(Diag(code, f"{path} is not committed or has local modifications"))
++    try:
++        rec = _load_json(path)
++    except ValueError as e:
++        return d + [Diag(code, f"unreadable: {e}")]
++    if AI_AUDIT_AUTH_SCHEMA is not None and rec.get("schema") != AI_AUDIT_AUTH_SCHEMA:
++        d.append(Diag(code, f"schema {rec.get('schema')!r} != {AI_AUDIT_AUTH_SCHEMA!r}"))
++    if rec.get("scope") != FINAL:
++        d.append(Diag(code, f"scope {rec.get('scope')!r}; must be 'FINAL'"))
++    if rec.get("audit_type") != AUDIT_AI:
++        d.append(Diag(code, f"audit_type {rec.get('audit_type')!r}; must be {AUDIT_AI!r}"))
++    if rec.get("dataset_manifest_sha256") != manifest_sha:
++        d.append(Diag(code, f"authorized dataset {rec.get('dataset_manifest_sha256')} != {manifest_sha}"))
++    if not (freeze_record and os.path.isfile(freeze_record)) or rec.get("freeze_record_sha256") != sha256_file(freeze_record):
++        d.append(Diag(code, "freeze_record_sha256 does not name the supplied freeze record (audit evidence not bound)"))
++    for k in ("authorized_by", "date", "owner_decision"):
++        if not str(rec.get(k, "")).strip():
++            d.append(Diag(code, f"field {k!r} is empty"))
++    for k in ("authorizes_ai_audited_final_training", "acknowledges_not_human_validation"):
++        if rec.get(k) is not True:
++            d.append(Diag(code, f"{k} must be true"))
+     return d
+ 
+ 
+@@ -622,7 +785,8 @@ class PreparedData:
+ def prepare(mode: str, dataset_dir: str, out_dir: str, recipe: dict, recipe_sha: str, *,
+             authorization: str | None = None, dataset_prereg: str | None = None,
+             freeze_record: str | None = None, training_prereg: str | None = None,
+-            installed_versions: dict | None = None, git: dict | None = None, code_paths=()) -> PreparedData:
++            installed_versions: dict | None = None, git: dict | None = None, code_paths=(),
++            ai_audit_authorization: str | None = None) -> PreparedData:
+     """Run every gate for `mode` and load TRAIN / VALIDATION. Raises GateRefused with ALL failures."""
+     if mode not in MODES:
+         raise ValueError(f"mode must be one of {MODES}")
+@@ -639,7 +803,8 @@ def prepare(mode: str, dataset_dir: str, out_dir: str, recipe: dict, recipe_sha:
+     else:
+         diags += gate_final(manifest, msha, recipe, recipe_sha, dataset_prereg=dataset_prereg,
+                             freeze_record=freeze_record, training_prereg=training_prereg,
+-                            installed_versions=installed_versions or {}, git=git, code_paths=code_paths)
++                            installed_versions=installed_versions or {}, git=git, code_paths=code_paths,
++                            ai_audit_authorization=ai_audit_authorization)
+     diags += verify_read_artifacts(dataset_dir, manifest)
+     train, validation = [], []
+     if not any(x.code in ("ARTIFACT_MISSING", "ARTIFACT_NOT_IN_MANIFEST") for x in diags):
+@@ -649,6 +814,10 @@ def prepare(mode: str, dataset_dir: str, out_dir: str, recipe: dict, recipe_sha:
+         vocab = recipe_vocabulary(recipe)
+         diags += check_rows(train, vocab) + check_rows(validation, vocab)
+         diags += check_disjoint(train, validation)
++        audit_type = manifest.get("audit_type")
++        diags += check_audit_rows(train + validation, audit_type)
++        if mode == FINAL and audit_type == AUDIT_AI:
++            diags += check_audit_category_outcomes(train + validation, audit_item(freeze_record).get("category_outcomes"))
+         if not train:
+             diags.append(Diag("EMPTY_SPLIT", "TRAIN has no rows"))
+         if not validation:
+@@ -658,7 +827,8 @@ def prepare(mode: str, dataset_dir: str, out_dir: str, recipe: dict, recipe_sha:
+     return PreparedData(mode, manifest, msha, train, validation, gate_evidence={
+         "manifest_sha256": msha, "manifest_status": str(manifest.get("status"))[:120],
+         "spec": manifest.get("spec"), "attack_label_basis": manifest.get("attack_label_basis"),
+-        "value_statuses": manifest.get("value_statuses"),
++        "value_statuses": manifest.get("value_statuses"), "audit_type": manifest.get("audit_type"),
++        "ai_audit_authorization_supplied": bool(ai_audit_authorization),
+         "artifacts_verified": [a for a in manifest.get("artifacts", [])
+                                if a["path"] in {p.format(split=s) for s in READ_SPLITS for p in (ROWS_FILE, META_FILE)}],
+         "splits_never_opened": list(NEVER_READ_SPLITS) + ["slices.*"],
+diff --git a/tests/test_v5_training_gates.py b/tests/test_v5_training_gates.py
+index f9d65d4..17046a8 100644
+--- a/tests/test_v5_training_gates.py
++++ b/tests/test_v5_training_gates.py
+@@ -72,6 +72,27 @@ class Base(unittest.TestCase):
+             fh.write(data)
+         return hashlib.sha256(data).hexdigest()
+ 
++    def rewrite_meta(self, fn):
++        """Apply fn(meta) to every TRAIN/VALIDATION meta line, re-hash the files into the manifest; return its sha."""
++        shas = {}
++        for split in ("TRAIN", "VALIDATION"):
++            name = f"rows.{split}.meta.jsonl"
++            path = os.path.join(self.ds, name)
++            with open(path, encoding="utf-8") as fh:
++                metas = [json.loads(ln) for ln in fh if ln.strip()]
++            for m in metas:
++                fn(m)
++            data = ("\n".join(json.dumps(m, sort_keys=True) for m in metas) + "\n").encode()
++            with open(path, "wb") as fh:
++                fh.write(data)
++            shas[name] = (hashlib.sha256(data).hexdigest(), len(data))
++
++        def fix(m):
++            for a in m["artifacts"]:
++                if a["path"] in shas:
++                    a["sha256"], a["bytes"] = shas[a["path"]]
++        return self.edit_manifest(fix)
++
+     def refused(self, mode, **kw):
+         with self.assertRaises(D.GateRefused) as cm:
+             D.prepare(mode, self.ds, kw.pop("out_dir", out(mode)), self.recipe, self.rsha, **kw)
+@@ -232,7 +253,10 @@ class Final(Base):
+         self.assertEqual(sum(d.code == "F7_RECIPE_NOT_RATIFIED" for d in exc.diagnostics), 1 + len(D.RECIPE_SECTIONS) - 1)
+ 
+     # ── positive path on a TEST DOUBLE: all gate inputs satisfied, git checks mocked ──
+-    def ratified_world(self, freeze_items=None, spec="V5-DATA-SPEC-r3"):
++    def ratified_world(self, freeze_items=None, spec="V5-DATA-SPEC-r3", audit_type="human", outcomes=None,
++                       item_audit_type="same", auth=None, row_basis=None):
++        """Test double of every FINAL input. `audit_type` is the manifest provenance; `auth` = dict of overrides
++        for a PROPOSED ai-audit authorization record (None = none supplied, True = a fully valid one)."""
+         prereg = os.path.join(self.tmp, "prereg.json")
+         with open(prereg, "w", encoding="utf-8") as fh:
+             fh.write('{"test": "double"}\n')
+@@ -241,31 +265,50 @@ class Final(Base):
+         def f(m):
+             m.update(status="REAL", fixture=False, attack_label_basis="post_filter_audit",
+                      preregistration_sha256=prereg_sha, spec=spec)
++            if audit_type is not None:
++                m["audit_type"] = audit_type
+             m["generator_config"]["mode"] = "real"
+             m["value_statuses"] = {k: "RATIFIED" for k in m["value_statuses"]}
+         msha = self.edit_manifest(f)
++        if row_basis is not None:
++            msha = self.rewrite_meta(row_basis)
+         recipe = copy.deepcopy(self.recipe)
+         recipe["status"] = "RATIFIED"
+         for s in D.RECIPE_SECTIONS:
+             recipe[s]["status"] = "RATIFIED"
+         rsha = "r" * 64
+         ev_path = os.path.relpath(prereg, D.REPO_ROOT)
+-        items = freeze_items or D.FREEZE_ITEMS["V5-DATA-SPEC-r3"]
++        items = freeze_items or D.FREEZE_ITEMS.get(spec, D.FREEZE_ITEMS["V5-DATA-SPEC-r3"])
+         freeze = {"schema": D.FREEZE_SCHEMA, "status": "FROZEN", "spec": spec, "dataset_manifest_sha256": msha,
+                   "owner_decision": "D-test", "items": {i: {"status": "DONE", "evidence": [
+                       {"path": ev_path, "sha256": prereg_sha}]} for i in items}}
++        if "post_filter_audit" in freeze["items"]:
++            freeze["items"]["post_filter_audit"]["audit_type"] = audit_type if item_audit_type == "same" else item_audit_type
++            if outcomes is not None:
++                freeze["items"]["post_filter_audit"]["category_outcomes"] = outcomes
+         tprereg = {"schema": D.TRAINING_PREREG_SCHEMA, "status": "RATIFIED", "recipe_sha256": rsha,
+                    "template_fingerprint": D.template_fingerprint(recipe), "dataset_manifest_sha256": msha,
+                    "owner_decision": "D-test"}
+         paths = {}
+-        for name, obj in (("freeze", freeze), ("tprereg", tprereg)):
++        pending = [("freeze", freeze), ("tprereg", tprereg)]
++        if auth is not None:
++            pending.append(("auth", {"schema": D.PROPOSED_AI_AUDIT_AUTH_SCHEMA, "scope": "FINAL", "audit_type": "ai_audited",
++                                     "dataset_manifest_sha256": msha, "authorized_by": "test", "date": "2026-10-20",
++                                     "owner_decision": "D-test", "authorizes_ai_audited_final_training": True,
++                                     "acknowledges_not_human_validation": True,
++                                     "freeze_record_sha256": None, **(auth if isinstance(auth, dict) else {})}))
++        for name, obj in pending:
+             paths[name] = os.path.join(self.tmp, f"{name}.json")
++            if name == "auth" and obj["freeze_record_sha256"] is None:
++                obj["freeze_record_sha256"] = D.sha256_file(paths["freeze"])
+             with open(paths[name], "w", encoding="utf-8") as fh:
+                 json.dump(obj, fh)
+         versions = {k: v for k, v in recipe["library_pins"].items() if k not in ("status", "source")}
+-        return recipe, rsha, dict(dataset_prereg=prereg, freeze_record=paths["freeze"],
+-                                  training_prereg=paths["tprereg"], installed_versions=versions,
+-                                  git={"clean": True, "commit": "x"})
++        kw = dict(dataset_prereg=prereg, freeze_record=paths["freeze"], training_prereg=paths["tprereg"],
++                  installed_versions=versions, git={"clean": True, "commit": "x"})
++        if "auth" in paths:
++            kw["ai_audit_authorization"] = paths["auth"]
++        return recipe, rsha, kw
+ 
+     def test_final_passes_only_when_every_condition_holds(self):
+         recipe, rsha, kw = self.ratified_world()
+@@ -303,6 +346,7 @@ class Final(Base):
+         self.assertTrue(any("human_review_prefilter_sample" in x for x in details), details)
+ 
+     def test_unknown_spec_revision_is_not_silently_accepted(self):
++        # r4 is encoded (PROPOSED) in the item/provenance tables but NOT in SUPPORTED_SPECS: still refused.
+         recipe, rsha, kw = self.ratified_world(spec="V5-DATA-SPEC-r4")
+         with mock.patch.object(D, "git_committed_unmodified", return_value=True), \
+                 mock.patch.object(D, "DATASET_PREREG_DIR", os.path.relpath(self.tmp, D.REPO_ROOT)):
+@@ -310,7 +354,256 @@ class Final(Base):
+                 D.prepare(D.FINAL, self.ds, out(D.FINAL), recipe, rsha, **kw)
+         codes = {d.code for d in cm.exception.diagnostics}
+         self.assertIn("SPEC_UNSUPPORTED", codes)
+-        self.assertIn("F5_DATASET_FREEZE", codes)
++        self.assertIn("F3_AUDIT_TYPE_SPEC_MISMATCH", codes)       # r4 does not accept a `human` claim
++
++
++class AiAuditGate(Base):
++    """PROPOSAL tests (D67 / r4): audit provenance, category outcome, row status and the owner authorization are
++    four separate facts. r4 is not in SUPPORTED_SPECS and no authorization schema is ratified, so every positive
++    path below patches those two constants explicitly — the module defaults stay refuse."""
++
++    ratified_world = Final.ratified_world
++
++    R4 = "V5-DATA-SPEC-r4"
++
++    def ctx(self, *, r4=True, schema=True, committed=lambda path: True):
++        from contextlib import ExitStack
++        st = ExitStack()
++        st.enter_context(mock.patch.object(D, "git_committed_unmodified", side_effect=committed))
++        st.enter_context(mock.patch.object(D, "DATASET_PREREG_DIR", os.path.relpath(self.tmp, D.REPO_ROOT)))
++        if r4:
++            st.enter_context(mock.patch.object(D, "SUPPORTED_SPECS", ("V5-DATA-SPEC-r3", self.R4)))
++        if schema:
++            st.enter_context(mock.patch.object(D, "AI_AUDIT_AUTH_SCHEMA", D.PROPOSED_AI_AUDIT_AUTH_SCHEMA))
++        return st
++
++    def train_statuses(self):
++        with open(os.path.join(self.ds, "rows.TRAIN.meta.jsonl"), encoding="utf-8") as fh:
++            return [json.loads(ln)["label_status"] for ln in fh if ln.strip()]
++
++    def attack_categories(self):
++        cats = set()
++        for split in ("TRAIN", "VALIDATION"):
++            with open(os.path.join(self.ds, f"rows.{split}.meta.jsonl"), encoding="utf-8") as fh:
++                cats |= {m["attack_category"] for m in map(json.loads, fh) if m["label"] == "BLOCK"}
++        return sorted(cats)
++
++    @staticmethod
++    def ai_rows(m):
++        if m["label"] == "BLOCK":
++            m.update(label_status="POLICY_DEFINED", label_status_basis="ai_audit")
++
++    def ai_world(self, outcomes="pass", row_basis="default", auth=True, **kw):
++        if outcomes == "pass":
++            outcomes = {c: D.OUTCOME_PASS for c in self.attack_categories()}
++        return self.ratified_world(spec=self.R4, audit_type="ai_audited", outcomes=outcomes, auth=auth,
++                                   row_basis=self.ai_rows if row_basis == "default" else row_basis, **kw)
++
++    def run_final(self, recipe, rsha, kw, **ctxkw):
++        with self.ctx(**ctxkw):
++            return D.prepare(D.FINAL, self.ds, out(D.FINAL), recipe, rsha, **kw)
++
++    def refused_final(self, recipe, rsha, kw, **ctxkw):
++        with self.assertRaises(D.GateRefused) as cm:
++            self.run_final(recipe, rsha, kw, **ctxkw)
++        return {d.code for d in cm.exception.diagnostics}, [d.detail for d in cm.exception.diagnostics]
++
++    # (a) the retired gate item is removed deliberately, only in the r4 table
++    def test_r4_retires_human_prefilter_item_explicitly_and_r3_is_untouched(self):
++        r3, r4 = D.FREEZE_ITEMS["V5-DATA-SPEC-r3"], D.FREEZE_ITEMS[self.R4]
++        self.assertIn("human_review_prefilter_sample", r3)
++        self.assertNotIn("human_review_prefilter_sample", r4)
++        self.assertEqual(r4, tuple(i for i in r3 if i != "human_review_prefilter_sample"))
++        self.assertEqual(D.SUPPORTED_SPECS, ("V5-DATA-SPEC-r3",))          # r4 NOT active by default
++
++    # positive control: the whole proposed chain is satisfiable on a test double, and only then
++    def test_ai_audited_final_passes_only_with_every_separate_input(self):
++        recipe, rsha, kw = self.ai_world()
++        p = self.run_final(recipe, rsha, kw)
++        self.assertEqual(p.gate_evidence["audit_type"], "ai_audited")
++        self.assertTrue(p.gate_evidence["ai_audit_authorization_supplied"])
++
++    def test_module_defaults_refuse_r4_ai_audited_even_with_a_complete_record(self):
++        recipe, rsha, kw = self.ai_world()
++        codes, details = self.refused_final(recipe, rsha, kw, r4=False, schema=False)
++        self.assertIn("SPEC_UNSUPPORTED", codes)
++        self.assertIn("F10_AI_AUDIT_AUTHORIZATION", codes)
++        # r4 activated but authorization schema still unratified: the record alone cannot authorize
++        codes, details = self.refused_final(recipe, rsha, kw, r4=True, schema=False)
++        self.assertEqual(codes, {"F10_AI_AUDIT_AUTHORIZATION"})
++        self.assertTrue(any("no ratified" in x for x in details))
++
++    # (c) no authorization -> FINAL refused, even when every other record is valid and every row is POLICY_DEFINED
++    def test_ai_audited_without_authorization_is_refused(self):
++        recipe, rsha, kw = self.ai_world(auth=None)
++        codes, details = self.refused_final(recipe, rsha, kw)
++        self.assertEqual(codes, {"F10_AI_AUDIT_AUTHORIZATION"})
++        self.assertTrue(any("--ai-audit-authorization" in x for x in details))
++
++    def test_invalid_authorization_records_are_refused(self):
++        cases = {
++            "wrong dataset": {"dataset_manifest_sha256": "0" * 64},
++            "unbound freeze record": {"freeze_record_sha256": "1" * 64},
++            "wrong scope": {"scope": "EXPERIMENTAL"},
++            "wrong audit_type": {"audit_type": "human"},
++            "wrong schema": {"schema": "v5-ai-audit-training-authorization/v9"},
++            "not authorizing": {"authorizes_ai_audited_final_training": False},
++            "no human-validation ack": {"acknowledges_not_human_validation": "yes"},
++            "empty owner decision": {"owner_decision": " "},
++        }
++        for name, over in cases.items():
++            with self.subTest(name):
++                self.setUp()
++                recipe, rsha, kw = self.ai_world(auth=over)
++                codes, _ = self.refused_final(recipe, rsha, kw)
++                self.assertEqual(codes, {"F10_AI_AUDIT_AUTHORIZATION"}, name)
++
++    def test_authorization_must_be_committed_and_a_separate_file(self):
++        recipe, rsha, kw = self.ai_world()
++        auth = kw["ai_audit_authorization"]
++        codes, _ = self.refused_final(recipe, rsha, kw, committed=lambda path: path != auth)
++        self.assertEqual(codes, {"F10_AI_AUDIT_AUTHORIZATION"})
++        for other in ("training_prereg", "freeze_record", "dataset_prereg"):     # bundled into another record
++            codes, details = self.refused_final(recipe, rsha, {**kw, "ai_audit_authorization": kw[other]})
++            self.assertIn("F10_AI_AUDIT_AUTHORIZATION", codes, other)
++            self.assertTrue(any("its own record" in x for x in details), other)
++
++    # (b) provenance is its own fact: missing / unknown / not allowed by the spec revision / inconsistent
++    def test_missing_or_unknown_audit_type_is_refused(self):
++        for bad in (None, "", "AI", "ai", "model_consensus", "human+ai", ["ai_audited"], 1):
++            with self.subTest(audit_type=bad):
++                self.setUp()
++                recipe, rsha, kw = self.ratified_world(audit_type=None)       # manifest without the field ...
++                if bad is not None:
++                    self.edit_manifest(lambda m: m.update(audit_type=bad))      # ... or with a bad value
++                    # re-sign the records to the edited manifest so ONLY provenance is wrong
++                    msha = D.sha256_file(os.path.join(self.ds, "manifest.json"))
++                    for k in ("freeze_record", "training_prereg"):
++                        with open(kw[k], encoding="utf-8") as fh:
++                            rec = json.load(fh)
++                        rec["dataset_manifest_sha256"] = msha
++                        with open(kw[k], "w", encoding="utf-8") as fh:
++                            json.dump(rec, fh)
++                codes, _ = self.refused_final(recipe, rsha, kw)
++                self.assertIn("F3_AUDIT_TYPE_UNKNOWN", codes)
++
++    def test_attack_label_basis_alone_never_implies_provenance(self):
++        recipe, rsha, kw = self.ratified_world(audit_type=None)
++        with open(os.path.join(self.ds, "manifest.json"), encoding="utf-8") as fh:
++            self.assertEqual(json.load(fh)["attack_label_basis"], "post_filter_audit")
++        codes, _ = self.refused_final(recipe, rsha, kw)
++        self.assertIn("F3_AUDIT_TYPE_UNKNOWN", codes)
++
++    def test_audit_type_must_match_the_spec_revision(self):
++        recipe, rsha, kw = self.ratified_world(audit_type="ai_audited")                 # r3 demands human review
++        codes, _ = self.refused_final(recipe, rsha, kw, r4=False)
++        self.assertIn("F3_AUDIT_TYPE_SPEC_MISMATCH", codes)
++        recipe, rsha, kw = self.ratified_world(spec=self.R4, audit_type="human")        # r4 is the AI protocol
++        codes, _ = self.refused_final(recipe, rsha, kw)
++        self.assertIn("F3_AUDIT_TYPE_SPEC_MISMATCH", codes)
++
++    def test_freeze_record_and_manifest_must_agree_on_provenance(self):
++        for item_type in ("human", None, "unknown"):
++            self.setUp()
++            recipe, rsha, kw = self.ai_world(item_audit_type=item_type)
++            codes, details = self.refused_final(recipe, rsha, kw)
++            self.assertIn("F5_DATASET_FREEZE", codes, item_type)
++            self.assertTrue(any("post_filter_audit.audit_type" in x for x in details), item_type)
++
++    # (2) category outcome: only PASS_AI_AUDITED for categories that actually have rows
++    def test_non_pass_or_missing_category_outcome_is_refused(self):
++        cats = self.attack_categories()
++        self.assertGreaterEqual(len(cats), 2)
++        for label, value, code in (("FAIL", "FAIL", "AUDIT_CATEGORY_NOT_PASSED"),
++                                   ("INSUFFICIENT_EVIDENCE", "INSUFFICIENT_EVIDENCE", "AUDIT_CATEGORY_NOT_PASSED"),
++                                   ("PENDING", "PENDING", "F5_DATASET_FREEZE"),
++                                   ("VERIFIED as outcome", "VERIFIED", "F5_DATASET_FREEZE"),
++                                   ("missing", None, "AUDIT_CATEGORY_OUTCOME_MISSING")):
++            with self.subTest(label):
++                self.setUp()
++                outcomes = {c: D.OUTCOME_PASS for c in cats}
++                if value is None:
++                    del outcomes[cats[0]]
++                else:
++                    outcomes[cats[0]] = value
++                recipe, rsha, kw = self.ai_world(outcomes=outcomes)
++                codes, _ = self.refused_final(recipe, rsha, kw)
++                self.assertIn(code, codes)
++
++    def test_failed_category_without_rows_does_not_block(self):
++        cats = self.attack_categories()
++        outcomes = {c: D.OUTCOME_PASS for c in cats} | {"Server Side Request Forgery": "FAIL"}   # excluded, no rows
++        recipe, rsha, kw = self.ai_world(outcomes=outcomes)
++        self.assertEqual(self.run_final(recipe, rsha, kw).mode, D.FINAL)
++
++    # (3) row status: an audit pass never sets / implies VERIFIED, and no other accepted status is a back door
++    def test_audit_based_label_cannot_be_verified(self):
++        def verified(m):
++            if m["label"] == "BLOCK":
++                m.update(label_status="VERIFIED", label_status_basis="ai_audit")
++        recipe, rsha, kw = self.ai_world(row_basis=verified)
++        codes, _ = self.refused_final(recipe, rsha, kw)
++        self.assertIn("AUDIT_CONFERRED_VERIFIED", codes)
++
++    def test_attack_rows_of_an_ai_audited_dataset_need_a_known_consistent_basis(self):
++        for name, fn, code in (
++                ("missing", lambda m: m.update(label_status="POLICY_DEFINED") if m["label"] == "BLOCK" else None,
++                 "AUDIT_ROW_BASIS_MISSING"),
++                ("unknown", lambda m: m.update(label_status="POLICY_DEFINED", label_status_basis="vibes") if m["label"] == "BLOCK" else None,
++                 "AUDIT_ROW_BASIS_MISSING"),
++                ("independent-but-policy", lambda m: m.update(label_status="POLICY_DEFINED", label_status_basis="independent_evidence")
++                 if m["label"] == "BLOCK" else None, "AUDIT_ROW_BASIS_INCONSISTENT")):
++            with self.subTest(name):
++                self.setUp()
++                recipe, rsha, kw = self.ai_world(row_basis=fn)
++                codes, _ = self.refused_final(recipe, rsha, kw)
++                self.assertIn(code, codes)
++
++    def test_audit_outcome_tokens_are_not_row_statuses(self):
++        self.assertFalse(set(D.TRAINABLE_LABEL_STATUSES) & D.AUDIT_OUTCOME_TOKENS)
++        self.assertEqual(D.TRAINABLE_LABEL_STATUSES, ("VERIFIED", "POLICY_DEFINED"))
++        rows = D.load_split(self.ds, "TRAIN")[0]
++        for token in ("PASS_AI_AUDITED", "AI_AUDITED", "INSUFFICIENT_EVIDENCE", "FAIL"):
++            r = copy.deepcopy(rows[:1])
++            r[0]["meta"]["label_status"] = token
++            codes = {d.code for d in D.check_rows(r, D.recipe_vocabulary(self.recipe))}
++            self.assertTrue({"LABEL_NOT_TRAINABLE", "LABEL_STATUS_IS_AUDIT_OUTCOME"} <= codes, token)
++
++    def test_gates_never_rewrite_row_statuses(self):
++        recipe, rsha, kw = self.ai_world()
++        p = self.run_final(recipe, rsha, kw)
++        on_disk = self.train_statuses()
++        self.assertEqual([r["meta"]["label_status"] for r in p.train_rows], on_disk)
++        self.assertNotIn("VERIFIED", {r["meta"]["label_status"] for r in p.train_rows if r["meta"]["label"] == "BLOCK"})
++
++    def test_ai_audit_row_cannot_hide_inside_a_human_declared_dataset(self):
++        recipe, rsha, kw = self.ratified_world(audit_type="human", row_basis=self.ai_rows)   # POLICY_DEFINED rows
++        codes, _ = self.refused_final(recipe, rsha, kw, r4=False)
++        self.assertIn("AUDIT_ROW_BASIS_CONTRADICTS_MANIFEST", codes)
++
++    def test_policy_defined_rows_are_no_path_around_the_authorization(self):
++        recipe, rsha, kw = self.ai_world(auth=None)
++        kw.pop("ai_audit_authorization", None)
++        self.assertIn("POLICY_DEFINED", self.train_statuses())
++        self.assertEqual(self.refused_final(recipe, rsha, kw)[0], {"F10_AI_AUDIT_AUTHORIZATION"})
++
++    def test_experimental_refuses_unknown_audit_type(self):
++        self.edit_manifest(lambda m: m.update(status="REAL", fixture=False, attack_label_basis="post_filter_audit",
++                                              audit_type="model_consensus"))
++        self.edit_manifest(lambda m: m["generator_config"].update(mode="real"))
++        codes, _ = self.refused(D.EXPERIMENTAL)
++        self.assertIn("F3_AUDIT_TYPE_UNKNOWN", codes)
++
++    def test_cli_exposes_the_authorization_flag_default_none(self):
++        sys.path.insert(0, os.path.join(REPO, "scripts", "training"))
++        try:
++            import finetune_v5
++        except Exception as exc:          # pragma: no cover - heavy imports unavailable
++            self.skipTest(f"finetune_v5 not importable ({type(exc).__name__})")
++        a = finetune_v5.parse_args(["--mode", "final", "--dataset", "x"])
++        self.assertIsNone(a.ai_audit_authorization)
++        a = finetune_v5.parse_args(["--mode", "final", "--dataset", "x", "--ai-audit-authorization", "p.json"])
++        self.assertEqual(a.ai_audit_authorization, "p.json")
+ 
+ 
+ class Recipe(unittest.TestCase):

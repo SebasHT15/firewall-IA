@@ -1,0 +1,62 @@
+{
+  "candidate_selected": null,
+  "interpretation": [
+    "A private-IP-only SSRF rule no longer separates labels; both callback names occur in both classes.",
+    "The lexical probe still separates all delta validation rows. Shared route and path cues make this split easy for a shallow model.",
+    "This does not estimate performance on a new application, new attack syntax, or the protected test."
+  ],
+  "lexical_probe": {
+    "families": {
+      "benign_edge": {
+        "FN": 0,
+        "FP": 0,
+        "TN": 30,
+        "TP": 0
+      },
+      "open_redirect": {
+        "FN": 0,
+        "FP": 0,
+        "TN": 30,
+        "TP": 30
+      },
+      "path_traversal": {
+        "FN": 0,
+        "FP": 0,
+        "TN": 30,
+        "TP": 30
+      },
+      "ssrf": {
+        "FN": 0,
+        "FP": 0,
+        "TN": 30,
+        "TP": 30
+      }
+    },
+    "method": "TF-IDF character 3-5 grams; logistic regression C=1; TRAIN delta only",
+    "validation": {
+      "FN": 0,
+      "FP": 0,
+      "TN": 120,
+      "TP": 90
+    }
+  },
+  "manifest_sha256": "a03832b1bb29759260976a078f6b2ecf7b765111ed1819f5cd682578896a60e6",
+  "protected_opened": false,
+  "schema": "v52-correction-shortcut-audit/v1",
+  "scope": "DIAGNOSTIC_ONLY_NOT_MODEL_QUALITY",
+  "script_sha256": "4179d59c28d413b9cf95be2893ca58551cfeb1e3c8263c9d956704dab78841a7",
+  "ssrf_private_ip_only_rule": {
+    "TRAIN": {
+      "FN": 60,
+      "FP": 60,
+      "TN": 60,
+      "TP": 60
+    },
+    "VALIDATION": {
+      "FN": 15,
+      "FP": 15,
+      "TN": 15,
+      "TP": 15
+    }
+  }
+}

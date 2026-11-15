@@ -39,8 +39,66 @@ Thumbs.db
 # Data plane environment (requirements-data-plane.txt)
 .venv-dataplane/
 
+# Analyzer research environment (requirements-analyzer-research.txt; D52 — never the data plane)
+.venv-analyzer/
+
+# Derived Analyzer dataset: regenerated locally from V4-clean like V4 itself (D6, D51);
+# its manifest (datasets/manifest_hybrid_analyzer_v1.json) is tracked
+datasets/hybrid_analyzer_v1/
+datasets/hybrid_analyzer_v2/
+
 # Docker Lab logs (destination receipt log, per-run output). The directory itself
 # is tracked via .gitkeep so it exists after a clone: the destination container
 # runs as a non-root user and cannot create it.
 docker/.lab-logs/*
 !docker/.lab-logs/.gitkeep
+
+# V5 (spec r3 §8, D58): source pools, raw downloads and the future dataset are never committed.
+datasets/v5_sources/
+datasets/v5/
+
+# Separately preserved V5 audit evidence
+# PROPOSED .gitignore addition (NOT applied; content-free). Owner decision pending.
+# Ignore rules do NOT remove already-staged/tracked files: run `git rm --cached` first
+# (see reports/v5/data-readiness/first-pr-inventory.md, "Owner Git actions").
+#
+# V5 post-filter audit: raw third-party (PayloadsAllTheThings, MIT) payload text and the review records that
+# reproduce it. Preserved outside Git; integrity + restoration in
+# reports/v5/data-readiness/evidence-preservation-manifest.json
+/reports/v5/postfilter-audit/round-1/sample.jsonl
+/reports/v5/postfilter-audit/round-1/annotations_a?.jsonl
+/reports/v5/postfilter-audit/round-1/adjudication_pending.jsonl
+/reports/v5/postfilter-audit/round-1/adjudication_rule_applied.jsonl
+/reports/v5/postfilter-audit/round-1/adjudication/
+/reports/v5/postfilter-audit/round-1/human_review/*.csv
+/reports/v5/postfilter-audit/round-1/**/discrepancy_sheet.jsonl
+/reports/v5/postfilter-audit/round-1/**/annotations_a?.partial.jsonl
+/reports/v5/postfilter-audit/round-1/**/packet.jsonl
+/reports/v5/postfilter-audit/round-1/**/batches/
+/reports/v5/postfilter-audit/round-1/**/*.handback.txt
+/reports/v5/postfilter-audit/r3-review/reviewer/batch_*.jsonl
+/reports/v5/data-readiness/xss_known_false_exclusions.md
+
+# Pinned raw source snapshots remain local.
+/reports/v5/data-readiness/names_family-candidate/wikidata_family_names.limit20000.json
+
+# Disposable generated fixture trees; never audit or training evidence.
+/reports/v5/.tmp-tests/
+
+# Required historical SQLi source input, retained locally and in the recovery archive.
+# Raw third-party source data is not published by this cleanup.
+/reports/v5/postfilter-audit/sqli-v2-correction/sqli_corrected_pool.jsonl
+
+# Cascade lab: the raw wire sample carries verbatim HTTP requests derived from the
+# legacy, non-redistributable eval.jsonl (CSIC-2010 / PayloadsAllTheThings; see
+# docs/data_sources.md). Kept locally only; regenerate deterministically with
+# scripts/cascade_lab/make_dev_sample.py --seed 20261026. Integrity + reproduction
+# in reports/v5/hybrid/cascade-lab/DATA_RETENTION.md. The paired-pass records
+# (results/dev_paired_v1.jsonl) carry NO request payloads (decisions/timings only)
+# and ARE kept in the tree for the recomputation cross-check.
+/reports/v5/hybrid/cascade-lab/dev_sample_v1.jsonl
+
+# Local successor model weights and raw authored cohorts; retained with hashes in PRIVATE_ARTIFACTS.json.
+/reports/v5/model2-successor-2026-11-05/artifact/model2.json
+/reports/v5/model2-successor-2026-11-05/artifact/cohort.TRAIN.json
+/reports/v5/model2-successor-2026-11-05/artifact/cohort.VALIDATION.json

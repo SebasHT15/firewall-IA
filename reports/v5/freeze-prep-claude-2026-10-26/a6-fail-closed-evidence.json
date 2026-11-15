@@ -1,0 +1,31 @@
+{
+  "aggregator": "scripts/dataset/v5_freeze_precheck.py",
+  "baseline": {
+    "checks": 11,
+    "checks_run_pass": true,
+    "freeze_ready": false,
+    "on": "real v3"
+  },
+  "dataset": "datasets/v5_sources/final_source_2026-10-25-v3 (read-only; original untouched)",
+  "mutations": [
+    {
+      "checks_run_pass": false,
+      "failed_checks": [
+        "A1_artifact_hashes (rows.TRAIN.jsonl)"
+      ],
+      "name": "artifact byte flip (rows.TRAIN.jsonl, on a COPY)"
+    },
+    {
+      "checks_run_pass": false,
+      "failed_checks": [
+        "split_row_counts",
+        "L7 (manifest sha mismatch vs collisions binding)"
+      ],
+      "name": "manifest count altered (TRAIN|split=9999, on a COPY)"
+    }
+  ],
+  "note": "freeze_ready is hard-wired False in the aggregator regardless of result; it never asserts freeze-readiness.",
+  "requirement": "A6: run the quality aggregator on v3 and confirm it FAILS CLOSED under mutation (never freeze_ready).",
+  "schema": "v5-A6-aggregator-fail-closed/v1-claude",
+  "v3_manifest_sha256_after": "7c1ebb9a98fa437c1a1be6839cfe1b2e9b31cac247b8a6ec4d08dc12d5ae8d16"
+}

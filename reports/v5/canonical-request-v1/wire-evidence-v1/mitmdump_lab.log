@@ -1,0 +1,167 @@
+[17:07:04.684] Loading script /home/sebas/Desktop/firewall-IA/scripts/wire_evidence/lab_addon.py
+[17:07:04.709] reverse proxy to http://127.0.0.1:34785 listening at 127.0.0.1:42121.
+[17:07:04.709] LAB EFFECTIVE OPTION mode=['reverse:http://127.0.0.1:34785']
+[17:07:04.709] LAB EFFECTIVE OPTION validate_inbound_headers=True
+[17:07:04.709] LAB EFFECTIVE OPTION http2=False
+[17:07:04.709] LAB EFFECTIVE OPTION connection_strategy='lazy'
+[17:07:04.709] LAB EFFECTIVE OPTION stream_large_bodies=None
+[17:07:04.709] LAB EFFECTIVE OPTION body_size_limit=None
+[17:07:04.709] data plane ready: classifier=http://127.0.0.1:42629/classify timeout=3.0s policy=fail-closed
+[17:07:04.709] feature extraction: off
+[17:07:04.709] hybrid shadow analyzer: off
+[17:07:04.709] fast path: off
+[17:07:04.709] canonical observer: shadow, separate process (logged only, never used for decisions) timeout=0.500s startup_timeout=10.0s restart_backoff=1.0s max_consecutive_failures=3 max_decoded_body=1048576; worker starts in the background
+[17:07:04.734][127.0.0.1:59448] client connect
+[17:07:04.734][127.0.0.1:59448] client disconnect
+[17:07:05.713][127.0.0.1:59456] client connect
+[17:07:05.715] [3ee4d6a6] received GET 127.0.0.1:34785/ok (body 0 bytes)
+[17:07:05.746] [3ee4d6a6] ALLOW GET 127.0.0.1:34785/ok reason='wire-lab stub' (classifier 30 ms)
+[17:07:05.746] [3ee4d6a6] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.109ms elapsed=0.525ms
+[17:07:05.746][127.0.0.1:59456] server connect 127.0.0.1:34785
+[17:07:05.747][127.0.0.1:59456] server disconnect 127.0.0.1:34785
+[17:07:05.747][127.0.0.1:59456] client disconnect
+[17:07:06.248][127.0.0.1:59470] client connect
+[17:07:06.250] [008d1aa8] received GET 127.0.0.1:34785/ok (body 0 bytes)
+[17:07:06.260] [008d1aa8] ALLOW GET 127.0.0.1:34785/ok reason='wire-lab stub' (classifier 10 ms)
+[17:07:06.261] [008d1aa8] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.057ms elapsed=0.562ms
+[17:07:06.261][127.0.0.1:59470] server connect 127.0.0.1:34785
+[17:07:06.262][127.0.0.1:59470] server disconnect 127.0.0.1:34785
+[17:07:06.262][127.0.0.1:59470] client disconnect
+[17:07:06.663][127.0.0.1:59474] client connect
+[17:07:06.666] [273dc2e1] received POST 127.0.0.1:34785/ok (body 5 bytes)
+[17:07:06.677] [273dc2e1] ALLOW POST 127.0.0.1:34785/ok reason='wire-lab stub' (classifier 11 ms)
+[17:07:06.678] [273dc2e1] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.175ms elapsed=0.863ms
+[17:07:06.678][127.0.0.1:59474] server connect 127.0.0.1:34785
+[17:07:06.679][127.0.0.1:59474] server disconnect 127.0.0.1:34785
+[17:07:06.680][127.0.0.1:59474] client disconnect
+[17:07:07.080][127.0.0.1:59480] client connect
+[17:07:07.082] [d0c29ba0] received POST 127.0.0.1:34785/ok (body 5 bytes)
+[17:07:07.093] [d0c29ba0] ALLOW POST 127.0.0.1:34785/ok reason='wire-lab stub' (classifier 10 ms)
+[17:07:07.093] [d0c29ba0] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED decoded_body_bytes=5 canon=0.075ms elapsed=0.847ms
+[17:07:07.094][127.0.0.1:59480] server connect 127.0.0.1:34785
+[17:07:07.094][127.0.0.1:59480] server disconnect 127.0.0.1:34785
+[17:07:07.095][127.0.0.1:59480] client disconnect
+[17:07:07.495][127.0.0.1:59492] client connect
+[17:07:07.497] [fdde1f2e] received POST 127.0.0.1:34785/ok (body 5 bytes)
+[17:07:07.509] [fdde1f2e] ALLOW POST 127.0.0.1:34785/ok reason='wire-lab stub' (classifier 10 ms)
+[17:07:07.510] [fdde1f2e] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin signals=S-CT-ABSENT,S-MEDIA-UNSUPPORTED transfer_encoding=chunked decoded_body_bytes=5 canon=0.077ms elapsed=0.772ms
+[17:07:07.510][127.0.0.1:59492] server connect 127.0.0.1:34785
+[17:07:07.511][127.0.0.1:59492] server disconnect 127.0.0.1:34785
+[17:07:07.511][127.0.0.1:59492] client disconnect
+[17:07:07.912][127.0.0.1:59500] client connect
+[17:07:07.914] [ed248e79] received GET 127.0.0.1:34785/ok (body 0 bytes)
+[17:07:07.922] [ed248e79] BLOCK (fail-closed) unexpected data plane error
+Traceback (most recent call last):
+  File "/home/sebas/Desktop/firewall-IA/data_plane/data_plane.py", line 554, in request
+    await self.enforce(flow)
+  File "/home/sebas/Desktop/firewall-IA/data_plane/data_plane.py", line 575, in enforce
+    verdict = await ask_classifier(client, self.classifier_url, raw_request)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/data_plane/data_plane.py", line 330, in ask_classifier
+    response = await client.post(url, json={"request": raw_request})
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/.venv-dataplane/lib/python3.12/site-packages/httpx/_client.py", line 1859, in post
+    return await self.request(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/.venv-dataplane/lib/python3.12/site-packages/httpx/_client.py", line 1527, in request
+    request = self.build_request(
+              ^^^^^^^^^^^^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/.venv-dataplane/lib/python3.12/site-packages/httpx/_client.py", line 378, in build_request
+    return Request(
+           ^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/.venv-dataplane/lib/python3.12/site-packages/httpx/_models.py", line 408, in __init__
+    headers, stream = encode_request(
+                      ^^^^^^^^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/.venv-dataplane/lib/python3.12/site-packages/httpx/_content.py", line 216, in encode_request
+    return encode_json(json)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/sebas/Desktop/firewall-IA/.venv-dataplane/lib/python3.12/site-packages/httpx/_content.py", line 179, in encode_json
+    ).encode("utf-8")
+      ^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'utf-8' codec can't encode character '\udce9' in position 64: surrogates not allowed
+[17:07:07.925][127.0.0.1:59500] client disconnect
+[17:07:08.326][127.0.0.1:45680] client connect
+[17:07:08.329] [9dea678c] received GET 127.0.0.1:34785/ok (body 0 bytes)
+[17:07:08.342] [9dea678c] ALLOW GET 127.0.0.1:34785/ok reason='wire-lab stub' (classifier 13 ms)
+[17:07:08.343] [9dea678c] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.060ms elapsed=0.781ms
+[17:07:08.343][127.0.0.1:45680] server connect 127.0.0.1:34785
+[17:07:08.344][127.0.0.1:45680] server disconnect 127.0.0.1:34785
+[17:07:08.344][127.0.0.1:45680] client disconnect
+[17:07:08.744][127.0.0.1:45696] client connect
+[17:07:08.745][127.0.0.1:45696] client disconnect
+[17:07:09.146][127.0.0.1:45712] client connect
+[17:07:09.148][127.0.0.1:45712] client disconnect
+[17:07:09.548][127.0.0.1:45728] client connect
+[17:07:09.549][127.0.0.1:45728] client disconnect
+[17:07:09.950][127.0.0.1:45732] client connect
+[17:07:09.953][127.0.0.1:45732] client disconnect
+[17:07:10.352][127.0.0.1:45744] client connect
+[17:07:10.354][127.0.0.1:45744] client disconnect
+[17:07:10.755][127.0.0.1:45760] client connect
+[17:07:10.757][127.0.0.1:45760] client disconnect
+[17:07:11.158][127.0.0.1:45772] client connect
+[17:07:11.159][127.0.0.1:45772] client disconnect
+[17:07:11.560][127.0.0.1:45788] client connect
+[17:07:11.562][127.0.0.1:45788] client disconnect
+[17:07:11.963][127.0.0.1:45798] client connect
+[17:07:11.965][127.0.0.1:45798] client disconnect
+[17:07:12.365][127.0.0.1:45808] client connect
+[17:07:12.367][127.0.0.1:45808] client disconnect
+[17:07:12.767][127.0.0.1:45816] client connect
+[17:07:12.769][127.0.0.1:45816] client disconnect
+[17:07:13.170][127.0.0.1:45830] client connect
+[17:07:13.171][127.0.0.1:45830] client disconnect
+[17:07:13.572][127.0.0.1:45836] client connect
+[17:07:13.573] [fab62ed6] received GET 127.0.0.1:34785/x (body 0 bytes)
+[17:07:13.582] [fab62ed6] ALLOW GET 127.0.0.1:34785/x reason='wire-lab stub' (classifier 9 ms)
+[17:07:13.583] [fab62ed6] CANONICAL OBS OK outcome=REJECT reject=R4 reason=field-value-cr-lf-nul size=UNCHECKED canon=0.028ms elapsed=0.479ms
+[17:07:13.583][127.0.0.1:45836] server connect 127.0.0.1:34785
+[17:07:13.583][127.0.0.1:45836] server disconnect 127.0.0.1:34785
+[17:07:13.584][127.0.0.1:45836] client disconnect
+[17:07:13.984][127.0.0.1:45850] client connect
+[17:07:13.985] [0ccac84e] received GET 127.0.0.1:34785/x (body 0 bytes)
+[17:07:13.990] [0ccac84e] ALLOW GET 127.0.0.1:34785/x reason='wire-lab stub' (classifier 5 ms)
+[17:07:13.990] [0ccac84e] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.056ms elapsed=0.513ms
+[17:07:13.991][127.0.0.1:45850] server connect 127.0.0.1:34785
+[17:07:13.991][127.0.0.1:45850] server disconnect 127.0.0.1:34785
+[17:07:13.991][127.0.0.1:45850] client disconnect
+[17:07:14.392][127.0.0.1:45860] client connect
+[17:07:14.395][127.0.0.1:45860] client disconnect
+[17:07:14.796][127.0.0.1:45866] client connect
+[17:07:14.798] [fc042784] received GET 127.0.0.1:34785/abs-target (body 0 bytes)
+[17:07:14.807] [fc042784] CANONICAL OBS OUT_OF_SCOPE target_form=absolute detail=absolute_form elapsed=0.014ms
+[17:07:14.807] [fc042784] ALLOW GET 127.0.0.1:34785/abs-target reason='wire-lab stub' (classifier 9 ms)
+[17:07:14.808][127.0.0.1:45866] server connect 127.0.0.1:34785
+[17:07:14.810][127.0.0.1:45866] server disconnect 127.0.0.1:34785
+[17:07:14.810][127.0.0.1:45866] client disconnect
+[17:07:15.211][127.0.0.1:45872] client connect
+[17:07:15.215] [aa18a554] received OPTIONS 127.0.0.1:34785* (body 0 bytes)
+[17:07:15.226] [aa18a554] ALLOW OPTIONS 127.0.0.1:34785* reason='wire-lab stub' (classifier 11 ms)
+[17:07:15.227] [aa18a554] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=asterisk decoded_body_bytes=0 canon=0.073ms elapsed=1.095ms
+[17:07:15.227][127.0.0.1:45872] server connect 127.0.0.1:34785
+[17:07:15.228][127.0.0.1:45872] server disconnect 127.0.0.1:34785
+[17:07:15.229][127.0.0.1:45872] client disconnect
+[17:07:15.629][127.0.0.1:45886] client connect
+[17:07:15.630][127.0.0.1:45886] 127.0.0.1:45886: Bad HTTP request line: b'GET not-a-path HTTP/1.1'
+[17:07:15.630][127.0.0.1:45886] client disconnect
+[17:07:16.031][127.0.0.1:45890] client connect
+[17:07:16.033] [fd60ac40] received POST 127.0.0.1:34785/x (body 54 bytes)
+[17:07:16.044] [fd60ac40] ALLOW POST 127.0.0.1:34785/x reason='wire-lab stub' (classifier 11 ms)
+[17:07:16.045] [fd60ac40] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.267ms elapsed=0.977ms
+[17:07:16.045][127.0.0.1:45890] server connect 127.0.0.1:34785
+[17:07:16.047][127.0.0.1:45890] server disconnect 127.0.0.1:34785
+[17:07:16.047][127.0.0.1:45890] client disconnect
+[17:07:16.448][127.0.0.1:45892] client connect
+[17:07:16.451] [4db34991] received POST 127.0.0.1:34785/x (body 62 bytes)
+[17:07:16.462] [4db34991] ALLOW POST 127.0.0.1:34785/x reason='wire-lab stub' (classifier 11 ms)
+[17:07:16.463] [4db34991] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin content_codings=gzip decoded_body_bytes=14 canon=0.112ms elapsed=0.843ms
+[17:07:16.463][127.0.0.1:45892] server connect 127.0.0.1:34785
+[17:07:16.465][127.0.0.1:45892] server disconnect 127.0.0.1:34785
+[17:07:16.465][127.0.0.1:45892] client disconnect
+[17:07:16.865][127.0.0.1:45902] client connect
+[17:07:16.867] [080be917] received POST 127.0.0.1:34785/x (body 43 bytes)
+[17:07:16.876] [080be917] ALLOW POST 127.0.0.1:34785/x reason='wire-lab stub' (classifier 9 ms)
+[17:07:16.877] [080be917] CANONICAL OBS OK outcome=REJECT reject=R3 reason=content-coding-decode-failure:gzip size=UNCHECKED target_form=origin content_codings=gzip canon=0.073ms elapsed=0.691ms
+[17:07:16.877][127.0.0.1:45902] server connect 127.0.0.1:34785
+[17:07:16.878][127.0.0.1:45902] server disconnect 127.0.0.1:34785
+[17:07:16.879][127.0.0.1:45902] client disconnect

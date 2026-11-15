@@ -1,0 +1,159 @@
+{
+  "app": "ObC00ki3s",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "v5only",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 698,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 592,
+      "check": "benign GET /static/js/cks.js",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "Client-side cookies set by JavaScript in the browser; the server issues none.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None server-side.",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "6f2027ef9c99",
+        "deciding_stage": "v5",
+        "delivered_bytes": 53,
+        "fast_path": null,
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 3.008984996995423,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "V5_ONLY",
+        "model2": null,
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.0046579989430028945,
+          "binding": 0.09345600119559094,
+          "canonical": 0.6039539985067677,
+          "canonical_with_wait": 0.6883630012453068,
+          "v5": 1.537246000225423
+        },
+        "timings_ms": {
+          "v5_ms": 1.537246000225423
+        },
+        "utc": 1793900465.8604832,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "f5d666becdf5a470147696ccc3d9c5e019e2538b3e9780b4cd330ea93b60af36"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 135981,
+      "check": "large response /static/img/bunchofcookies.jpeg (135981 B): v5only: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 135981,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app ObC00ki3s --arm v5only --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/ObC00ki3s-v5only/ObC00ki3s.v5only.stack.json",
+    "up --app ObC00ki3s --arm v5only --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/ObC00ki3s-v5only/ObC00ki3s.v5only.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/ObC00ki3s-v5only --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/ObC00ki3s-v5only",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/ObC00ki3s-v5only"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": false,
+  "large_responses": [
+    {
+      "arm": "v5only",
+      "asset_bytes": 135981,
+      "capped_502": false,
+      "response_body_len": 135981,
+      "status": 200,
+      "target": "/static/img/bunchofcookies.jpeg"
+    }
+  ],
+  "pass": true,
+  "utc": 1793900462.8177273,
+  "v5": "double"
+}

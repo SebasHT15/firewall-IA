@@ -1,0 +1,32 @@
+{
+  "schema": "fast-path-policy/v1",
+  "policy_id": "sec-challenges-ObC00ki3s-static-v1",
+  "status": "PROPOSED",
+  "canonical_contract": "canonical-request/v1",
+  "http_versions": [
+    "HTTP/1.1"
+  ],
+  "rules": [
+    {
+      "id": "exact-static-asset",
+      "methods": [
+        "GET"
+      ],
+      "path": [
+        "static",
+        "js",
+        "cks.js"
+      ],
+      "query": {},
+      "required_query": [],
+      "headers": {
+        "host": {
+          "type": "enum",
+          "values": [
+            "obc00ki3s.fwlab.test"
+          ]
+        }
+      }
+    }
+  ]
+}

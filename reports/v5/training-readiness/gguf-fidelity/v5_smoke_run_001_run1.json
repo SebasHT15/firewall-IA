@@ -1,0 +1,124 @@
+{
+  "adapter": "model-output-v5/smoke/smoke-run-001/adapter",
+  "format": "v5",
+  "inputs": "64 synthetic fixture texts (manifest 4b66c311fc9c)",
+  "note": "fidelity between runtimes on synthetic inputs; NOT accuracy. Timings: CPU build diagnostic only, not a D31/D32 benchmark and not a D36 result",
+  "reference": {
+    "decisions": {
+      "ALLOW": 36,
+      "BLOCK": 28,
+      "INVALID": 0
+    },
+    "runtime": "HF 4-bit NF4 + PEFT adapter (GPU)",
+    "seconds_total": 16.22
+  },
+  "results": {
+    "v5-smoke-nf4faithful-Q4_K_M.gguf": {
+      "decisions": {
+        "ALLOW": 43,
+        "BLOCK": 21,
+        "INVALID": 0
+      },
+      "differences": [
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Cross-site scripting payload detected.",
+          "i": 13
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Cross-site scripting payload detected.",
+          "i": 23
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 25
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 27
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Cross-site scripting payload detected.",
+          "i": 35
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 37
+        },
+        {
+          "gguf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "hf": "BLOCK | Command injection payload detected.",
+          "i": 51
+        }
+      ],
+      "ended_on_eos": 64,
+      "file_bytes": 667815200,
+      "identical_decisions": "57/64",
+      "identical_generations": "57/64",
+      "model_ms_cpu": {
+        "max": 812.7,
+        "median": 630.3,
+        "n": 64,
+        "p95": 741.3
+      },
+      "sha256": "407936905979523526206bfb8f43edb27ca0ad2c98f20ee57216732976bcb222",
+      "token_parity_text": null
+    },
+    "v5-smoke-nf4faithful-Q8_0.gguf": {
+      "decisions": {
+        "ALLOW": 35,
+        "BLOCK": 29,
+        "INVALID": 0
+      },
+      "differences": [
+        {
+          "gguf": "BLOCK | Command injection payload detected.",
+          "hf": "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "i": 49
+        }
+      ],
+      "ended_on_eos": 64,
+      "file_bytes": 1169808672,
+      "identical_decisions": "63/64",
+      "identical_generations": "63/64",
+      "model_ms_cpu": {
+        "max": 1097.3,
+        "median": 921.4,
+        "n": 64,
+        "p95": 1022.5
+      },
+      "sha256": "1cf5b961f41219687b56c83772e777687c7ea364322fb49c6fb0fc7f5a6fb2dc",
+      "token_parity_text": null
+    },
+    "v5-smoke-nf4faithful-bf16.gguf": {
+      "decisions": {
+        "ALLOW": 36,
+        "BLOCK": 28,
+        "INVALID": 0
+      },
+      "differences": [],
+      "ended_on_eos": 64,
+      "file_bytes": 2201017632,
+      "identical_decisions": "64/64",
+      "identical_generations": "64/64",
+      "model_ms_cpu": {
+        "max": 1048.7,
+        "median": 955.0,
+        "n": 64,
+        "p95": 1030.0
+      },
+      "sha256": "6cc228be19ce0a3f8dd81a7c6bd4bfc6e637a110d7e61d41702ea99bd40ecf3b",
+      "token_parity_text": null
+    }
+  },
+  "schema": "v5-gguf-fidelity/v1",
+  "server": {
+    "binary": "/home/sebas/opt/llama.cpp/build/bin/llama-server",
+    "threads": 16
+  }
+}

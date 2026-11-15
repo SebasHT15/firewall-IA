@@ -1,0 +1,162 @@
+{
+  "what": "request_features.extract_features() call time, in-process (V5 Phase 1)",
+  "scope": "extractor call only: not render_request, not logging, not the gateway",
+  "kind": "observation on this machine; not a D32 inference benchmark",
+  "measured_utc": "2026-10-01T18:40:08+00:00",
+  "feature_schema_version": "request-features/v1",
+  "corpus": {
+    "path": "datasets/v4_clean/eval.jsonl",
+    "sha256": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859",
+    "matches_manifest": true,
+    "texts": 6206,
+    "fields_read": [
+      "input"
+    ],
+    "order": "file order"
+  },
+  "environment": {
+    "python": "3.12.14",
+    "executable": ".venv-dataplane/bin/python",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX"
+  },
+  "warmup_pass": {
+    "count": 6206,
+    "unit": "ms",
+    "mean_ms": 0.015517931195617144,
+    "p50_ms": 0.014275,
+    "p95_ms": 0.026228,
+    "p99_ms": 0.030128,
+    "min_ms": 0.00832,
+    "max_ms": 0.173524,
+    "stdev_ms": 0.005478921578860558,
+    "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+    "scope": "extractor-call",
+    "samples_above_p99": 62,
+    "outlier_policy": "none removed; all samples retained and reported"
+  },
+  "runs": [
+    {
+      "count": 6206,
+      "unit": "ms",
+      "mean_ms": 0.015299017724782468,
+      "p50_ms": 0.014145,
+      "p95_ms": 0.025688,
+      "p99_ms": 0.029914,
+      "min_ms": 0.008167,
+      "max_ms": 0.038772,
+      "stdev_ms": 0.004751158946787515,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 62,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    {
+      "count": 6206,
+      "unit": "ms",
+      "mean_ms": 0.015265360941024814,
+      "p50_ms": 0.014107,
+      "p95_ms": 0.025594,
+      "p99_ms": 0.029837,
+      "min_ms": 0.008242,
+      "max_ms": 0.040302,
+      "stdev_ms": 0.004755180897794333,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 62,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    {
+      "count": 6206,
+      "unit": "ms",
+      "mean_ms": 0.015361677570093457,
+      "p50_ms": 0.014189,
+      "p95_ms": 0.025779,
+      "p99_ms": 0.030102,
+      "min_ms": 0.008487,
+      "max_ms": 0.039447,
+      "stdev_ms": 0.004782054242752939,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 62,
+      "outlier_policy": "none removed; all samples retained and reported"
+    }
+  ],
+  "steady_pooled": {
+    "count": 18618,
+    "unit": "ms",
+    "mean_ms": 0.015308685411966914,
+    "p50_ms": 0.014146,
+    "p95_ms": 0.025678,
+    "p99_ms": 0.029925,
+    "min_ms": 0.008167,
+    "max_ms": 0.040302,
+    "stdev_ms": 0.004762729172487159,
+    "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+    "scope": "extractor-call",
+    "samples_above_p99": 186,
+    "outlier_policy": "none removed; all samples retained and reported"
+  },
+  "synthetic_form_body_by_size_bytes": {
+    "1024": {
+      "count": 20,
+      "unit": "ms",
+      "mean_ms": 0.0481782,
+      "p50_ms": 0.048106,
+      "p95_ms": 0.04984,
+      "p99_ms": 0.0521,
+      "min_ms": 0.04631,
+      "max_ms": 0.0521,
+      "stdev_ms": 0.001310236322597047,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 0,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    "10240": {
+      "count": 20,
+      "unit": "ms",
+      "mean_ms": 0.4329809,
+      "p50_ms": 0.431491,
+      "p95_ms": 0.44823,
+      "p99_ms": 0.452586,
+      "min_ms": 0.415294,
+      "max_ms": 0.452586,
+      "stdev_ms": 0.010550996185943271,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 0,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    "102400": {
+      "count": 20,
+      "unit": "ms",
+      "mean_ms": 4.32618215,
+      "p50_ms": 4.318145,
+      "p95_ms": 4.404249,
+      "p99_ms": 4.44873,
+      "min_ms": 4.23853,
+      "max_ms": 4.44873,
+      "stdev_ms": 0.04728371427466229,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 0,
+      "outlier_policy": "none removed; all samples retained and reported"
+    },
+    "1048576": {
+      "count": 20,
+      "unit": "ms",
+      "mean_ms": 48.3085786,
+      "p50_ms": 48.35181,
+      "p95_ms": 48.589256,
+      "p99_ms": 48.768187,
+      "min_ms": 47.860184,
+      "max_ms": 48.768187,
+      "stdev_ms": 0.2432522273505208,
+      "percentile_method": "nearest-rank (ceil(q*n), 1-indexed, no interpolation)",
+      "scope": "extractor-call",
+      "samples_above_p99": 0,
+      "outlier_policy": "none removed; all samples retained and reported"
+    }
+  }
+}

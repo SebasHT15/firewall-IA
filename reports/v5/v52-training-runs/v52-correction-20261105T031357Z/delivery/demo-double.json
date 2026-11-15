@@ -1,0 +1,475 @@
+{
+  "identity": {
+    "app": {
+      "image": "firewall-ia/lab-app:lab",
+      "image_id": "sha256:7e7f96b9ae8d7ae90dcb4acf0680f67be1e3de9e8a2ef71db01260aa513fd2ef",
+      "source": "scripts/local_stack/notes_app/app.py",
+      "source_sha256": "f6d25d46e8abfe7b85f753258c6b8107527aee75547d41269285bc2c77b7dd5c"
+    },
+    "crs": null,
+    "effect_routes": false,
+    "fast_path": null,
+    "firewall": "cascade",
+    "front": {
+      "alpn": "h2",
+      "conf_sha256": "d90e95223aff83153cdf27fcc9a6a5ee1a73b9bc750bef08b233f4ebbac0b759",
+      "image": "nginx:1.25-alpine",
+      "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00",
+      "template_sha256": "542d0aee16dcd2be2b1f4199711cac85f6d43499636a09ba5d7577e8bb64a4dc",
+      "tls_version": "TLSv1.3"
+    },
+    "manifest": {
+      "manifest_id": "v52-short-route-cascade-20261105",
+      "path": "reports/v5/v52-training-runs/v52-correction-20261105T031357Z/delivery/candidate.EXPERIMENTAL.json",
+      "sha256": "3a43174adb3c051ac764cbc20272d83e28950ec8e632e9010ff5e6427500e088",
+      "status": "EXPERIMENTAL"
+    },
+    "mode": "CASCADE_ACTIVE",
+    "schema": "firewall-local-stack-identity/v1",
+    "stack_source_sha256": "121a0293fc836ebe8400060c3af9a0dc81df26d912dc3e1cec95b1d659f415e3",
+    "upstream": "app",
+    "v4": "not started",
+    "v5": "double"
+  },
+  "v5": "double",
+  "rows": [
+    {
+      "path": "tls_h1",
+      "step": "API token",
+      "method": "POST",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_status": "200",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h1",
+      "step": "API with the token",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_status": "200",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h1",
+      "step": "API with alg=none token",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_status": "401",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h1",
+      "step": "API with an expired token",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_status": "401",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h1",
+      "step": "traversal-shaped path",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        400,
+        "front",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 0,
+      "gateway": [],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 400,
+          "upstream_status": "",
+          "upstream_connect_time": ""
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 0
+    },
+    {
+      "path": "tls_h2",
+      "step": "home page",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_status": "200",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h2",
+      "step": "login page (sets session, CSRF token)",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_status": "200",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h2",
+      "step": "login without CSRF token",
+      "method": "POST",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_status": "403",
+          "upstream_connect_time": "0.001"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h2",
+      "step": "login with CSRF token",
+      "method": "POST",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_status": "303",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h2",
+      "step": "notes of the session",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_status": "200",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h2",
+      "step": "search with the double's marker",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 0,
+      "gateway": [
+        {
+          "applied": "DENY",
+          "stage": "v5",
+          "http_status": 403
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_status": "403",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    },
+    {
+      "path": "tls_h2",
+      "step": "SQL-injection-shaped search",
+      "method": "GET",
+      "expected": [
+        null,
+        null,
+        null,
+        null
+      ],
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": false,
+      "marker_consistent": true,
+      "app_lines": 1,
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "stage": "v5",
+          "http_status": null
+        }
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_status": "200",
+          "upstream_connect_time": "0.000"
+        }
+      ],
+      "waf_rules": [],
+      "v5_calls": 1
+    }
+  ]
+}

@@ -1,0 +1,395 @@
+{"sample_id": "A0001", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF into Set-Cookie header (project-authored hardcoded list)"}
+{"sample_id": "A0002", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF header injection (Content-Length)"}
+{"sample_id": "A0003", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF Set-Cookie"}
+{"sample_id": "A0004", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF Set-Cookie with prefix value"}
+{"sample_id": "A0005", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "double-encoded CRLF with embedded 'next=' param name; needs double decoding"}
+{"sample_id": "A0006", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF injecting Transfer-Encoding header"}
+{"sample_id": "A0007", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF Set-Cookie"}
+{"sample_id": "A0008", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "unicode-truncation CRLF bypass (U+560D/U+560A); needs lossy charset conversion sink"}
+{"sample_id": "A0009", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF X-Frame-Options header injection"}
+{"sample_id": "A0010", "label_class": "VERIFIABLE", "failure_mode": null, "note": "LF-only header injection"}
+{"sample_id": "A0011", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF Content-Type injection"}
+{"sample_id": "A0012", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF Location injection"}
+{"sample_id": "A0013", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF after URL value"}
+{"sample_id": "A0014", "label_class": "VERIFIABLE", "failure_mode": null, "note": "response splitting with HTML body"}
+{"sample_id": "A0015", "label_class": "VERIFIABLE", "failure_mode": null, "note": "CRLF Refresh header"}
+{"sample_id": "A0016", "label_class": "VERIFIABLE", "failure_mode": null, "note": "separator + whoami"}
+{"sample_id": "A0017", "label_class": "PROBABLY_CORRECT", "failure_mode": "other", "note": "fuzzdb terminal-escape/log injection with literal backslash-n and wget; needs log/terminal sink"}
+{"sample_id": "A0018", "label_class": "VERIFIABLE", "failure_mode": null, "note": "bash $; trick then /usr/bin/id"}
+{"sample_id": "A0019", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "bare command cat</etc/passwd; needs command slot or separator"}
+{"sample_id": "A0020", "label_class": "VERIFIABLE", "failure_mode": null, "note": "background operator + id"}
+{"sample_id": "A0021", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "brace-expansion + glob obfuscated cat /etc/passwd; bare command"}
+{"sample_id": "A0022", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "{{ }} template syntax with unknown function get_user_file; not shell", "better_category": "Server Side Template Injection"}
+{"sample_id": "A0023", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Shellshock env function definition"}
+{"sample_id": "A0024", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "docs-style prefix 'original_cmd_by_server' plus backtick substitution"}
+{"sample_id": "A0025", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "brace-expansion technique demo (harmless command)"}
+{"sample_id": "A0026", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "PHP code injection (&& phpinfo()), adjacent to command injection"}
+{"sample_id": "A0027", "label_class": "VERIFIABLE", "failure_mode": null, "note": "|| perl -e"}
+{"sample_id": "A0028", "label_class": "VERIFIABLE", "failure_mode": null, "note": "$(`cat /etc/passwd`)"}
+{"sample_id": "A0029", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "exec('sleep 5') language-level code injection"}
+{"sample_id": "A0030", "label_class": "VERIFIABLE", "failure_mode": null, "note": "separator + net user /ADD"}
+{"sample_id": "A0031", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "bare Windows command; needs command slot"}
+{"sample_id": "A0032", "label_class": "VERIFIABLE", "failure_mode": null, "note": "& ipconfig /all"}
+{"sample_id": "A0033", "label_class": "VERIFIABLE", "failure_mode": null, "note": "&& sleep 10 time-based"}
+{"sample_id": "A0034", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "full shell loop with DNS exfil to attacker host; standalone command line"}
+{"sample_id": "A0035", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "shell prompt 'swissky@crashlab:~$' residue; documentation session"}
+{"sample_id": "A0036", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "exec('sleep 5') code injection"}
+{"sample_id": "A0037", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Shellshock with curl callback"}
+{"sample_id": "A0038", "label_class": "VERIFIABLE", "failure_mode": null, "note": "a;id;"}
+{"sample_id": "A0039", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "quote-less concatenation bypass who$(echo am)i; bare command"}
+{"sample_id": "A0040", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "brace-expansion {,ifconfig}; bare"}
+{"sample_id": "A0041", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "shell prompt residue plus tr demo"}
+{"sample_id": "A0042", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "bash substitution wildcard demo ${test//..}; bare"}
+{"sample_id": "A0043", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "bare absolute-path command /usr/bin/id"}
+{"sample_id": "A0044", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "bare Windows net localgroup command"}
+{"sample_id": "A0045", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "PHP system() code injection"}
+{"sample_id": "A0046", "label_class": "INCORRECT", "failure_mode": "other", "note": "CSRF PoC HTML form fragment; not a request-borne payload"}
+{"sample_id": "A0047", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC JS fragment"}
+{"sample_id": "A0048", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC JS xhr fragment"}
+{"sample_id": "A0049", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC JS xhr fragment"}
+{"sample_id": "A0050", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "bare <script> tag"}
+{"sample_id": "A0051", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC JS fragment (form submit)"}
+{"sample_id": "A0052", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC hidden input fragment"}
+{"sample_id": "A0053", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC JS fragment"}
+{"sample_id": "A0054", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC JS fragment (setRequestHeader)"}
+{"sample_id": "A0055", "label_class": "INCORRECT", "failure_mode": "other", "note": "PoC HTML input fragment"}
+{"sample_id": "A0056", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "overlong-UTF8 dots + %c0%5c separators (non-standard); legacy decoder needed"}
+{"sample_id": "A0057", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal '0x2e' text; no decoder interprets it"}
+{"sample_id": "A0058", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "overlong UTF-8 dots and slash then boot.ini"}
+{"sample_id": "A0059", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "NUL bytes and %%35%%63 mix; efficacy unclear"}
+{"sample_id": "A0060", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %c1%pc escape"}
+{"sample_id": "A0061", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "'??' and %%32%%66 mutation"}
+{"sample_id": "A0062", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %c1%8s escape"}
+{"sample_id": "A0063", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "incomplete %c0. escapes"}
+{"sample_id": "A0064", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %bg%qf escapes"}
+{"sample_id": "A0065", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "'??' fuzz characters in place of dots"}
+{"sample_id": "A0066", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "%%32%%65 double-percent mutation"}
+{"sample_id": "A0067", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "single-level backslash traversal"}
+{"sample_id": "A0068", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "'.?' mutations"}
+{"sample_id": "A0069", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal 0x5c text"}
+{"sample_id": "A0070", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal 0x2e text"}
+{"sample_id": "A0071", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "%5C.. backslash traversal plus %c0%5c"}
+{"sample_id": "A0072", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "backslash traversal with doubled backslashes"}
+{"sample_id": "A0073", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "'.?' mutation"}
+{"sample_id": "A0074", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %c0%5e / %c1%pc"}
+{"sample_id": "A0075", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "NUL between dots; odd mix"}
+{"sample_id": "A0076", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "overlong dots with %u2215 slash"}
+{"sample_id": "A0077", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal 0x5c and %c0."}
+{"sample_id": "A0078", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "contains invalid %c1%8s"}
+{"sample_id": "A0079", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal 0x2f"}
+{"sample_id": "A0080", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "%%32%%65 / %c1%pc mutations"}
+{"sample_id": "A0081", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %c0%5e and %uEFC8"}
+{"sample_id": "A0082", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %c0%qf"}
+{"sample_id": "A0083", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "%5C.. backslash traversal to hosts file"}
+{"sample_id": "A0084", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "invalid %c0%9v"}
+{"sample_id": "A0085", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "overlong UTF-8 dots/slash then boot.ini"}
+{"sample_id": "A0086", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "NUL-dot mutation with %c1%1c"}
+{"sample_id": "A0087", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "%%c0%6e%c0%6e is not a valid dot encoding"}
+{"sample_id": "A0088", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "overlong UTF-8 dots then plain /etc/passwd"}
+{"sample_id": "A0089", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "%%32%%66 double-percent mutation"}
+{"sample_id": "A0090", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal 0x2e and invalid %c0%qf"}
+{"sample_id": "A0091", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "'.?' mutation with %u2215"}
+{"sample_id": "A0092", "label_class": "VERIFIABLE", "failure_mode": null, "note": "backslash traversal with NUL truncation"}
+{"sample_id": "A0093", "label_class": "VERIFIABLE", "failure_mode": null, "note": "mixed-slash traversal to boot.ini"}
+{"sample_id": "A0094", "label_class": "VERIFIABLE", "failure_mode": null, "note": "classic ../ chain to /etc/passwd"}
+{"sample_id": "A0095", "label_class": "VERIFIABLE", "failure_mode": null, "note": "backslash traversal boot.ini"}
+{"sample_id": "A0096", "label_class": "VERIFIABLE", "failure_mode": null, "note": "backslash traversal boot.ini"}
+{"sample_id": "A0097", "label_class": "VERIFIABLE", "failure_mode": null, "note": "./../ chain to boot.ini"}
+{"sample_id": "A0098", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "LFI-to-RCE doc example request fragment (file=/tmp/exec.php&c=id)"}
+{"sample_id": "A0099", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "%uff0e/backslash traversal without file target"}
+{"sample_id": "A0100", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute log path with stray space and %00; garbled but recognisable"}
+{"sample_id": "A0101", "label_class": "VERIFIABLE", "failure_mode": null, "note": "/.//..// traversal to boot.ini"}
+{"sample_id": "A0102", "label_class": "VERIFIABLE", "failure_mode": null, "note": "overlong UTF-8 ../ chain to /etc/passwd"}
+{"sample_id": "A0103", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute Windows path target (httpd.conf)"}
+{"sample_id": "A0104", "label_class": "VERIFIABLE", "failure_mode": null, "note": "backslash traversal boot.ini"}
+{"sample_id": "A0105", "label_class": "VERIFIABLE", "failure_mode": null, "note": "..// chain to /etc/passwd"}
+{"sample_id": "A0106", "label_class": "VERIFIABLE", "failure_mode": null, "note": "/../ chain boot.ini with NUL"}
+{"sample_id": "A0107", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "repetition of '/.\\' with no '..'; path-length truncation trick, efficacy unclear"}
+{"sample_id": "A0108", "label_class": "VERIFIABLE", "failure_mode": null, "note": "../ chain to /etc/passwd"}
+{"sample_id": "A0109", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "%uff0e/%u2216 traversal without target"}
+{"sample_id": "A0110", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "bare relative log file path from wordlist"}
+{"sample_id": "A0111", "label_class": "VERIFIABLE", "failure_mode": null, "note": "backslash traversal boot.ini"}
+{"sample_id": "A0112", "label_class": "VERIFIABLE", "failure_mode": null, "note": ".\\\\..\\\\ traversal boot.ini"}
+{"sample_id": "A0113", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute Windows Apache config path"}
+{"sample_id": "A0114", "label_class": "VERIFIABLE", "failure_mode": null, "note": "overlong-dot traversal boot.ini"}
+{"sample_id": "A0115", "label_class": "VERIFIABLE", "failure_mode": null, "note": "overlong UTF-8 ../ chain /etc/passwd"}
+{"sample_id": "A0116", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute macOS path with NUL"}
+{"sample_id": "A0117", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "'2f' without percent sign"}
+{"sample_id": "A0118", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal 0x2f text"}
+{"sample_id": "A0119", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "%2e%2e%5c traversal preceded by backslashes"}
+{"sample_id": "A0120", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "%uff0e/%u2215 traversal boot.ini"}
+{"sample_id": "A0121", "label_class": "VERIFIABLE", "failure_mode": null, "note": "..// traversal /etc/passwd"}
+{"sample_id": "A0122", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "long-A prefix then ../ chain; no target"}
+{"sample_id": "A0123", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute path target"}
+{"sample_id": "A0124", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute Windows path target"}
+{"sample_id": "A0125", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "bare '<?php' opener from a code block"}
+{"sample_id": "A0126", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "base64 of ../ chain to etc/passwd; needs b64-decoding sink"}
+{"sample_id": "A0127", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "absolute Windows path target"}
+{"sample_id": "A0128", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of a multi-line introspection query"}
+{"sample_id": "A0129", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of a multi-line query"}
+{"sample_id": "A0130", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "NoSQL regex injection inside a GraphQL argument; fragment"}
+{"sample_id": "A0131", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of introspection query"}
+{"sample_id": "A0132", "label_class": "VERIFIABLE", "failure_mode": null, "note": "single-line __type introspection query"}
+{"sample_id": "A0133", "label_class": "INCORRECT", "failure_mode": "other", "note": "bare field name 'title'"}
+{"sample_id": "A0134", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "GraphQL error message"}
+{"sample_id": "A0135", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of introspection query"}
+{"sample_id": "A0136", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of introspection query"}
+{"sample_id": "A0137", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "SQLi inside GraphQL argument; fragment ending in '{'"}
+{"sample_id": "A0138", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of introspection query"}
+{"sample_id": "A0139", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "SQLi probe inside GraphQL argument; fragment"}
+{"sample_id": "A0140", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of introspection query"}
+{"sample_id": "A0141", "label_class": "INCORRECT", "failure_mode": "other", "note": "bare endpoint path /graph, not a payload"}
+{"sample_id": "A0142", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of introspection query"}
+{"sample_id": "A0143", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "hardcoded HPP spec with neutral values; attack only if duplicates change semantics"}
+{"sample_id": "A0144", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP spec scope self/all"}
+{"sample_id": "A0145", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP role escalation"}
+{"sample_id": "A0146", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP permission escalation"}
+{"sample_id": "A0147", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP group users/admins"}
+{"sample_id": "A0148", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP user bob/admin"}
+{"sample_id": "A0149", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "hardcoded HPP numeric level; neutral"}
+{"sample_id": "A0150", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP action delete/drop"}
+{"sample_id": "A0151", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "hardcoded HPP flag 0/1/true; neutral"}
+{"sample_id": "A0152", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded HPP cmd exec"}
+{"sample_id": "A0153", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "PHP serialized object reference trick (hmac bypass)"}
+{"sample_id": "A0154", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "Jackson exception message"}
+{"sample_id": "A0155", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "PHP serialized array with type juggling (b:1)"}
+{"sample_id": "A0156", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "var_dump() output wrapping a serialized object"}
+{"sample_id": "A0157", "label_class": "INCORRECT", "failure_mode": "other", "note": "benign serialized sample array, not malicious"}
+{"sample_id": "A0158", "label_class": "VERIFIABLE", "failure_mode": null, "note": "node-serialize/funcster __js_function RCE"}
+{"sample_id": "A0159", "label_class": "VERIFIABLE", "failure_mode": null, "note": "node-serialize IIFE RCE"}
+{"sample_id": "A0160", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "PHP serialized object reference trick"}
+{"sample_id": "A0161", "label_class": "INCORRECT", "failure_mode": "setup_command", "note": "ysoserial generation command line"}
+{"sample_id": "A0162", "label_class": "INCORRECT", "failure_mode": "other", "note": "C# source line from docs"}
+{"sample_id": "A0163", "label_class": "INCORRECT", "failure_mode": "other", "note": "JWK RSA key material (header-embedded key), not a token"}
+{"sample_id": "A0164", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "'{\"login\":\"admin\"}.' partial token"}
+{"sample_id": "A0165", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "single JSON header field line (kid)"}
+{"sample_id": "A0166", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "well-formed sample HS256 token; unmodified, malicious only if forged"}
+{"sample_id": "A0167", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "jwt_tool menu line"}
+{"sample_id": "A0168", "label_class": "INCORRECT", "failure_mode": "other", "note": "jwt.io sample claims JSON"}
+{"sample_id": "A0169", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "JWT header with jku claim; partial token"}
+{"sample_id": "A0170", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "jwt_tool prompt (the V4 prose family)"}
+{"sample_id": "A0171", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "JWK field line"}
+{"sample_id": "A0172", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "JWK field line"}
+{"sample_id": "A0173", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "blind-LDAP filter followed by ': OK' doc annotation"}
+{"sample_id": "A0174", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "blind-LDAP filter followed by ': KO' doc annotation"}
+{"sample_id": "A0175", "label_class": "INCORRECT", "failure_mode": "other", "note": "exploit script code line"}
+{"sample_id": "A0176", "label_class": "INCORRECT", "failure_mode": "other", "note": "exploit script code line"}
+{"sample_id": "A0177", "label_class": "VERIFIABLE", "failure_mode": null, "note": "LDAP filter break fragment *)(&"}
+{"sample_id": "A0178", "label_class": "INCORRECT", "failure_mode": "other", "note": "description of extensible-match syntax with explanation text"}
+{"sample_id": "A0179", "label_class": "VERIFIABLE", "failure_mode": null, "note": "LDAP filter injection *)(uid=*))(|(uid=*"}
+{"sample_id": "A0180", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "XPath name() payload in LDAP fuzz list", "better_category": "XPath Injection"}
+{"sample_id": "A0181", "label_class": "INCORRECT", "failure_mode": "other", "note": "script code line"}
+{"sample_id": "A0182", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "blind-LDAP filter with ': OK' annotation"}
+{"sample_id": "A0183", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "blind-LDAP filter with ': KO' annotation"}
+{"sample_id": "A0184", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "blind-LDAP filter with ': KO' annotation"}
+{"sample_id": "A0185", "label_class": "INCORRECT", "failure_mode": "other", "note": "script code line"}
+{"sample_id": "A0186", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "blind-LDAP filter with ': KO' annotation"}
+{"sample_id": "A0187", "label_class": "INCORRECT", "failure_mode": "other", "note": "Ruby puts line"}
+{"sample_id": "A0188", "label_class": "VERIFIABLE", "failure_mode": null, "note": "operator injection $gt undefined (JSON)"}
+{"sample_id": "A0189", "label_class": "VERIFIABLE", "failure_mode": null, "note": "server-side JS injection db.injection.insert"}
+{"sample_id": "A0190", "label_class": "VERIFIABLE", "failure_mode": null, "note": "JS time-delay injection"}
+{"sample_id": "A0191", "label_class": "VERIFIABLE", "failure_mode": null, "note": "JS breakout return(true)"}
+{"sample_id": "A0192", "label_class": "VERIFIABLE", "failure_mode": null, "note": "URL-encoded operator injection $gt/$lt/$ne"}
+{"sample_id": "A0193", "label_class": "VERIFIABLE", "failure_mode": null, "note": "operator injection $or breakout"}
+{"sample_id": "A0194", "label_class": "VERIFIABLE", "failure_mode": null, "note": "$regex blind extraction"}
+{"sample_id": "A0195", "label_class": "INCORRECT", "failure_mode": "other", "note": "Ruby require line"}
+{"sample_id": "A0196", "label_class": "INCORRECT", "failure_mode": "other", "note": "Ruby string-interpolation script line"}
+{"sample_id": "A0197", "label_class": "VERIFIABLE", "failure_mode": null, "note": "$ne null auth bypass"}
+{"sample_id": "A0198", "label_class": "VERIFIABLE", "failure_mode": null, "note": "$comment injection breakout"}
+{"sample_id": "A0199", "label_class": "VERIFIABLE", "failure_mode": null, "note": "operator injection $ne/$regex"}
+{"sample_id": "A0200", "label_class": "INCORRECT", "failure_mode": "other", "note": "script condition line"}
+{"sample_id": "A0201", "label_class": "INCORRECT", "failure_mode": "other", "note": "vulnerable server code sample"}
+{"sample_id": "A0202", "label_class": "INCORRECT", "failure_mode": "other", "note": "Python f-string script line"}
+{"sample_id": "A0203", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "obfuscated hex-IP userinfo URL"}
+{"sample_id": "A0204", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "doc example with placeholder domain yoursite.com (query-prefix bypass)"}
+{"sample_id": "A0205", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "<>//google.com protocol-relative bypass"}
+{"sample_id": "A0206", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "mixed-radix numeric host URL"}
+{"sample_id": "A0207", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/redirect?url=/\\/example.com... multi-parameter spray"}
+{"sample_id": "A0208", "label_class": "VERIFIABLE", "failure_mode": null, "note": "fully percent-encoded /http://google.com"}
+{"sample_id": "A0209", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "multi-parameter spray with /\\/example.com"}
+{"sample_id": "A0210", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/\\/\\/example.com/ slash-confusion"}
+{"sample_id": "A0211", "label_class": "INCORRECT", "failure_mode": "placeholder", "note": "'?return_to={payload}' lowercase {payload} slipped through PLACEHOLDER_RE"}
+{"sample_id": "A0212", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/https://google/%2f%2e%2e path-confusion"}
+{"sample_id": "A0213", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "<>javascript:alert(1) scheme redirect/XSS hybrid"}
+{"sample_id": "A0214", "label_class": "INCORRECT", "failure_mode": "placeholder", "note": "'?redirect_url={payload}' placeholder"}
+{"sample_id": "A0215", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/https://example.com/%2e%2e%2f"}
+{"sample_id": "A0216", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "https://%5cgoogle.com backslash host confusion"}
+{"sample_id": "A0217", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/https://example.com/"}
+{"sample_id": "A0218", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "\\/\\/google.com/ slash-confusion"}
+{"sample_id": "A0219", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "userinfo + decimal-IP host"}
+{"sample_id": "A0220", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/https://%5cexample.com"}
+{"sample_id": "A0221", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "numeric host variant"}
+{"sample_id": "A0222", "label_class": "VERIFIABLE", "failure_mode": null, "note": "redirect URL with //example.com across common params"}
+{"sample_id": "A0223", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "IPv6-bracket host with userinfo"}
+{"sample_id": "A0224", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "whitelist-domain@host bypass"}
+{"sample_id": "A0225", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/http://example.com"}
+{"sample_id": "A0226", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "userinfo + decimal-IP host"}
+{"sample_id": "A0227", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "whitelisteddomain.tld@decimal-IP"}
+{"sample_id": "A0228", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "userinfo + octal-dotted IP host"}
+{"sample_id": "A0229", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "doc example with placeholder domain (path-keyword bypass)"}
+{"sample_id": "A0230", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hex/decimal mixed host"}
+{"sample_id": "A0231", "label_class": "INCORRECT", "failure_mode": "placeholder", "note": "'?view={payload}' placeholder"}
+{"sample_id": "A0232", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "/%09/javascript:alert(1) scheme/whitespace bypass"}
+{"sample_id": "A0233", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded structural TE tab-obfuscation variant"}
+{"sample_id": "A0234", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded structural 'Transfer-Encoding ' (space) variant"}
+{"sample_id": "A0235", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded double Content-Length"}
+{"sample_id": "A0236", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded TE.CL; body not length-consistent"}
+{"sample_id": "A0237", "label_class": "VERIFIABLE", "failure_mode": null, "note": "hardcoded classic CL.TE with consistent length 13"}
+{"sample_id": "A0238", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "hardcoded TE.TE obfuscation (duplicate TE)"}
+{"sample_id": "A0239", "label_class": "INCORRECT", "failure_mode": "other", "note": "browser fetch() PoC JavaScript wrapping a smuggled request string"}
+{"sample_id": "A0240", "label_class": "VERIFIABLE", "failure_mode": null, "note": "MSSQL union + OpenRowset file read"}
+{"sample_id": "A0241", "label_class": "VERIFIABLE", "failure_mode": null, "note": "UNION SELECT with SLEEP/BENCHMARK"}
+{"sample_id": "A0242", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "en-dash instead of '--'; comment not valid as written"}
+{"sample_id": "A0243", "label_class": "VERIFIABLE", "failure_mode": null, "note": "SLEEP polyglot"}
+{"sample_id": "A0244", "label_class": "VERIFIABLE", "failure_mode": null, "note": "UNION ALL SELECT with column probes"}
+{"sample_id": "A0245", "label_class": "VERIFIABLE", "failure_mode": null, "note": "ORDER BY stacking SLEEP/BENCHMARK"}
+{"sample_id": "A0246", "label_class": "VERIFIABLE", "failure_mode": null, "note": "ORDER BY stacking SLEEP/BENCHMARK"}
+{"sample_id": "A0247", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "MSSQL stacked call of a user-defined helper spWriteStringToFile"}
+{"sample_id": "A0248", "label_class": "VERIFIABLE", "failure_mode": null, "note": "time-based SLEEP"}
+{"sample_id": "A0249", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "MSSQL RESTORE LABELONLY to UNC path (stacked, OOB)"}
+{"sample_id": "A0250", "label_class": "VERIFIABLE", "failure_mode": null, "note": "auth bypass admin') or '1'='1"}
+{"sample_id": "A0251", "label_class": "VERIFIABLE", "failure_mode": null, "note": "ORDER BY stacking SLEEP/BENCHMARK"}
+{"sample_id": "A0252", "label_class": "INCORRECT", "failure_mode": "other", "note": "PHP source line from docs"}
+{"sample_id": "A0253", "label_class": "INCORRECT", "failure_mode": "placeholder", "note": "BURP-COLLABORATOR-SUBDOMAIN placeholder not caught by filter"}
+{"sample_id": "A0254", "label_class": "VERIFIABLE", "failure_mode": null, "note": "UNION ALL SELECT with SLEEP"}
+{"sample_id": "A0255", "label_class": "VERIFIABLE", "failure_mode": null, "note": "' or 0=0 --"}
+{"sample_id": "A0256", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Oracle utl_inaddr error/OOB injection"}
+{"sample_id": "A0257", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "PostgreSQL error message"}
+{"sample_id": "A0258", "label_class": "VERIFIABLE", "failure_mode": null, "note": "MSSQL waitfor delay"}
+{"sample_id": "A0259", "label_class": "VERIFIABLE", "failure_mode": null, "note": "' or true--"}
+{"sample_id": "A0260", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "sqlmap-style 'UNION ALL SELECTCHAR(...' fused tokens; syntactically broken as written"}
+{"sample_id": "A0261", "label_class": "VERIFIABLE", "failure_mode": null, "note": "ORDER BY stacking SLEEP/BENCHMARK"}
+{"sample_id": "A0262", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "prime and en-dash characters; not valid SQL as written"}
+{"sample_id": "A0263", "label_class": "INCORRECT", "failure_mode": "setup_command", "note": "sqlmap command line"}
+{"sample_id": "A0264", "label_class": "VERIFIABLE", "failure_mode": null, "note": "MSSQL waitfor delay"}
+{"sample_id": "A0265", "label_class": "VERIFIABLE", "failure_mode": null, "note": "SLEEP in subselect"}
+{"sample_id": "A0266", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "MSSQL RESTORE VERIFYONLY UNC path (stacked, OOB)"}
+{"sample_id": "A0267", "label_class": "VERIFIABLE", "failure_mode": null, "note": "UNION ALL SELECT"}
+{"sample_id": "A0268", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "sqlmap-style fused SELECTCHAR; syntactically broken"}
+{"sample_id": "A0269", "label_class": "VERIFIABLE", "failure_mode": null, "note": "UNION ALL SELECT"}
+{"sample_id": "A0270", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Alibaba cloud metadata URL"}
+{"sample_id": "A0271", "label_class": "VERIFIABLE", "failure_mode": null, "note": "loopback range address"}
+{"sample_id": "A0272", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "URL followed by doc label 'Dotted hexadecimal'"}
+{"sample_id": "A0273", "label_class": "INCORRECT", "failure_mode": "tool_output", "note": "nslookup/DNS output line"}
+{"sample_id": "A0274", "label_class": "INCORRECT", "failure_mode": "other", "note": "Python script line"}
+{"sample_id": "A0275", "label_class": "VERIFIABLE", "failure_mode": null, "note": "loopback address 127.127.127.127"}
+{"sample_id": "A0276", "label_class": "INCORRECT", "failure_mode": "other", "note": "PHP code line"}
+{"sample_id": "A0277", "label_class": "VERIFIABLE", "failure_mode": null, "note": "GCP metadata v1beta1 URL"}
+{"sample_id": "A0278", "label_class": "VERIFIABLE", "failure_mode": null, "note": "DigitalOcean metadata URL"}
+{"sample_id": "A0279", "label_class": "INCORRECT", "failure_mode": "other", "note": "Redis command inside SSRF chain; not a URL value"}
+{"sample_id": "A0280", "label_class": "INCORRECT", "failure_mode": "other", "note": "Python script line"}
+{"sample_id": "A0281", "label_class": "INCORRECT", "failure_mode": "other", "note": "Python script line"}
+{"sample_id": "A0282", "label_class": "INCORRECT", "failure_mode": "other", "note": "PHP array element line"}
+{"sample_id": "A0283", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "PHP '$commands = array(' opener"}
+{"sample_id": "A0284", "label_class": "VERIFIABLE", "failure_mode": null, "note": "AWS metadata URL"}
+{"sample_id": "A0285", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Azure IMDS URL"}
+{"sample_id": "A0286", "label_class": "VERIFIABLE", "failure_mode": null, "note": "http://localhost:80"}
+{"sample_id": "A0287", "label_class": "VERIFIABLE", "failure_mode": null, "note": "DigitalOcean metadata"}
+{"sample_id": "A0288", "label_class": "VERIFIABLE", "failure_mode": null, "note": "DigitalOcean metadata"}
+{"sample_id": "A0289", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "URL followed by doc label 'Dotless decimal'"}
+{"sample_id": "A0290", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "full example.com SSRF PoC URL fetching external SVG"}
+{"sample_id": "A0291", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "URL followed by doc label"}
+{"sample_id": "A0292", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "hostname followed by '= ::1' doc annotation"}
+{"sample_id": "A0293", "label_class": "INCORRECT", "failure_mode": "setup_command", "note": "curl command line"}
+{"sample_id": "A0294", "label_class": "VERIFIABLE", "failure_mode": null, "note": "OpenStack metadata URL"}
+{"sample_id": "A0295", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "GCP short hostname 'metadata'"}
+{"sample_id": "A0296", "label_class": "VERIFIABLE", "failure_mode": null, "note": "dict:// scheme to Redis SAVE"}
+{"sample_id": "A0297", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "dict:// to placeholder host 'attacker'"}
+{"sample_id": "A0298", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Oracle cloud metadata address"}
+{"sample_id": "A0299", "label_class": "VERIFIABLE", "failure_mode": null, "note": "AWS metadata SSH key path"}
+{"sample_id": "A0300", "label_class": "PROBABLY_CORRECT", "failure_mode": "markdown_residue", "note": "Velocity/Groovy-style ${this.evaluate(...)} probe with trailing doc comment (source Java.md = SSTI category)"}
+{"sample_id": "A0301", "label_class": "VERIFIABLE", "failure_mode": null, "note": "ERB Dir.entries"}
+{"sample_id": "A0302", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "Jinja2/Tornado os.system; needs os in template context"}
+{"sample_id": "A0303", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Mako RCE chain"}
+{"sample_id": "A0304", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Smarty writeFile webshell"}
+{"sample_id": "A0305", "label_class": "PROBABLY_CORRECT", "failure_mode": "markdown_residue", "note": "FreeMarker Execute RCE with trailing '// Error-Based RCE' doc comment"}
+{"sample_id": "A0306", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Mako RCE chain"}
+{"sample_id": "A0307", "label_class": "INCORRECT", "failure_mode": "other", "note": "lodash template settings regex source line"}
+{"sample_id": "A0308", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Groovy toURL().text SSRF/read"}
+{"sample_id": "A0309", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "HTML closing tag residue"}
+{"sample_id": "A0310", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Mako RCE chain"}
+{"sample_id": "A0311", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "class.getClassLoader() engine probe"}
+{"sample_id": "A0312", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Twig/PHP passthru via chr() obfuscation"}
+{"sample_id": "A0313", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Mako RCE chain"}
+{"sample_id": "A0314", "label_class": "VERIFIABLE", "failure_mode": null, "note": "OGNL Runtime.exec error-based"}
+{"sample_id": "A0315", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Groovy file read"}
+{"sample_id": "A0316", "label_class": "INCORRECT", "failure_mode": "other", "note": "PHP ini_set statement with comment; not a payload"}
+{"sample_id": "A0317", "label_class": "VERIFIABLE", "failure_mode": null, "note": "OGNL time-based exec"}
+{"sample_id": "A0318", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Twig map('passthru') RCE"}
+{"sample_id": "A0319", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "fragment of a Java reflection chain"}
+{"sample_id": "A0320", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Groovy ASTTest RCE"}
+{"sample_id": "A0321", "label_class": "PROBABLY_CORRECT", "failure_mode": "markdown_residue", "note": "Django {% csrf_token %} probe with trailing doc comment"}
+{"sample_id": "A0322", "label_class": "VERIFIABLE", "failure_mode": null, "note": "SpEL System.getenv"}
+{"sample_id": "A0323", "label_class": "PROBABLY_CORRECT", "failure_mode": "markdown_residue", "note": "Django add-filter detection probe with doc comment"}
+{"sample_id": "A0324", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Mako RCE chain"}
+{"sample_id": "A0325", "label_class": "PROBABLY_CORRECT", "failure_mode": "markdown_residue", "note": "FreeMarker Execute sleep with trailing doc comment"}
+{"sample_id": "A0326", "label_class": "PROBABLY_CORRECT", "failure_mode": "markdown_residue", "note": "Elixir EEx shell call with trailing doc comment"}
+{"sample_id": "A0327", "label_class": "VERIFIABLE", "failure_mode": null, "note": "Flask config disclosure"}
+{"sample_id": "A0328", "label_class": "INCORRECT", "failure_mode": "markdown_residue", "note": "HTML closing tag residue"}
+{"sample_id": "A0329", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "later line of a multi-line Velocity chain ($ex undefined alone)"}
+{"sample_id": "A0330", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath local-name() boolean (hardcoded)"}
+{"sample_id": "A0331", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath or '1'='1 with whitespace"}
+{"sample_id": "A0332", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath name()!= boolean"}
+{"sample_id": "A0333", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath position() boolean"}
+{"sample_id": "A0334", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "SQL stacked query, not XPath", "better_category": "SQL Injection"}
+{"sample_id": "A0335", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath starts-with boolean"}
+{"sample_id": "A0336", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath/SQL ambiguous and-chain"}
+{"sample_id": "A0337", "label_class": "VERIFIABLE", "failure_mode": null, "note": "classic ' or '1'='1 (also SQL/LDAP-ambiguous)"}
+{"sample_id": "A0338", "label_class": "VERIFIABLE", "failure_mode": null, "note": "admin' or '1"}
+{"sample_id": "A0339", "label_class": "VERIFIABLE", "failure_mode": null, "note": "') or ('1'='1"}
+{"sample_id": "A0340", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath count() boolean"}
+{"sample_id": "A0341", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "' or //*[@name] path expression; context-dependent"}
+{"sample_id": "A0342", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "SQL-style '--' comment is not valid XPath 1.0"}
+{"sample_id": "A0343", "label_class": "VERIFIABLE", "failure_mode": null, "note": "XPath predicate break-out and union"}
+{"sample_id": "A0344", "label_class": "VERIFIABLE", "failure_mode": null, "note": "') or 1=1 or ('"}
+{"sample_id": "A0345", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "JS expression [1].find(alert); needs script/eval sink"}
+{"sample_id": "A0346", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\xE2\\x80\\x8B text inside <script>; JS syntax error as written"}
+{"sample_id": "A0347", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "fuzzdb templated vector with duplicated attribute and IE-only event; likely inert"}
+{"sample_id": "A0348", "label_class": "INCORRECT", "failure_mode": "placeholder", "note": "%(payload)s Python format placeholder"}
+{"sample_id": "A0349", "label_class": "INCORRECT", "failure_mode": "prose", "note": "detection template with '<%tag' and prose 'is invalid.'"}
+{"sample_id": "A0350", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "Heiderich-style parser-differential probe, no executable script"}
+{"sample_id": "A0351", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "CSS declaration smuggling </style><svg onload>; needs CSS/style sink"}
+{"sample_id": "A0352", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "formaction=javascript: needs click"}
+{"sample_id": "A0353", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "fuzzdb templated duplicated-attribute vector (applet); likely inert"}
+{"sample_id": "A0354", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x0C text in attribute name"}
+{"sample_id": "A0355", "label_class": "VERIFIABLE", "failure_mode": null, "note": "script src to JSONP callback=alert"}
+{"sample_id": "A0356", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "IE CSS expression(); legacy only"}
+{"sample_id": "A0357", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "SVG CDATA mXSS-style vector; parser dependent"}
+{"sample_id": "A0358", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "fuzzdb templated duplicated-attribute vector (html); likely inert"}
+{"sample_id": "A0359", "label_class": "VERIFIABLE", "failure_mode": null, "note": "onmouseover handler on anchor"}
+{"sample_id": "A0360", "label_class": "INCORRECT", "failure_mode": "prose", "note": "documentation sentence about IP decimal conversion"}
+{"sample_id": "A0361", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x1B text in href"}
+{"sample_id": "A0362", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x47 text in tag name"}
+{"sample_id": "A0363", "label_class": "VERIFIABLE", "failure_mode": null, "note": "script src to JSONP callback=alert"}
+{"sample_id": "A0364", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "iframe src javascript: with entity colon; unclosed tag, parser dependent"}
+{"sample_id": "A0365", "label_class": "INCORRECT", "failure_mode": "other", "note": "bare event-handler name 'onKeyDown'"}
+{"sample_id": "A0366", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x00 text inside closing tag"}
+{"sample_id": "A0367", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "line of an Angular sandbox-escape snippet"}
+{"sample_id": "A0368", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "JS phishing-form injection statement; needs script execution context"}
+{"sample_id": "A0369", "label_class": "VERIFIABLE", "failure_mode": null, "note": "<svg><script>alert unclosed"}
+{"sample_id": "A0370", "label_class": "INCORRECT", "failure_mode": "other", "note": "bare event-handler name"}
+{"sample_id": "A0371", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "comment-parsing differential vector"}
+{"sample_id": "A0372", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "&#x000003c entity probe; no executable content"}
+{"sample_id": "A0373", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x0B text in closing tag"}
+{"sample_id": "A0374", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "meta refresh to javascript:; blocked in modern browsers"}
+{"sample_id": "A0375", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "fuzzdb templated duplicated-attribute vector (script); likely inert"}
+{"sample_id": "A0376", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "legacy IE list-style-image javascript:"}
+{"sample_id": "A0377", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\xE2\\x80\\xA8 text in href"}
+{"sample_id": "A0378", "label_class": "INCORRECT", "failure_mode": "prose", "note": "documentation sentence about Object.keys()"}
+{"sample_id": "A0379", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x32 text in attribute name"}
+{"sample_id": "A0380", "label_class": "UNCERTAIN", "failure_mode": "encoding_garbage", "note": "literal \\x3E text in tag"}
+{"sample_id": "A0381", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "internal entity declaration and expansion; XXE probe without external reference"}
+{"sample_id": "A0382", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "IE HTC import XSS vector in XXE fuzz list", "better_category": "XSS Injection"}
+{"sample_id": "A0383", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "internal entity declaration example; entity-expansion probe"}
+{"sample_id": "A0384", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "IE HTC import XSS fragment", "better_category": "XSS Injection"}
+{"sample_id": "A0385", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "external entity declaration file:///etc/shadow without &xxe; reference"}
+{"sample_id": "A0386", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "SQL boolean in CDATA", "better_category": "SQL Injection"}
+{"sample_id": "A0387", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "XSS breakout fragment '}}</script>\""}
+{"sample_id": "A0388", "label_class": "INCORRECT", "failure_mode": "truncated", "note": "bare entity reference &foo;"}
+{"sample_id": "A0389", "label_class": "UNCERTAIN", "failure_mode": "truncated", "note": "references &systemEntity; with no DOCTYPE"}
+{"sample_id": "A0390", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "external entity http://example:443 declaration; no reference"}
+{"sample_id": "A0391", "label_class": "UNCERTAIN", "failure_mode": "other", "note": "benign internal entity declaration only"}
+{"sample_id": "A0392", "label_class": "PROBABLY_CORRECT", "failure_mode": null, "note": "external entity file:///c:/boot.ini declaration without reference"}
+{"sample_id": "A0393", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "XSS via CDATA splitting", "better_category": "XSS Injection"}
+{"sample_id": "A0394", "label_class": "INCORRECT", "failure_mode": "setup_command", "note": "iconv command to prepare an exploit file"}
+{"sample_id": "A0395", "label_class": "INCORRECT", "failure_mode": "wrong_category", "note": "XSS via CDATA splitting", "better_category": "XSS Injection"}

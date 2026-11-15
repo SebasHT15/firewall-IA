@@ -1,0 +1,25 @@
+# firewall-IA — V5 canonical-request/v1 decoders (PROPOSED, D63). NOT installed anywhere yet.
+#
+# `data_plane/canonical_request.py` imports only the standard library. These two packages are
+# needed only to decode `br` and `zstd` request bodies (V5-DATA-SPEC-r3 §5.2); when one is
+# missing, such a body is rejected R3 `content-coding-decoder-unavailable:<coding>`.
+#
+# Purpose: let the V5 generator (and any tool that calls `canonicalize`) run in its own Python
+# environment WITHOUT mitmproxy, with the same decoder versions the data plane uses:
+#
+#     uv venv --python 3.12 .venv-v5-generator
+#     .venv-v5-generator/bin/python -m pip install -r requirements-v5-canonical.txt
+#
+# Versions = exactly those already installed in .venv-dataplane as dependencies of
+# mitmproxy==12.2.3 (Brotli 1.2.0, zstandard 0.25.0 with libzstd 1.5.7, C backend). Verified
+# 2026-10-13 on CPython 3.12.15, linux x86_64: `canonicalize` decodes gzip/br/zstd with only
+# these two packages on sys.path (`python3.12 -I -S`, mitmproxy/transformers/torch absent).
+# Other interpreters/platforms are NOT verified. Pinning them in requirements-data-plane.txt as
+# well, and adding wheel hashes (--require-hashes), are owner decisions (D63).
+#
+# Brotli 1.2.0 matters beyond decoding: `_decode_br` relies on its per-step output bound
+# (<= 32,752 bytes with output_buffer_limit=1); tests/test_canonical_request_limits.py fails if
+# a different version changes it.
+
+Brotli==1.2.0
+zstandard==0.25.0

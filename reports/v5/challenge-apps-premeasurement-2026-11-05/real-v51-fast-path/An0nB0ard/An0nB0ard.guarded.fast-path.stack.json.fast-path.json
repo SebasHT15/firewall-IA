@@ -1,0 +1,32 @@
+{
+  "schema": "fast-path-policy/v1",
+  "policy_id": "sec-challenges-An0nB0ard-static-v1",
+  "status": "PROPOSED",
+  "canonical_contract": "canonical-request/v1",
+  "http_versions": [
+    "HTTP/1.1"
+  ],
+  "rules": [
+    {
+      "id": "exact-static-asset",
+      "methods": [
+        "GET"
+      ],
+      "path": [
+        "static",
+        "css",
+        "style.css"
+      ],
+      "query": {},
+      "required_query": [],
+      "headers": {
+        "host": {
+          "type": "enum",
+          "values": [
+            "an0nb0ard.fwlab.test"
+          ]
+        }
+      }
+    }
+  ]
+}

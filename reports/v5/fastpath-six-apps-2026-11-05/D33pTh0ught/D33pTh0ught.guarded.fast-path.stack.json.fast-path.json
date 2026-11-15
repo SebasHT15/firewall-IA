@@ -1,0 +1,32 @@
+{
+  "schema": "fast-path-policy/v1",
+  "policy_id": "sec-challenges-D33pTh0ught-static-v1",
+  "status": "PROPOSED",
+  "canonical_contract": "canonical-request/v1",
+  "http_versions": [
+    "HTTP/1.1"
+  ],
+  "rules": [
+    {
+      "id": "exact-static-asset",
+      "methods": [
+        "GET"
+      ],
+      "path": [
+        "static",
+        "img",
+        "machine.jpg"
+      ],
+      "query": {},
+      "required_query": [],
+      "headers": {
+        "host": {
+          "type": "enum",
+          "values": [
+            "d33pth0ught.fwlab.test"
+          ]
+        }
+      }
+    }
+  ]
+}

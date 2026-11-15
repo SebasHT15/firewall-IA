@@ -1,0 +1,156 @@
+{
+  "schema": "v5-r4-emitter-integration-evidence/proposal-v1",
+  "scope": "SYNTHETIC_TEST_CONTROL_ONLY",
+  "owner_authorization": false,
+  "real_data_consumed": false,
+  "test_doubles": [
+    "REAL_BUILD_AUTH_SCHEMA",
+    "SUPPORTED_SPECS",
+    "AI_AUDIT_ROW_STATUS_ALLOWED",
+    "committed-record checks",
+    "synthetic audit outcomes and unsigned test authorizations"
+  ],
+  "core_functions_mocked": [],
+  "row_contract": "v5-training-reference-contract/v1-PROPOSED",
+  "v5_prepared_rows": {
+    "TRAIN": 232,
+    "VALIDATION": 24
+  },
+  "dataset_manifest_sha256": "3e7ab3e64aba94207a3c7f6d44733b5d99aec6ec24366df5236db63392417808",
+  "runs": [
+    {
+      "view": "baseline_34",
+      "artifact": "/home/sebas/Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/r4-emitter-synthetic-001/baseline.json",
+      "artifact_sha256": "678d323b9f9cb1f9055ac34f4c2e4e9586be589ebe28b7d9f568507589f06ccb",
+      "max_probability_delta": 1.5543122344752192e-15,
+      "metadata": {
+        "TRAIN": {
+          "rows": 232,
+          "components": 4,
+          "labels": {
+            "ALLOW": 116,
+            "BLOCK": 116
+          },
+          "label_status": {
+            "VERIFIED": 116,
+            "TRAINING_REFERENCE": 116
+          },
+          "label_basis": {
+            "None": 232
+          },
+          "label_status_basis": {
+            "None": 116,
+            "ai_audit": 116
+          },
+          "audit_type": {
+            "ai_audited": 232
+          },
+          "row_contract": {
+            "v5-training-reference-contract/v1-PROPOSED": 232
+          }
+        },
+        "VALIDATION": {
+          "rows": 24,
+          "components": 1,
+          "labels": {
+            "ALLOW": 12,
+            "BLOCK": 12
+          },
+          "label_status": {
+            "VERIFIED": 12,
+            "TRAINING_REFERENCE": 12
+          },
+          "label_basis": {
+            "None": 24
+          },
+          "label_status_basis": {
+            "None": 12,
+            "ai_audit": 12
+          },
+          "audit_type": {
+            "ai_audited": 24
+          },
+          "row_contract": {
+            "v5-training-reference-contract/v1-PROPOSED": 24
+          }
+        }
+      },
+      "threshold_selected": false
+    },
+    {
+      "view": "target-path-neutralized/v1",
+      "artifact": "/home/sebas/Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/r4-emitter-synthetic-001/path-ablation.json",
+      "artifact_sha256": "083288d47734b24e233a6ac5ac630319b4a3b31dcc9c3ff271186ee927b2e84e",
+      "max_probability_delta": 5.551115123125783e-16,
+      "metadata": {
+        "TRAIN": {
+          "rows": 232,
+          "components": 4,
+          "labels": {
+            "ALLOW": 116,
+            "BLOCK": 116
+          },
+          "label_status": {
+            "VERIFIED": 116,
+            "TRAINING_REFERENCE": 116
+          },
+          "label_basis": {
+            "None": 232
+          },
+          "label_status_basis": {
+            "None": 116,
+            "ai_audit": 116
+          },
+          "audit_type": {
+            "ai_audited": 232
+          },
+          "row_contract": {
+            "v5-training-reference-contract/v1-PROPOSED": 232
+          }
+        },
+        "VALIDATION": {
+          "rows": 24,
+          "components": 1,
+          "labels": {
+            "ALLOW": 12,
+            "BLOCK": 12
+          },
+          "label_status": {
+            "VERIFIED": 12,
+            "TRAINING_REFERENCE": 12
+          },
+          "label_basis": {
+            "None": 24
+          },
+          "label_status_basis": {
+            "None": 12,
+            "ai_audit": 12
+          },
+          "audit_type": {
+            "ai_audited": 24
+          },
+          "row_contract": {
+            "v5-training-reference-contract/v1-PROPOSED": 24
+          }
+        }
+      },
+      "threshold_selected": false
+    }
+  ],
+  "source_sha256": {
+    "data_plane/request_features.py": "de16da96c5da2cded632b5332db25edf696a816577cefcce0c354b05df4d3db5",
+    "data_plane/canonical_request.py": "991c1a11ebdb0c22e6c05102ae9a0e1e9756247ec654ab874e2c78d92f1f58b4",
+    "scripts/model2/contracts.py": "78885adc21e8df1822f31cbff2e1f4a47b16bf3fa41e9bacb32bc45fa7c4b515",
+    "scripts/model2/feature_views.py": "54255988cb6f40e81fe8fcd2ff2edf6db89c2409adc06e33bb7d3047f4c6e30f",
+    "scripts/model2/fixture_experiment.py": "f33c9a589c6fa15105a468343500fb7502fa74ef7799aa4d27c65e9f0c6dd00c",
+    "scripts/model2/identity_groups.py": "178e21f7756fa40c790c3f375a5909f1ffd5ecc50be70fc3b1fb1bc6b5eea19f",
+    "scripts/model2/training.py": "9cb56744ff6603b6874c4471037802b7c8b8846cc4a9ff32456b7a80ddeeac63",
+    "scripts/model2/final_training.py": "c730016565925539b8e9766889a1fb9a456f869aa0582341c15752abfaf5d835",
+    "scripts/dataset/v5_row_contract.py": "2f854703e79c382f63d1e02b9ca62f31a95d6383cf454045995be27cce9bc7e7"
+  },
+  "reader_source_sha256": {
+    "scripts/training/v5_example_exchange.py": "d4d681e7123e433c000149ad5d7602782deee9564f4f6b2e22fcd963ea947f43",
+    "scripts/training/v5_train_data.py": "c200026ea4141646c60c3f148c49d1f7a4ce0f5484b96fcc304ef531f4cea861",
+    "scripts/training/v5_training_recipe_v1.json": "ca2b9956100b8abe3768f48afa80b6e28cbe13a80414be25105fa13d150d2108"
+  }
+}

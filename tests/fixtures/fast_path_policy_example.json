@@ -1,0 +1,25 @@
+{
+  "schema": "fast-path-policy/v1",
+  "policy_id": "EXAMPLE-FOR-TESTS-ONLY-shop-lab",
+  "status": "PROPOSED",
+  "canonical_contract": "canonical-request/v1",
+  "http_versions": ["HTTP/1.1"],
+  "rules": [
+    {
+      "id": "item-by-id",
+      "methods": ["GET", "HEAD"],
+      "path": ["api", "items", {"type": "uint", "max_digits": 6}],
+      "query": {"lang": {"type": "enum", "values": ["en", "es"]},
+                "page": {"type": "uint", "max_digits": 3}},
+      "required_query": [],
+      "headers": {"host": {"type": "enum", "values": ["shop.example"]},
+                  "accept": {"type": "enum", "values": ["application/json"]}}
+    },
+    {
+      "id": "health",
+      "methods": ["GET"],
+      "path": ["healthz"],
+      "headers": {"host": {"type": "enum", "values": ["shop.example"]}}
+    }
+  ]
+}

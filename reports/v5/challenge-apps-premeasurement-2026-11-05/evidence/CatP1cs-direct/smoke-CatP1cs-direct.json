@@ -1,0 +1,115 @@
+{
+  "app": "CatP1cs",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "direct",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 4153,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 16958,
+      "check": "benign GET /show?img=favicon.ico",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None. A POST to / returns a random message id; nothing is stored.",
+      "pass": true
+    },
+    {
+      "app_received": true,
+      "check": "direct arm has no blocking layer (request reaches app)",
+      "note": "baseline: front -> app, no gateway, no WAF",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 76673,
+      "check": "large response /show?img=alba.jpg (76673 B): direct: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 76673,
+      "status": 200
+    },
+    {
+      "asset_bytes": 8106213,
+      "check": "large response /static/img/blackcat.gif (8106213 B): direct: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 8106213,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app CatP1cs --arm direct --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/CatP1cs-direct/CatP1cs.direct.stack.json",
+    "up --app CatP1cs --arm direct --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/CatP1cs-direct/CatP1cs.direct.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/CatP1cs-direct --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/CatP1cs-direct",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/CatP1cs-direct"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": false,
+  "large_responses": [
+    {
+      "arm": "direct",
+      "asset_bytes": 76673,
+      "capped_502": false,
+      "response_body_len": 76673,
+      "status": 200,
+      "target": "/show?img=alba.jpg"
+    },
+    {
+      "arm": "direct",
+      "asset_bytes": 8106213,
+      "capped_502": false,
+      "response_body_len": 8106213,
+      "status": 200,
+      "target": "/static/img/blackcat.gif"
+    }
+  ],
+  "pass": true,
+  "utc": 1793900410.7370305,
+  "v5": "double"
+}

@@ -1,0 +1,31 @@
+[
+  {
+    "n_ctx_slot": 256,
+    "sent": 204,
+    "n_predict": 17,
+    "outcome": "ACCEPTED",
+    "prompt_n": 204,
+    "truncated": false,
+    "stop_type": "eos",
+    "content": "ALLOW | Normal HTTP request with no attack patterns detected."
+  },
+  {
+    "n_ctx_slot": 256,
+    "sent": 364,
+    "n_predict": 17,
+    "outcome": "HTTP 400",
+    "body": "{\"error\":{\"code\":400,\"message\":\"request (364 tokens) exceeds the available context size (256 tokens), try increasing it\",\"type\":\"exceed_context_size_error\",\"n_prompt_tokens\":364,\"n_ctx\":256}}"
+  },
+  {
+    "case": "prompt fits, prompt + n_predict exceeds n_ctx",
+    "n_ctx_slot": 256,
+    "sent": 249,
+    "n_predict": 17,
+    "outcome": "ACCEPTED",
+    "prompt_n": 249,
+    "predicted_n": 7,
+    "truncated": true,
+    "stop_type": "limit",
+    "content": "ALLOW | Normal HTTP request with"
+  }
+]

@@ -1,0 +1,140 @@
+{
+  "A_vs_B_nf4_vs_bf16_unmerged": {
+    "differences": [
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 15
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 21
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 23
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 25
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 27
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 37
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 51
+      }
+    ],
+    "identical_decisions": 57,
+    "identical_generations": 57,
+    "n": 64
+  },
+  "A_vs_C_runtime_vs_merged_artifact": {
+    "differences": [
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 21
+      },
+      {
+        "a": "BLOCK | Cross-site scripting payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 23
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 25
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 27
+      },
+      {
+        "a": "BLOCK | Command injection payload detected.",
+        "b": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "i": 51
+      }
+    ],
+    "identical_decisions": 59,
+    "identical_generations": 59,
+    "n": 64
+  },
+  "A_vs_D_runtime_vs_faithful_merged_artifact": {
+    "differences": [],
+    "identical_decisions": 64,
+    "identical_generations": 64,
+    "n": 64
+  },
+  "B_vs_C_merge_arithmetic": {
+    "differences": [
+      {
+        "a": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "b": "BLOCK | Cross-site scripting payload detected.",
+        "i": 15
+      },
+      {
+        "a": "ALLOW | Normal HTTP request with no attack patterns detected.",
+        "b": "BLOCK | Command injection payload detected.",
+        "i": 37
+      }
+    ],
+    "identical_decisions": 62,
+    "identical_generations": 62,
+    "n": 64
+  },
+  "adapter": "model-output-v5/smoke/smoke-run-001/adapter",
+  "adapter_sha256": "9261e4178b995f64704a84d3d26e67eec47273bf2b3797d658df7f9e46b9e591",
+  "decisions_A": {
+    "ALLOW": 36,
+    "BLOCK": 28,
+    "INVALID": 0
+  },
+  "decisions_C": {
+    "ALLOW": 41,
+    "BLOCK": 23,
+    "INVALID": 0
+  },
+  "decisions_D": {
+    "ALLOW": 36,
+    "BLOCK": 28,
+    "INVALID": 0
+  },
+  "faithful_merged_dir": "model-output-v5/merge-check/v5-smoke-run-001-nf4dequant",
+  "format": "v5",
+  "inputs": "64 synthetic fixture texts (manifest 4b66c311fc9c)",
+  "merged": {
+    "architectures": [
+      "LlamaForCausalLM"
+    ],
+    "bytes": 2203740389,
+    "dir": "model-output-v5/merge-check/v5-smoke-run-001",
+    "lora_tensors_left": 0,
+    "tensors": 201
+  },
+  "note": "fidelity between runtimes on synthetic inputs; NOT an accuracy or quality measurement",
+  "runtime_A_double_quant": true,
+  "schema": "v5-merge-fidelity/v1",
+  "seconds_A": 16.06,
+  "seconds_B": 9.5,
+  "seconds_C": 5.02,
+  "seconds_D": 4.94,
+  "versions": {
+    "peft": "0.19.1",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0"
+  }
+}

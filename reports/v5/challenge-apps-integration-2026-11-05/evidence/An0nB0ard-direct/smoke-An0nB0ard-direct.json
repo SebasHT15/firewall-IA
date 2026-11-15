@@ -1,0 +1,100 @@
+{
+  "app": "An0nB0ard",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "direct",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 1825,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 1293,
+      "check": "benign GET /messages",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None. blog.py imports flask.session but never sets a secret key or writes a session; no server-side session or auth cookie is issued.",
+      "pass": true
+    },
+    {
+      "check": "state reset: /messages shows only the seeded baseline at up",
+      "note": "MySQL on ephemeral tmpfs; re-seeded from members.sql each up",
+      "pass": true,
+      "seeded_entry_present": true
+    },
+    {
+      "app_received": true,
+      "check": "direct arm has no blocking layer (request reaches app)",
+      "note": "baseline: front -> app, no gateway, no WAF",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 82972,
+      "check": "large response /static/css/bootstrap.min.css (82972 B): direct: no cascade cap, served in full",
+      "note": "64 KiB gateway cap kept; recorded, not tuned",
+      "pass": true,
+      "response_body_len": 82972,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "db": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app An0nB0ard --arm direct --out reports/v5/challenge-apps-integration-2026-11-05/evidence/An0nB0ard-direct/An0nB0ard.direct.stack.json",
+    "up --app An0nB0ard --arm direct --config reports/v5/challenge-apps-integration-2026-11-05/evidence/An0nB0ard-direct/An0nB0ard.direct.stack.json --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/An0nB0ard-direct --v5 double",
+    "down --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/An0nB0ard-direct",
+    "check-clean --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/An0nB0ard-direct"
+  ],
+  "commit_matches_pin": true,
+  "large_responses": [
+    {
+      "arm": "direct",
+      "asset_bytes": 82972,
+      "capped_502": false,
+      "response_body_len": 82972,
+      "status": 200,
+      "target": "/static/css/bootstrap.min.css"
+    }
+  ],
+  "pass": true,
+  "utc": 1793898184.1035788,
+  "v5": "double"
+}

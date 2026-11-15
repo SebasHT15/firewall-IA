@@ -1,0 +1,55 @@
+{
+  "criteria_r4": {
+    "C1": {
+      "limit": 0.2,
+      "metric": "Wilson95 upper INCORRECT"
+    },
+    "C2": {
+      "limit": 0.35,
+      "metric": "Wilson95 upper UNCERTAIN+INCORRECT"
+    },
+    "coverage": 1.0,
+    "unresolved_max": 0,
+    "wilson_z": 1.96
+  },
+  "execution_authorized": false,
+  "population": {
+    "manifest_sha256": "8589d16cf109dc01e1f46b70d1cb80a8316bff3157d525004388f97d6ea38526",
+    "path": "pool.jsonl",
+    "rows": 68,
+    "sha256": "4d51713e3a1466929f94f553ec61d0ea1d945593e6b99b33ed6ec74db686464b"
+  },
+  "relation_to_prior": "v1/v2 votes and failed outcomes preserved, never reused or relabeled",
+  "reviewers": {
+    "a1": "gpt-6.1-sol",
+    "a2": "gpt-6-astra",
+    "procedure": "fresh blind Codex sessions, one fixed sample per role, no fork/history, R3 blind",
+    "r3": "gpt-6-sol"
+  },
+  "sample": {
+    "manifest_sha256": "1a1bfab019697bb21f794b1427e7fefda37f48500f4cb1946828dfef01fbf5f4",
+    "method": "source_file stratified, largest remainder; SHA256 rank(seed NUL source_file NUL record_id)",
+    "path": "sample_n50.jsonl",
+    "rows": 50,
+    "seed": "v5-sqli-v3-quality-2026-10-25",
+    "sha256": "d74d74ebee1eaa4e82c8537309a01e39e42bd9fae9e9e6b073f202a92c749c9e"
+  },
+  "schema": "v5-source-census-preregistration/sqli-v3-PROPOSED",
+  "source_correction": {
+    "input_sha256": "2db4db956c43992d809a40f6c798e369fee4f6452eab9aeb61d8dded16ad0748",
+    "negative_rules": [
+      "source_code",
+      "schema_fragment",
+      "setup_statement",
+      "tool_or_prose",
+      "malformed_fused_keyword",
+      "generic_template_identifier"
+    ],
+    "positive_rule": "recognizable SQL injection mechanism required; see MECHANISM",
+    "removed_diff_sha256": "c0fb98a63ec5a0af2f624418ac2c5a9602cf17c1ba59a7ae8390adbd723d3d8e",
+    "rule_source": "build_candidate.py",
+    "source_scope": "SQL Injection Markdown mechanism examples, excluding overview README, Intruder wordlists and Cassandra/CQL"
+  },
+  "status": "PROPOSED_BEFORE_VOTES",
+  "training_authorized": false
+}

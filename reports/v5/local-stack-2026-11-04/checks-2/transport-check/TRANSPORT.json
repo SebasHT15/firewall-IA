@@ -1,0 +1,4329 @@
+{
+  "cases": [
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [],
+      "id": "get_root",
+      "method": "GET",
+      "note": "",
+      "target": "/",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Accept",
+          "text/css"
+        ]
+      ],
+      "id": "get_static",
+      "method": "GET",
+      "note": "",
+      "target": "/static/app.css",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [],
+      "id": "get_query_encoded",
+      "method": "GET",
+      "note": "",
+      "target": "/search?q=caf%C3%A9+au+lait&tag=a%2Fb&x=1&x=2&empty=",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "title=Hello&body=World+%21&tag=home&csrf_token=t0k",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ]
+      ],
+      "id": "post_form",
+      "method": "POST",
+      "note": "",
+      "target": "/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "{\"title\":\"Plan\",\"body\":\"Ship v1\",\"tag\":\"work\"}",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "application/json"
+        ],
+        [
+          "Authorization",
+          "Bearer aaa.bbb.ccc"
+        ]
+      ],
+      "id": "post_json",
+      "method": "POST",
+      "note": "",
+      "target": "/api/v1/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "{\"title\":\"Renamed\"}",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "id": "put_json",
+      "method": "PUT",
+      "note": "",
+      "target": "/api/v1/notes/7",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "na\u00c3\u00afve caf\u00c3\u00a9\n",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "text/plain; charset=utf-8"
+        ]
+      ],
+      "id": "patch_text",
+      "method": "PATCH",
+      "note": "",
+      "target": "/api/v1/notes/7",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Authorization",
+          "Bearer aaa.bbb.ccc"
+        ]
+      ],
+      "id": "delete_bearer",
+      "method": "DELETE",
+      "note": "",
+      "target": "/api/v1/notes/7",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [],
+      "id": "options",
+      "method": "OPTIONS",
+      "note": "",
+      "target": "/api/v1/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [],
+      "id": "head",
+      "method": "HEAD",
+      "note": "",
+      "target": "/static/app.css",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "email=a%40example.test",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": [
+        "fwlab_sid=s3ss10n",
+        "theme=dark"
+      ],
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "application/x-www-form-urlencoded"
+        ],
+        [
+          "Cookie",
+          "fwlab_sid=s3ss10n; theme=dark"
+        ],
+        [
+          "X-CSRF-Token",
+          "t0k"
+        ],
+        [
+          "Origin",
+          "https://notes.fwlab.test:8443"
+        ],
+        [
+          "Referer",
+          "https://notes.fwlab.test:8443/account"
+        ]
+      ],
+      "id": "session_csrf_headers",
+      "method": "POST",
+      "note": "HTTP/2 sends two cookie fields; the front must join them as one Cookie header",
+      "target": "/account/email",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [
+        "x_forwarded_for"
+      ],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "X_Forwarded_For",
+          "203.0.113.9"
+        ],
+        [
+          "X-Lab-Note",
+          "kept"
+        ]
+      ],
+      "id": "underscore_header",
+      "method": "GET",
+      "note": "nginx drops header names with underscores (default); plain HTTP/1.1 keeps it",
+      "target": "/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "",
+      "chunked": false,
+      "forward": false,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [],
+      "id": "block_query",
+      "method": "GET",
+      "note": "",
+      "target": "/search?q=evil",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "{\"title\":\"evil\"}",
+      "chunked": false,
+      "forward": false,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "application/json"
+        ]
+      ],
+      "id": "block_json",
+      "method": "POST",
+      "note": "",
+      "target": "/api/v1/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "<19000 bytes sha256=60ec37365bb52e577ca5c5cbd2608580a08f6e89668dda62c36a839350ec4cc9>",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "text/plain; charset=utf-8"
+        ]
+      ],
+      "id": "body_19000",
+      "method": "POST",
+      "note": "",
+      "target": "/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "chunked body of a note",
+      "chunked": true,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "text/plain; charset=utf-8"
+        ]
+      ],
+      "id": "chunked_body",
+      "method": "POST",
+      "note": "the front re-frames a chunked body with Content-Length; the canonical text must not change",
+      "target": "/notes",
+      "transports": [
+        "plain",
+        "tls_h1"
+      ]
+    },
+    {
+      "body": "stream body without length",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": true,
+      "headers": [
+        [
+          "Content-Type",
+          "text/plain; charset=utf-8"
+        ]
+      ],
+      "id": "h2_body_without_length",
+      "method": "POST",
+      "note": "compared with post_text_reference",
+      "target": "/notes",
+      "transports": [
+        "tls_h2"
+      ]
+    },
+    {
+      "body": "stream body without length",
+      "chunked": false,
+      "forward": true,
+      "front_drops": [],
+      "h2_cookie_crumbs": null,
+      "h2_no_content_length": false,
+      "headers": [
+        [
+          "Content-Type",
+          "text/plain; charset=utf-8"
+        ]
+      ],
+      "id": "post_text_reference",
+      "method": "POST",
+      "note": "",
+      "target": "/notes",
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    }
+  ],
+  "clean_after": {
+    "checked_utc": 1793846505.5663285,
+    "clean": true,
+    "leftovers": [],
+    "run_id": "20261104T204105-5229a8",
+    "schema": "firewall-local-stack-clean/v1"
+  },
+  "created_utc": 1793846505.5663438,
+  "detection_quality": "NOT_MEASURED",
+  "identity": {
+    "app": {
+      "image": "firewall-ia/lab-app:lab",
+      "image_id": "sha256:7e7f96b9ae8d7ae90dcb4acf0680f67be1e3de9e8a2ef71db01260aa513fd2ef",
+      "source": "scripts/local_stack/notes_app/app.py",
+      "source_sha256": "f6d25d46e8abfe7b85f753258c6b8107527aee75547d41269285bc2c77b7dd5c"
+    },
+    "crs": null,
+    "effect_routes": false,
+    "fast_path": null,
+    "firewall": "cascade",
+    "front": {
+      "alpn": "h2",
+      "conf_sha256": "d90e95223aff83153cdf27fcc9a6a5ee1a73b9bc750bef08b233f4ebbac0b759",
+      "image": "nginx:1.25-alpine",
+      "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00",
+      "template_sha256": "542d0aee16dcd2be2b1f4199711cac85f6d43499636a09ba5d7577e8bb64a4dc",
+      "tls_version": "TLSv1.3"
+    },
+    "manifest": {
+      "manifest_id": "v51-policy-20261101-native-baseline34",
+      "path": "reports/v5/successor-post-training-2026-11-01/cascade-native.EXPERIMENTAL.json",
+      "sha256": "a3eb71aa1ccdbe07e289c515c5885172cff9b64703a5344cc13ea57d91a3d829",
+      "status": "EXPERIMENTAL"
+    },
+    "mode": "V5_ONLY",
+    "schema": "firewall-local-stack-identity/v1",
+    "stack_source_sha256": "121a0293fc836ebe8400060c3af9a0dc81df26d912dc3e1cec95b1d659f415e3",
+    "upstream": "raw-sink",
+    "v4": "not started",
+    "v5": "url"
+  },
+  "kind": "MECHANISM_CHECK_WITH_V5_DOUBLE",
+  "passed": true,
+  "rows": [
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "16022c9843363b438420c5d83afdf62ff6b700b421d2edf557d1436e289716f5",
+      "case": "get_root",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "16022c9843363b438420c5d83afdf62ff6b700b421d2edf557d1436e289716f5",
+      "case": "get_root",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "16022c9843363b438420c5d83afdf62ff6b700b421d2edf557d1436e289716f5",
+      "case": "get_root",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "73651c24ba9dd819aa3e8fe760584f7aac8bfb5fbfcbecd5c288ea36958b1597",
+      "case": "get_static",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "Accept"
+        ],
+        "header_names": [
+          "host",
+          "accept"
+        ],
+        "headers": {
+          "accept": "text/css",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/static/app.css",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "73651c24ba9dd819aa3e8fe760584f7aac8bfb5fbfcbecd5c288ea36958b1597",
+      "case": "get_static",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "Accept"
+        ],
+        "header_names": [
+          "host",
+          "accept"
+        ],
+        "headers": {
+          "accept": "text/css",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/static/app.css",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "73651c24ba9dd819aa3e8fe760584f7aac8bfb5fbfcbecd5c288ea36958b1597",
+      "case": "get_static",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "accept"
+        ],
+        "header_names": [
+          "host",
+          "accept"
+        ],
+        "headers": {
+          "accept": "text/css",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/static/app.css",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "3da8ecb5bb94f4d8cdada6f815bffe1fb9c62b14bd39c26655ce25cc0af46d05",
+      "case": "get_query_encoded",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/search?q=caf%C3%A9+au+lait&tag=a%2Fb&x=1&x=2&empty=",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "3da8ecb5bb94f4d8cdada6f815bffe1fb9c62b14bd39c26655ce25cc0af46d05",
+      "case": "get_query_encoded",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/search?q=caf%C3%A9+au+lait&tag=a%2Fb&x=1&x=2&empty=",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "3da8ecb5bb94f4d8cdada6f815bffe1fb9c62b14bd39c26655ce25cc0af46d05",
+      "case": "get_query_encoded",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/search?q=caf%C3%A9+au+lait&tag=a%2Fb&x=1&x=2&empty=",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "12cf912828aede8514400e720aed37d3ef9aedb3b4ab5589dd7542cebbab4ab2",
+      "case": "post_form",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 50,
+        "body_sha256": "ea48ca1dcda224d6059a92c8fa655fcbc39a205fb1066687f7622a78094127f2",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "content-length"
+        ],
+        "headers": {
+          "content-type": "application/x-www-form-urlencoded",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "12cf912828aede8514400e720aed37d3ef9aedb3b4ab5589dd7542cebbab4ab2",
+      "case": "post_form",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 50,
+        "body_sha256": "ea48ca1dcda224d6059a92c8fa655fcbc39a205fb1066687f7622a78094127f2",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "application/x-www-form-urlencoded",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "12cf912828aede8514400e720aed37d3ef9aedb3b4ab5589dd7542cebbab4ab2",
+      "case": "post_form",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 50,
+        "body_sha256": "ea48ca1dcda224d6059a92c8fa655fcbc39a205fb1066687f7622a78094127f2",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "application/x-www-form-urlencoded",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "010b0213959d8f8041efa16323eda2d7053010671c51d88f98436f7f91b4afba",
+      "case": "post_json",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 46,
+        "body_sha256": "9e13f06b79daab51ef4bbc21f323a95d72f688ea0fbdfbe2857461ce90b30bf1",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Authorization",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "authorization",
+          "content-length"
+        ],
+        "headers": {
+          "authorization": "Bearer aaa.bbb.ccc",
+          "content-type": "application/json",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/api/v1/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "010b0213959d8f8041efa16323eda2d7053010671c51d88f98436f7f91b4afba",
+      "case": "post_json",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 46,
+        "body_sha256": "9e13f06b79daab51ef4bbc21f323a95d72f688ea0fbdfbe2857461ce90b30bf1",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type",
+          "Authorization"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type",
+          "authorization"
+        ],
+        "headers": {
+          "authorization": "Bearer aaa.bbb.ccc",
+          "content-type": "application/json",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/api/v1/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "010b0213959d8f8041efa16323eda2d7053010671c51d88f98436f7f91b4afba",
+      "case": "post_json",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 46,
+        "body_sha256": "9e13f06b79daab51ef4bbc21f323a95d72f688ea0fbdfbe2857461ce90b30bf1",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type",
+          "authorization"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type",
+          "authorization"
+        ],
+        "headers": {
+          "authorization": "Bearer aaa.bbb.ccc",
+          "content-type": "application/json",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/api/v1/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "1fc32f9922e01969e22306e8a92eb1014970a1c8d9aa801f35eae5d96c38d3e6",
+      "case": "put_json",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 19,
+        "body_sha256": "c9eca649f65d705c51ca91e6ecc6819b7f4103c252136a7587598cafa1eb3b91",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "content-length"
+        ],
+        "headers": {
+          "content-type": "application/json",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "PUT",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "1fc32f9922e01969e22306e8a92eb1014970a1c8d9aa801f35eae5d96c38d3e6",
+      "case": "put_json",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 19,
+        "body_sha256": "c9eca649f65d705c51ca91e6ecc6819b7f4103c252136a7587598cafa1eb3b91",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "application/json",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "PUT",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "1fc32f9922e01969e22306e8a92eb1014970a1c8d9aa801f35eae5d96c38d3e6",
+      "case": "put_json",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 19,
+        "body_sha256": "c9eca649f65d705c51ca91e6ecc6819b7f4103c252136a7587598cafa1eb3b91",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "application/json",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "PUT",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "73a4d1b02cb4d536302e28720aff223c07134dbb29ef359fe8d055ceb0c946ab",
+      "case": "patch_text",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 13,
+        "body_sha256": "805f7469e3c6951641102490db37edf36ede14c2720fa69af1005b79b61dedab",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "content-length"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "PATCH",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "73a4d1b02cb4d536302e28720aff223c07134dbb29ef359fe8d055ceb0c946ab",
+      "case": "patch_text",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 13,
+        "body_sha256": "805f7469e3c6951641102490db37edf36ede14c2720fa69af1005b79b61dedab",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "PATCH",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "73a4d1b02cb4d536302e28720aff223c07134dbb29ef359fe8d055ceb0c946ab",
+      "case": "patch_text",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 13,
+        "body_sha256": "805f7469e3c6951641102490db37edf36ede14c2720fa69af1005b79b61dedab",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "PATCH",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "82e03f5df82625a1d5450e048b369d54bc1e42d19b7786296806ae3b9f2aa947",
+      "case": "delete_bearer",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "Authorization"
+        ],
+        "header_names": [
+          "host",
+          "authorization"
+        ],
+        "headers": {
+          "authorization": "Bearer aaa.bbb.ccc",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "DELETE",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "82e03f5df82625a1d5450e048b369d54bc1e42d19b7786296806ae3b9f2aa947",
+      "case": "delete_bearer",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "Authorization"
+        ],
+        "header_names": [
+          "host",
+          "authorization"
+        ],
+        "headers": {
+          "authorization": "Bearer aaa.bbb.ccc",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "DELETE",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "82e03f5df82625a1d5450e048b369d54bc1e42d19b7786296806ae3b9f2aa947",
+      "case": "delete_bearer",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "authorization"
+        ],
+        "header_names": [
+          "host",
+          "authorization"
+        ],
+        "headers": {
+          "authorization": "Bearer aaa.bbb.ccc",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "DELETE",
+        "target": "/api/v1/notes/7",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "54ef014a2d0b1a69a5fe2cb978e5aed20d87c71eee40621e7c7c4b0563ca5ba7",
+      "case": "options",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "OPTIONS",
+        "target": "/api/v1/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "54ef014a2d0b1a69a5fe2cb978e5aed20d87c71eee40621e7c7c4b0563ca5ba7",
+      "case": "options",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "OPTIONS",
+        "target": "/api/v1/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "54ef014a2d0b1a69a5fe2cb978e5aed20d87c71eee40621e7c7c4b0563ca5ba7",
+      "case": "options",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "OPTIONS",
+        "target": "/api/v1/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "4fd7d718dc6b7f385e01186fa6b5b6e1e11385f7c4160e78f6f7419ed247889a",
+      "case": "head",
+      "client_body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "HEAD",
+        "target": "/static/app.css",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "4fd7d718dc6b7f385e01186fa6b5b6e1e11385f7c4160e78f6f7419ed247889a",
+      "case": "head",
+      "client_body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "HEAD",
+        "target": "/static/app.css",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "4fd7d718dc6b7f385e01186fa6b5b6e1e11385f7c4160e78f6f7419ed247889a",
+      "case": "head",
+      "client_body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host"
+        ],
+        "header_names": [
+          "host"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "HEAD",
+        "target": "/static/app.css",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "924b575431aa98c129303bafc2c50fcf68934a8ba99d998b211a4c15a4238ea9",
+      "case": "session_csrf_headers",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 22,
+        "body_sha256": "8305a5d56d37659fcb29d73895f3cfb0b34b7c324318a2a6ff1be9fe877961ce",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Cookie",
+          "X-CSRF-Token",
+          "Origin",
+          "Referer",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "cookie",
+          "x-csrf-token",
+          "origin",
+          "referer",
+          "content-length"
+        ],
+        "headers": {
+          "content-type": "application/x-www-form-urlencoded",
+          "cookie": "fwlab_sid=s3ss10n; theme=dark",
+          "host": "notes.fwlab.test",
+          "origin": "https://notes.fwlab.test:8443",
+          "referer": "https://notes.fwlab.test:8443/account",
+          "x-csrf-token": "t0k"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/account/email",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "924b575431aa98c129303bafc2c50fcf68934a8ba99d998b211a4c15a4238ea9",
+      "case": "session_csrf_headers",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 22,
+        "body_sha256": "8305a5d56d37659fcb29d73895f3cfb0b34b7c324318a2a6ff1be9fe877961ce",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type",
+          "Cookie",
+          "X-CSRF-Token",
+          "Origin",
+          "Referer"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type",
+          "cookie",
+          "x-csrf-token",
+          "origin",
+          "referer"
+        ],
+        "headers": {
+          "content-type": "application/x-www-form-urlencoded",
+          "cookie": "fwlab_sid=s3ss10n; theme=dark",
+          "host": "notes.fwlab.test",
+          "origin": "https://notes.fwlab.test:8443",
+          "referer": "https://notes.fwlab.test:8443/account",
+          "x-csrf-token": "t0k"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/account/email",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "924b575431aa98c129303bafc2c50fcf68934a8ba99d998b211a4c15a4238ea9",
+      "case": "session_csrf_headers",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 22,
+        "body_sha256": "8305a5d56d37659fcb29d73895f3cfb0b34b7c324318a2a6ff1be9fe877961ce",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type",
+          "x-csrf-token",
+          "origin",
+          "referer",
+          "cookie"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type",
+          "x-csrf-token",
+          "origin",
+          "referer",
+          "cookie"
+        ],
+        "headers": {
+          "content-type": "application/x-www-form-urlencoded",
+          "cookie": "fwlab_sid=s3ss10n; theme=dark",
+          "host": "notes.fwlab.test",
+          "origin": "https://notes.fwlab.test:8443",
+          "referer": "https://notes.fwlab.test:8443/account",
+          "x-csrf-token": "t0k"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/account/email",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "c6f6936806331c3ecb57a026f08e136b8e637c8fe86217192c8d4b816db95668",
+      "case": "underscore_header",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "X_Forwarded_For",
+          "X-Lab-Note"
+        ],
+        "header_names": [
+          "host",
+          "x_forwarded_for",
+          "x-lab-note"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test",
+          "x-lab-note": "kept",
+          "x_forwarded_for": "203.0.113.9"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "c6f6936806331c3ecb57a026f08e136b8e637c8fe86217192c8d4b816db95668",
+      "case": "underscore_header",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "X-Lab-Note"
+        ],
+        "header_names": [
+          "host",
+          "x-lab-note"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test",
+          "x-lab-note": "kept"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "c6f6936806331c3ecb57a026f08e136b8e637c8fe86217192c8d4b816db95668",
+      "case": "underscore_header",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 0,
+        "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "framing": "none",
+        "header_name_case": [
+          "Host",
+          "x-lab-note"
+        ],
+        "header_names": [
+          "host",
+          "x-lab-note"
+        ],
+        "headers": {
+          "host": "notes.fwlab.test",
+          "x-lab-note": "kept"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "GET",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "firewall",
+      "canonical_sha256": "c69f8c8c7f07b7337a5393154e4ce4de1892c67a1e81f260f60db78e060cee86",
+      "case": "block_query",
+      "client_body_sha256": "acf9c5df4c39f2c3ed7c060b7edf4bf8a320e21aea038513b30421574e5454b5",
+      "client_error": null,
+      "client_status": 403,
+      "firewall_answer": true,
+      "gateway": {
+        "applied": "DENY",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": 403,
+        "reason": "v5_block",
+        "records": 1
+      },
+      "received_count": 0,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "firewall",
+      "canonical_sha256": "c69f8c8c7f07b7337a5393154e4ce4de1892c67a1e81f260f60db78e060cee86",
+      "case": "block_query",
+      "client_body_sha256": "acf9c5df4c39f2c3ed7c060b7edf4bf8a320e21aea038513b30421574e5454b5",
+      "client_error": null,
+      "client_status": 403,
+      "firewall_answer": true,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 403,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "403"
+      },
+      "gateway": {
+        "applied": "DENY",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": 403,
+        "reason": "v5_block",
+        "records": 1
+      },
+      "received_count": 0,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "firewall",
+      "canonical_sha256": "c69f8c8c7f07b7337a5393154e4ce4de1892c67a1e81f260f60db78e060cee86",
+      "case": "block_query",
+      "client_body_sha256": "acf9c5df4c39f2c3ed7c060b7edf4bf8a320e21aea038513b30421574e5454b5",
+      "client_error": null,
+      "client_status": 403,
+      "firewall_answer": true,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 403,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "403"
+      },
+      "gateway": {
+        "applied": "DENY",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": 403,
+        "reason": "v5_block",
+        "records": 1
+      },
+      "received_count": 0,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "firewall",
+      "canonical_sha256": "3fd2aef6c8aae3abe063bfa1631115b1666595cc4fe5ee31e3fa36f97e592863",
+      "case": "block_json",
+      "client_body_sha256": "acf9c5df4c39f2c3ed7c060b7edf4bf8a320e21aea038513b30421574e5454b5",
+      "client_error": null,
+      "client_status": 403,
+      "firewall_answer": true,
+      "gateway": {
+        "applied": "DENY",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": 403,
+        "reason": "v5_block",
+        "records": 1
+      },
+      "received_count": 0,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "firewall",
+      "canonical_sha256": "3fd2aef6c8aae3abe063bfa1631115b1666595cc4fe5ee31e3fa36f97e592863",
+      "case": "block_json",
+      "client_body_sha256": "acf9c5df4c39f2c3ed7c060b7edf4bf8a320e21aea038513b30421574e5454b5",
+      "client_error": null,
+      "client_status": 403,
+      "firewall_answer": true,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 403,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "403"
+      },
+      "gateway": {
+        "applied": "DENY",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": 403,
+        "reason": "v5_block",
+        "records": 1
+      },
+      "received_count": 0,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "firewall",
+      "canonical_sha256": "3fd2aef6c8aae3abe063bfa1631115b1666595cc4fe5ee31e3fa36f97e592863",
+      "case": "block_json",
+      "client_body_sha256": "acf9c5df4c39f2c3ed7c060b7edf4bf8a320e21aea038513b30421574e5454b5",
+      "client_error": null,
+      "client_status": 403,
+      "firewall_answer": true,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 403,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "403"
+      },
+      "gateway": {
+        "applied": "DENY",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": 403,
+        "reason": "v5_block",
+        "records": 1
+      },
+      "received_count": 0,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "27bf9c8a12465033880181d0ab15d92cc37bc4a783940a6032308798f0447f05",
+      "case": "body_19000",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 19000,
+        "body_sha256": "60ec37365bb52e577ca5c5cbd2608580a08f6e89668dda62c36a839350ec4cc9",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "content-length"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "27bf9c8a12465033880181d0ab15d92cc37bc4a783940a6032308798f0447f05",
+      "case": "body_19000",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 19000,
+        "body_sha256": "60ec37365bb52e577ca5c5cbd2608580a08f6e89668dda62c36a839350ec4cc9",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "27bf9c8a12465033880181d0ab15d92cc37bc4a783940a6032308798f0447f05",
+      "case": "body_19000",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 19000,
+        "body_sha256": "60ec37365bb52e577ca5c5cbd2608580a08f6e89668dda62c36a839350ec4cc9",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "1c5827d483850954254820d779733dd3f53502ea005389a94a37e7a613dd8c05",
+      "case": "chunked_body",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 22,
+        "body_sha256": "9a44b6e5592455e49bb93f74827de73c15fa6c5bb14c842e1143ed43b96fea02",
+        "framing": "chunked",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Transfer-Encoding"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "transfer-encoding"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "1c5827d483850954254820d779733dd3f53502ea005389a94a37e7a613dd8c05",
+      "case": "chunked_body",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 22,
+        "body_sha256": "9a44b6e5592455e49bb93f74827de73c15fa6c5bb14c842e1143ed43b96fea02",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "4f682eaca42a70ec24c3010c339a9eefec8f21a1d30325d64c686831e212adb1",
+      "case": "h2_body_without_length",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 26,
+        "body_sha256": "0d9d5b55140d85d5410fb1a8e8ea41c4fcd8ac75266661b53fa28174a7045a81",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    },
+    {
+      "alpn": null,
+      "attribution": "upstream",
+      "canonical_sha256": "4f682eaca42a70ec24c3010c339a9eefec8f21a1d30325d64c686831e212adb1",
+      "case": "post_text_reference",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 26,
+        "body_sha256": "0d9d5b55140d85d5410fb1a8e8ea41c4fcd8ac75266661b53fa28174a7045a81",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Type",
+          "Content-Length"
+        ],
+        "header_names": [
+          "host",
+          "content-type",
+          "content-length"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "plain",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "http/1.1",
+      "attribution": "upstream",
+      "canonical_sha256": "4f682eaca42a70ec24c3010c339a9eefec8f21a1d30325d64c686831e212adb1",
+      "case": "post_text_reference",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/1.1",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 26,
+        "body_sha256": "0d9d5b55140d85d5410fb1a8e8ea41c4fcd8ac75266661b53fa28174a7045a81",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "Content-Type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h1",
+      "v5_calls": 1
+    },
+    {
+      "alpn": "h2",
+      "attribution": "upstream",
+      "canonical_sha256": "4f682eaca42a70ec24c3010c339a9eefec8f21a1d30325d64c686831e212adb1",
+      "case": "post_text_reference",
+      "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+      "client_error": null,
+      "client_status": 200,
+      "firewall_answer": false,
+      "front": {
+        "protocol": "HTTP/2.0",
+        "reached_gateway": true,
+        "status": 200,
+        "tls_protocol": "TLSv1.3",
+        "tls_reused": ".",
+        "upstream_status": "200"
+      },
+      "gateway": {
+        "applied": "FORWARD",
+        "canonical_outcome": "ACCEPT",
+        "deciding_stage": "v5",
+        "http_status": null,
+        "reason": null,
+        "records": 1
+      },
+      "received": {
+        "body_bytes": 26,
+        "body_sha256": "0d9d5b55140d85d5410fb1a8e8ea41c4fcd8ac75266661b53fa28174a7045a81",
+        "framing": "content-length",
+        "header_name_case": [
+          "Host",
+          "Content-Length",
+          "content-type"
+        ],
+        "header_names": [
+          "host",
+          "content-length",
+          "content-type"
+        ],
+        "headers": {
+          "content-type": "text/plain; charset=utf-8",
+          "host": "notes.fwlab.test"
+        },
+        "host": [
+          "notes.fwlab.test"
+        ],
+        "method": "POST",
+        "target": "/notes",
+        "version": "HTTP/1.1"
+      },
+      "received_count": 1,
+      "transport": "tls_h2",
+      "v5_calls": 1
+    }
+  ],
+  "schema": "firewall-local-stack-transport-check/v1",
+  "special_cases": [
+    {
+      "case": "cl_and_te_together",
+      "note": "",
+      "passed": true,
+      "property": "never delivered with two framings; rejected or re-framed once",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "gateway_protocol",
+          "canonical_sha256": null,
+          "case": "cl_te",
+          "client_body_sha256": "60df067097d45c79e1f0572ea39d8026ebced35e35c6d06e120c3ef7ad47d776",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "received_count": 0,
+          "transport": "plain",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "cl_te",
+          "client_body_sha256": "487ad0d2cf075f4328a1adf57ef428759ad4e2c873a8ebd2ad9653990829c9cf",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": false,
+            "status": 400,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h1",
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "absolute_form_target",
+      "note": "",
+      "passed": true,
+      "property": "never delivered in absolute form; if delivered, decided on the origin form",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "firewall",
+          "canonical_sha256": null,
+          "case": "absolute",
+          "client_body_sha256": "918fb4f6803bc5faa587e24fb15a1fa5040d50c9083698aa31b57b896c475d7c",
+          "client_error": null,
+          "client_status": 501,
+          "firewall_answer": true,
+          "gateway": {
+            "applied": "DENY",
+            "canonical_outcome": null,
+            "deciding_stage": "framing",
+            "http_status": 501,
+            "reason": "scope_target_form",
+            "records": 1
+          },
+          "received_count": 0,
+          "transport": "plain",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "upstream",
+          "canonical_sha256": "c6f6936806331c3ecb57a026f08e136b8e637c8fe86217192c8d4b816db95668",
+          "case": "absolute",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h1",
+          "v5_calls": 1
+        }
+      ]
+    },
+    {
+      "case": "h2_authority_host_mismatch",
+      "note": "which value wins is recorded in rows[0].received.host",
+      "passed": true,
+      "property": "at most one Host reaches the gateway",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "authority",
+          "client_body_sha256": "487ad0d2cf075f4328a1adf57ef428759ad4e2c873a8ebd2ad9653990829c9cf",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": false,
+            "status": 400,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h2",
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "h2_multiplexed_streams",
+      "note": "",
+      "passed": true,
+      "property": "each stream delivered once or blocked, decided once",
+      "rows": [
+        {
+          "decisions": 8,
+          "front_lines": 8,
+          "received": 7,
+          "statuses": [
+            200,
+            200,
+            200,
+            200,
+            200,
+            200,
+            200,
+            403
+          ],
+          "v5_calls": 8
+        }
+      ]
+    },
+    {
+      "case": "h2_stream_cancelled_mid_body",
+      "note": "",
+      "passed": true,
+      "property": "a cancelled stream is never classified nor delivered",
+      "rows": [
+        {
+          "decisions": 0,
+          "front": {
+            "bytes_sent": 0,
+            "connection": 49,
+            "connection_requests": 1,
+            "method": "POST",
+            "protocol": "HTTP/2.0",
+            "request_length": 1546,
+            "request_time": 0.301,
+            "status": 499,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_addr": "",
+            "upstream_connect_time": "",
+            "upstream_response_time": "",
+            "upstream_status": "",
+            "utc": 1793846482.623
+          },
+          "received": 0,
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "tls_h1_keepalive",
+      "note": "",
+      "passed": true,
+      "property": "three requests on one client connection, each delivered once",
+      "rows": [
+        {
+          "client_connections_at_front": 1,
+          "connection_requests": [
+            1,
+            2,
+            3
+          ],
+          "received": 3,
+          "statuses": [
+            200,
+            200,
+            200
+          ]
+        }
+      ]
+    },
+    {
+      "case": "tls_new_and_resumed",
+      "note": "whether a resumption happened is an observation for the latency runs, not a pass condition",
+      "passed": true,
+      "property": "new and resumed TLS sessions both served; reuse recorded",
+      "rows": [
+        {
+          "client_reused": [
+            false,
+            true
+          ],
+          "front_reused": [
+            ".",
+            "r"
+          ],
+          "statuses": [
+            200,
+            200
+          ],
+          "version": "TLSv1_2"
+        },
+        {
+          "client_reused": [
+            false,
+            true
+          ],
+          "front_reused": [
+            ".",
+            "r"
+          ],
+          "statuses": [
+            200,
+            200
+          ],
+          "version": "TLSv1_3"
+        }
+      ]
+    },
+    {
+      "case": "h2c_prior_knowledge_to_gateway",
+      "note": "",
+      "passed": true,
+      "property": "the gateway never forwards nor classifies HTTP/2",
+      "rows": [
+        {
+          "answer_head": "",
+          "decisions": 1,
+          "received": 0,
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "plain_http_to_tls_port",
+      "note": "",
+      "passed": true,
+      "property": "answered by the front, never forwarded",
+      "rows": [
+        {
+          "front": {
+            "bytes_sent": 393,
+            "connection": 55,
+            "connection_requests": 1,
+            "method": "GET",
+            "protocol": "HTTP/1.1",
+            "request_length": 42,
+            "request_time": 0.0,
+            "status": 400,
+            "tls_protocol": "",
+            "tls_reused": "",
+            "upstream_addr": "",
+            "upstream_connect_time": "",
+            "upstream_response_time": "",
+            "upstream_status": "",
+            "utc": 1793846485.8
+          },
+          "received": 0,
+          "status": 400,
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "dot_segments_raw",
+      "note": "a front refusal is not a model decision and is reported apart in any evaluation",
+      "passed": true,
+      "property": "the client's target is delivered unchanged, or the answer is attributed to the layer that refused it",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "upstream",
+          "canonical_sha256": "f0596d24005aa7825fbe06a7366f6d02d9a17e0a82c7e9e949ca4cb015e57ca3",
+          "case": "dot_segments_raw",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/static/../notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "plain",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "upstream",
+          "canonical_sha256": "f0596d24005aa7825fbe06a7366f6d02d9a17e0a82c7e9e949ca4cb015e57ca3",
+          "case": "dot_segments_raw",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/static/../notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h1",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "h2",
+          "attribution": "upstream",
+          "canonical_sha256": "f0596d24005aa7825fbe06a7366f6d02d9a17e0a82c7e9e949ca4cb015e57ca3",
+          "case": "dot_segments_raw",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/static/../notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h2",
+          "v5_calls": 1
+        }
+      ]
+    },
+    {
+      "case": "dot_segments_encoded_slash",
+      "note": "a front refusal is not a model decision and is reported apart in any evaluation",
+      "passed": true,
+      "property": "the client's target is delivered unchanged, or the answer is attributed to the layer that refused it",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "upstream",
+          "canonical_sha256": "382970947e1ff5ccd75c335ea1d11746fea9b31973c564e83c19a103e885e931",
+          "case": "dot_segments_encoded_slash",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/notes/..%2F..%2Fetc%2Fpasswd",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "plain",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "dot_segments_encoded_slash",
+          "client_body_sha256": "487ad0d2cf075f4328a1adf57ef428759ad4e2c873a8ebd2ad9653990829c9cf",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": false,
+            "status": 400,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h1",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "h2",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "dot_segments_encoded_slash",
+          "client_body_sha256": "487ad0d2cf075f4328a1adf57ef428759ad4e2c873a8ebd2ad9653990829c9cf",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": false,
+            "status": 400,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h2",
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "dot_segments_escape_root",
+      "note": "a front refusal is not a model decision and is reported apart in any evaluation",
+      "passed": true,
+      "property": "the client's target is delivered unchanged, or the answer is attributed to the layer that refused it",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "upstream",
+          "canonical_sha256": "ed02cac114f0ed577fe5be13ecf23a8576fd324af1b9b90ded3ec20ab55ccca2",
+          "case": "dot_segments_escape_root",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/../../etc/passwd",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "plain",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "dot_segments_escape_root",
+          "client_body_sha256": "487ad0d2cf075f4328a1adf57ef428759ad4e2c873a8ebd2ad9653990829c9cf",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": false,
+            "status": 400,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h1",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "h2",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "dot_segments_escape_root",
+          "client_body_sha256": "487ad0d2cf075f4328a1adf57ef428759ad4e2c873a8ebd2ad9653990829c9cf",
+          "client_error": null,
+          "client_status": 400,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": false,
+            "status": 400,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h2",
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "traversal_in_query",
+      "note": "a front refusal is not a model decision and is reported apart in any evaluation",
+      "passed": true,
+      "property": "the client's target is delivered unchanged, or the answer is attributed to the layer that refused it",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "upstream",
+          "canonical_sha256": "a4493cb7969b0538cb6e2624f2e3cbb83de2fb5677de8db6826053fdb3fb25be",
+          "case": "traversal_in_query",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/files?name=..%2F..%2Fprivate%2Fcanary.txt",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "plain",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "upstream",
+          "canonical_sha256": "a4493cb7969b0538cb6e2624f2e3cbb83de2fb5677de8db6826053fdb3fb25be",
+          "case": "traversal_in_query",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/files?name=..%2F..%2Fprivate%2Fcanary.txt",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h1",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "h2",
+          "attribution": "upstream",
+          "canonical_sha256": "a4493cb7969b0538cb6e2624f2e3cbb83de2fb5677de8db6826053fdb3fb25be",
+          "case": "traversal_in_query",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/files?name=..%2F..%2Fprivate%2Fcanary.txt",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h2",
+          "v5_calls": 1
+        }
+      ]
+    },
+    {
+      "case": "encoded_dot_segments",
+      "note": "a front refusal is not a model decision and is reported apart in any evaluation",
+      "passed": true,
+      "property": "the client's target is delivered unchanged, or the answer is attributed to the layer that refused it",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "upstream",
+          "canonical_sha256": "09e529647e7723bdd649a188f9a002c54a7555042613f115a5720c674aaf6422",
+          "case": "encoded_dot_segments",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/static/%2e%2e/notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "plain",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "upstream",
+          "canonical_sha256": "09e529647e7723bdd649a188f9a002c54a7555042613f115a5720c674aaf6422",
+          "case": "encoded_dot_segments",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/static/%2e%2e/notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h1",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "h2",
+          "attribution": "upstream",
+          "canonical_sha256": "09e529647e7723bdd649a188f9a002c54a7555042613f115a5720c674aaf6422",
+          "case": "encoded_dot_segments",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "/static/%2e%2e/notes",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h2",
+          "v5_calls": 1
+        }
+      ]
+    },
+    {
+      "case": "double_slash",
+      "note": "a front refusal is not a model decision and is reported apart in any evaluation",
+      "passed": true,
+      "property": "the client's target is delivered unchanged, or the answer is attributed to the layer that refused it",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "upstream",
+          "canonical_sha256": "b99d517216d22f219ed5ac8948e2d0c75293039f3a7fd689c40cdf9b915ee077",
+          "case": "double_slash",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "//notes//1",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "plain",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "upstream",
+          "canonical_sha256": "b99d517216d22f219ed5ac8948e2d0c75293039f3a7fd689c40cdf9b915ee077",
+          "case": "double_slash",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "//notes//1",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h1",
+          "v5_calls": 1
+        },
+        {
+          "alpn": "h2",
+          "attribution": "upstream",
+          "canonical_sha256": "b99d517216d22f219ed5ac8948e2d0c75293039f3a7fd689c40cdf9b915ee077",
+          "case": "double_slash",
+          "client_body_sha256": "3a0e9802d082f20261809a30531db442cd44e46bf13506ab79022a5f2c68f387",
+          "client_error": null,
+          "client_status": 200,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": true,
+            "status": 200,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "200"
+          },
+          "gateway": {
+            "applied": "FORWARD",
+            "canonical_outcome": "ACCEPT",
+            "deciding_stage": "v5",
+            "http_status": null,
+            "reason": null,
+            "records": 1
+          },
+          "received": {
+            "body_bytes": 0,
+            "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "framing": "none",
+            "header_name_case": [
+              "Host"
+            ],
+            "header_names": [
+              "host"
+            ],
+            "headers": {
+              "host": "notes.fwlab.test"
+            },
+            "host": [
+              "notes.fwlab.test"
+            ],
+            "method": "GET",
+            "target": "//notes//1",
+            "version": "HTTP/1.1"
+          },
+          "received_count": 1,
+          "transport": "tls_h2",
+          "v5_calls": 1
+        }
+      ]
+    },
+    {
+      "case": "body_over_canonical_limit",
+      "note": "",
+      "passed": true,
+      "property": "never delivered nor classified; answered 4xx by the gateway or the front",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "firewall",
+          "canonical_sha256": null,
+          "case": "body_over_canonical_limit",
+          "client_body_sha256": "918fb4f6803bc5faa587e24fb15a1fa5040d50c9083698aa31b57b896c475d7c",
+          "client_error": null,
+          "client_status": 413,
+          "firewall_answer": true,
+          "gateway": {
+            "applied": "DENY",
+            "canonical_outcome": null,
+            "deciding_stage": "canonical",
+            "http_status": 413,
+            "reason": "canonical_drop",
+            "records": 1
+          },
+          "received_count": 0,
+          "transport": "plain",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "firewall",
+          "canonical_sha256": null,
+          "case": "body_over_canonical_limit",
+          "client_body_sha256": "918fb4f6803bc5faa587e24fb15a1fa5040d50c9083698aa31b57b896c475d7c",
+          "client_error": null,
+          "client_status": 413,
+          "firewall_answer": true,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": true,
+            "status": 413,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "413"
+          },
+          "gateway": {
+            "applied": "DENY",
+            "canonical_outcome": null,
+            "deciding_stage": "canonical",
+            "http_status": 413,
+            "reason": "canonical_drop",
+            "records": 1
+          },
+          "received_count": 0,
+          "transport": "tls_h1",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "h2",
+          "attribution": "firewall",
+          "canonical_sha256": null,
+          "case": "body_over_canonical_limit",
+          "client_body_sha256": "918fb4f6803bc5faa587e24fb15a1fa5040d50c9083698aa31b57b896c475d7c",
+          "client_error": null,
+          "client_status": 413,
+          "firewall_answer": true,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": true,
+            "status": 413,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": "413"
+          },
+          "gateway": {
+            "applied": "DENY",
+            "canonical_outcome": null,
+            "deciding_stage": "canonical",
+            "http_status": 413,
+            "reason": "canonical_drop",
+            "records": 1
+          },
+          "received_count": 0,
+          "transport": "tls_h2",
+          "v5_calls": 0
+        }
+      ]
+    },
+    {
+      "case": "body_over_front_limit",
+      "note": "",
+      "passed": true,
+      "property": "never delivered nor classified; answered 4xx by the gateway or the front",
+      "rows": [
+        {
+          "alpn": null,
+          "attribution": "gateway_protocol",
+          "canonical_sha256": null,
+          "case": "body_over_front_limit",
+          "client_body_sha256": "34fb3a936db6e206ec8ecd1397166f969bea857da651e3cb52d99ceae2091afe",
+          "client_error": null,
+          "client_status": 413,
+          "firewall_answer": false,
+          "received_count": 0,
+          "transport": "plain",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "http/1.1",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "body_over_front_limit",
+          "client_body_sha256": "fdf9229ad3bea8e754a94171f5a8059ccb142b9381400648b08abfad0cfeed28",
+          "client_error": null,
+          "client_status": 413,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/1.1",
+            "reached_gateway": false,
+            "status": 413,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h1",
+          "v5_calls": 0
+        },
+        {
+          "alpn": "h2",
+          "attribution": "front",
+          "canonical_sha256": null,
+          "case": "body_over_front_limit",
+          "client_body_sha256": "fdf9229ad3bea8e754a94171f5a8059ccb142b9381400648b08abfad0cfeed28",
+          "client_error": null,
+          "client_status": 413,
+          "firewall_answer": false,
+          "front": {
+            "protocol": "HTTP/2.0",
+            "reached_gateway": false,
+            "status": 413,
+            "tls_protocol": "TLSv1.3",
+            "tls_reused": ".",
+            "upstream_status": ""
+          },
+          "received_count": 0,
+          "transport": "tls_h2",
+          "v5_calls": 0
+        }
+      ]
+    }
+  ],
+  "verdicts": [
+    {
+      "case": "get_root",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "get_static",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "get_query_encoded",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "post_form",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "post_json",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "put_json",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "patch_text",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "delete_bearer",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "options",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "head",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "session_csrf_headers",
+      "note": "HTTP/2 sends two cookie fields; the front must join them as one Cookie header",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "underscore_header",
+      "note": "nginx drops header names with underscores (default); plain HTTP/1.1 keeps it",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "block_query",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "block_json",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "body_19000",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "chunked_body",
+      "note": "the front re-frames a chunked body with Content-Length; the canonical text must not change",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1"
+      ]
+    },
+    {
+      "case": "h2_body_without_length",
+      "note": "compared with post_text_reference",
+      "problems": [],
+      "transports": [
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "post_text_reference",
+      "note": "",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1",
+        "tls_h2"
+      ]
+    },
+    {
+      "case": "chunked_body[plain] == chunked_body[tls_h1]",
+      "note": "same canonical text and body after re-framing",
+      "problems": [],
+      "transports": [
+        "plain",
+        "tls_h1"
+      ]
+    },
+    {
+      "case": "h2_body_without_length[tls_h2] == post_text_reference[plain]",
+      "note": "same canonical text and body after re-framing",
+      "problems": [],
+      "transports": [
+        "tls_h2",
+        "plain"
+      ]
+    }
+  ]
+}

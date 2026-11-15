@@ -1,0 +1,280 @@
+{
+  "dataset_name": "hybrid_analyzer_v1",
+  "status": "frozen (D51); immutable once a model is trained on it — any change is hybrid_analyzer_v2",
+  "issue": 53,
+  "feature_schema": "request-features/v2",
+  "feature_fields": [
+    "method",
+    "path_length",
+    "query_length",
+    "body_length",
+    "has_body",
+    "content_type",
+    "body_format",
+    "query_param_count",
+    "body_param_count",
+    "total_param_count",
+    "repeated_param_name_count",
+    "alnum_ratio",
+    "symbol_count",
+    "symbol_ratio",
+    "non_ascii_count",
+    "percent_encoded_count",
+    "percent_encoded_ratio",
+    "has_percent_encoding",
+    "longest_char_run",
+    "entropy_bits_per_char",
+    "path_depth",
+    "json_depth",
+    "single_quote_count",
+    "double_quote_count",
+    "parenthesis_count",
+    "semicolon_count",
+    "slash_count",
+    "backslash_count",
+    "angle_bracket_count",
+    "pipe_count",
+    "ampersand_count",
+    "equals_count",
+    "percent_count",
+    "brace_count"
+  ],
+  "target_schema": "analyzer-targets/v1",
+  "source": {
+    "dataset": "datasets/v4_clean",
+    "manifest": "datasets/manifest_v4_clean.json",
+    "sha256": {
+      "train": "4459f6861629279395acc57f99173d82bbda4dc8205a5f3bd08750dd528d262b",
+      "eval": "61f15591203609b4c583773184cd25edd6d1adc5f86959e009cfd47f6d370859"
+    },
+    "v4_generator_git_commit": "1bf412fb843992399665e96ec034016462feda7f",
+    "modified": false
+  },
+  "builder": {
+    "head": "97a862b94cd2f669ee03cc077bb9f94836093f39",
+    "builder_path": "scripts/dataset/build_hybrid_analyzer_v1.py",
+    "builder_committed_unchanged": false
+  },
+  "external_test_v1": "not read",
+  "mapping": {
+    "attack": {
+      "ALLOW": 0,
+      "BLOCK": 1
+    },
+    "category": {
+      "SQL Injection": "sql_injection",
+      "XSS Injection": "xss",
+      "Directory Traversal": "path_file_access",
+      "File Inclusion": "path_file_access",
+      "Command Injection": "command_injection",
+      "Server Side Template Injection": "ssti",
+      "Open Redirect": "open_redirect",
+      "Server Side Request Forgery": "ssrf",
+      "<every other BLOCK category>": "other_attack"
+    },
+    "not_fitted": {
+      "JSON Web Token": "unsupported_jwt"
+    }
+  },
+  "grouping": "connected components over V4 train of 'same canonical request OR same feature vector'; canonical request = parse_dataset_v4.canonical_key(f'{method} {path}?{query}\\n{content_type}\\n{body}'); feature vector = the 34 RequestFeatures v2 values in field order; group key = smallest canonical request in the component",
+  "validation": {
+    "salt": "hybrid-analyzer-v1-validation",
+    "fraction": 0.2,
+    "rule": "int.from_bytes(sha256(salt + '\\x00' + group_key)[:8], 'big') % 10000 < 2000"
+  },
+  "views": {
+    "internal_test_full": "role == internal_test and slice is null",
+    "internal_test_feature_disjoint": "internal_test_full and not meta_feature_vector_in_train",
+    "unsupported_jwt": "slice == unsupported_jwt (never fitted; eval rows are the slice)",
+    "flag_reference_set": "TRAIN u VALIDATION, JWT excluded"
+  },
+  "model_inputs": "only the `features` object; every `meta_` field, `role`, `slice` and `row_id` is offline metadata",
+  "counts": {
+    "groups": 18720,
+    "largest_group_rows": 417,
+    "train_rows": 20141,
+    "validation_rows": 4993,
+    "train_fitted_rows": 20059,
+    "validation_fitted_rows": 4980,
+    "internal_test_full_rows": 6190,
+    "internal_test_feature_disjoint_rows": 5456,
+    "unsupported_jwt_eval_rows": 16,
+    "flag_feature_vector_in_train": 734,
+    "flag_canonical_request_in_train": 127,
+    "validation_vectors_in_train": 0,
+    "validation_canonical_requests_in_train": 0
+  },
+  "counts_expected_from_phase2a": {
+    "groups": 18720,
+    "largest_group_rows": 417,
+    "train_rows": 20141,
+    "validation_rows": 4993,
+    "train_fitted_rows": 20059,
+    "validation_fitted_rows": 4980,
+    "internal_test_full_rows": 6190,
+    "internal_test_feature_disjoint_rows": 5456,
+    "unsupported_jwt_eval_rows": 16,
+    "flag_feature_vector_in_train": 734,
+    "flag_canonical_request_in_train": 127,
+    "validation_vectors_in_train": 0,
+    "validation_canonical_requests_in_train": 0
+  },
+  "unsupported_jwt_rows_by_role": {
+    "train": 82,
+    "validation": 13,
+    "internal_test": 16
+  },
+  "validation_share_of_v4_train": 0.1987,
+  "targets": {
+    "train": {
+      "BENIGN": 10028,
+      "command_injection": 491,
+      "open_redirect": 162,
+      "other_attack": 708,
+      "path_file_access": 3285,
+      "sql_injection": 2566,
+      "ssrf": 144,
+      "ssti": 315,
+      "xss": 2360
+    },
+    "validation": {
+      "BENIGN": 2539,
+      "command_injection": 116,
+      "open_redirect": 46,
+      "other_attack": 161,
+      "path_file_access": 821,
+      "sql_injection": 617,
+      "ssrf": 42,
+      "ssti": 78,
+      "xss": 560
+    },
+    "internal_test_full": {
+      "BENIGN": 3103,
+      "command_injection": 134,
+      "open_redirect": 51,
+      "other_attack": 226,
+      "path_file_access": 1000,
+      "sql_injection": 817,
+      "ssrf": 63,
+      "ssti": 88,
+      "xss": 708
+    },
+    "internal_test_feature_disjoint": {
+      "BENIGN": 2423,
+      "command_injection": 134,
+      "open_redirect": 50,
+      "other_attack": 226,
+      "path_file_access": 1000,
+      "sql_injection": 765,
+      "ssrf": 63,
+      "ssti": 88,
+      "xss": 707
+    }
+  },
+  "attack": {
+    "train": {
+      "0": 10028,
+      "1": 10031
+    },
+    "validation": {
+      "0": 2539,
+      "1": 2441
+    },
+    "internal_test_full": {
+      "0": 3103,
+      "1": 3087
+    },
+    "internal_test_feature_disjoint": {
+      "0": 2423,
+      "1": 3033
+    }
+  },
+  "v4_reasons": {
+    "train": {
+      "BENIGN": 10028,
+      "CRLF Injection": 324,
+      "Command Injection": 491,
+      "Cross-Site Request Forgery": 31,
+      "Directory Traversal": 1615,
+      "File Inclusion": 1670,
+      "GraphQL Injection": 62,
+      "HTTP Parameter Pollution": 12,
+      "Insecure Deserialization": 11,
+      "LDAP Injection": 63,
+      "NoSQL Injection": 79,
+      "Open Redirect": 162,
+      "Request Smuggling": 7,
+      "SQL Injection": 2566,
+      "Server Side Request Forgery": 144,
+      "Server Side Template Injection": 315,
+      "XPath Injection": 21,
+      "XSS Injection": 2360,
+      "XXE Injection": 98
+    },
+    "validation": {
+      "BENIGN": 2539,
+      "CRLF Injection": 75,
+      "Command Injection": 116,
+      "Cross-Site Request Forgery": 7,
+      "Directory Traversal": 390,
+      "File Inclusion": 431,
+      "GraphQL Injection": 13,
+      "HTTP Parameter Pollution": 5,
+      "LDAP Injection": 17,
+      "NoSQL Injection": 18,
+      "Open Redirect": 46,
+      "SQL Injection": 617,
+      "Server Side Request Forgery": 42,
+      "Server Side Template Injection": 78,
+      "XPath Injection": 8,
+      "XSS Injection": 560,
+      "XXE Injection": 18
+    },
+    "internal_test_full": {
+      "BENIGN": 3103,
+      "CRLF Injection": 112,
+      "Command Injection": 134,
+      "Cross-Site Request Forgery": 8,
+      "Directory Traversal": 506,
+      "File Inclusion": 494,
+      "GraphQL Injection": 22,
+      "HTTP Parameter Pollution": 3,
+      "Insecure Deserialization": 5,
+      "LDAP Injection": 21,
+      "NoSQL Injection": 17,
+      "Open Redirect": 51,
+      "SQL Injection": 817,
+      "Server Side Request Forgery": 63,
+      "Server Side Template Injection": 88,
+      "XPath Injection": 11,
+      "XSS Injection": 708,
+      "XXE Injection": 27
+    },
+    "internal_test_feature_disjoint": {
+      "BENIGN": 2423,
+      "CRLF Injection": 112,
+      "Command Injection": 134,
+      "Cross-Site Request Forgery": 8,
+      "Directory Traversal": 506,
+      "File Inclusion": 494,
+      "GraphQL Injection": 22,
+      "HTTP Parameter Pollution": 3,
+      "Insecure Deserialization": 5,
+      "LDAP Injection": 21,
+      "NoSQL Injection": 17,
+      "Open Redirect": 50,
+      "SQL Injection": 765,
+      "Server Side Request Forgery": 63,
+      "Server Side Template Injection": 88,
+      "XPath Injection": 11,
+      "XSS Injection": 707,
+      "XXE Injection": 27
+    }
+  },
+  "artifact": {
+    "path": "datasets/hybrid_analyzer_v1/hybrid_analyzer_v1.jsonl",
+    "rows": 31340,
+    "bytes": 49453235,
+    "sha256": "b370186b8d3c461e4efa462bf36c29e2e9b018df9b077f23660aa7025754cd87"
+  }
+}

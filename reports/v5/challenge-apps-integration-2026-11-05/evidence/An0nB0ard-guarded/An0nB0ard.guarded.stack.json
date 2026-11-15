@@ -1,0 +1,47 @@
+{
+  "schema": "firewall-local-stack/v1",
+  "mode": "CASCADE_ACTIVE",
+  "manifest": {
+    "path": "reports/v5/model2-guarded-2026-11-05/manifest.EXPERIMENTAL.json",
+    "sha256": "d0f4e0cff6d4394b4d895a2c7aa665f36a85b4819a8800fc3ff6cb646a800e65"
+  },
+  "ports": {
+    "front_tls": 8443,
+    "front_status": 8444,
+    "gateway": 8080,
+    "guard": 8081,
+    "admin": 8090,
+    "v5": 8001
+  },
+  "front": {
+    "image": "nginx:1.25-alpine",
+    "http2": true,
+    "workers": 2,
+    "max_body": "64k",
+    "upstream_keepalive": 16,
+    "upstream_timeout": "10s",
+    "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00"
+  },
+  "app": {
+    "image": "fwlab-challenge/an0nb0ard:lab",
+    "image_id": "sha256:4700125b42bfab235dcb01d627561f259466da344edfd83cbc4c38efe21da42a",
+    "port": 1337,
+    "hostname": "an0nb0ard.fwlab.test"
+  },
+  "gateway": {
+    "body_size_limit": "64k",
+    "v5_timeout_seconds": 3.0,
+    "decision_deadline_seconds": 5.0,
+    "max_inflight": 8,
+    "max_waiting": 16
+  },
+  "fast_path": null,
+  "crs": {
+    "image": "owasp/modsecurity-crs:4.25.2-nginx-alpine-202610180210-lts",
+    "port": 8460,
+    "blocking_paranoia": 1,
+    "anomaly_inbound": 5,
+    "anomaly_outbound": 4,
+    "image_id": "sha256:57fd215e2894638a02d235f88510fa2a129d64740f0edb6798ca0e4aa2f02457"
+  }
+}

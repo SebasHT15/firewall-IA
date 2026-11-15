@@ -1,0 +1,284 @@
+{
+  "issue": 53,
+  "run": "run-002",
+  "created_utc": "2026-10-04T05:37:49Z",
+  "stage_order": [
+    "select",
+    "bench",
+    "freeze",
+    "test"
+  ],
+  "dataset": {
+    "name": "hybrid_analyzer_v2",
+    "manifest": "datasets/manifest_hybrid_analyzer_v2.json",
+    "manifest_sha256": "40f958eaf538b36a4198bed4a459347a6f680a2d98229aeffa52fc7a7d2e6b83",
+    "grouping": "connected components over V4 train of 'same canonical request OR same feature vector OR same V4 generator group'; canonical request = parse_dataset_v4.canonical_key(f'{method} {path}?{query}\\n{content_type}\\n{body}'); feature vector = the 34 RequestFeatures v2 values; generator group = the generator's in-memory _gid, recovered by byte-identical regeneration (scripts/dataset/recover_v4_provenance.py); group key = smallest canonical request of the component",
+    "validation_split": {
+      "salt": "hybrid-analyzer-v2-validation",
+      "fraction": 0.2,
+      "rule": "per stratum (group target or 'mixed'), groups ordered by sha256(salt NUL group_key); a group joins VALIDATION when that brings the stratum's VALIDATION rows closer to fraction x rows"
+    },
+    "artifact_sha256": "e8da8674435ed65057161bb4c74b41dc4aa1d8bf876b0327c53ecba7c0d99b75",
+    "feature_schema": "request-features/v2",
+    "target_schema": "analyzer-targets/v1"
+  },
+  "fitted_rows": {
+    "attack": {
+      "train": 20104,
+      "validation": 4935
+    },
+    "category": {
+      "train": 9987,
+      "validation": 2485
+    }
+  },
+  "model_input": "RequestFeatures v2 only (34 fields); no meta_ field",
+  "preprocessing": {
+    "linear (logreg)": "int counts -> log1p (grid-checked) -> standardize with TRAIN mean/std; float ratios -> standardize; booleans 0/1 (not scaled); method / content_type one-hot over TRAIN values + `__other__`; body_format one-hot over its closed enum",
+    "tree (random_forest, hist_gb)": "numerics raw; booleans 0/1; same one-hot; nothing else",
+    "fit": "TRAIN rows only (attack: all fitted TRAIN rows; category: TRAIN BLOCK rows)"
+  },
+  "families": [
+    "logreg",
+    "random_forest",
+    "hist_gb"
+  ],
+  "mlp": "not trained: tree families reach VALIDATION group-weighted attack ROC-AUC ~0.995; remaining attack errors concentrate in a few groups; category limits are label/endpoint-bound (D46 ablation), not capacity-bound",
+  "attack_grid": {
+    "logreg": [
+      {
+        "C": 0.01,
+        "log1p": true
+      },
+      {
+        "C": 0.1,
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "log1p": true
+      },
+      {
+        "C": 10.0,
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "log1p": false
+      }
+    ],
+    "random_forest": [
+      {
+        "n_estimators": 100,
+        "min_samples_leaf": 1
+      },
+      {
+        "n_estimators": 300,
+        "min_samples_leaf": 1
+      },
+      {
+        "n_estimators": 100,
+        "min_samples_leaf": 5
+      },
+      {
+        "n_estimators": 300,
+        "min_samples_leaf": 5
+      }
+    ],
+    "hist_gb": [
+      {
+        "max_iter": 100,
+        "max_leaf_nodes": 15
+      },
+      {
+        "max_iter": 100,
+        "max_leaf_nodes": 31
+      },
+      {
+        "max_iter": 300,
+        "max_leaf_nodes": 15
+      },
+      {
+        "max_iter": 300,
+        "max_leaf_nodes": 31
+      }
+    ]
+  },
+  "category_grid": {
+    "logreg": [
+      {
+        "C": 0.1,
+        "class_weight": null,
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": null,
+        "log1p": true
+      },
+      {
+        "C": 10.0,
+        "class_weight": null,
+        "log1p": true
+      },
+      {
+        "C": 0.1,
+        "class_weight": "balanced",
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": "balanced",
+        "log1p": true
+      },
+      {
+        "C": 10.0,
+        "class_weight": "balanced",
+        "log1p": true
+      },
+      {
+        "C": 1.0,
+        "class_weight": null,
+        "log1p": false
+      }
+    ],
+    "random_forest": [
+      {
+        "n_estimators": 100,
+        "class_weight": null
+      },
+      {
+        "n_estimators": 300,
+        "class_weight": null
+      },
+      {
+        "n_estimators": 100,
+        "class_weight": "balanced_subsample"
+      },
+      {
+        "n_estimators": 300,
+        "class_weight": "balanced_subsample"
+      }
+    ],
+    "hist_gb": [
+      {
+        "max_iter": 100,
+        "class_weight": null
+      },
+      {
+        "max_iter": 300,
+        "class_weight": null
+      },
+      {
+        "max_iter": 100,
+        "class_weight": "balanced"
+      },
+      {
+        "max_iter": 300,
+        "class_weight": "balanced"
+      }
+    ]
+  },
+  "fixed_hyperparameters": {
+    "logreg": "lbfgs, max_iter=5000, L2",
+    "random_forest": "max_features='sqrt' (default), bootstrap, n_jobs=-1 to fit / 1 to predict",
+    "hist_gb": "learning_rate=0.1, early_stopping=False, other defaults"
+  },
+  "seed": 0,
+  "stability_seeds": [
+    1,
+    2
+  ],
+  "selection_rules": {
+    "attack (per family)": "per family, highest VALIDATION ROC-AUC; ties (6 decimals) -> lowest Brier; then first in grid order",
+    "category (per family)": "per family, highest VALIDATION macro-F1; ties (6 decimals) -> lowest log loss; then first in grid order",
+    "calibration": "per family, out-of-fold predictions over 5 group folds of VALIDATION for native / sigmoid / isotonic, in that order of complexity; start from native and move to the next more complex method only if its paired group-bootstrap 95% interval of the OOF Brier difference (candidate - current) lies entirely below 0; the chosen calibrator is then refit on all of VALIDATION; AND the candidate's OOF log loss must not exceed the current method's (log-loss guard)",
+    "calibration_guard_origin": "added for run-002 at the owner's instruction to be careful with isotonic after run-001, where isotonic produced exact 0/1 probabilities (seen on VALIDATION before run-001's test) and tripled log loss on INTERNAL TEST (seen in run-001's test). It is therefore informed by the first INTERNAL TEST look; recorded as such (D54)",
+    "winner_attack": "mechanical: among the three families' selected + calibrated models, the lowest VALIDATION calibrated-OOF Brier is 'best'; every family whose paired group-bootstrap 95% interval of (Brier family - Brier best) includes 0 is statistically tied with it; among the tied, the lowest bench attack-inference P50 wins (then smaller artifact)",
+    "winner_category": "mechanical: highest VALIDATION macro-F1 is 'best'; families whose paired group-bootstrap 95% interval of (macro-F1 family - macro-F1 best) includes 0 are tied; among the tied, the lowest bench category-inference P50 wins (then smaller artifact)",
+    "diagnostics": "row-weighted metrics are the reported metrics; group-weighted (each D54 group weighs 1) and error concentration are reported next to them as a standing diagnostic, never as a selection criterion",
+    "threshold": "0.5 is a reporting-only threshold for confusion counts; it is not the firewall's operating point (decided later with the Small Decision Model)",
+    "grids": "unchanged from run-001 (same families, same configurations); no MLP",
+    "second_look": "INTERNAL TEST is read once, after `freeze`, and labelled: SECOND-LOOK INTERNAL EVALUATION AFTER METHODOLOGY CORRECTION — NOT AN UNTOUCHED TEST"
+  },
+  "feature_order": [
+    "method",
+    "path_length",
+    "query_length",
+    "body_length",
+    "has_body",
+    "content_type",
+    "body_format",
+    "query_param_count",
+    "body_param_count",
+    "total_param_count",
+    "repeated_param_name_count",
+    "alnum_ratio",
+    "symbol_count",
+    "symbol_ratio",
+    "non_ascii_count",
+    "percent_encoded_count",
+    "percent_encoded_ratio",
+    "has_percent_encoding",
+    "longest_char_run",
+    "entropy_bits_per_char",
+    "path_depth",
+    "json_depth",
+    "single_quote_count",
+    "double_quote_count",
+    "parenthesis_count",
+    "semicolon_count",
+    "slash_count",
+    "backslash_count",
+    "angle_bracket_count",
+    "pipe_count",
+    "ampersand_count",
+    "equals_count",
+    "percent_count",
+    "brace_count"
+  ],
+  "calibration": {
+    "methods": [
+      "native",
+      "sigmoid",
+      "isotonic"
+    ],
+    "folds": 5,
+    "fold_assignment": "sha256('hybrid-analyzer-v1-calibration-cv' NUL meta_group_id)[:8] % 5"
+  },
+  "ablations": {
+    "path": [
+      "path_length",
+      "path_depth"
+    ],
+    "path_and_slash_diagnostic": [
+      "path_length",
+      "path_depth",
+      "slash_count"
+    ]
+  },
+  "reporting_threshold": 0.5,
+  "bootstrap": {
+    "n_boot": 1000,
+    "unit": "VALIDATION group (meta_group_id); INTERNAL TEST meta_group_id"
+  },
+  "internal_test_rows_loaded_by_select": 0,
+  "permutation_importance": {
+    "repeats": 5,
+    "data": "VALIDATION",
+    "unit": "RequestFeatures field (all its encoder columns)"
+  },
+  "external_test_v1": "not read (D53)",
+  "environment": {
+    "python": "3.12.15",
+    "numpy": "2.5.3",
+    "scikit_learn": "1.9.1",
+    "scipy": "1.18.1",
+    "joblib": "1.6.0",
+    "threadpoolctl": "3.7.0",
+    "platform": "Linux-7.0.0-38-generic-x86_64-with-glibc2.43",
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900HX",
+    "logical_cpus": 32,
+    "interpreter": "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python"
+  }
+}

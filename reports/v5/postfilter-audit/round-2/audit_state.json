@@ -1,0 +1,157 @@
+{
+  "categories_audited": [
+    "Command Injection",
+    "SQL Injection",
+    "Server Side Template Injection",
+    "XSS Injection"
+  ],
+  "code": {
+    "scripts/dataset/audit_v5_attack_pool.py": "0a16c7a7466170b7d6a0020d85e00c6d3fba3e42cbda32c55d6af9d6d07afc78",
+    "scripts/dataset/audit_v5_postfilter.py": "479c4cba950e92d2632156fa5ffbbf176ed6a2c7255d88b1fcd211a0dd60e5e3"
+  },
+  "continuation_scope": "documented filter correction; no category results inherited",
+  "denylist": {
+    "approval": {
+      "approved_by": "owner (SebasHT15)",
+      "approved_content_sha256_before_approval": "bb88c7611375f6279469b017127eb289f788a0ba65b230a93e3ac102e6ef88cc",
+      "date": "2026-10-19",
+      "decision_ref": "D66 (DECISIONS.md); owner approval in the data-readiness session 2026-10-19, issue #77; evidence reports/v5/data-readiness/README.md §B",
+      "scope": "final third-party deny-list for this V5 build round (spec §3.1 / §11.2 'Final third-party deny-list'); the PATT structural filters, including the XSS rules literal_backslash_x and prose_sentence, are kept unchanged (owner, same decision)"
+    },
+    "denied_files": 26,
+    "path": "scripts/dataset/v5_lexicon/patt_third_party_denylist_v2.json",
+    "sha256": "3e5570580a10319fc03ca622c034786a384a3ea6dddaf95bfeb413cf3fc7dd7e",
+    "status": "APPROVED"
+  },
+  "filter_change_doc": {
+    "path": "reports/v5/training-readiness/FILTER_CORRECTION_FOR_CONTINUATION_2026-10-24.md",
+    "sha256": "5becbcff2789a674c9217535095ac9ddd31412b2a09e24470d0b7dcf2e35a5d0"
+  },
+  "human_sample": {
+    "path": "human_review/human_review_sample.csv",
+    "rows": 80,
+    "sha256": "1a4e568d79b613bb82d059ee87be7d7472a2df653a5302400c5d8dc951dd12e6"
+  },
+  "human_seed": "v5-postfilter-r4-round2-34d57bacc6248ed4db49847af737d077/human",
+  "human_validation_performed": false,
+  "legacy_human_sample_is_not_r3_selection": true,
+  "method": "stratified by source file within category; within a file rank by sha256(seed NUL '' NUL category NUL record_id); human subsample drawn from the sample with human_seed before any annotation exists",
+  "mode": "REAL",
+  "params": {
+    "human_min_per_category": 20,
+    "max_human_incorrect_share": 0.2,
+    "max_rounds": 2,
+    "max_wilson_upper_incorrect": 0.2,
+    "max_wilson_upper_uncertain_or_incorrect": 0.35,
+    "n_min_per_category": 50,
+    "wilson_z": 1.959963984540054
+  },
+  "params_status": "PROPOSED (V5-DATA-SPEC-r3 §11.2; ratified in the dataset preregistration)",
+  "per_category": {
+    "Command Injection": {
+      "by_file": {
+        "Command Injection/Intruder/command-execution-unix.txt": 7,
+        "Command Injection/Intruder/command_exec.txt": 36,
+        "Command Injection/README.md": 7
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "SQL Injection": {
+      "by_file": {
+        "SQL Injection/BigQuery Injection.md": 1,
+        "SQL Injection/Cassandra Injection.md": 1,
+        "SQL Injection/DB2 Injection.md": 1,
+        "SQL Injection/Intruder/Generic_ErrorBased.txt": 4,
+        "SQL Injection/Intruder/Generic_Fuzz.txt": 1,
+        "SQL Injection/Intruder/Generic_UnionSelect.txt": 18,
+        "SQL Injection/Intruder/SQLi_Polyglots.txt": 1,
+        "SQL Injection/MSSQL Injection.md": 5,
+        "SQL Injection/MySQL Injection.md": 6,
+        "SQL Injection/OracleSQL Injection.md": 2,
+        "SQL Injection/PostgreSQL Injection.md": 3,
+        "SQL Injection/README.md": 4,
+        "SQL Injection/SQLite Injection.md": 2,
+        "SQL Injection/SQLmap.md": 1
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "Server Side Template Injection": {
+      "by_file": {
+        "Server Side Template Injection/ASP.md": 1,
+        "Server Side Template Injection/Elixir.md": 2,
+        "Server Side Template Injection/Java.md": 12,
+        "Server Side Template Injection/JavaScript.md": 4,
+        "Server Side Template Injection/PHP.md": 9,
+        "Server Side Template Injection/Python.md": 18,
+        "Server Side Template Injection/README.md": 1,
+        "Server Side Template Injection/Ruby.md": 3
+      },
+      "human": 20,
+      "sample": 50
+    },
+    "XSS Injection": {
+      "by_file": {
+        "XSS Injection/1 - XSS Filter Bypass.md": 16,
+        "XSS Injection/2 - XSS Polyglot.md": 4,
+        "XSS Injection/3 - XSS Common WAF Bypass.md": 3,
+        "XSS Injection/4 - CSP Bypass.md": 1,
+        "XSS Injection/5 - XSS in Angular.md": 4,
+        "XSS Injection/Intruders/xss_payloads_quick.txt": 5,
+        "XSS Injection/Intruders/xss_swf_fuzz.txt": 4,
+        "XSS Injection/README.md": 13
+      },
+      "human": 20,
+      "sample": 50
+    }
+  },
+  "pool": {
+    "path": "../../Documents/Codex/2026-10-22/firewall-c1-model2-continuidad/work/readmission-009/audit-input/attack_pool.jsonl",
+    "records": 3875,
+    "sha256": "8383c00e670e8d6700f1d50bc8609511ff38022ee41458d5929c62fdd01958e5"
+  },
+  "pool_manifest_sha256": "8a9096aa7ccf480e58f180da66222c3fd382cbb168c31e29ca36e8bf79665a40",
+  "prior_r4_evidence": {
+    "exchange": {
+      "path": "reports/v5/postfilter-audit/r3-execution-2026-10-23/category-outcomes-for-consumers.json",
+      "sha256": "7549e7adf47ec0ad25a1b6147e61c191a9064c270e583de31f9d124dce230b46"
+    },
+    "pool": {
+      "path": "datasets/v5_sources/attack/attack_pool.jsonl",
+      "sha256": "ba385fa256d5e5c5f591d4055ab272136eb4d14415de86a21dcd95a3b88c0f21"
+    },
+    "pool_manifest": {
+      "path": "datasets/v5_sources/attack/manifest.json",
+      "sha256": "12887aa6c1a4505be563c1b30b56f347ac371b94779ae3b1014badcabd9aa5d1"
+    },
+    "report": {
+      "path": "reports/v5/postfilter-audit/r3-execution-2026-10-23/report.json",
+      "sha256": "e41114dc44a72b51971afef9f1c8e0b25137cd90ca1050dd612925b140585d5e"
+    },
+    "schema": "v5-ai-audit-evidence/v1-PROPOSED",
+    "state": {
+      "path": "reports/v5/postfilter-audit/round-1/audit_state.json",
+      "sha256": "33924212d3dc06d645bbef27b6fedda9e18d09f76b1b7f9cac289d511a3d2def"
+    }
+  },
+  "r3_preselected_sample": {
+    "path": "sample.jsonl",
+    "rows": 200,
+    "rule": "entire continuation frame (at most 200), fixed before annotations",
+    "sha256": "6a9d1c427bfe298f66c87d96f3c4c82bfdad780df2a5b1ddcf911a2ddede7311"
+  },
+  "r4_preregistration": {
+    "path": "reports/v5/postfilter-audit/preregistration/v5-postfilter-prereg-r4.json",
+    "sha256": "1039a3ddf4d614c1700d1fd13303c50dec50619502fcc13a8df8243c5cdd73bf"
+  },
+  "review_method": "D67_R4_AI_ONLY_CONTINUATION",
+  "round": 2,
+  "sample": {
+    "path": "sample.jsonl",
+    "rows": 200,
+    "sha256": "6a9d1c427bfe298f66c87d96f3c4c82bfdad780df2a5b1ddcf911a2ddede7311"
+  },
+  "schema": "v5-postfilter-audit/v1",
+  "seed": "v5-postfilter-r4-round2-34d57bacc6248ed4db49847af737d077"
+}

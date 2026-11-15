@@ -131,6 +131,38 @@ class TestRuntimeConfig(unittest.TestCase):
     def test_base_model_unchanged(self):
         self.assertEqual(core.BASE_MODEL, "TinyLlama/TinyLlama-1.1B-Chat-v1.0")
 
+class TestTruncatedGeneration(unittest.TestCase):
+    """`ended_with_eos` is the only thing that separates a complete answer from
+    one cut at the token cap: `EXTRACT_RE` accepts both (it ends in `$`)."""
+
+    CUT = "ALLOW | Normal HTTP request with no attack patterns"
+
+    def test_regex_alone_cannot_see_truncation(self):
+        # Documents WHY the flag exists: this is the legacy text-only result.
+        self.assertEqual(core.parse_prediction(self.CUT),
+                         ("ALLOW", "Normal HTTP request with no attack patterns", "ok"))
+        self.assertEqual(core.parse_prediction(self.CUT, ended_with_eos=None)[2], "ok")
+
+    def test_not_ended_with_eos_is_invalid(self):
+        for text in (self.CUT, "ALLOW | N", "BLOCK | SQL inj",
+                     "ALLOW | Normal HTTP request with no attack patterns detected.",
+                     "", None, "garbage"):
+            self.assertEqual(core.parse_prediction(text, ended_with_eos=False),
+                             (None, None, "invalid"), text)
+
+    def test_ended_with_eos_parses_as_before(self):
+        for text in ("ALLOW | Normal HTTP request with no attack patterns detected.",
+                     "BLOCK | SQL injection payload detected.",
+                     "  BLOCK |   Path traversal attack detected.  ",
+                     "BLOCK | no period here",
+                     "total garbage, no contract", "", None):
+            self.assertEqual(core.parse_prediction(text, ended_with_eos=True),
+                             core.parse_prediction(text), text)
+
+    def test_ended_with_eos_never_fabricates_a_decision(self):
+        self.assertEqual(core.parse_prediction("", ended_with_eos=True), (None, None, "invalid"))
+        self.assertEqual(core.parse_prediction(None, ended_with_eos=True), (None, None, "invalid"))
+
 
 if __name__ == "__main__":
     unittest.main()

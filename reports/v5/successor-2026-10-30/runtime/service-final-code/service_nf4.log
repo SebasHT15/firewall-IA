@@ -1,0 +1,20 @@
+INFO:     Started server process [71011]
+INFO:     Waiting for application startup.
+2026-10-30 19:30:14,111 INFO    firewall.control_plane.v5: startup: loading V5 adapter /home/sebas/Desktop/firewall-IA/model-output-v5/final/v5-final-v4-20261027T022649Z/adapter
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  17%|█▋        | 34/201 [00:00<00:00, 339.87it/s]Loading weights:  43%|████▎     | 87/201 [00:00<00:00, 444.37it/s]Loading weights:  72%|███████▏  | 145/201 [00:00<00:00, 504.51it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 506.00it/s]
+2026-10-30 19:30:18,293 INFO    firewall.control_plane.v5: startup: V5 ready on cuda in 4.2 s (fingerprint ad93d3b6d0a1 adapter c27e363fe761)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:58609 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49490 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49502 - "GET /contract HTTP/1.1" 200 OK
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+2026-10-30 19:30:18,914 INFO    firewall.control_plane.v5: classify: ok decision=ALLOW generate_ms=470.1
+INFO:     127.0.0.1:49504 - "POST /classify HTTP/1.1" 200 OK
+[transformers] Both `max_new_tokens` (=17) and `max_length`(=2048) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+2026-10-30 19:30:19,075 INFO    firewall.control_plane.v5: classify: ok decision=BLOCK generate_ms=158.6
+INFO:     127.0.0.1:49512 - "POST /classify HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+2026-10-30 19:30:19,195 INFO    firewall.control_plane.v5: shutdown
+INFO:     Application shutdown complete.
+INFO:     Finished server process [71011]

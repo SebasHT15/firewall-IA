@@ -1,0 +1,31 @@
+[10:33:18.670] Loading script /home/sebas/Desktop/firewall-IA/scripts/wire_evidence/lab_addon.py
+[10:33:18.722] reverse proxy to http://127.0.0.1:40717 listening at 127.0.0.1:40225.
+[10:33:18.722] LAB EFFECTIVE OPTION mode=['reverse:http://127.0.0.1:40717']
+[10:33:18.722] LAB EFFECTIVE OPTION validate_inbound_headers=False
+[10:33:18.722] LAB EFFECTIVE OPTION http2=False
+[10:33:18.722] LAB EFFECTIVE OPTION connection_strategy='lazy'
+[10:33:18.722] LAB EFFECTIVE OPTION stream_large_bodies=None
+[10:33:18.722] LAB EFFECTIVE OPTION body_size_limit=None
+[10:33:18.722] data plane ready: classifier=http://127.0.0.1:41875/classify timeout=3.0s policy=fail-closed
+[10:33:18.722] feature extraction: off
+[10:33:18.722] hybrid shadow analyzer: off
+[10:33:18.722] fast path: off
+[10:33:18.722] canonical observer: shadow, separate process (logged only, never used for decisions) timeout=0.500s startup_timeout=10.0s restart_backoff=1.0s max_consecutive_failures=3 max_decoded_body=1048576; worker starts in the background
+[10:33:18.880][127.0.0.1:45154] client connect
+[10:33:18.880][127.0.0.1:45154] client disconnect
+[10:33:19.880][127.0.0.1:45162] client connect
+[10:33:19.881] [eac48a3f] received GET 127.0.0.1:40717/ok (body 0 bytes)
+[10:33:19.904] [eac48a3f] ALLOW GET 127.0.0.1:40717/ok reason='wire-lab stub' (classifier 23 ms)
+[10:33:19.905] [eac48a3f] CANONICAL OBS OK outcome=ACCEPT size=UNCHECKED target_form=origin decoded_body_bytes=0 canon=0.111ms elapsed=0.668ms
+[10:33:19.905] [eac48a3f] FRAMING OBS UNATTESTABLE reasons=VALIDATE_INBOUND_HEADERS_OFF,PROFILE_NOT_TESTED canonical_status=OK canonical_outcome=ACCEPT target_form=origin gen=0 elapsed=0.668ms
+[10:33:19.905][127.0.0.1:45162] server connect 127.0.0.1:40717
+[10:33:19.906][127.0.0.1:45162] server disconnect 127.0.0.1:40717
+[10:33:19.906][127.0.0.1:45162] client disconnect
+[10:33:20.506][127.0.0.1:45168] client connect
+[10:33:20.507] [1bbdb49c] received POST 127.0.0.1:40717/x (body 5 bytes)
+[10:33:20.512] [1bbdb49c] ALLOW POST 127.0.0.1:40717/x reason='wire-lab stub' (classifier 5 ms)
+[10:33:20.513] [1bbdb49c] CANONICAL OBS OK outcome=REJECT reject=R1 reason=framing-te-and-cl size=UNCHECKED transfer_encoding=chunked canon=0.035ms elapsed=0.530ms
+[10:33:20.513] [1bbdb49c] FRAMING OBS UNATTESTABLE reasons=VALIDATE_INBOUND_HEADERS_OFF,PROFILE_NOT_TESTED,CANONICAL_REJECT canonical_status=OK canonical_outcome=REJECT target_form=origin gen=0 elapsed=0.530ms
+[10:33:20.513][127.0.0.1:45168] server connect 127.0.0.1:40717
+[10:33:20.513][127.0.0.1:45168] server disconnect 127.0.0.1:40717
+[10:33:20.513][127.0.0.1:45168] client disconnect

@@ -1,0 +1,241 @@
+{
+  "arrivals": "open-loop Poisson, seeded; latency from the scheduled arrival",
+  "audit": {
+    "dev_rate": 1.5,
+    "permit_rate": 5.0,
+    "repetitions": 2,
+    "sample_rates": [
+      0.0,
+      0.1,
+      1.0
+    ],
+    "seconds": 90,
+    "traffic": "DEV plus synthetic requests of the experimental fixture"
+  },
+  "client_timeout_s": 15.0,
+  "doubles": false,
+  "failures": {
+    "faults": [
+      "V5 killed",
+      "Model 2 killed",
+      "Model 2 hung",
+      "canonical workers killed",
+      "V5 hung",
+      "guard stopped",
+      "sink killed",
+      "return to V4 with V5 down",
+      "gateway killed"
+    ],
+    "pause_s": 12.0,
+    "rate": 2.0,
+    "repetitions": {
+      "reference": 1,
+      "verified": 2
+    }
+  },
+  "levels": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    8,
+    12,
+    16,
+    24
+  ],
+  "manifests": {
+    "reference": {
+      "path": "reports/v5/hybrid/gateway-integration-v1/manifests/dev_fixture_baseline34.json",
+      "sha256": "4b703f7ee53f14a27fdd7bca10413741dec658280d2db0bbc10a773446f1637d"
+    },
+    "v4": {
+      "path": "reports/v5/hybrid/gateway-integration-v1/manifests/dev_fixture_baseline34.json",
+      "sha256": "4b703f7ee53f14a27fdd7bca10413741dec658280d2db0bbc10a773446f1637d"
+    },
+    "verified": {
+      "path": "reports/v5/successor-2026-10-30/verified-suffix/service-final/cascade-manifest.EXPERIMENTAL.json",
+      "sha256": "4042d8c7f6eee48ae7911c40237751da1c369fce7e57dcf7ad8efacd81311b79"
+    }
+  },
+  "operating_limits": {
+    "audit_queue_size": 64,
+    "audit_timeout": 5.0,
+    "deadline": 5.0,
+    "max_inflight": 8,
+    "max_waiting": 16,
+    "observe_max_pending": 16,
+    "probe_interval": 2.0,
+    "v4_timeout": 3.0,
+    "v5_timeout": 3.0,
+    "worker_backoff": 2.0
+  },
+  "order": "shuffled per repetition with a seeded generator, see `run_order`",
+  "recovery": {
+    "definition": "10 consecutive useful probes within 2 x the P95 of the first level",
+    "overload_rate": "1.5 x first saturated",
+    "overload_seconds": 45,
+    "probe_rate": 1.0,
+    "probe_seconds": 45
+  },
+  "run_order": {
+    "1": [
+      [
+        "verified",
+        "CASCADE_ACTIVE"
+      ],
+      [
+        "reference",
+        "CASCADE_ACTIVE"
+      ],
+      [
+        "v4",
+        "V4_ONLY"
+      ],
+      [
+        "reference",
+        "V5_ONLY"
+      ],
+      [
+        "verified",
+        "V5_ONLY"
+      ],
+      [
+        "verified",
+        "CASCADE_OBSERVE"
+      ],
+      [
+        "reference",
+        "CASCADE_OBSERVE"
+      ]
+    ],
+    "2": [
+      [
+        "verified",
+        "CASCADE_ACTIVE"
+      ],
+      [
+        "verified",
+        "V5_ONLY"
+      ],
+      [
+        "reference",
+        "V5_ONLY"
+      ],
+      [
+        "v4",
+        "V4_ONLY"
+      ],
+      [
+        "verified",
+        "CASCADE_OBSERVE"
+      ],
+      [
+        "reference",
+        "CASCADE_OBSERVE"
+      ],
+      [
+        "reference",
+        "CASCADE_ACTIVE"
+      ]
+    ],
+    "3": [
+      [
+        "reference",
+        "CASCADE_OBSERVE"
+      ],
+      [
+        "v4",
+        "V4_ONLY"
+      ],
+      [
+        "verified",
+        "CASCADE_ACTIVE"
+      ],
+      [
+        "reference",
+        "V5_ONLY"
+      ],
+      [
+        "reference",
+        "CASCADE_ACTIVE"
+      ],
+      [
+        "verified",
+        "V5_ONLY"
+      ],
+      [
+        "verified",
+        "CASCADE_OBSERVE"
+      ]
+    ]
+  },
+  "runs": [
+    [
+      "v4",
+      "V4_ONLY"
+    ],
+    [
+      "reference",
+      "V5_ONLY"
+    ],
+    [
+      "verified",
+      "V5_ONLY"
+    ],
+    [
+      "reference",
+      "CASCADE_ACTIVE"
+    ],
+    [
+      "verified",
+      "CASCADE_ACTIVE"
+    ],
+    [
+      "reference",
+      "CASCADE_OBSERVE"
+    ],
+    [
+      "verified",
+      "CASCADE_OBSERVE"
+    ]
+  ],
+  "saturation": {
+    "max_useful_p95_ms": 2000.0,
+    "min_useful_fraction": 0.95,
+    "status": "descriptive, not an SLO",
+    "stop": "two consecutive saturated levels"
+  },
+  "schema": "firewall-gateway-load-protocol/v1",
+  "scope": "DEVELOPMENT, HTTP/1.1 cleartext reverse proxy on loopback, inert sink. Not a deployment or capacity claim. No threshold selected. No protected set read.",
+  "seeds": {
+    "base": 20261031
+  },
+  "services": "fresh per run; only those the mode needs; V4 is not loaded for V5_ONLY/ACTIVE",
+  "soak": {
+    "rate": "per family, 0.7 x the lowest sustainable rate of its V5 modes and V4_ONLY; V4_ONLY also runs at each family's rate, as the baseline of OBSERVE",
+    "repetitions": 2,
+    "seconds": 240
+  },
+  "status_of_candidates": "EXPERIMENTAL: nothing here approves a profile, a threshold or a deployment. 200 ms is aspirational and D36 is not rewritten.",
+  "step_seconds": 30,
+  "traffic": {
+    "cases": 1012,
+    "inputs_sha256": "3118bf663689c28b574094bc5e9797fa628d49106dbe4857b4c29962f59d51fe",
+    "labels_used": false,
+    "mix": {
+      "authored_paired_dev/ALLOW": 221,
+      "authored_paired_dev/BLOCK": 213,
+      "legacy_dev/ALLOW": 300,
+      "legacy_dev/BLOCK": 278
+    },
+    "note": "Traffic shape only. References are not used and are not ground truth.",
+    "order": "shuffled by seed, cycled; same per repetition",
+    "population": "every wire_ok DEV case"
+  },
+  "verified_profile": {
+    "path": "reports/v5/successor-2026-10-30/verified-suffix/service-final/verified-suffix.EXPERIMENTAL.json",
+    "sha256": "e81d70f3933e0b09abe2e581c6de6903b7f96ff0128374cae4480b1c62ada91f"
+  },
+  "warmup_requests": 20
+}

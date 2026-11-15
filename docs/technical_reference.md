@@ -1,5 +1,15 @@
 # firewall-IA — technical reference
 
+**Current-state guide (2026-11-14):** use [project status](project_status.md) and the
+[documentation map](index.md) for the tested Fast Path + V5.1 candidate and its app-bound header guard.
+The V4, Analyzer, shadow-routing, benchmark and October roadmap sections below retain their
+historical scope. Their statements that V5/Model 2 are unimplemented or V4 decides all traffic do
+not describe the new candidate. Current operation: [challenge apps](challenge_apps.md) and
+[cascade gateway](cascade_gateway.md). Historical results and parser contracts remain unchanged.
+V4 operation is retired from the supported PC integration; its input-token defect and missing
+admission control remain unresolved. Historical commands below are reproduction instructions.
+See [D87's scope and requirement map](integration_resolution_2026-11-14.md).
+
 Component-level detail for the control plane, the data plane, the inference benchmark and
 the dataset. It was moved here verbatim from the top-level README when the first
 functional gateway stage was closed (2026-09-21), so the README could stay a short front
@@ -8,12 +18,15 @@ page. Statements that later evidence made stale were corrected in place and are 
 
 - Headline status and results: [`../README.md`](../README.md)
 - Authoritative current technical state: [`../CONTEXT.md`](../CONTEXT.md)
-- Decisions D1–D42: [`../DECISIONS.md`](../DECISIONS.md)
+- Decisions and later implementation records: [`../DECISIONS.md`](../DECISIONS.md)
 - Docker Lab and the demo: [`../docker/README.md`](../docker/README.md)
 - External Test v1 methodology: [`external_test_v1_protocol.md`](external_test_v1_protocol.md)
 
 Contents: [Control Plane](#control-plane-issue-15) ·
 [Data Plane](#data-plane-issues-16-17--first-version) ·
+[Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1) ·
+[Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces) ·
+[Analyzer research pipeline](#lightweight-request-analyzer--research-pipeline-hybrid-architecture-phase-2b-issue-53) ·
 [Inference Benchmark](#inference-benchmark-issue-9) ·
 [External v1 latency observations](#external-test-v1--latency-observations-derived) ·
 [External v1 secondary breakdowns](#external-test-v1--secondary-breakdowns-pre-registered) ·
@@ -24,6 +37,28 @@ Contents: [Control Plane](#control-plane-issue-15) ·
 [Repository Workflow](#repository-workflow)
 
 ---
+
+## Historical integration update — 2026-10-20
+
+The current target and completed/pending matrix are in `continuity-2026-10-20.md` and the
+root README. Older target diagrams below describe their recorded stage, not current routing.
+
+- `/classify` now consumes `classify_timed` token-level `ended_with_eos` evidence. False or
+  non-boolean termination evidence yields invalid; a missing key fails the API call. Complete
+  responses keep their schema. The gateway enforces invalid/non-200 as fail-closed.
+- Legacy `parse_prediction(text)` benchmark callers preserve historical text-only semantics.
+  #65 input-template-token injection is separate and remains unresolved.
+- The data plane can observe both Fast Path and Analyzer after V4's verdict. Neither output
+  is used for enforcement; both new modes default off. The Analyzer runs in a bounded separate
+  process; scheduling/extraction overhead still needs measurement. See `hybrid_shadow_runtime.md`.
+- Fast Path gets unavailable framing/canonical evidence from today's gateway, hence CONTINUE.
+  An eligible test fixture is not a production bypass or an approved application policy.
+- C1 means deterministic features; optional C2 is learned evidence. Model 2 BLOCK/DEFER and
+  V5 selective fallback remain unimplemented proposals, not the old ALLOW/BLOCK/UNCERTAIN target.
+- D1 feature input is preserved in current shadow operation. Compatibility with canonical
+  input must be measured before reusing learned weights on the target representation.
+
+Validation commands and limitations: `../reports/v5/integration/README.md`.
 
 ## Control Plane (Issue #15)
 
@@ -111,6 +146,12 @@ neither to be silently discarded nor pooled into steady-state statistics without
 `data_plane.py` is a mitmproxy addon: an **authorized inline interception** point, not a
 man-in-the-middle attack. Every HTTP request that reaches the proxy is classified by the
 control plane before anything is forwarded.
+
+*(Note 2026-10-12.)* The gateway renders the **V4** text below (`render_request()`, D1), and
+that is unchanged. A future V5 model will use a different input contract, `canonical-request/v1`
+(D56/D57: `Content-Type` as the only header, deterministic framing validation, template-safe
+tokenization). That contract is approved but **not implemented**, and its gateway integration is
+a later phase.
 
 ```
 HTTP client --(HTTP proxy 127.0.0.1:8080)--> mitmdump -s data_plane/data_plane.py
@@ -308,10 +349,10 @@ smuggling 2).
 > **37/149 is a diagnostic count, not a false-positive rate.** The case mix was built to
 > provoke failures, so none of its proportions is a performance metric and none
 > extrapolates to real traffic. The internal formal-split FPR is **0.06%** (2 of 3,103
-> benign rows), see [V4 internal evaluation](../README.md#4-v4-internal-evaluation).
+> benign rows), see [V4 internal evaluation](history/README-through-2026-10-21.md#4-v4-internal-evaluation).
 > *(updated at stage close)* External Test v1 later measured **68/200** on its own benign
 > cases — a test-specific figure on a 50/50 constructed set, not an operational FPR either
-> (see [External Test v1](../README.md#5-external-test-v1)).
+> (see [External Test v1](history/README-through-2026-10-21.md#5-external-test-v1)).
 
 **What the evidence supports.** Coverage gaps / out-of-distribution inputs, possible
 spurious correlations (for example loopback Host → SSRF) and joint-feature context
@@ -323,15 +364,151 @@ headers.
 runs in the Docker Lab on the validated smoke fixtures — see
 [`../docker/README.md`](../docker/README.md#demo).
 
+### Shadow feature extraction (Hybrid Architecture Phase 1)
+
+*(Added 2026-10-01, Issue #49, decisions D43, D44 and D45.)* The first stage of the
+**Hybrid Architecture** — feature extraction → lightweight request analyzer → small decision
+model → V4 as fallback for uncertain cases → enforcement. "Hybrid Architecture" is not
+"V5": V5 is the next model revision of D37 / D40 (D45). This stage runs in **shadow mode**:
+it describes every request and nothing acts on the description. *(Updated 2026-10-04: it is
+still the only Hybrid stage inside the gateway; Model 1 now exists as a frozen offline
+artifact — see [Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces).)*
+
+```
+request ─► render_request() ─► D1 text ─► POST /classify ─► V4 verdict ─┬─► extract_features(same text) ─► "FEATURE EXTRACTION (shadow)" log line   (nothing reads it)
+           └──────────── timed as "(classifier N ms)" ───────────┘      └─► ALLOW / BLOCK enforced, fail-closed   (unchanged)
+```
+
+**What it is.** `data_plane/request_features.py`, standard library only: a deterministic
+function from the D1 text to a frozen `RequestFeatures` object. It works on the same string
+V4 receives, rendered once per request, so a feature computed in the gateway and one
+computed offline over a dataset are identical. It makes **no decision**: no ALLOW, BLOCK,
+UNCERTAIN, score or threshold. The counts below are descriptions, not blocking rules.
+
+**What it does not do yet.** No lightweight request analyzer, no small decision model, no
+`UNCERTAIN`, no routing, no effect on V4, enforcement or fail-closed, no training, no
+dataset change. `data_plane/hybrid_contracts.py` defines `AnalyzerOutput` (frozen in Phase
+2A, D50: `signals` with a required `attack` probability, `P̂(BLOCK | features)` on V4-clean's
+50 / 50 prior, and optionally all eight `category:<id>` probabilities given attack, summing to
+1 — ids in `ANALYZER_CATEGORIES`, D47; no global confidence; `analyzer_version`),
+`DecisionInput` (`features`, `analysis`) and `DecisionOutput` (`decision` ∈ ALLOW / BLOCK /
+UNCERTAIN, rejected otherwise, never coerced; `confidence` in [0, 1]; `reason`). They are
+contracts only: nothing in the gateway produces or consumes them. *(Updated 2026-10-04: the
+frozen Model 1 produces `AnalyzerOutput` offline, in research code; `DecisionInput` /
+`DecisionOutput` still have no producer.)* The Analyzer's design (targets, dataset,
+splits, metrics) is in
+[`../reports/hybrid/phase2a-analyzer-design/`](../reports/hybrid/phase2a-analyzer-design/).
+
+**Excluded (D44).** `Host` and `User-Agent` are never features, directly or indirectly. The
+only header read is `Content-Type`. Character and syntax features are computed over the
+**surface** = path + query + body (the `?` separator belongs to neither), never over
+headers, and **on the text as received**: nothing is percent-decoded, so `%27` counts as an
+encoded character, not as a quote.
+
+**Features — schema `request-features/v2`:**
+
+| Group | Feature | Type | Definition |
+|---|---|---|---|
+| request | `method` | str | first token of the request line |
+| request | `path_length` | int | characters of the path (target before `?`) |
+| request | `query_length` | int | characters after `?`; 0 without query |
+| request | `body_length` | int | characters of the body (rendered text, not bytes) |
+| request | `has_body` | bool | body is non-empty |
+| request | `content_type` | str | media type of the first `Content-Type`, lowercase, parameters dropped; `""` if absent |
+| request | `body_format` | str | `none` (no body) · `form` (`application/x-www-form-urlencoded`) · `json` (`application/json` or `+json`, parsed) · `json_invalid` (JSON type, unparseable or nested deeper than 1,000) · `other` (anything else; not parsed, not sniffed) |
+| request | `query_param_count` | int | non-empty `&`-separated segments of the query |
+| request | `body_param_count` | int | form: non-empty segments; JSON: object members at any depth, as written (a repeated key counts); otherwise 0 |
+| request | `total_param_count` | int | query + body parameters |
+| request | `repeated_param_name_count` | int | parameter names (raw, query + form body) occurring more than once |
+| characters | `alnum_ratio` | float | ASCII letters and digits / surface length |
+| characters | `symbol_count` | int | ASCII punctuation characters (the 32 of `string.punctuation`) — the "special characters" |
+| characters | `symbol_ratio` | float | `symbol_count` / surface length — the symbol density |
+| characters | `non_ascii_count` | int | characters above U+007F |
+| characters | `percent_encoded_count` | int | valid `%XX` triplets, matched within path, query and body separately |
+| characters | `percent_encoded_ratio` | float | 3 × `percent_encoded_count` / surface length |
+| characters | `has_percent_encoding` | bool | `percent_encoded_count` > 0 |
+| characters | `longest_char_run` | int | longest run of one repeated character, within path, query or body |
+| characters | `entropy_bits_per_char` | float | Shannon entropy of the surface's character distribution |
+| structure | `path_depth` | int | non-empty `/` segments of the path |
+| structure | `json_depth` | int | maximum container nesting of a parsed JSON body; 0 otherwise |
+| syntax | `single_quote_count` · `double_quote_count` · `semicolon_count` · `slash_count` · `backslash_count` · `pipe_count` · `ampersand_count` · `equals_count` · `percent_count` | int | occurrences of `'` `"` `;` `/` `\` `\|` `&` `=` `%` |
+| syntax | `parenthesis_count` · `angle_bracket_count` · `brace_count` | int | occurrences of `(`+`)`, `<`+`>`, `{`+`}` |
+| — | `schema_version` | str | `request-features/v2`; bumped whenever a feature is added or redefined (v1 was the pre-review definition, only in `reports/hybrid/phase1-feature-extraction-v1/`) |
+
+Ratios are 0.0 on an empty surface. Missing parts count as empty: any string yields
+features, never an exception (a non-string is a `TypeError`). The result depends only on
+the text: JSON integers are not converted (the interpreter's int-digit limit cannot change
+`body_format`), and nesting is capped at 1,000 because the depth at which Python's parser
+gives up depends on the caller's stack (measured 9,897–9,997).
+
+**Configuration.** `config.yaml`, read when the addon loads:
+
+```yaml
+data_plane:
+  shadow_feature_extraction: true   # false, or absent: not run
+```
+
+Optional and a YAML boolean; any other value stops mitmdump at startup. The Docker Lab's
+`docker/config.docker.yaml` does not set it, so the lab, the demo and the External v1
+capture proxy run with it off. Restart mitmdump after changing it or after editing
+`request_features.py` (a hot reload of `data_plane.py` does not reload that module).
+
+**Failure policy.** An extractor exception is caught on its own and logged as
+`FEATURE EXTRACTION (shadow) failed … <ExceptionType> at <file>:<line>; ignored`, without
+the exception message (it could quote the request). The verdict already obtained from
+the classifier is enforced unchanged. It is **never** a `403` or `503`: fail-closed still means "no valid
+decision from the classifier" (D34), and an experimental component must not become a new
+source of BLOCKs (D43).
+
+**Observing it.** With the switch on, mitmdump prints at startup
+`feature extraction: shadow (logged only, never used for decisions)` (or `off`), and per
+request, after the classifier answered and before the decision line:
+
+```
+[13:22:07.867] [8e2068c3] received POST localhost:9000/products.html (body 30 bytes)
+[13:22:08.151] [8e2068c3] FEATURE EXTRACTION (shadow) 0.081 ms request-features/v2 method=POST content_type='application/x-www-form-urlencoded' body_format=form len=14/0/30 params=0/1 repeated=0 pct_encoded=0 symbols=9 (0.205) non_ascii=0 entropy=4.298
+[13:22:08.151] [8e2068c3] BLOCK POST localhost:9000/products.html reason='Server-side request forgery attack detected' (classifier 284 ms)
+```
+
+The flow tag ties them. The feature line is a summary — `len` is path/query/body
+lengths, `params` query/body counts — with no path, no query values, no body and no Host or
+User-Agent. Its `… ms` is the extractor call alone. Feature lines use the logger
+`firewall.data_plane.features` and do not match the decision-line regexes of
+`external_v1_run.py`, `summarize_latency_observations.py` or `docker/demo.sh` (tested). The
+decision line is the model decision and keeps its exact format, and its
+`(classifier N ms)` keeps its definition from before Phase 1 — `render_request()` plus the
+`/classify` call — because the extractor runs after that timer (tested).
+
+**Overhead** (measured 2026-10-01, `reports/hybrid/phase1-feature-extraction-v2/`). In
+process, over the 6,206 V4 eval texts × 3 passes (n = 18,618): min 0.0101 · mean 0.0185 ·
+P50 0.0169 · P95 0.0301 · max 0.1588 ms per request. Live in the gateway, n = 34: P50
+0.052 · P95 0.125 · max 0.132 ms. The cost grows linearly with body size (1 KiB ≈ 0.05 ms,
+10 KiB ≈ 0.47 ms, 100 KiB ≈ 4.7 ms, 1 MiB ≈ 53 ms, synthetic form bodies) and runs
+synchronously on mitmproxy's event loop. Phase 1 deliberately adds no limit,
+truncation or optimization for large bodies; it is a consideration for later phases.
+Reproduce:
+
+```bash
+.venv-dataplane/bin/python scripts/benchmarks/benchmark_request_features.py
+```
+
 ### Tests
 
 ```bash
-# data plane (24 tests; no model, no running services)
+# request feature extraction and Hybrid Architecture contracts (44 tests; standard library only, runs in either environment)
+python3.12 -m unittest tests.test_request_features -v
+
+# data plane (36 tests, including shadow mode; no model, no running services)
 .venv-dataplane/bin/python -m unittest discover -s tests -p 'test_data_plane.py' -v
 
 # everything else (ML environment); modules that need mitmproxy or Flask are reported
 # as skipped and run in the data plane environment instead (see ../README.md#tests)
 python3.12 -m unittest discover -s tests -v
+
+# Lightweight Request Analyzer research code (Analyzer environment; see below)
+.venv-analyzer/bin/python -m unittest tests.test_hybrid_analyzer_model tests.test_hybrid_analyzer_dataset -v
+# hybrid_analyzer_v2 rebuild and provenance (ML environment; needs csic_database.csv and PayloadsAllTheThings)
+python3.12 -m unittest tests.test_hybrid_analyzer_dataset_v2 -v
 ```
 
 ### Scope of this first version
@@ -349,8 +526,142 @@ implementation defects.
 - End-to-end benchmark: pending (Issue #18)
 - Model behaviour on real HTTP traffic: diagnosed in `real-http-fp-v1` (see above) and
   evaluated independently in External Test v1 *(updated at stage close;* see
-  [`../README.md`](../README.md#5-external-test-v1)*)*
-- Heuristics, suspicious score, fast path: not implemented (Issues #35–#38)
+  [`../README.md`](history/README-through-2026-10-21.md#5-external-test-v1)*)*
+- Fast Path: default-off observer implemented; active bypass, deferred validation and performance
+  evidence pending (#36–#38). Legacy heuristic scoring (#35/D29) needs scope reconciliation.
+- Request feature extraction (Hybrid Architecture Phase 1): shadow mode only — logged,
+  never used for a decision (see [Shadow feature extraction](#shadow-feature-extraction-hybrid-architecture-phase-1))
+
+---
+
+## Hybrid Architecture — target design, status and interfaces
+
+**Current lab update (2026-11-05):** the paragraph and status table below are a historical
+2026-10-20 snapshot. The cascade now has active Model 2 BLOCK/DEFER and V5.1 fallback. An explicit
+lab-only Fast Path variant has been exercised on one exact static resource in each of the six challenge
+apps ([evidence](../reports/v5/fastpath-six-apps-2026-11-05/INFORME.md)); the default four arms still
+leave it off. Learned C2 remains optional and inactive: Model 2 scores the 34 deterministic C1 features
+directly. Do not read the historical table as the current deployment status.
+
+Updated 2026-10-20. V4 remains the sole enforced decision. The target is:
+
+```text
+Wire HTTP → parser → framing + canonicalization → canonical request
+  → Fast Path: FAST_ALLOW → ALLOW
+               CONTINUE  → C1 deterministic evidence + optional learned C2
+                         → Model 2: BLOCK → BLOCK
+                                    DEFER → V5 → ALLOW / BLOCK
+```
+
+| Component | Status | Where |
+|---|---|---|
+| Request Feature Extraction | implemented, shadow | `data_plane/request_features.py` |
+| Fast Path | implemented observer, default off; gateway prerequisites unavailable | `data_plane/fast_path.py` |
+| Model 1 / learned C2 | frozen artifact; isolated shadow worker, default off | `data_plane/hybrid_shadow*.py` |
+| Model 2 BLOCK/DEFER | proposal only | `../reports/v5/hybrid/model2-contract-proposal.md` |
+| Cascade / selective V5 fallback / hybrid enforcement | not implemented | V4 still decides every request |
+| External validation of the Hybrid system | pending | no cascade quality claim |
+
+The Fast Path proposal uses positive rules and explicit protocol/application evidence, not
+heuristic suspicious-score thresholds. This does not silently supersede D29: reconcile its
+legacy formulation and #35–#38 before enforcement. Runtime placement under D52 is still open;
+the separate Analyzer process is an experimental runtime, preserving D33 environment isolation.
+
+### Interfaces (`data_plane/hybrid_contracts.py`)
+
+- **`RequestFeatures`** (schema `request-features/v2`): 34 fields — 25 integer counts (lengths,
+  parameter counts, `percent_encoded_count`, `path_depth`, `json_depth`, 12 syntax-character
+  counts …), 4 ratios (`alnum_ratio`, `symbol_ratio`, `percent_encoded_ratio`,
+  `entropy_bits_per_char`), 2 booleans (`has_body`, `has_percent_encoding`), 3 categoricals
+  (`method`, `content_type`, `body_format`). Computed over path + query + body, undecoded; only
+  the `Content-Type` header is read (D44). Field definitions: [above](#shadow-feature-extraction-hybrid-architecture-phase-1).
+- **`AnalyzerOutput`** (D50): `signals["attack"]` = P̂(BLOCK | features), required; optionally
+  all eight `category:<id>` = P̂(category | attack, features), summing to 1 (ids
+  `ANALYZER_CATEGORIES`, D47). **Two levels, not multilabel** (D46): `attack` is the security
+  signal; the category is auxiliary context. No global confidence; uncertainty is derived from
+  the probabilities. `attack` is learned on V4-clean's 50 / 50 prior — not an operational
+  attack prevalence (D42). Unknown signals, values outside [0, 1] or a partial / non-summing
+  category set are rejected.
+- **Legacy placeholder:** `DecisionInput` → `DecisionOutput` still has ALLOW/BLOCK/UNCERTAIN
+  in code, with no producer. It is not the proposed Model 2 contract: a separate BLOCK/DEFER
+  output is required after ratification; do not wire this legacy ALLOW-capable type into Model 2.
+
+### Model 1 as frozen (run-002, D54 / D55)
+
+| | |
+|---|---|
+| Version | `hybrid-analyzer-v2/attack=hist_gb,category=hist_gb` |
+| Attack model | `HistGradientBoostingClassifier(max_iter=100, max_leaf_nodes=31, learning_rate=0.1, early_stopping=False)`, **native probabilities** (no calibrator passed the D55 rule) |
+| Category model | `HistGradientBoostingClassifier(max_iter=300, class_weight="balanced", learning_rate=0.1, early_stopping=False)`, BLOCK rows only, JWT never fitted (D48) |
+| Preprocessing | `FeatureEncoder("tree")`, fit on v2 TRAIN: numerics raw, booleans 0/1, `method` / `content_type` one-hot over TRAIN values + `__other__`, `body_format` one-hot over its closed enum (unknown → error); exact encoders in `frozen_selection.json` |
+| Call | `AnalyzerModel.analyze(RequestFeatures) -> AnalyzerOutput` (pickled `hybrid_analyzer.AnalyzerModel`) |
+| Artifact | `model-output-hybrid-analyzer-v2/recommended.pkl`, 8,866,799 B, SHA-256 `79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b` |
+| Cost (scikit-learn, 1 request, 1 thread) | P50 8.92 · P95 9.22 ms; attack 0.49 ms, category 8.39 ms; ≈ 111 req/s; +15 MiB RSS |
+
+Training data: **`hybrid_analyzer_v2`** (D54) — V4 train split into TRAIN (20,175 rows, 20,104
+fitted) and VALIDATION (4,959 / 4,935) by connected components of "same canonical request OR
+same feature vector OR same original V4 generator family"; the family is recovered by
+re-running the unmodified V4 generator (`scripts/dataset/recover_v4_provenance.py`) and is
+accepted only if V4-clean is reproduced byte for byte. TRAIN ↔ VALIDATION overlap is 0 under
+all three relations. INTERNAL TEST = V4 eval (full 6,190; feature-disjoint 5,456 vs TRAIN ∪
+VALIDATION; `unsupported_jwt` 16) — **read twice** (run-001, then a labelled second look after
+the v2 freeze). Results, limitations and the run-001 history:
+[`../reports/hybrid/phase2b-analyzer-v2-run-002/README.md`](../reports/hybrid/phase2b-analyzer-v2-run-002/README.md).
+
+### Runtime boundaries and fail-closed semantics
+
+- **Environments (D33, D52):** the data plane runs in `.venv-dataplane` (mitmproxy; no ML stack),
+  the control plane and V4 in the ML environment, Model 1 research in `.venv-analyzer` (numpy,
+  scikit-learn 1.9.1). The data plane must never import scikit-learn.
+- **Today:** fail-closed is exactly D4 / D34 — anything but a valid V4 ALLOW is 403 / 503. An
+  extractor failure is not a classifier failure (D43): logged, verdict enforced unchanged.
+- **Current observers:** errors, missing artifacts, busy workers and timeouts are observational
+  statuses; they cannot change V4 enforcement. See `hybrid_shadow_runtime.md`.
+- **Proposed Model 2:** missing or invalid evidence is DEFER-equivalent; fallback failure remains
+  fail-closed. Early BLOCK authority and the operating policy still require ratification. No
+  hybrid decision path is active today.
+
+### Model artifact handling (D55)
+
+Model outputs are gitignored (`model-output*/`, including `model-output-hybrid-analyzer-v1/`
+and `-v2/`); their SHA-256, sizes, configs and metrics are versioned in each run's report
+(`frozen_selection.json`, `SHA256SUMS`). Pickles are tied to the library versions in
+`requirements-analyzer-research.txt`. Datasets `hybrid_analyzer_v{1,2}` are regenerated locally
+(manifests versioned) and never overwritten; any change is a new version. Frozen run folders
+are never rewritten; corrections go in `ERRATA.md`.
+
+---
+
+## Lightweight Request Analyzer — research pipeline (Hybrid Architecture Phase 2B, Issue #53)
+
+Offline research only: **nothing here runs in, or is imported by, the gateway**, and no
+decision is taken from it (D43, D52). **Frozen Analyzer:**
+`hybrid-analyzer-v2/attack=hist_gb,category=hist_gb` (run-002, D54 / D55):
+[`../reports/hybrid/phase2b-analyzer-v2-run-002/README.md`](../reports/hybrid/phase2b-analyzer-v2-run-002/README.md).
+Run-001 (`hybrid_analyzer_v1`, not adopted) is kept with its errata:
+[`../reports/hybrid/phase2b-analyzer-baselines/`](../reports/hybrid/phase2b-analyzer-baselines/).
+
+| Step | Code | Environment | Output |
+|---|---|---|---|
+| Dataset `hybrid_analyzer_v1` (D51) | `scripts/dataset/build_hybrid_analyzer_v1.py` | stdlib (`python3.12`) | `datasets/hybrid_analyzer_v1/*.jsonl` (local, gitignored) + `datasets/manifest_hybrid_analyzer_v1.json` |
+| V4 generator provenance (generator group of every V4-clean row, by byte-identical regeneration) | `scripts/dataset/recover_v4_provenance.py` | ML env (`python3.12`; the generator needs pandas) | in memory (CLI prints / writes to a given path) |
+| Dataset `hybrid_analyzer_v2` (D54) | `scripts/dataset/build_hybrid_analyzer_v2.py` | ML env (`python3.12`) | `datasets/hybrid_analyzer_v2/*.jsonl` (local, gitignored) + `datasets/manifest_hybrid_analyzer_v2.json` |
+| Preprocessing, models, metrics, `AnalyzerOutput` wrapper | `scripts/training/hybrid_analyzer.py` | `.venv-analyzer` | — |
+| `select` → `bench` → `freeze` → `test` (once per run; `--run run-001` default, `--run run-002`) | `scripts/training/run_hybrid_analyzer_baselines.py` | `.venv-analyzer` | `reports/hybrid/phase2b-analyzer-baselines/` (run-001), `reports/hybrid/phase2b-analyzer-v2-run-002/` (run-002); models in `model-output-hybrid-analyzer-v{1,2}/` (gitignored) |
+| Sibling diagnostic of the VALIDATION carve-out | `scripts/dataset/diagnose_hybrid_analyzer_v1_siblings.py` | stdlib | report folder |
+
+The Analyzer environment is separate from both the ML / control-plane environment and the
+data-plane environment (D52; D33 unchanged):
+
+```bash
+uv venv --python 3.12 --seed .venv-analyzer
+.venv-analyzer/bin/python -m pip install -r requirements-analyzer-research.txt
+```
+
+The model input is the 34 RequestFeatures v2 fields only; the dataset's `meta_*` fields are
+offline metadata used to slice the evaluation. `attack` and the category are separate models
+(D46); output is validated by `hybrid_contracts.AnalyzerOutput` (D50). External Test v1 is
+never read by this pipeline (D53).
 
 ---
 
@@ -628,7 +939,7 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
   false positives on its benign cases**, concentrated in `api-json` (21/40) and
   `unseen-structure` (24/40). That 34% is specific to this 50/50 constructed test, not an
   operational FPR; it does not prove overfitting and is not formal OOD detection. See
-  [`../README.md`](../README.md#5-external-test-v1).
+  [`../README.md`](history/README-through-2026-10-21.md#5-external-test-v1).
 - **External v1 is one application in one lab, five of nineteen attack categories,**
   plain HTTP/1.1, sequential execution, and no evasion suite — the limits pre-registered
   in [`external_test_v1_protocol.md`](external_test_v1_protocol.md) §13.
@@ -642,6 +953,12 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
   end-to-end benchmark exists yet (Issue #18).
 - **No quantized comparison exists yet** — GGUF/Q4_K_M is unbuilt.
 - **No physical embedded validation exists yet.**
+- **The Hybrid Architecture is incomplete** *(added 2026-10-04)*. Only shadow feature extraction
+  runs in the gateway. Model 1 is frozen offline; its internal results are a second look at
+  INTERNAL TEST (not untouched), it has not been evaluated on External v1, its FPR (≈ 0.06) is far
+  above V4's internal one, it leans on percent-encoding / length / `path_length` shortcuts, its
+  `ssrf` category is weak (F1 ≈ 0.25) and it cannot see JWT attacks. See
+  [Hybrid Architecture](#hybrid-architecture--target-design-status-and-interfaces).
 - **CSIC BLOCK labels come from a keyword heuristic**, so the CSIC-derived portion of
   per-category results inherits that circularity.
 - **The data plane is a first version, validated locally with plain HTTP/1.1 only.**
@@ -698,9 +1015,14 @@ Dataset identity is pinned in [`datasets/manifest_v4_clean.json`](../datasets/ma
 - External Test v1 — frozen at `36df2ee`, executed as `external-v1-run-001`
 - Docker demo (`docker/demo.sh`), runtime verified from a clean state
 
-The current ordered plan after the first-stage release is kept in one place:
-[`../CONTEXT.md`](../CONTEXT.md) ("Current checkpoint") and
-[`../README.md`](../README.md#next-steps).
+The current ordered plan is in [`continuity-2026-10-20.md`](continuity-2026-10-20.md) and
+[`../README.md`](future_work.md); issue acceptance is in
+[`issue-plan-2026-10-20.md`](issue-plan-2026-10-20.md). Older CONTEXT §0.9 is historical.
+
+**Hybrid Architecture** *(added 2026-10-04)*: Phase 1 feature extraction (#49), Phase 2A
+Analyzer design (#51) and Phase 2B Model 1 (#53) are done and merged into `develop`; Model 2,
+the orchestrator and enforcement are not implemented. PR #79 adds the default-off Analyzer
+and Fast Path observers and their combined regression tests.
 
 **M3 — partially started ahead of M2 (D26)**
 
@@ -714,10 +1036,11 @@ The current ordered plan after the first-stage release is kept in one place:
   [`external_test_v1_protocol.md`](external_test_v1_protocol.md))
 - Issue #18 — end-to-end gateway latency (no-fast-path baseline): not started
 
-Latency-reduction layer — **designed, not built** (D29, D30):
+Latency-reduction layer — Fast Path is in the target; observation exists, bypass and measured
+benefit do not. Legacy issue criteria require reconciliation with the proposed policy:
 
 - Issue #35 — heuristic suspicious scoring: not started
-- Issue #36 — benign fast-path ALLOW: not started
+- Issue #36 — benign fast-path ALLOW: observer delivered; active routing and prerequisites pending
 - Issue #37 — asynchronous model validation of fast-path traffic: not started
 - Issue #38 — fast-path calibration and benchmark: not started
 

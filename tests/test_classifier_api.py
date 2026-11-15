@@ -1,6 +1,7 @@
 """Control-plane HTTP tests.
 
-The heavy model is never loaded: `inference_core.classify_raw` is replaced with
+The heavy model is never loaded: `inference_core.classify_timed` (the function
+the endpoint calls; it carries the EOS termination signal) is replaced with
 a stub that returns a canned decoder output, and `app.state` is populated by
 hand. That keeps these tests fast while still exercising the real endpoint
 code, the real schemas and the real parser.
@@ -30,9 +31,11 @@ BENIGN = "GET /index.html HTTP/1.1\nHost: example.com"
 ATTACK = "GET /api/users?id=1' OR '1'='1 HTTP/1.1\nHost: target.com"
 
 
-def fake_inference(raw_output, latency_ms=12.5):
-    """Stand in for core.classify_raw, returning a canned decoder output."""
-    return lambda tok, mdl, request, device, **kw: (raw_output, latency_ms)
+def fake_inference(raw_output, latency_ms=12.5, ended_with_eos=True):
+    """Stand in for core.classify_timed, returning a canned decoder output and
+    the measure dict (only the keys the endpoint reads)."""
+    measure = {"generate_ms": latency_ms, "ended_with_eos": ended_with_eos}
+    return lambda tok, mdl, request, device, **kw: (raw_output, dict(measure))
 
 
 class ModelLoadedTestCase(unittest.TestCase):
@@ -67,7 +70,7 @@ class TestHealth(ModelLoadedTestCase):
 
 class TestClassifyValid(ModelLoadedTestCase):
     def test_allow(self):
-        with patch.object(core, "classify_raw",
+        with patch.object(core, "classify_timed",
                           fake_inference("ALLOW | Normal HTTP request with no attack patterns detected.")):
             r = client.post("/classify", json={"request": BENIGN})
         self.assertEqual(r.status_code, 200)
@@ -79,7 +82,7 @@ class TestClassifyValid(ModelLoadedTestCase):
         })
 
     def test_block(self):
-        with patch.object(core, "classify_raw",
+        with patch.object(core, "classify_timed",
                           fake_inference("BLOCK | SQL injection payload detected.")):
             r = client.post("/classify", json={"request": ATTACK})
         self.assertEqual(r.status_code, 200)
@@ -91,7 +94,7 @@ class TestClassifyValid(ModelLoadedTestCase):
         })
 
     def test_latency_is_reported_from_the_core(self):
-        with patch.object(core, "classify_raw",
+        with patch.object(core, "classify_timed",
                           fake_inference("ALLOW | fine.", latency_ms=234.5)):
             r = client.post("/classify", json={"request": BENIGN})
         self.assertAlmostEqual(r.json()["model_latency_ms"], 234.5)
@@ -101,7 +104,7 @@ class TestClassifyInvalidOutput(ModelLoadedTestCase):
     """§3.3 — an unparseable model output is reported, never coerced."""
 
     def test_invalid_output_reported_explicitly(self):
-        with patch.object(core, "classify_raw", fake_inference("total garbage, no contract")):
+        with patch.object(core, "classify_timed", fake_inference("total garbage, no contract")):
             r = client.post("/classify", json={"request": BENIGN})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.json(), {
@@ -124,7 +127,7 @@ class TestClassifyInvalidOutput(ModelLoadedTestCase):
             "Sure! Here is my analysis of the request:",
         ]
         for text in garbage:
-            with patch.object(core, "classify_raw", fake_inference(text)):
+            with patch.object(core, "classify_timed", fake_inference(text)):
                 r = client.post("/classify", json={"request": BENIGN})
             body = r.json()
             self.assertEqual(r.status_code, 200, text)
@@ -134,11 +137,87 @@ class TestClassifyInvalidOutput(ModelLoadedTestCase):
 
     def test_the_word_allow_in_prose_does_not_become_a_decision(self):
         """Guards against the legacy `if 'BLOCK' in output else ALLOW` shape."""
-        with patch.object(core, "classify_raw",
+        with patch.object(core, "classify_timed",
                           fake_inference("This request does not contain BLOCK-worthy payloads")):
             r = client.post("/classify", json={"request": BENIGN})
         self.assertEqual(r.json()["status"], "invalid")
         self.assertIsNone(r.json()["decision"])
+
+
+class TestTruncatedGenerationIsNeverAllow(ModelLoadedTestCase):
+    """A generation that stopped on the token cap (no native EOS) is incomplete.
+    `EXTRACT_RE` ends in `$`, so the text alone still parses as a decision;
+    the endpoint must use the termination signal and report `invalid`."""
+
+    def _post(self, text, **kw):
+        with patch.object(core, "classify_timed", fake_inference(text, **kw)):
+            return client.post("/classify", json={"request": BENIGN})
+
+    def test_truncated_allow_is_invalid_not_allow(self):
+        r = self._post("ALLOW | Normal HTTP request with no attack patterns",
+                       ended_with_eos=False)
+        body = r.json()
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(body["status"], "invalid")
+        self.assertIsNone(body["decision"])
+        self.assertIsNone(body["reason"])
+
+    def test_truncated_one_character_allow_is_invalid(self):
+        self.assertEqual(self._post("ALLOW | N", ended_with_eos=False).json()["status"], "invalid")
+
+    def test_truncated_block_is_invalid_too(self):
+        # Not a safety hole (the data plane blocks both), but one rule for every cut:
+        # no decision is taken from a generation that did not finish.
+        body = self._post("BLOCK | SQL injection payload", ended_with_eos=False).json()
+        self.assertEqual((body["status"], body["decision"]), ("invalid", None))
+
+    def test_missing_termination_flag_fails_closed(self):
+        def no_flag(tok, mdl, request, device, **kw):
+            return "ALLOW | Normal HTTP request with no attack patterns detected.", {"generate_ms": 1.0}
+        with patch.object(core, "classify_timed", no_flag):
+            r = client.post("/classify", json={"request": BENIGN})
+        self.assertEqual(r.status_code, 500)       # KeyError -> "Inference failed" -> data plane blocks
+        self.assertNotIn("ALLOW", r.text)
+
+    def test_non_boolean_termination_flag_fails_closed(self):
+        body = self._post("ALLOW | Normal HTTP request with no attack patterns detected.",
+                          ended_with_eos="yes").json()
+        self.assertEqual((body["status"], body["decision"]), ("invalid", None))
+
+    def test_complete_generation_is_unchanged(self):
+        allow = self._post("ALLOW | Normal HTTP request with no attack patterns detected.",
+                           ended_with_eos=True).json()
+        block = self._post("BLOCK | SQL injection payload detected.", ended_with_eos=True).json()
+        self.assertEqual((allow["status"], allow["decision"]), ("ok", "ALLOW"))
+        self.assertEqual((block["status"], block["decision"]), ("ok", "BLOCK"))
+
+    def test_end_to_end_through_the_real_generation_path(self):
+        """No stub on classify_timed: a model that never emits EOS (token cap)
+        and decodes to an ALLOW-looking text must come out invalid."""
+        torch = __import__("torch")
+
+        class Tok:
+            eos_token_id = 2
+            def __call__(self, prompt, return_tensors=None):
+                class B(dict):
+                    def to(self, d): return self
+                return B(input_ids=torch.tensor([[1] * 7]))
+            def decode(self, ids, skip_special_tokens=False):
+                return "ALLOW | Normal HTTP request with no attack patterns"
+
+        class Mdl:
+            def __init__(self, tail): self.tail = tail
+            def generate(self, **kw):
+                n = kw["input_ids"].shape[1]
+                return torch.tensor([[1] * n + [5] * (kw["max_new_tokens"] - len(self.tail)) + self.tail])
+
+        classifier_api.app.state.tokenizer = Tok()
+        classifier_api.app.state.device = "cpu"
+        for tail, want in (([], ("invalid", None)),            # 40 tokens, no EOS: truncated
+                           ([2], ("ok", "ALLOW"))):            # EOS is the 40th token: complete
+            classifier_api.app.state.model = Mdl(tail)
+            body = client.post("/classify", json={"request": BENIGN}).json()
+            self.assertEqual((body["status"], body["decision"]), want, tail)
 
 
 class TestErrorHandling(ModelLoadedTestCase):
@@ -152,7 +231,7 @@ class TestErrorHandling(ModelLoadedTestCase):
         def boom(*a, **kw):
             raise RuntimeError("CUDA out of memory at 0xdeadbeef")
 
-        with patch.object(core, "classify_raw", boom):
+        with patch.object(core, "classify_timed", boom):
             r = client.post("/classify", json={"request": BENIGN})
         self.assertEqual(r.status_code, 500)
         self.assertEqual(r.json()["detail"], "Inference failed")
@@ -191,7 +270,7 @@ class TestParityWithCore(ModelLoadedTestCase):
     def test_api_matches_core_parse_prediction(self):
         for raw in self.CASES:
             expected_decision, expected_reason, expected_status = core.parse_prediction(raw)
-            with patch.object(core, "classify_raw", fake_inference(raw)):
+            with patch.object(core, "classify_timed", fake_inference(raw)):
                 body = client.post("/classify", json={"request": BENIGN}).json()
             self.assertEqual(body["status"], expected_status, raw)
             self.assertEqual(body["decision"], expected_decision, raw)
@@ -199,7 +278,7 @@ class TestParityWithCore(ModelLoadedTestCase):
 
     def test_api_uses_the_shared_parser_object(self):
         self.assertIs(classifier_api.core.parse_prediction, core.parse_prediction)
-        self.assertIs(classifier_api.core.classify_raw, core.classify_raw)
+        self.assertIs(classifier_api.core.classify_timed, core.classify_timed)
 
 
 if __name__ == "__main__":

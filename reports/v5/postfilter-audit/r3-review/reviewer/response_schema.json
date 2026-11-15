@@ -1,0 +1,31 @@
+{
+  "schema": "v5-postfilter-r3-response/v1",
+  "description": "R3 (ChatGPT GPT-6) per-record audit response. One JSON object per line (JSONL), one per reviewed item, same order as the batch, each sample_id exactly once. R3 assigns audit labels only; it never confers VERIFIED, approves a category, or authorizes training. Model agreement is diagnostic, not independent ground truth.",
+  "label_response": {
+    "required": ["sample_id", "label", "rationale"],
+    "properties": {
+      "sample_id": {"type": "string", "description": "stable record id, echoed from the batch (e.g. PF1-0001)"},
+      "label": {"enum": ["VERIFIABLE", "PROBABLY_CORRECT", "UNCERTAIN", "INCORRECT"]},
+      "failure_mode": {
+        "description": "required when label=INCORRECT, else null",
+        "enum": ["prose", "tool_output", "placeholder", "markdown_residue", "setup_command", "reference_url", "wrong_category", "truncated", "encoding_garbage", "other", null]
+      },
+      "better_category": {"type": ["string", "null"], "description": "set only when the payload is a real payload of a different category"},
+      "rationale": {"type": "string", "description": "one concise, evidence-based sentence; no line breaks"}
+    }
+  },
+  "unevaluated_response": {
+    "description": "Used instead of a label_response when an item could not be evaluated. NEVER a substitute for a label; the coordinator logs it and counts it against coverage. No label is fabricated.",
+    "required": ["sample_id", "status", "reason"],
+    "properties": {
+      "sample_id": {"type": "string"},
+      "status": {"const": "UNEVALUATED"},
+      "reason": {"type": "string", "description": "why the item could not be evaluated (e.g. refusal, truncation, tool failure)"}
+    }
+  },
+  "coordinator_only_execution_metadata": {
+    "description": "Recorded by the coordinator AFTER R3 runs; never prepopulated, never invented. Lives outside reviewer materials.",
+    "fields": ["exposed_model_designation", "execution_date", "interface", "available_settings", "raw_output_path", "batch_file", "batch_sha256"],
+    "designation_mismatch_rule": "If the exposed model designation is not the approved ChatGPT GPT-6, STOP and flag to the owner BEFORE evaluation; do not silently substitute a reviewer."
+  }
+}

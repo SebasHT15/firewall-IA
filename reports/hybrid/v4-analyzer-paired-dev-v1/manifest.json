@@ -1,0 +1,133 @@
+{
+  "schema": "paired-dev-set/v1",
+  "role": "DEVELOPMENT / ERROR-ANALYSIS (D37, D45); not an evaluation or external test",
+  "revision": 1,
+  "units": {
+    "total_request_records": 434,
+    "unique_request_texts": 355,
+    "attack_records": 213,
+    "independent_attack_records (per-family distinct canonical payload, one placement each)": 201,
+    "distinct_family_canonical_pairs (the independence unit)": 201,
+    "distinct_canonical_payload_strings": 200,
+    "cross_family_shared_canonical_strings": 1,
+    "placement_sensitivity_variant_records (DEPENDENT, not independent)": 12,
+    "distinct_attack_techniques": 201,
+    "benign_records": 221,
+    "benign_twin_records": 201,
+    "unique_benign_twin_texts": 127,
+    "benign_probe_records": 20,
+    "unique_benign_probe_texts": 20,
+    "unique_benign_texts_total": 142,
+    "complete_attack_benign_pairs": 201,
+    "dependency_components (same canonical payload OR same text)": 342
+  },
+  "independent_attack_payloads_by_family": {
+    "command_injection": 32,
+    "csrf": 4,
+    "jwt": 6,
+    "open_redirect": 8,
+    "other_attack": 12,
+    "path_file_access": 32,
+    "sql_injection": 33,
+    "ssrf": 32,
+    "ssti": 10,
+    "xss": 32
+  },
+  "distinct_techniques_by_family": {
+    "command_injection": 32,
+    "csrf": 4,
+    "jwt": 6,
+    "open_redirect": 8,
+    "other_attack": 12,
+    "path_file_access": 32,
+    "sql_injection": 33,
+    "ssrf": 32,
+    "ssti": 10,
+    "xss": 32
+  },
+  "conclusion_families": [
+    "sql_injection",
+    "xss",
+    "command_injection",
+    "path_file_access",
+    "ssrf"
+  ],
+  "conclusion_family_independent_payloads": {
+    "sql_injection": 33,
+    "xss": 32,
+    "command_injection": 32,
+    "path_file_access": 32,
+    "ssrf": 32
+  },
+  "conclusion_family_meets_D18_30_independent": {
+    "sql_injection": true,
+    "xss": true,
+    "command_injection": true,
+    "path_file_access": true,
+    "ssrf": true
+  },
+  "conclusion_family_sink_coverage": {
+    "sql_injection": {
+      "natural_sink": 23,
+      "generic_carrier": 10
+    },
+    "xss": {
+      "natural_sink": 14,
+      "generic_carrier": 18
+    },
+    "command_injection": {
+      "natural_sink": 0,
+      "generic_carrier": 32
+    },
+    "path_file_access": {
+      "natural_sink": 6,
+      "generic_carrier": 26
+    },
+    "ssrf": {
+      "natural_sink": 24,
+      "generic_carrier": 8
+    }
+  },
+  "sink_type_note": "natural_sink = field role is a plausible injection point for the family (query/filter/auth for SQLi, reflected field for XSS, /static for traversal, url/webhook for SSRF); command_injection has NO natural sink in the inert lab; a V4 ALLOW on a generic_carrier token is delivery/classification context, never an operational detection failure",
+  "independence_criterion": ">= 30 DISTINCT CANONICAL attack payloads per family (D18); placement variants and reused benign texts are NEVER counted as independent",
+  "cases_by_family": {
+    "benign_probe": 20,
+    "benign_twin": 201,
+    "command_injection": 34,
+    "csrf": 4,
+    "jwt": 6,
+    "open_redirect": 8,
+    "other_attack": 12,
+    "path_file_access": 35,
+    "sql_injection": 36,
+    "ssrf": 34,
+    "ssti": 10,
+    "xss": 34
+  },
+  "hosts": [
+    "api.fwlab.test:9100",
+    "shop.fwlab.test:9100"
+  ],
+  "placements": [
+    "api_products_category",
+    "api_products_url",
+    "cart_form",
+    "checkout_form",
+    "csrf_origin",
+    "jwt_auth",
+    "login_form",
+    "order_json",
+    "order_json_webhook",
+    "products_category",
+    "products_url",
+    "search_next",
+    "search_q",
+    "static_path"
+  ],
+  "not_testable": {
+    "http_request_smuggling": "NOT TESTABLE: CL.TE / TE.CL desync needs conflicting Content-Length / Transfer-Encoding framing; scripts/external/wire.to_wire rejects Transfer-Encoding and any Content-Length mismatch, and mitmproxy normalises framing",
+    "host_header_injection": "NOT TESTABLE: the proxy connects to the request's Host, so a malicious external Host would leave the authorized lab; CRLF in a header does not survive rendering. Only benign Host variation among lab aliases is representable",
+    "stateful_jwt_or_csrf_bypass": "NOT TESTABLE as an end-to-end bypass: the inert lab app validates no JWT and enforces no CSRF token, so attack SUCCESS is unobservable. Only the single-request REPRESENTATION is captured and its CLASSIFICATION studied; the Analyzer is blind to Authorization / Origin / Referer by construction (D44, JWT also D48)"
+  },
+  "cases_sha256": "879c7ddb31c29406f5abe51ffe2fbe5a8e677213d4d7ab543648aa1aca97958d"
+}

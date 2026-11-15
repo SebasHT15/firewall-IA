@@ -14,10 +14,12 @@ Under `python3.12 -m unittest discover -s tests` this module is reported as skip
 
 import json
 import os
+import re
 import socket
 import sys
 import tempfile
 import threading
+import time
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from unittest.mock import patch
@@ -204,6 +206,206 @@ class TestFailClosedRealSockets(AddonTestCase):
         self.assertIsNone(flow.response)
 
 
+def recording_classifier(seen, answer):
+    """A fake /classify that records each request, then answers via `answer(request)`."""
+    def handler(request):
+        seen.append(request)
+        return answer(request)
+    return httpx.MockTransport(handler)
+
+
+def raise_timeout(request):
+    raise httpx.ReadTimeout("simulated", request=request)
+
+
+CLASSIFIER_BEHAVIOURS = {
+    "ALLOW": lambda r: httpx.Response(200, json=OK_ALLOW),
+    "BLOCK": lambda r: httpx.Response(200, json=OK_BLOCK),
+    "invalid": lambda r: httpx.Response(200, json=INVALID),
+    "HTTP 500": lambda r: httpx.Response(500, json={"detail": "Inference failed"}),
+    "timeout": raise_timeout,
+}
+
+
+class TestShadowFeatureExtraction(AddonTestCase):
+    """Hybrid Architecture Phase 1 (D43): request features are extracted beside
+    the V4 pipeline and change nothing about it — not the text V4 receives, not
+    the decision, not enforcement, not fail-closed, not the classifier timing."""
+
+    def shadow_flow(self):
+        return tflow.tflow(req=make_request(
+            "POST", "/search?q=laptop&q=tv",
+            headers=[("Host", "shop.example"), ("User-Agent", "curl/8.18.0"),
+                     ("Content-Type", "application/x-www-form-urlencoded")],
+            content=b"page=2&sort=price"))
+
+    async def run_shadow(self, transport, shadow):
+        gateway = data_plane.FirewallGateway(URL, 1.0, transport=transport, shadow_features=shadow)
+        flow = self.shadow_flow()
+        await gateway.request(flow)
+        return flow
+
+    @staticmethod
+    def outcome(flow, seen):
+        """What the client gets and what V4 was sent."""
+        response = None if flow.response is None else (flow.response.status_code,
+                                                         flow.response.text)
+        return response, [r.content for r in seen]
+
+    async def test_features_are_extracted_and_v4_still_makes_the_decision(self):
+        seen, extracted = [], []
+        real = data_plane.request_features.extract_features
+
+        def spy(text):
+            extracted.append((text, real(text)))
+            return extracted[-1][1]
+
+        with patch.object(data_plane.request_features, "extract_features", side_effect=spy), \
+                self.assertLogs("firewall.data_plane", level="INFO") as logs:
+            flow = await self.run_shadow(
+                recording_classifier(seen, CLASSIFIER_BEHAVIOURS["BLOCK"]), shadow=True)
+
+        # The extractor ran once, on exactly the text V4 was sent.
+        self.assertEqual(len(extracted), 1)
+        text, features = extracted[0]
+        self.assertEqual(len(seen), 1)
+        self.assertEqual(json.loads(seen[0].content), {"request": text})
+        # It produced the expected description.
+        self.assertEqual(
+            (features.method, features.body_format, features.query_param_count,
+             features.body_param_count, features.repeated_param_name_count),
+            ("POST", "form", 2, 2, 1))
+        # V4's BLOCK is what was enforced.
+        self.assertEqual(flow.response.status_code, 403)
+        self.assertEqual(flow.response.text, data_plane.BLOCKED_BODY)
+        output = "\n".join(logs.output)
+        self.assertIn("FEATURE EXTRACTION (shadow)", output)
+        self.assertIn("method=POST", output)
+        self.assertIn("BLOCK", output)
+
+    async def test_outcome_is_identical_with_shadow_on_and_off(self):
+        for name, answer in CLASSIFIER_BEHAVIOURS.items():
+            with self.subTest(classifier=name):
+                outcomes = {}
+                for shadow in (False, True):
+                    seen = []
+                    with self.assertLogs("firewall.data_plane", level="INFO"):
+                        flow = await self.run_shadow(recording_classifier(seen, answer), shadow)
+                    outcomes[shadow] = self.outcome(flow, seen)
+                self.assertEqual(outcomes[True], outcomes[False])
+
+    async def test_extractor_failure_changes_nothing(self):
+        for name, expected_status in (("ALLOW", None), ("BLOCK", 403), ("invalid", 503)):
+            with self.subTest(classifier=name):
+                seen = []
+                with patch.object(data_plane.request_features, "extract_features",
+                                  side_effect=RuntimeError("boom q=laptop")), \
+                        self.assertLogs("firewall.data_plane", level="INFO") as logs:
+                    flow = await self.run_shadow(
+                        recording_classifier(seen, CLASSIFIER_BEHAVIOURS[name]), shadow=True)
+                status = None if flow.response is None else flow.response.status_code
+                self.assertEqual(status, expected_status)
+                self.assertEqual(len(seen), 1, "V4 must still be asked")
+                output = "\n".join(logs.output)
+                self.assertIn("FEATURE EXTRACTION (shadow) failed", output)
+                self.assertIn("RuntimeError", output)
+                # The exception message may quote the request; it is not logged.
+                self.assertNotIn("boom", output)
+                if name != "invalid":
+                    self.assertNotIn("fail-closed", output)
+
+    async def test_request_is_rendered_once(self):
+        with patch.object(data_plane, "render_request",
+                          wraps=data_plane.render_request) as render, \
+                self.assertLogs("firewall.data_plane", level="INFO"):
+            await self.run_shadow(recording_classifier([], CLASSIFIER_BEHAVIOURS["ALLOW"]),
+                                  shadow=True)
+        self.assertEqual(render.call_count, 1)
+
+    async def test_classifier_time_keeps_its_definition(self):
+        """`(classifier N ms)` keeps its pre-Phase-1 definition: render_request
+        plus the /classify call. A slow render must show up in it; a slow
+        extractor must not."""
+        real_render = data_plane.render_request
+        real_extract = data_plane.request_features.extract_features
+
+        # 30 + 60 ms: each well above the mocked classifier call, together below
+        # asyncio's 100 ms slow-callback warning in debug mode.
+        def slow_render(request):
+            time.sleep(0.03)
+            return real_render(request)
+
+        def slow_extract(text):
+            time.sleep(0.06)
+            return real_extract(text)
+
+        with patch.object(data_plane, "render_request", side_effect=slow_render), \
+                patch.object(data_plane.request_features, "extract_features",
+                             side_effect=slow_extract), \
+                self.assertLogs("firewall.data_plane", level="INFO") as logs:
+            await self.run_shadow(recording_classifier([], CLASSIFIER_BEHAVIOURS["BLOCK"]),
+                                  shadow=True)
+        messages = [r.getMessage() for r in logs.records]
+        decision = next(m for m in messages if "(classifier " in m)
+        classifier_ms = float(re.search(r"\(classifier ([\d.]+) ms\)", decision).group(1))
+        self.assertGreaterEqual(classifier_ms, 29)  # the render is inside (%.0f rounding)
+        self.assertLess(classifier_ms, 85)           # the 60 ms extraction is not
+        feature = next(m for m in messages if "FEATURE EXTRACTION (shadow)" in m)
+        self.assertGreaterEqual(float(re.search(r"\(shadow\) ([\d.]+) ms", feature).group(1)), 60)
+        # Logged after the verdict, before the decision line.
+        self.assertLess(messages.index(feature), messages.index(decision))
+
+    async def test_shadow_is_off_unless_enabled(self):
+        with patch.object(data_plane.request_features, "extract_features") as extractor:
+            flow = await self.run_request(classifier(json_body=OK_ALLOW))
+        extractor.assert_not_called()
+        self.assertIsNone(flow.response)
+
+    async def test_feature_line_carries_no_payload(self):
+        flow = tflow.tflow(req=make_request(
+            "POST", "/account?token=secret-token-123",
+            headers=[("Host", "shop.example"), ("User-Agent", "agent-x"),
+                     ("Content-Type", "application/x-www-form-urlencoded")],
+            content=b"user=ana&password=hunter2"))
+        gateway = data_plane.FirewallGateway(URL, 1.0, transport=classifier(json_body=OK_ALLOW),
+                                             shadow_features=True)
+        with self.assertLogs("firewall.data_plane.features", level="INFO") as logs:
+            await gateway.request(flow)
+        line = "\n".join(logs.output)
+        for secret in ("secret-token-123", "token", "hunter2", "password", "/account",
+                       "shop.example", "agent-x"):
+            self.assertNotIn(secret, line)
+
+    async def test_feature_lines_are_not_read_as_decision_lines(self):
+        """The External v1 runner, the latency summarizer and docker/demo.sh
+        find decisions in the data-plane log with regexes. Feature lines must
+        not match them, and decision lines must still match."""
+        sys.path.insert(0, os.path.join(REPO_ROOT, "scripts", "external"))
+        import external_v1_run
+        import summarize_latency_observations
+        decision_parsers = [external_v1_run._ALLOW_RE, external_v1_run._BLOCK_RE,
+                            external_v1_run._FAILCLOSED_RE,
+                            summarize_latency_observations.DECISION_LINE,
+                            re.compile(r"\] (ALLOW|BLOCK) ")]  # docker/demo.sh
+
+        for name in ("ALLOW", "BLOCK", "HTTP 500"):
+            gateway = data_plane.FirewallGateway(
+                URL, 1.0, transport=recording_classifier([], CLASSIFIER_BEHAVIOURS[name]),
+                shadow_features=True)
+            with self.assertLogs("firewall.data_plane", level="INFO") as logs:
+                gateway.running()
+                await gateway.request(self.shadow_flow())
+            # mitmdump prints "[HH:MM:SS.mmm] <message>".
+            lines = [f"[12:00:00.000] {r.getMessage()}" for r in logs.records]
+            feature_lines = [ln for ln in lines if "feature extraction" in ln.lower()]
+            decision_lines = [ln for ln in lines if any(p.search(ln) for p in decision_parsers)]
+            with self.subTest(classifier=name):
+                self.assertEqual(len(feature_lines), 2)    # startup mode + one request
+                self.assertEqual(len(decision_lines), 1)   # exactly the decision, as before
+                for ln in feature_lines:
+                    self.assertFalse(any(p.search(ln) for p in decision_parsers), ln)
+
+
 class TestRenderRequest(unittest.TestCase):
     def test_request_without_body(self):
         self.assertEqual(
@@ -277,6 +479,24 @@ class TestConfig(unittest.TestCase):
             with self.subTest(config=text), self.assertRaises(Exception):
                 data_plane.load_config(self.write_config(text))
 
+    def test_repository_config_enables_shadow_feature_extraction(self):
+        self.assertIs(data_plane.load_shadow_feature_extraction(), True)
+
+    def test_shadow_feature_extraction_is_optional_and_off_when_absent(self):
+        path = self.write_config(
+            "data_plane: {classifier_url: http://127.0.0.1:8000/classify, "
+            "classifier_timeout_seconds: 3}")
+        self.assertIs(data_plane.load_shadow_feature_extraction(path), False)
+
+    def test_shadow_feature_extraction_accepts_booleans_only(self):
+        base = ("data_plane: {classifier_url: http://127.0.0.1:8000/classify, "
+                "classifier_timeout_seconds: 3, shadow_feature_extraction: %s}")
+        self.assertIs(data_plane.load_shadow_feature_extraction(
+            self.write_config(base % "false")), False)
+        for value in ('"true"', "1", "shadow", "null"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                data_plane.load_shadow_feature_extraction(self.write_config(base % value))
+
 
 class TestUnloadGuard(unittest.TestCase):
     """mitmdump forwards traffic unfiltered if a hot reload leaves the script
@@ -329,6 +549,14 @@ class TestDockerLabConfig(unittest.TestCase):
             "docker/config.docker.yaml and config.yaml must keep the same "
             "classifier timeout; if they diverge on purpose, say why in both files",
         )
+
+    def test_docker_config_leaves_shadow_feature_extraction_off(self):
+        # Deliberate difference from the root config (Hybrid Architecture
+        # Phase 1, D43): the key
+        # is absent, so the Docker Lab, the demo and the External v1 capture
+        # proxy (which imports data_plane with this file) behave exactly as
+        # before. Enabling it in the lab is a separate, explicit change.
+        self.assertIs(data_plane.load_shadow_feature_extraction(self.DOCKER_CONFIG), False)
 
     def test_root_config_still_targets_localhost(self):
         # The local, non-Docker workflow must keep working: the Docker Lab is an

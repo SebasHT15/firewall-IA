@@ -1,0 +1,62 @@
+{
+  "schema": "v51-preview-probes/v1",
+  "status": "DIAGNOSTIC_NOT_FREEZE_ACCREDITATION",
+  "preview_sha256": "4b5034c549000d1fe27490b36780a636b0ea37966d8422dab1e70e8a02ab66e0",
+  "checker_sha256": "8fe0b68b8b48dd678f58b0de4f2beebb2d39fce65aa8d25f4186abb8bdcf2174",
+  "source_sha256": {
+    "v5_token_purity.py": "73548b153b59784371bd7d7ea009cd216e15a8419c8f790a3309b6158f015906",
+    "v5_structure_probe.py": "8a1ee26594bf43cbf58f93cb0a2abfa83ece5a69c5f8a37dc336cc7f13f22015"
+  },
+  "C_S3": {
+    "TRAIN_CANDIDATE": {
+      "rows": 5166,
+      "eligible_tokens": 222,
+      "max_purity": 0.5,
+      "block_tokens": 0,
+      "warn_tokens": 0
+    },
+    "VALIDATION_CANDIDATE": {
+      "rows": 2080,
+      "eligible_tokens": 139,
+      "max_purity": 0.5,
+      "block_tokens": 0,
+      "warn_tokens": 0
+    }
+  },
+  "C_S4": {
+    "schema": "v5-cs4-structure-probe/v1",
+    "train_rows": 5166,
+    "validation_rows": 2080,
+    "feature_names": [
+      "carrier",
+      "method",
+      "media_type",
+      "encoder_profile",
+      "length_bin",
+      "field_names",
+      "struct_cluster_id",
+      "template_id",
+      "placement_mode",
+      "attacked_slot_role",
+      "attacked_slot_type"
+    ],
+    "encoded_feature_count": 2045,
+    "accuracy": 0.5,
+    "libraries": {
+      "numpy": "2.5.3",
+      "scipy": "1.18.1",
+      "scikit_learn": "1.9.1"
+    },
+    "fit": {
+      "random_state": 0,
+      "solver": "liblinear",
+      "max_iter": 1000
+    },
+    "warn_accuracy_gt": 0.55,
+    "block_accuracy_gt": 0.65,
+    "status": "PASS"
+  },
+  "reserve_opened": false,
+  "target_models_trained": false,
+  "note": "The fitted logistic model is only the prescribed structure probe; neither V5 nor Model 2 was trained. No invented C-S5 acceptance control is applied; additional ENC-4 associations remain diagnostic."
+}

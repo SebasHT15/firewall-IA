@@ -1,0 +1,1191 @@
+{
+  "run": "v4-analyzer-disagreement-v1",
+  "type": "DIAGNOSTIC on development data (issue #57)",
+  "created_utc": "2026-10-05T06:03:44Z",
+  "git_head": "3c8e86017351341d14beb05c96439f7cff59e055",
+  "analyzer_version": "hybrid-analyzer-v2/attack=hist_gb,category=hist_gb",
+  "model_sha256": "79eb7265a7a3abd9f5a499234732042a9100729b4434971a02d73e03f6a2ff9b",
+  "model_unchanged_after": true,
+  "input_checks": {
+    "s1_cases": true,
+    "s1_results": true,
+    "v4_train": true,
+    "v4_eval": true
+  },
+  "canonical_relation_check": {
+    "rows_checked": 25134,
+    "rows_equal": 25134
+  },
+  "s1_meta": {
+    "cases": 175,
+    "unique_texts": 149,
+    "excluded_from_v4_eval (D54)": 30,
+    "scored_unique_texts": 119,
+    "v4_rep_inconsistent": 0,
+    "problems": []
+  },
+  "s2_meta": {
+    "cases": 135,
+    "suite_sha256": "7715c92a42c22e9b280f206009869d9fced8341dfce7b8abf7bbd50d74fcd0ca",
+    "problems": []
+  },
+  "bands (descriptive, fixed in PROTOCOL §5)": [
+    "[0,0.1)",
+    "[0.1,0.5)",
+    "[0.5,0.9)",
+    "[0.9,1]"
+  ],
+  "evaluator_sha256": "cd3452f99c123104ec125a849bdba84ef1a302613580681fa59a272f10a96d54",
+  "protocol_sha256": "29d15048677b5592ae903827f8ae853d64599aeec55f0e07e55471512038d0bf",
+  "problems": [],
+  "S1_real_http_fp_v1": {
+    "vector_level (primary unit for Analyzer-side results)": {
+      "distinct_vectors": 8,
+      "cross_label_mix_v4_mix_band (vectors)": [
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW",
+          "band": "[0,0.1)",
+          "vectors": 3
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW/BLOCK",
+          "band": "[0,0.1)",
+          "vectors": 4
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW/BLOCK",
+          "band": "[0.1,0.5)",
+          "vectors": 1
+        }
+      ],
+      "vectors": [
+        {
+          "vector": "3ec29d294d25",
+          "texts": 87,
+          "labels": "ALLOW",
+          "v4_block": 29,
+          "v4_allow": 58,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW/BLOCK",
+          "attack": 0.001264,
+          "band": "[0,0.1)"
+        },
+        {
+          "vector": "078df81ba232",
+          "texts": 8,
+          "labels": "ALLOW",
+          "v4_block": 0,
+          "v4_allow": 8,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW",
+          "attack": 0.041191,
+          "band": "[0,0.1)"
+        },
+        {
+          "vector": "1cf4391aa238",
+          "texts": 4,
+          "labels": "ALLOW",
+          "v4_block": 3,
+          "v4_allow": 1,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW/BLOCK",
+          "attack": 0.428608,
+          "band": "[0.1,0.5)"
+        },
+        {
+          "vector": "3c8bb43ff326",
+          "texts": 4,
+          "labels": "ALLOW",
+          "v4_block": 0,
+          "v4_allow": 4,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW",
+          "attack": 0.000787,
+          "band": "[0,0.1)"
+        },
+        {
+          "vector": "512321c8bdef",
+          "texts": 4,
+          "labels": "ALLOW",
+          "v4_block": 0,
+          "v4_allow": 4,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW",
+          "attack": 0.00048,
+          "band": "[0,0.1)"
+        },
+        {
+          "vector": "7ea99b65e63a",
+          "texts": 4,
+          "labels": "ALLOW",
+          "v4_block": 1,
+          "v4_allow": 3,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW/BLOCK",
+          "attack": 0.022157,
+          "band": "[0,0.1)"
+        },
+        {
+          "vector": "87cb6369b568",
+          "texts": 4,
+          "labels": "ALLOW",
+          "v4_block": 1,
+          "v4_allow": 3,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW/BLOCK",
+          "attack": 0.00045,
+          "band": "[0,0.1)"
+        },
+        {
+          "vector": "a1795539b5c4",
+          "texts": 4,
+          "labels": "ALLOW",
+          "v4_block": 3,
+          "v4_allow": 1,
+          "v4_invalid": 0,
+          "v4_mix": "ALLOW/BLOCK",
+          "attack": 0.00048,
+          "band": "[0,0.1)"
+        }
+      ]
+    },
+    "cross_label_v4_band (texts, secondary)": [
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0,0.1)",
+        "n": 81
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.1,0.5)",
+        "n": 1
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "BLOCK",
+        "band": "[0,0.1)",
+        "n": 34
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "BLOCK",
+        "band": "[0.1,0.5)",
+        "n": 3
+      }
+    ],
+    "at_reporting_threshold_0_5 (D55, not an operating point)": {
+      "ALLOW | ALLOW | attack<0.5": 82,
+      "ALLOW | BLOCK | attack<0.5": 37
+    },
+    "per_family": {
+      "HDR": {
+        "texts": 25,
+        "v4_block": 10,
+        "analyzer_bands": {
+          "[0,0.1)": 25
+        },
+        "attack_when_v4_block": {
+          "n": 10,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        },
+        "attack_when_v4_allow": {
+          "n": 15,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        }
+      },
+      "HOST": {
+        "texts": 32,
+        "v4_block": 6,
+        "analyzer_bands": {
+          "[0,0.1)": 32
+        },
+        "attack_when_v4_block": {
+          "n": 6,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        },
+        "attack_when_v4_allow": {
+          "n": 26,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0412
+        }
+      },
+      "PATH": {
+        "texts": 28,
+        "v4_block": 9,
+        "analyzer_bands": {
+          "[0,0.1)": 24,
+          "[0.1,0.5)": 4
+        },
+        "attack_when_v4_block": {
+          "n": 9,
+          "min": 0.0005,
+          "median": 0.0013,
+          "max": 0.4286
+        },
+        "attack_when_v4_allow": {
+          "n": 19,
+          "min": 0.0005,
+          "median": 0.0008,
+          "max": 0.4286
+        }
+      },
+      "PORT": {
+        "texts": 24,
+        "v4_block": 7,
+        "analyzer_bands": {
+          "[0,0.1)": 24
+        },
+        "attack_when_v4_block": {
+          "n": 7,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        },
+        "attack_when_v4_allow": {
+          "n": 17,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        }
+      },
+      "UA": {
+        "texts": 24,
+        "v4_block": 9,
+        "analyzer_bands": {
+          "[0,0.1)": 24
+        },
+        "attack_when_v4_block": {
+          "n": 9,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        },
+        "attack_when_v4_allow": {
+          "n": 15,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        }
+      },
+      "UAxPC": {
+        "texts": 8,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0,0.1)": 8
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        },
+        "attack_when_v4_allow": {
+          "n": 3,
+          "min": 0.0013,
+          "median": 0.0013,
+          "max": 0.0013
+        }
+      }
+    },
+    "pairs": [
+      {
+        "family": "HDR",
+        "varied": "header",
+        "v4": "V4 flips",
+        "analyzer": "Analyzer identical",
+        "pairs": 4
+      },
+      {
+        "family": "HDR",
+        "varied": "header",
+        "v4": "V4 same",
+        "analyzer": "Analyzer identical",
+        "pairs": 20
+      },
+      {
+        "family": "HOST",
+        "varied": "header",
+        "v4": "V4 flips",
+        "analyzer": "Analyzer identical",
+        "pairs": 6
+      },
+      {
+        "family": "HOST",
+        "varied": "header",
+        "v4": "V4 same",
+        "analyzer": "Analyzer identical",
+        "pairs": 22
+      },
+      {
+        "family": "PATH",
+        "varied": "surface",
+        "v4": "V4 flips",
+        "analyzer": "Analyzer changes",
+        "pairs": 6
+      },
+      {
+        "family": "PATH",
+        "varied": "surface",
+        "v4": "V4 same",
+        "analyzer": "Analyzer changes",
+        "pairs": 18
+      },
+      {
+        "family": "PORT",
+        "varied": "header",
+        "v4": "V4 flips",
+        "analyzer": "Analyzer identical",
+        "pairs": 7
+      },
+      {
+        "family": "PORT",
+        "varied": "header",
+        "v4": "V4 same",
+        "analyzer": "Analyzer identical",
+        "pairs": 15
+      },
+      {
+        "family": "UA",
+        "varied": "header",
+        "v4": "V4 flips",
+        "analyzer": "Analyzer identical",
+        "pairs": 1
+      },
+      {
+        "family": "UA",
+        "varied": "header",
+        "v4": "V4 same",
+        "analyzer": "Analyzer identical",
+        "pairs": 20
+      },
+      {
+        "family": "UAxPC",
+        "varied": "header",
+        "v4": "V4 flips",
+        "analyzer": "Analyzer identical",
+        "pairs": 1
+      },
+      {
+        "family": "UAxPC",
+        "varied": "header",
+        "v4": "V4 same",
+        "analyzer": "Analyzer identical",
+        "pairs": 5
+      }
+    ],
+    "feature_vectors": {
+      "distinct_vectors": 8,
+      "vectors_with_both_v4_decisions": 5,
+      "texts_in_those_vectors": 103
+    },
+    "v4_block_texts_analyzer_category_vs_v4_reason": {
+      "HTTP parameter pollution detected -> other_attack": 1,
+      "HTTP parameter pollution detected -> xss": 2,
+      "Server-side request forgery attack detected -> other_attack": 24,
+      "File inclusion attack detected -> other_attack": 4,
+      "Server-side request forgery attack detected -> sql_injection": 1,
+      "Open redirect payload detected -> other_attack": 3,
+      "HTTP request smuggling attack detected -> sql_injection": 2
+    },
+    "overlap": {
+      "seen_train_validation": {
+        "allow": 4,
+        "block": 0
+      },
+      "seen_train_validation_jwt": {
+        "allow": 0,
+        "block": 0
+      },
+      "in_internal_test_relation": {
+        "allow": 4,
+        "block": 0
+      },
+      "exact_text_in_v4_train": {
+        "allow": 0,
+        "block": 0
+      },
+      "exact_text_in_v4_eval": {
+        "allow": 0,
+        "block": 0
+      }
+    }
+  },
+  "S2_manual_suite": {
+    "vector_level (primary unit for Analyzer-side results)": {
+      "distinct_vectors": 134,
+      "cross_label_mix_v4_mix_band (vectors)": [
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW",
+          "band": "[0,0.1)",
+          "vectors": 6
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW",
+          "band": "[0.1,0.5)",
+          "vectors": 4
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW",
+          "band": "[0.5,0.9)",
+          "vectors": 2
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "ALLOW",
+          "band": "[0.9,1]",
+          "vectors": 8
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "BLOCK",
+          "band": "[0,0.1)",
+          "vectors": 3
+        },
+        {
+          "labels": "ALLOW",
+          "v4": "BLOCK",
+          "band": "[0.9,1]",
+          "vectors": 3
+        },
+        {
+          "labels": "BLOCK",
+          "v4": "ALLOW",
+          "band": "[0,0.1)",
+          "vectors": 4
+        },
+        {
+          "labels": "BLOCK",
+          "v4": "ALLOW",
+          "band": "[0.9,1]",
+          "vectors": 1
+        },
+        {
+          "labels": "BLOCK",
+          "v4": "BLOCK",
+          "band": "[0,0.1)",
+          "vectors": 10
+        },
+        {
+          "labels": "BLOCK",
+          "v4": "BLOCK",
+          "band": "[0.1,0.5)",
+          "vectors": 9
+        },
+        {
+          "labels": "BLOCK",
+          "v4": "BLOCK",
+          "band": "[0.5,0.9)",
+          "vectors": 11
+        },
+        {
+          "labels": "BLOCK",
+          "v4": "BLOCK",
+          "band": "[0.9,1]",
+          "vectors": 73
+        }
+      ],
+      "vectors": null
+    },
+    "cross_label_v4_band (texts, secondary)": [
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0,0.1)",
+        "n": 6
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.1,0.5)",
+        "n": 4
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.5,0.9)",
+        "n": 2
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.9,1]",
+        "n": 8
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "BLOCK",
+        "band": "[0,0.1)",
+        "n": 3
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "BLOCK",
+        "band": "[0.9,1]",
+        "n": 3
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "ALLOW",
+        "band": "[0,0.1)",
+        "n": 4
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "ALLOW",
+        "band": "[0.9,1]",
+        "n": 1
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0,0.1)",
+        "n": 10
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0.1,0.5)",
+        "n": 10
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0.5,0.9)",
+        "n": 11
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0.9,1]",
+        "n": 73
+      }
+    ],
+    "allow_texts_with_headers_beyond_host_content_type": 5,
+    "cross_label_v4_band_unseen_only": [
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0,0.1)",
+        "n": 4
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.1,0.5)",
+        "n": 4
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.5,0.9)",
+        "n": 2
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "ALLOW",
+        "band": "[0.9,1]",
+        "n": 8
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "BLOCK",
+        "band": "[0,0.1)",
+        "n": 3
+      },
+      {
+        "label": "ALLOW",
+        "v4_decision": "BLOCK",
+        "band": "[0.9,1]",
+        "n": 3
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "ALLOW",
+        "band": "[0,0.1)",
+        "n": 4
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "ALLOW",
+        "band": "[0.9,1]",
+        "n": 1
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0,0.1)",
+        "n": 10
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0.1,0.5)",
+        "n": 10
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0.5,0.9)",
+        "n": 11
+      },
+      {
+        "label": "BLOCK",
+        "v4_decision": "BLOCK",
+        "band": "[0.9,1]",
+        "n": 73
+      }
+    ],
+    "at_reporting_threshold_0_5 (D55, not an operating point)": {
+      "ALLOW | ALLOW | attack<0.5": 10,
+      "ALLOW | ALLOW | attack>=0.5": 10,
+      "ALLOW | BLOCK | attack<0.5": 3,
+      "ALLOW | BLOCK | attack>=0.5": 3,
+      "BLOCK | ALLOW | attack<0.5": 4,
+      "BLOCK | ALLOW | attack>=0.5": 1,
+      "BLOCK | BLOCK | attack<0.5": 20,
+      "BLOCK | BLOCK | attack>=0.5": 84
+    },
+    "at_reporting_threshold_0_5_unseen_only": {
+      "ALLOW | ALLOW | attack<0.5": 8,
+      "ALLOW | ALLOW | attack>=0.5": 10,
+      "ALLOW | BLOCK | attack<0.5": 3,
+      "ALLOW | BLOCK | attack>=0.5": 3,
+      "BLOCK | ALLOW | attack<0.5": 4,
+      "BLOCK | ALLOW | attack>=0.5": 1,
+      "BLOCK | BLOCK | attack<0.5": 20,
+      "BLOCK | BLOCK | attack>=0.5": 84
+    },
+    "per_category": {
+      "Adversarial": {
+        "texts": 20,
+        "v4_block": 16,
+        "analyzer_bands": {
+          "[0.9,1]": 14,
+          "[0.1,0.5)": 2,
+          "[0,0.1)": 4
+        },
+        "attack_when_v4_block": {
+          "n": 16,
+          "min": 0.0135,
+          "median": 0.9946,
+          "max": 0.9998
+        },
+        "attack_when_v4_allow": {
+          "n": 4,
+          "min": 0.0004,
+          "median": 0.2508,
+          "max": 0.9884
+        }
+      },
+      "CRLF Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 4,
+          "[0.1,0.5)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.3388,
+          "median": 0.9972,
+          "max": 0.9996
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "CSRF": {
+        "texts": 5,
+        "v4_block": 3,
+        "analyzer_bands": {
+          "[0,0.1)": 4,
+          "[0.5,0.9)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 3,
+          "min": 0.0434,
+          "median": 0.0564,
+          "max": 0.6104
+        },
+        "attack_when_v4_allow": {
+          "n": 2,
+          "min": 0.0019,
+          "median": 0.0181,
+          "max": 0.0344
+        }
+      },
+      "Command Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 2,
+          "[0,0.1)": 2,
+          "[0.5,0.9)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.0365,
+          "median": 0.8974,
+          "max": 0.9867
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "False Positive": {
+        "texts": 20,
+        "v4_block": 4,
+        "analyzer_bands": {
+          "[0.5,0.9)": 2,
+          "[0.9,1]": 10,
+          "[0,0.1)": 5,
+          "[0.1,0.5)": 3
+        },
+        "attack_when_v4_block": {
+          "n": 4,
+          "min": 0.0261,
+          "median": 0.9883,
+          "max": 0.9968
+        },
+        "attack_when_v4_allow": {
+          "n": 16,
+          "min": 0.0004,
+          "median": 0.5091,
+          "max": 0.9931
+        }
+      },
+      "File Inclusion": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 5
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.9414,
+          "median": 0.9883,
+          "max": 0.999
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "GraphQL Injection": {
+        "texts": 5,
+        "v4_block": 3,
+        "analyzer_bands": {
+          "[0.9,1]": 3,
+          "[0,0.1)": 1,
+          "[0.1,0.5)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 3,
+          "min": 0.4003,
+          "median": 0.9792,
+          "max": 0.9943
+        },
+        "attack_when_v4_allow": {
+          "n": 2,
+          "min": 0.0503,
+          "median": 0.4853,
+          "max": 0.9204
+        }
+      },
+      "HTTP Parameter Pollution": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 2,
+          "[0.1,0.5)": 1,
+          "[0.5,0.9)": 2
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.1985,
+          "median": 0.8343,
+          "max": 0.991
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "HTTP Request Smuggling": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 1,
+          "[0.1,0.5)": 3,
+          "[0.5,0.9)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.1117,
+          "median": 0.4579,
+          "max": 0.9936
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "Insecure Deserialization": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0,0.1)": 1,
+          "[0.9,1]": 3,
+          "[0.5,0.9)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.0029,
+          "median": 0.9947,
+          "max": 0.9999
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "JWT Attacks": {
+        "texts": 5,
+        "v4_block": 4,
+        "analyzer_bands": {
+          "[0,0.1)": 5
+        },
+        "attack_when_v4_block": {
+          "n": 4,
+          "min": 0.0003,
+          "median": 0.0004,
+          "max": 0.0033
+        },
+        "attack_when_v4_allow": {
+          "n": 1,
+          "min": 0.0004,
+          "median": 0.0004,
+          "max": 0.0004
+        }
+      },
+      "LDAP Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 5
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.9853,
+          "median": 0.9968,
+          "max": 0.9977
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "NoSQL Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 4,
+          "[0.1,0.5)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.3236,
+          "median": 0.9963,
+          "max": 0.9972
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "Open Redirect": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 4,
+          "[0.5,0.9)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.5781,
+          "median": 0.9746,
+          "max": 0.9995
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "Path Traversal": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 5
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.9892,
+          "median": 0.9981,
+          "max": 0.9998
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "SQL Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.1,0.5)": 1,
+          "[0.5,0.9)": 3,
+          "[0.9,1]": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.4791,
+          "median": 0.8471,
+          "max": 0.9949
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "SSRF": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 4,
+          "[0.1,0.5)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.2299,
+          "median": 0.9857,
+          "max": 0.9901
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "SSTI": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 5
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.9953,
+          "median": 0.9976,
+          "max": 0.9992
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "XPath Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 4,
+          "[0.5,0.9)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.6392,
+          "median": 0.9851,
+          "max": 0.9988
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "XSS Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 4,
+          "[0,0.1)": 1
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.0596,
+          "median": 0.9971,
+          "max": 0.9986
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      },
+      "XXE Injection": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 5
+        },
+        "attack_when_v4_block": {
+          "n": 5,
+          "min": 0.9856,
+          "median": 0.9976,
+          "max": 0.9988
+        },
+        "attack_when_v4_allow": {
+          "n": 0
+        }
+      }
+    },
+    "block_by_signal_location": {
+      "surface": {
+        "texts": 94,
+        "v4_block": 92,
+        "analyzer_bands": {
+          "[0.1,0.5)": 7,
+          "[0.5,0.9)": 9,
+          "[0.9,1]": 73,
+          "[0,0.1)": 5
+        },
+        "attack": {
+          "n": 94,
+          "min": 0.0029,
+          "median": 0.9905,
+          "max": 0.9999
+        }
+      },
+      "header-only": {
+        "texts": 10,
+        "v4_block": 7,
+        "analyzer_bands": {
+          "[0,0.1)": 9,
+          "[0.5,0.9)": 1
+        },
+        "attack": {
+          "n": 10,
+          "min": 0.0003,
+          "median": 0.0026,
+          "max": 0.6104
+        }
+      },
+      "header-dependent": {
+        "texts": 5,
+        "v4_block": 5,
+        "analyzer_bands": {
+          "[0.9,1]": 1,
+          "[0.1,0.5)": 3,
+          "[0.5,0.9)": 1
+        },
+        "attack": {
+          "n": 5,
+          "min": 0.1117,
+          "median": 0.4579,
+          "max": 0.9936
+        }
+      }
+    },
+    "category_head": {
+      "block_cases_with_d47_mapping": 104,
+      "top1_agrees": 49,
+      "by_expected": {
+        "command_injection": {
+          "command_injection": 4,
+          "other_attack": 1,
+          "xss": 1,
+          "open_redirect": 1
+        },
+        "open_redirect": {
+          "path_file_access": 5
+        },
+        "other_attack": {
+          "sql_injection": 6,
+          "other_attack": 29,
+          "open_redirect": 3,
+          "ssti": 4,
+          "path_file_access": 5,
+          "ssrf": 1,
+          "xss": 1,
+          "command_injection": 1
+        },
+        "path_file_access": {
+          "path_file_access": 7,
+          "open_redirect": 1,
+          "sql_injection": 3
+        },
+        "sql_injection": {
+          "other_attack": 2,
+          "path_file_access": 4,
+          "open_redirect": 1,
+          "sql_injection": 3,
+          "ssrf": 1
+        },
+        "ssrf": {
+          "ssrf": 1,
+          "path_file_access": 3,
+          "open_redirect": 1
+        },
+        "ssti": {
+          "path_file_access": 2,
+          "ssti": 1,
+          "xss": 1,
+          "sql_injection": 1,
+          "other_attack": 1
+        },
+        "xss": {
+          "xss": 4,
+          "path_file_access": 3,
+          "sql_injection": 1,
+          "open_redirect": 1
+        }
+      },
+      "unmapped_block_cases (JWT, adversarial without mapping)": 5
+    },
+    "feature_vectors": {
+      "distinct_vectors": 134,
+      "vectors_with_both_v4_decisions": 0,
+      "texts_in_those_vectors": 0
+    },
+    "vectors_shared_by_allow_and_block": 0,
+    "overlap": {
+      "seen_train_validation": {
+        "allow": 2,
+        "block": 0
+      },
+      "seen_train_validation_jwt": {
+        "allow": 0,
+        "block": 0
+      },
+      "in_internal_test_relation": {
+        "allow": 0,
+        "block": 0
+      },
+      "exact_text_in_v4_train": {
+        "allow": 0,
+        "block": 0
+      },
+      "exact_text_in_v4_eval": {
+        "allow": 0,
+        "block": 0
+      }
+    }
+  },
+  "extremes (attack < 0.01 or >= 0.99)": {
+    "ALLOW | ALLOW | high": 3,
+    "ALLOW | ALLOW | low": 75,
+    "ALLOW | BLOCK | high": 2,
+    "ALLOW | BLOCK | low": 33,
+    "BLOCK | ALLOW | low": 2,
+    "BLOCK | BLOCK | high": 49,
+    "BLOCK | BLOCK | low": 5
+  }
+}

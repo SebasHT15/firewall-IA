@@ -1,0 +1,25 @@
+{
+  "faithful_chain_(NF4_dequant_then_Q4)": {
+    "bf16_vs_Q4_K_M_decisions": "54/64",
+    "generations": "34/64",
+    "flips": {
+      "BLOCK->ALLOW": 10
+    }
+  },
+  "naive_chain_(original_bf16_then_Q4)": {
+    "bf16_vs_Q4_K_M_decisions": "58/64",
+    "generations": "44/64",
+    "flips": {
+      "BLOCK->ALLOW": 3,
+      "ALLOW->BLOCK": 3
+    }
+  },
+  "v5_faithful_chain": {
+    "bf16_vs_Q4_K_M_decisions": "57/64",
+    "generations": "57/64",
+    "flips": {
+      "BLOCK->ALLOW": 7
+    }
+  },
+  "note": "Q4_K_M compared with its OWN bf16 GGUF (same source weights). 64 synthetic fixture inputs; hypothesis discrimination only, not accuracy."
+}
