@@ -71,7 +71,7 @@ It gives no evidence either way.
 frozen, independently captured lab traffic: 68/200 benign cases BLOCK (60% in
 `unseen-structure`, 52.5% in `api-json`) against BLOCK recall 199/200. That is a
 test-specific rate under a 50/50 construction, not an operational FPR, and it does not by
-itself establish a cause ([`../README.md`](../README.md#5-external-test-v1), D42).
+itself establish a cause ([`../README.md`](history/README-through-2026-10-21.md#5-external-test-v1), D42).
 
 Rules: before any claim about how the gateway will behave, evaluate on an external test
 built from the traffic it will actually see: real clients, local and lab hosts, the

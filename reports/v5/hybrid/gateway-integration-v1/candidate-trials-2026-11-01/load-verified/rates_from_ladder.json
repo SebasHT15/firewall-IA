@@ -1,0 +1,44 @@
+{
+  "fixed_by_protocol": {
+    "audit_dev_rate": 1.5,
+    "audit_permit_rate": 5.0,
+    "failure_rate": 2.0,
+    "note": "below the sustainable rate of both runtimes; not inherited from any model"
+  },
+  "ladder_by_repetition": {
+    "first_saturated": {
+      "CASCADE_ACTIVE": [
+        24,
+        16,
+        16
+      ],
+      "V5_ONLY": [
+        12,
+        12,
+        12
+      ]
+    },
+    "sustainable": {
+      "CASCADE_ACTIVE": [
+        16,
+        12,
+        12
+      ],
+      "V5_ONLY": [
+        8,
+        8,
+        8
+      ]
+    }
+  },
+  "recovery_rate": 18.0,
+  "recovery_rule": "1.5 x the lowest first saturated rate of both modes",
+  "schema": "firewall-candidate-rates-from-ladder/v1",
+  "soak_high_rate": 8.4,
+  "soak_high_rule": "0.7 x the lowest sustainable rate of CASCADE_ACTIVE, in both modes; omitted where it equals soak_rate. Above the sustainable rate of V5_ONLY on purpose",
+  "soak_rate": 5.6,
+  "soak_rule": "0.7 x the lowest sustainable rate of both modes, the same for both modes",
+  "source": "analysis-ladder.json and the ladder_*.json of this directory",
+  "status": "Rates of this machine and this DEV mix. Not a capacity of any deployment. Nothing inherited from an earlier model.",
+  "written_before": "soak, recovery, failures and audit of this runtime"
+}

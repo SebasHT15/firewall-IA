@@ -1,5 +1,9 @@
 # FIREWALL-IA — Dossier de continuidad para el siguiente chat de Claude
 
+**Documento histórico.** Las ramas, PR, bloqueos y asignaciones de este dossier describen
+octubre de 2026. Para retomar el trabajo actual, leer [CONTEXT](../CONTEXT.md),
+[estado actual](project_status.md) e [índice de documentación](index.md).
+
 Fecha: 2026-10-20, America/Costa_Rica. Este documento es para el **coordinador**, no para el revisor ciego R3.
 
 ## 1. Punto de partida y Git

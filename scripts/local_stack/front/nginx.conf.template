@@ -1,0 +1,97 @@
+# firewall-IA local stack — TLS and HTTP/2 FRONT (nginx). Rendered by scripts/local_stack/stack.py.
+#
+# Terminates TLS (1.2/1.3) and accepts HTTP/1.1 and HTTP/2 (ALPN). Everything it forwards to the
+# gateway is ONE HTTP/1.1 message per request, on loopback, plaintext. The gateway keeps its own
+# contract (gateway-framing/v1, HTTP/1.1 only, inbound TLS refused): this front is a separate layer
+# and no framing evidence of the gateway is claimed for it. See docs/local_stack.md.
+#
+# Normalizations this front applies on purpose (measured by scripts/local_stack/transport_check.py):
+#   - the request body is read completely before forwarding and sent with Content-Length
+#     (an HTTP/1.1 chunked body or an HTTP/2 body without content-length is re-framed);
+#   - HTTP/2 lowercase header names; multiple HTTP/2 `cookie` fields joined with "; ";
+#   - `Connection` removed (keepalive to the gateway), hop-by-hop headers not forwarded;
+#   - header names with underscores and invalid header names are DROPPED (nginx defaults);
+#   - no header is added: no X-Forwarded-*, no request id. Every forwarded header is the client's.
+# A request is never retried (`proxy_next_upstream off`): a non-idempotent request reaches the gateway
+# at most once.
+
+worker_processes ${WORKERS};
+pid /tmp/nginx.pid;
+error_log /logs/front-error.log warn;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    client_body_temp_path /tmp/client_body;
+    proxy_temp_path /tmp/proxy;
+    fastcgi_temp_path /tmp/fastcgi;
+    uwsgi_temp_path /tmp/uwsgi;
+    scgi_temp_path /tmp/scgi;
+    server_tokens off;
+    default_type application/octet-stream;
+
+    # No target, query, header value or body: only what attributes the answer to a layer.
+    log_format fwlab escape=json '{"utc":$msec,"connection":$connection,'
+        '"connection_requests":$connection_requests,"protocol":"$server_protocol",'
+        '"tls_protocol":"$ssl_protocol","tls_reused":"$ssl_session_reused","method":"$request_method",'
+        '"status":$status,"upstream_status":"$upstream_status","upstream_addr":"$upstream_addr",'
+        '"request_length":$request_length,"bytes_sent":$bytes_sent,"request_time":$request_time,'
+        '"upstream_connect_time":"$upstream_connect_time",'
+        '"upstream_response_time":"$upstream_response_time"}';
+    access_log /logs/front-access.jsonl fwlab;
+
+    upstream fwlab_gateway {
+        server 127.0.0.1:${GATEWAY_PORT} max_fails=0;
+        keepalive ${UPSTREAM_KEEPALIVE};
+    }
+
+    server {
+        listen 127.0.0.1:${TLS_PORT} ssl;
+        http2 ${HTTP2};
+        server_name ${SERVER_NAME};
+
+        ssl_certificate /pki/server.crt;
+        ssl_certificate_key /pki/server.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_prefer_server_ciphers off;
+        ssl_session_cache shared:fwlab:1m;
+        ssl_session_timeout 5m;
+        ssl_session_tickets on;
+
+        client_max_body_size ${MAX_BODY};
+        client_body_buffer_size ${MAX_BODY};
+        large_client_header_buffers 4 16k;
+        keepalive_timeout 60s;
+
+        location / {
+            proxy_pass http://fwlab_gateway;
+            proxy_http_version 1.1;
+            proxy_set_header Host $http_host;
+            proxy_set_header Connection "";
+            proxy_request_buffering on;
+            proxy_buffering on;
+            proxy_redirect off;
+            proxy_intercept_errors off;
+            proxy_next_upstream off;
+            proxy_connect_timeout 2s;
+            proxy_send_timeout ${UPSTREAM_TIMEOUT};
+            proxy_read_timeout ${UPSTREAM_TIMEOUT};
+        }
+    }
+
+    # Readiness of the front itself, on its own loopback port. It never touches the gateway, so a
+    # readiness probe is never classified.
+    server {
+        listen 127.0.0.1:${STATUS_PORT};
+        access_log off;
+        location = /__front/ready {
+            default_type text/plain;
+            return 200 "ready\n";
+        }
+        location / {
+            return 404;
+        }
+    }
+}

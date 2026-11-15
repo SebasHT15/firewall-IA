@@ -1,0 +1,82 @@
+{
+  "ready": true,
+  "work": "/home/sebas/Documents/Codex/2026-10-26/ta/work/local-stack-2026-11-04/checks-1/failure-check/stack",
+  "endpoints": {
+    "front_tls": "https://notes.fwlab.test:8443",
+    "front_status": "http://127.0.0.1:8444",
+    "gateway_plain": "http://127.0.0.1:8080",
+    "gateway_admin": "http://127.0.0.1:8090",
+    "v5": "http://127.0.0.1:40905",
+    "app_direct": "http://172.30.160.2:9300"
+  },
+  "mode": "V5_ONLY",
+  "v5": "url:http://127.0.0.1:40905"
+}
+{
+  "app": "removed",
+  "app-network": "removed",
+  "front": "removed",
+  "gateway": "gone"
+}
+{
+  "passed": true,
+  "probes": [
+    {
+      "probe": "baseline",
+      "status": 200,
+      "layer": "application",
+      "passed": true,
+      "elapsed_ms": 18.4
+    },
+    {
+      "probe": "v5_error500",
+      "status": 503,
+      "layer": "firewall",
+      "passed": true,
+      "elapsed_ms": 12.2
+    },
+    {
+      "probe": "v5_invalid_no_eos",
+      "status": 503,
+      "layer": "firewall",
+      "passed": true,
+      "elapsed_ms": 10.3
+    },
+    {
+      "probe": "v5_hang",
+      "status": 503,
+      "layer": "firewall",
+      "passed": true,
+      "elapsed_ms": 3010.8
+    },
+    {
+      "probe": "v5_recovered",
+      "status": 200,
+      "layer": "application",
+      "passed": true,
+      "elapsed_ms": 15.6
+    },
+    {
+      "probe": "app_stopped",
+      "status": 502,
+      "layer": "upstream_unreachable",
+      "passed": true,
+      "elapsed_ms": 3089.2
+    },
+    {
+      "probe": "app_restarted",
+      "status": 200,
+      "layer": "application",
+      "passed": true,
+      "elapsed_ms": 19.6
+    },
+    {
+      "probe": "gateway_killed",
+      "status": 502,
+      "layer": "front",
+      "passed": true,
+      "elapsed_ms": 1.5
+    }
+  ],
+  "clean": true
+}

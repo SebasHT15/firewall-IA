@@ -1,0 +1,175 @@
+{
+  "status": "EXPERIMENTAL_HTTP_CHECK",
+  "private_inputs_sha256": "3118bf663689c28b574094bc5e9797fa628d49106dbe4857b4c29962f59d51fe",
+  "results": [
+    {
+      "config": "native",
+      "cases": 95,
+      "benchmark_n": 95,
+      "health": {
+        "status": "ok",
+        "model_loaded": true,
+        "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v5/final/v5-final-v4-20261027T022649Z/adapter",
+        "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "load_s": 4.001379820001603,
+        "max_inflight": 8,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v1",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30",
+          "sha256": "2974296b292d6f9404baebc0c4e39cc651f678d2077262648f96bf95fef24e5d",
+          "status": "EXPERIMENTAL",
+          "precision": "nf4",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": false,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30"
+        }
+      },
+      "contract": {
+        "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+        "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "base_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+        "vocabulary": [
+          "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "BLOCK | SQL injection payload detected.",
+          "BLOCK | Cross-site scripting payload detected.",
+          "BLOCK | Path traversal attack detected.",
+          "BLOCK | File inclusion attack detected.",
+          "BLOCK | Command injection payload detected.",
+          "BLOCK | Server-side template injection payload detected."
+        ],
+        "max_length": 512,
+        "token_budget_B": 415,
+        "label_budget": 13,
+        "overhead": 76,
+        "margin": 8,
+        "max_new_tokens": 17,
+        "bos_id": 1,
+        "eos_id": 2,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v1",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30",
+          "sha256": "2974296b292d6f9404baebc0c4e39cc651f678d2077262648f96bf95fef24e5d",
+          "status": "EXPERIMENTAL",
+          "precision": "nf4",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": false,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-nf4-runtime-dev-2026-10-30"
+        }
+      },
+      "mismatch_ids": [],
+      "pipeline_p95_ms": 241.3824030008982,
+      "client_p95_ms": 242.6077019990771
+    },
+    {
+      "config": "verified",
+      "cases": 1012,
+      "benchmark_n": 95,
+      "health": {
+        "status": "ok",
+        "model_loaded": true,
+        "adapter_dir": "/home/sebas/Desktop/firewall-IA/model-output-v5/final/v5-final-v4-20261027T022649Z/adapter",
+        "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "load_s": 4.106523759997799,
+        "max_inflight": 8,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v2",
+          "profile_id": "v5-nf4-verified-suffix-dev-20261031",
+          "sha256": "e81d70f3933e0b09abe2e581c6de6903b7f96ff0128374cae4480b1c62ada91f",
+          "status": "EXPERIMENTAL",
+          "precision": "nf4",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+          "decoder": "verified_suffix/v1",
+          "decoder_sha256": "867335f011b939c428a12bab74fcb2ddc366be627f15df269c5bf26f0f67d0f8"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": false,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-nf4-verified-suffix-dev-20261031",
+          "decoder": "verified_suffix/v1",
+          "decoder_sha256": "867335f011b939c428a12bab74fcb2ddc366be627f15df269c5bf26f0f67d0f8"
+        }
+      },
+      "contract": {
+        "recipe_path": "scripts/training/v5_training_recipe_v1.json",
+        "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+        "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3",
+        "base_model": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+        "base_revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+        "vocabulary": [
+          "ALLOW | Normal HTTP request with no attack patterns detected.",
+          "BLOCK | SQL injection payload detected.",
+          "BLOCK | Cross-site scripting payload detected.",
+          "BLOCK | Path traversal attack detected.",
+          "BLOCK | File inclusion attack detected.",
+          "BLOCK | Command injection payload detected.",
+          "BLOCK | Server-side template injection payload detected."
+        ],
+        "max_length": 512,
+        "token_budget_B": 415,
+        "label_budget": 13,
+        "overhead": 76,
+        "margin": 8,
+        "max_new_tokens": 17,
+        "bos_id": 1,
+        "eos_id": 2,
+        "runtime_profile": {
+          "schema": "v5-inference-profile/v2",
+          "profile_id": "v5-nf4-verified-suffix-dev-20261031",
+          "sha256": "e81d70f3933e0b09abe2e581c6de6903b7f96ff0128374cae4480b1c62ada91f",
+          "status": "EXPERIMENTAL",
+          "precision": "nf4",
+          "double_quant": false,
+          "recipe_sha256": "c9fe4a96a0f1159c0325ef785e105e6f39c69ca6b34cc99f97ddcdd5a29c04a6",
+          "adapter_sha256": "c27e363fe76190f5cb4be77f02e110419ab5d95ef5ee1f959a238ba99bc72393",
+          "decoder": "verified_suffix/v1",
+          "decoder_sha256": "867335f011b939c428a12bab74fcb2ddc366be627f15df269c5bf26f0f67d0f8"
+        },
+        "runtime_settings": {
+          "loaded_in_4bit": true,
+          "double_quant": false,
+          "model_dtype": "torch.bfloat16",
+          "attention_implementation": "sdpa",
+          "profile_id": "v5-nf4-verified-suffix-dev-20261031",
+          "decoder": "verified_suffix/v1",
+          "decoder_sha256": "867335f011b939c428a12bab74fcb2ddc366be627f15df269c5bf26f0f67d0f8"
+        }
+      },
+      "mismatch_ids": [],
+      "pipeline_p95_ms": 97.56260400172323,
+      "client_p95_ms": 98.71496200139518
+    }
+  ],
+  "services_stopped": true,
+  "source_sha256": {
+    "scripts/v5_successor/verified_suffix_service_check.py": "45cc6367864a8b5eb3bda8712951bccfb72373dd9f2a53bfefecf50f161a113d",
+    "scripts/v5_successor/verified_suffix.py": "867335f011b939c428a12bab74fcb2ddc366be627f15df269c5bf26f0f67d0f8",
+    "control_plane/v5_inference_core.py": "89cc7be88870002dc7326fe8303f33f9531c77f0c61bc38b6e9c1487e5899ab5",
+    "control_plane/v5_runtime_profile.py": "eb8170418649dc0b9dfd3da88442a518aa0a256270d9960cfca14ac822a1f101",
+    "control_plane/v5_classifier_api.py": "0fb59537f5b98a3d42d6da97cb925d50a68d8b1bd637485e0b8c26a5f639e0ed"
+  },
+  "manifest_sha256": "4042d8c7f6eee48ae7911c40237751da1c369fce7e57dcf7ad8efacd81311b79",
+  "profile_sha256": "e81d70f3933e0b09abe2e581c6de6903b7f96ff0128374cae4480b1c62ada91f",
+  "note": "API/profile verification only; gateway/load must be checked separately with this manifest."
+}

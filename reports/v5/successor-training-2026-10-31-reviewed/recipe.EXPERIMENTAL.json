@@ -1,0 +1,120 @@
+{
+  "schema": "v5-training-recipe/v1",
+  "recipe_id": "v51-policy-composition-experimental-20261031",
+  "status": "PROPOSED",
+  "note": "Experimental successor proposal. Same pinned base, fresh LoRA; original TRAIN preserved. Requires committed owner admission for this exact composition. No FINAL or production authorization.",
+  "base_model": {
+    "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "local_files_only": true,
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "template": {
+    "id": "V5_CANDIDATE_TEMPLATE",
+    "module": "control_plane/v5_tokenization.py",
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "vocabulary": {
+    "id": "VOCABULARY_ALT_A",
+    "module": "control_plane/v5_output_contract.py",
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "token_budget": {
+    "max_length": 512,
+    "margin": 8,
+    "B": 415,
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "loss": {
+    "on": "completion",
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "quantization": {
+    "load_in_4bit": true,
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "bnb_4bit_compute_dtype": "bfloat16",
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "lora": {
+    "r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "bias": "none",
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ],
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "optimization": {
+    "num_train_epochs": 4,
+    "per_device_train_batch_size": 4,
+    "per_device_eval_batch_size": 4,
+    "gradient_accumulation_steps": 8,
+    "gradient_checkpointing": true,
+    "learning_rate": 0.0002,
+    "lr_scheduler_type": "cosine",
+    "warmup_ratio": 0.05,
+    "optim": "paged_adamw_8bit",
+    "bf16": true,
+    "eval_steps": 200,
+    "save_steps": 200,
+    "logging_steps": 50,
+    "save_total_limit": 2,
+    "load_best_model_at_end": true,
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "seed": {
+    "seed": 20261019,
+    "data_seed": 20261019,
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "library_pins": {
+    "python": "3.12",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0",
+    "trl": "1.4.0",
+    "peft": "0.19.1",
+    "bitsandbytes": "0.49.2",
+    "datasets": "4.8.5",
+    "accelerate": "1.13.0",
+    "status": "PROPOSED",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission."
+  },
+  "smoke": {
+    "max_steps": 40,
+    "max_steps_hard_cap": 60,
+    "per_device_train_batch_size": 4,
+    "gradient_accumulation_steps": 1,
+    "learning_rate": 0.0002,
+    "warmup_ratio": 0.0,
+    "eval_steps": 20,
+    "save_steps": 20,
+    "logging_steps": 1,
+    "save_total_limit": 1,
+    "generation_checks": 12,
+    "status": "ENGINEERING",
+    "source": "engineering smoke settings only; never a V5 training schedule"
+  },
+  "initialization": {
+    "mode": "PINNED_BASE_WITH_NEW_LORA",
+    "continue_from_adapter": false,
+    "original_TRAIN_preserved": true,
+    "status": "PROPOSED"
+  }
+}

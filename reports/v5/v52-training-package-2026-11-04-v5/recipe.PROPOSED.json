@@ -1,0 +1,120 @@
+{
+  "base_model": {
+    "local_files_only": true,
+    "name": "TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+    "revision": "fe8a4ea1ffedaf415f4da2f062534de366a451e6",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  },
+  "initialization": {
+    "continue_from_adapter": false,
+    "mode": "PINNED_BASE_WITH_NEW_LORA",
+    "original_TRAIN_preserved": true,
+    "status": "PROPOSED"
+  },
+  "library_pins": {
+    "accelerate": "1.13.0",
+    "bitsandbytes": "0.49.2",
+    "datasets": "4.8.5",
+    "peft": "0.19.1",
+    "python": "3.12",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED",
+    "torch": "2.6.0+cu124",
+    "transformers": "5.8.0",
+    "trl": "1.4.0"
+  },
+  "lora": {
+    "bias": "none",
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "r": 16,
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED",
+    "target_modules": [
+      "q_proj",
+      "k_proj",
+      "v_proj",
+      "o_proj",
+      "gate_proj",
+      "up_proj",
+      "down_proj"
+    ]
+  },
+  "loss": {
+    "on": "completion",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  },
+  "note": "Fresh LoRA from pinned base, V5.1 TRAIN/VALIDATION retained as immutable parents, policy-defined application correction delta appended. Owner admission and commit required; no FINAL or deployment authorization.",
+  "optimization": {
+    "bf16": true,
+    "eval_steps": 200,
+    "gradient_accumulation_steps": 8,
+    "gradient_checkpointing": true,
+    "learning_rate": 0.0002,
+    "load_best_model_at_end": true,
+    "logging_steps": 50,
+    "lr_scheduler_type": "cosine",
+    "num_train_epochs": 4,
+    "optim": "paged_adamw_8bit",
+    "per_device_eval_batch_size": 4,
+    "per_device_train_batch_size": 4,
+    "save_steps": 200,
+    "save_total_limit": 2,
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED",
+    "warmup_ratio": 0.05
+  },
+  "quantization": {
+    "bnb_4bit_compute_dtype": "bfloat16",
+    "bnb_4bit_quant_type": "nf4",
+    "bnb_4bit_use_double_quant": true,
+    "load_in_4bit": true,
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  },
+  "recipe_id": "v52-app-correction-experimental-20261104",
+  "schema": "v5-training-recipe/v1",
+  "seed": {
+    "data_seed": 20261019,
+    "seed": 20261019,
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  },
+  "smoke": {
+    "eval_steps": 20,
+    "generation_checks": 12,
+    "gradient_accumulation_steps": 1,
+    "learning_rate": 0.0002,
+    "logging_steps": 1,
+    "max_steps": 40,
+    "max_steps_hard_cap": 60,
+    "per_device_train_batch_size": 4,
+    "save_steps": 20,
+    "save_total_limit": 1,
+    "source": "engineering smoke settings only; never a V5 training schedule",
+    "status": "ENGINEERING",
+    "warmup_ratio": 0.0
+  },
+  "status": "PROPOSED",
+  "template": {
+    "id": "V5_CANDIDATE_TEMPLATE",
+    "module": "control_plane/v5_tokenization.py",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  },
+  "token_budget": {
+    "B": 415,
+    "margin": 8,
+    "max_length": 512,
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  },
+  "vocabulary": {
+    "id": "VOCABULARY_ALT_A",
+    "module": "control_plane/v5_output_contract.py",
+    "source": "Inherited parameters from the original recipe; this composition requires explicit experimental owner admission.",
+    "status": "PROPOSED"
+  }
+}

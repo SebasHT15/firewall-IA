@@ -1,0 +1,106 @@
+=== framing
+[PASS] framing: benign GET delivered 
+[PASS] framing: V5 block not delivered 
+[PASS] framing: real Model 2 early block, no V5 call 
+[PASS] framing: Fast Path fixture applied, no model call 
+[PASS] framing: Content-Length request split every 5 bytes 
+[PASS] framing: split inside CRLF of the head 
+[PASS] framing: chunked request, segments across chunk boundaries 
+[PASS] framing: chunked delivered as what was decided 
+[PASS] framing: evil split across segments is decided on the whole request 
+[PASS] framing: body carrying a whole request is one message, decided with its body 
+[PASS] framing: two pipelined requests: benign delivered, evil not 
+[PASS] framing: Expect: 100-continue, body after the interim response 
+[PASS] framing: two Host headers are ambiguous 
+[PASS] framing: TE and CL together 
+[PASS] framing: duplicate Content-Length 
+[PASS] framing: obfuscated Transfer-Encoding 
+[PASS] framing: obsolete line folding refused by the strict parser 
+[PASS] framing: bare-LF request is decided and delivered in its normalized form 
+[PASS] framing: bare LF cannot hide a TE header behind a value 
+[PASS] framing: HTTP/1.0 outside the scope 
+[PASS] framing: absolute-form outside the scope 
+[PASS] framing: asterisk-form outside the scope 
+[PASS] framing: WebSocket upgrade outside the scope 
+[PASS] framing: h2c upgrade header is stripped by mitmproxy before the decision, delivered as decided 
+[PASS] framing: HTTP/2 prior knowledge never delivered 
+[PASS] framing: TLS on the cleartext listener never delivered 
+[PASS] framing: body over the mitmproxy limit 
+[PASS] framing: body over the received-body bound is refused before canonicalization 
+[PASS] framing: text over the token budget is rejected, never truncated 
+[PASS] framing: direct connection to the guard is refused, nothing delivered 
+[PASS] framing: no ticket left behind 
+[PASS] framing: guard rejection counted 
+[PASS] framing: records and gateway log carry no target, query or body 
+=== after_hook_mutation
+[PASS] after_hook_mutation: changed after the decision: not delivered, 502 
+[PASS] after_hook_mutation: guard recorded the mismatch 
+=== failures
+[PASS] failures: V5 invalid output denies, nothing delivered 
+[PASS] failures: V5 HTTP 500 denies, nothing delivered 
+[PASS] failures: V5 saturated 503 denies, nothing delivered 
+[PASS] failures: V5 malformed reply denies, nothing delivered 
+[PASS] failures: V5 timeout denies, nothing delivered 
+[PASS] failures: V5 recovered: benign delivered again 
+[PASS] failures: Model 2 worker killed: request defers to V5 
+[PASS] failures: Model 2 failure recorded as non-OK, V5 decided 
+[PASS] failures: Model 2 worker restarted: early block is back 
+[PASS] failures: V5 serving another recipe stops readiness 
+[PASS] failures: not ready: fail-closed, nothing delivered 
+[PASS] failures: contract restored: serving again 
+=== return_to_v4
+[PASS] return_to_v4: ACTIVE decides 
+[PASS] return_to_v4: sentinel: V4 decides and the request is delivered through the guard 
+[PASS] return_to_v4: V4 block applied during the return 
+[PASS] return_to_v4: readiness follows V4 during the return 
+[PASS] return_to_v4: V4 failing during the return stays fail-closed 
+[PASS] return_to_v4: sentinel removed: ACTIVE decides again 
+[PASS] return_to_v4: restart with V4_ONLY: V4 decides, no V5 call, no cascade runtime 
+=== observe
+[PASS] observe: V4 action unchanged with V5 normal: b'GET /catalog/widgets HTT' 
+[PASS] observe: V4 action unchanged with V5 normal: b'GET /search?q=evil HTTP/' 
+[PASS] observe: V4 action unchanged with V5 normal: b'GET /download?file=..%2f' 
+[PASS] observe: V4 action unchanged with V5 normal: b'GET /healthz HTTP/1.1\r\nH' 
+[PASS] observe: V4 action unchanged with V5 error500: b'GET /catalog/widgets HTT' 
+[PASS] observe: V4 action unchanged with V5 error500: b'GET /search?q=evil HTTP/' 
+[PASS] observe: V4 action unchanged with V5 error500: b'GET /download?file=..%2f' 
+[PASS] observe: V4 action unchanged with V5 error500: b'GET /healthz HTTP/1.1\r\nH' 
+[PASS] observe: V4 action unchanged with V5 hang: b'GET /catalog/widgets HTT' 
+[PASS] observe: V4 action unchanged with V5 hang: b'GET /search?q=evil HTTP/' 
+[PASS] observe: V4 action unchanged with V5 hang: b'GET /download?file=..%2f' 
+[PASS] observe: V4 action unchanged with V5 hang: b'GET /healthz HTTP/1.1\r\nH' 
+[PASS] observe: V4 action unchanged with V5 invalid: b'GET /catalog/widgets HTT' 
+[PASS] observe: V4 action unchanged with V5 invalid: b'GET /search?q=evil HTTP/' 
+[PASS] observe: V4 action unchanged with V5 invalid: b'GET /download?file=..%2f' 
+[PASS] observe: V4 action unchanged with V5 invalid: b'GET /healthz HTTP/1.1\r\nH' 
+[PASS] observe: cascade recorded beside V4 (real Model 2 would block what V4 double allows) 
+[PASS] observe: hypothetical FAST_ALLOW recorded, not applied 
+[PASS] observe: hypothetical permit audited as not applied 
+[PASS] observe: Model 2 worker killed: V4 action unchanged 
+[PASS] observe: direct path: the guard is not listening in OBSERVE 
+[PASS] observe: unusable manifest: observation off and reported, V4 serves 
+=== v5_only
+[PASS] v5_only: V5 allows 
+[PASS] v5_only: V5 blocks 
+[PASS] v5_only: no Model 2 stage: V5 decides the traversal too 
+[PASS] v5_only: Model 2 and Fast Path not consulted 
+[PASS] v5_only: V5 invalid denies 
+=== fast_path_audit
+[PASS] fast_path_audit: permit applied 
+[PASS] fast_path_audit: sampled permit audited, V5 agrees 
+[PASS] fast_path_audit: auditor says BLOCK: the permit stays applied 
+[PASS] fast_path_audit: disagreement recorded, no retroactive effect 
+[PASS] fast_path_audit: the next permit is still decided by the policy 
+[PASS] fast_path_audit: auditor timeout never delays or denies the permit 
+[PASS] fast_path_audit: audit timeout recorded 
+[PASS] fast_path_audit: every permit ended in exactly one audit record 
+=== shutdown
+[PASS] shutdown: serving before shutdown 
+[PASS] shutdown: clean exit on SIGTERM 
+[PASS] shutdown: no worker left behind 
+[PASS] shutdown: unusable manifest in an authoritative mode: the gateway does not run 
+=== saturation
+[PASS] saturation: burst over the bounds: every request answered, excess fail-closed 
+[PASS] saturation: saturation counted 
+[PASS] saturation: recovers after the burst 
+TOTAL 96/96 passed

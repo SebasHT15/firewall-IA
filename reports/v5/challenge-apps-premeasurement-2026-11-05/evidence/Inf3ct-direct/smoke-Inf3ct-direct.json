@@ -1,0 +1,84 @@
+{
+  "app": "Inf3ct",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "direct",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 1243,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 230,
+      "check": "benign GET /log",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: /log fresh at up, then stores this run's marker",
+      "log_fresh_at_up": true,
+      "marker_stored": true,
+      "note": "in-memory log; resets per container/up",
+      "pass": true
+    },
+    {
+      "app_received": true,
+      "check": "direct arm has no blocking layer (request reaches app)",
+      "note": "baseline: front -> app, no gateway, no WAF",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app Inf3ct --arm direct --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/Inf3ct-direct/Inf3ct.direct.stack.json",
+    "up --app Inf3ct --arm direct --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/Inf3ct-direct/Inf3ct.direct.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/Inf3ct-direct --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/Inf3ct-direct",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/Inf3ct-direct"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": false,
+  "large_responses": [],
+  "pass": true,
+  "utc": 1793900441.344435,
+  "v5": "double"
+}

@@ -1,34 +1,9 @@
-"""
-firewall-IA — Fast Path eligibility, SHADOW ONLY (Hybrid Architecture; PROPOSED, no decision record yet).
+"""Closed-world Fast Path eligibility after verified framing and canonical ACCEPT.
 
-    validated canonical request -> Fast Path -> FAST_ALLOW | CONTINUE -> (Analyzer -> Model 2 -> V5)
-
-This module answers one question about one request: "could the Fast Path hypothetically
-let it skip the model stages?". It only OBSERVES. Nothing in the gateway reads the
-answer: V4 still decides every request, enforcement and fail-closed are untouched
-(D4, D25, D34, D43). `FAST_ALLOW` here is a recorded hypothesis, never a permission.
-
-CONSERVATIVE BY CONSTRUCTION
-- The absence of suspicious features is NOT evidence. There is no suspicion score, no weight
-  and no threshold anywhere in this module. FAST_ALLOW needs POSITIVE, closed-world evidence:
-  the request must match, completely, a rule of an owner-supplied policy that declares the
-  application context explicitly (D57: "a policy that depends on application context must
-  state that context explicitly"). No policy, or no full match, means CONTINUE.
-- Eligibility is evaluated only AFTER the protocol-validation prerequisites hold: a
-  `canonical-request/v1` ACCEPT for this very request and framing evidence that is VERIFIED
-  by a project control. When either is unavailable (today, in the gateway: both are), the
-  answer is CONTINUE with the unmet prerequisites, and the rules are not even looked at.
-- Every doubt is CONTINUE: any failure, any malformed or ambiguous input, any exception.
-- Headers are not covered by the canonical text (it carries Content-Type only), yet V4
-  reads them. So the Fast Path inspects them itself: every header must be listed by the
-  rule with a closed value grammar, otherwise CONTINUE.
-- The only grammars are `enum` (exact strings) and `uint` (bounded decimal digits).
-  Alphabet-based "looks harmless" classes are deliberately not offered: a value made of
-  letters and digits can still be an attack (a command name, an internal address).
-- v1 scope: GET and HEAD, origin-form target, no body, no percent-encoding, no fragment,
-  no Transfer-Encoding, no content coding, no canonical signal.
-
-Standard library only (D33): importable in the data plane environment.
+The router chooses whether to observe or enforce FAST_ALLOW; this module only
+matches the app-bound policy. v1 retains enum/uint semantics. v2 additionally
+supports named, bounded header syntax profiles justified by an audited public
+handler contract. Unknown, ambiguous or invalid inputs always CONTINUE.
 """
 
 import hashlib
@@ -36,8 +11,72 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
+
+from datetime import datetime
+from urllib.parse import urlsplit
+import re
+
+HEADER_PROFILES = frozenset(('language_preferences', 'client_hints', 'question_cookie', 'http_date', 'entity_tag', 'public_referer'))
+HEADER_LANGUAGES = frozenset(('es-CR','es','es-419','es-ES','es-MX','en-US','en','en-GB','pt-BR','fr','de'))
+
+
+def _header_profile_matches(profile, value, *, origins=(), paths=(), queries=(), relative_root=False):
+    if not isinstance(value, str) or not 0 < len(value) <= 512 or any(ord(c) < 32 or ord(c) > 126 for c in value):
+        return False
+    if profile == 'public_referer':
+        if value == '/':
+            return relative_root
+        if any(c.isspace() or c in '%#\\' for c in value):
+            return False
+        try:
+            url = urlsplit(value)
+        except ValueError:
+            return False
+        if url.scheme + '://' + url.netloc not in origins or url.path not in paths or url.fragment:
+            return False
+        if not url.query:
+            return '?' not in value
+        kind = dict(queries).get(url.path)
+        if kind == 'uint-id':
+            return re.fullmatch(r'id=(?:0|[1-9][0-9]{0,8})', url.query) is not None
+        if kind == 'basename-img':
+            return '..' not in url.query and re.fullmatch(r'img=[A-Za-z0-9_~-][A-Za-z0-9_.~-]{0,127}', url.query) is not None
+        return False
+    if profile == 'language_preferences':
+        parts = value.split(',')
+        if not 1 <= len(parts) <= 4:
+            return False
+        seen = set()
+        for part in parts:
+            pair = part.strip().split(';q=')
+            if len(pair) > 2 or pair[0] not in HEADER_LANGUAGES or pair[0] in seen:
+                return False
+            if len(pair) == 2 and not re.fullmatch(r'0\.[1-9]', pair[1]):
+                return False
+            seen.add(pair[0])
+        return True
+    if profile == 'client_hints':
+        # Three structured brand/version members; bounded quoted strings. No
+        # arbitrary regex is taken from a policy and no controls/escapes allowed.
+        return len(value) <= 160 and re.fullmatch(
+            r'"[A-Za-z0-9 .;:()?_=/-]{1,32}";v="[0-9]{1,3}"(?:, "[A-Za-z0-9 .;:()?_=/-]{1,32}";v="[0-9]{1,3}"){2}', value) is not None
+    if profile == 'question_cookie':
+        # ObC00ki3s client-only cookie; never a server session credential.
+        return value.startswith('question=') and len(value) <= 256 and all(c not in value[9:] for c in ';{}\\"')
+    if profile == 'entity_tag':
+        return re.fullmatch(r'(?:W/)?"[A-Za-z0-9._-]{1,128}"|\*', value) is not None
+    if profile == 'http_date':
+        try:
+            parsed = datetime.strptime(value, '%a, %d %b %Y %H:%M:%S GMT')
+            return 1970 <= parsed.year <= 2100 and parsed.strftime('%a, %d %b %Y %H:%M:%S GMT') == value
+        except ValueError:
+            return False
+    return False
+
+
 CONTRACT_ID = "fast-path/v1-shadow"
 POLICY_SCHEMA = "fast-path-policy/v1"
+POLICY_SCHEMA_V2 = "fast-path-policy/v2"
 
 # Values of the canonical-request/v1 contract that this module reads from a result object. They
 # are repeated here, not imported, because the gateway must not import the contract before it is
@@ -81,7 +120,7 @@ REASONS = (
     "TARGET_MALFORMED", "TARGET_NOT_ORIGIN_FORM", "FRAGMENT_PRESENT", "PERCENT_ENCODING_PRESENT",
     "PATH_NOT_MATCHED", "QUERY_MALFORMED", "QUERY_PARAM_UNKNOWN", "QUERY_PARAM_REPEATED",
     "QUERY_PARAM_MISSING", "QUERY_VALUE_NOT_ALLOWED",
-    "HEADER_NOT_ALLOWED", "HEADER_REPEATED", "HEADER_VALUE_NOT_ALLOWED",
+    "HEADER_NOT_ALLOWED", "HEADER_REPEATED", "HEADER_VALUE_NOT_ALLOWED", "HEADER_REQUIRED_MISSING",
     "EVALUATION_ERROR",
 )
 
@@ -96,8 +135,15 @@ class Grammar:
     kind: str                      # "enum" | "uint"
     values: frozenset = frozenset()
     max_digits: int = 0
+    reference_origins: frozenset = frozenset()
+    reference_paths: frozenset = frozenset()
+    reference_queries: tuple = ()
+    relative_root: bool = False
 
     def matches(self, value: str) -> bool:
+        if self.kind in HEADER_PROFILES:
+            return _header_profile_matches(self.kind, value, origins=self.reference_origins,
+                paths=self.reference_paths, queries=self.reference_queries, relative_root=self.relative_root)
         if self.kind == "enum":
             return value in self.values
         if value == "" or len(value) > self.max_digits or not all(c in _DIGITS for c in value):
@@ -113,6 +159,7 @@ class Rule:
     query: tuple                   # ((name, Grammar), ...)
     required_query: frozenset
     headers: tuple                 # ((lowercase name, Grammar), ...)
+    required_headers: frozenset = frozenset()
 
 
 @dataclass(frozen=True)
@@ -124,10 +171,30 @@ class Policy:
     sha256: str
 
 
-def _grammar(spec, *, header: bool, where: str) -> Grammar:
+def _grammar(spec, *, header: bool, where: str, profiles=False) -> Grammar:
     if not isinstance(spec, dict) or "type" not in spec:
         raise PolicyError(f"{where}: grammar must be an object with 'type'")
     kind = spec["type"]
+    if kind == "public_referer":
+        if not header or not profiles or set(spec) != {"type", "origins", "paths", "queries", "relative_root"}:
+            raise PolicyError(f"{where}: public_referer requires explicit v2 header contract")
+        origins, paths, queries = spec['origins'], spec['paths'], spec['queries']
+        if (not isinstance(origins,list) or not 1 <= len(origins) <= 4 or
+            any(not isinstance(x,str) or not re.fullmatch(r'https://[a-z0-9]+(?:[.-][a-z0-9]+)*(?::8443)?',x) for x in origins)):
+            raise PolicyError(f"{where}: invalid reference origins")
+        if (not isinstance(paths,list) or not 1 <= len(paths) <= 32 or
+            any(not isinstance(x,str) or not re.fullmatch(r'/(?:[A-Za-z0-9_~-][A-Za-z0-9_.~/-]{0,127})?',x)
+                or any(p in ('.','..','') for p in x[1:].split('/')) and x!='/' for x in paths)):
+            raise PolicyError(f"{where}: invalid reference paths")
+        if (not isinstance(queries,dict) or any(k not in paths or v not in ('uint-id','basename-img')for k,v in queries.items())
+            or not isinstance(spec['relative_root'],bool)):
+            raise PolicyError(f"{where}: invalid reference queries")
+        return Grammar(kind, reference_origins=frozenset(origins),reference_paths=frozenset(paths),
+                       reference_queries=tuple(sorted(queries.items())),relative_root=spec['relative_root'])
+    if kind in HEADER_PROFILES:
+        if not header or not profiles or set(spec) != {"type"}:
+            raise PolicyError(f"{where}: named header profiles require policy v2 and no parameters")
+        return Grammar(kind)
     if kind == "enum":
         if set(spec) != {"type", "values"}:
             raise PolicyError(f"{where}: enum takes exactly 'type' and 'values'")
@@ -170,7 +237,7 @@ def parse_policy(doc) -> Policy:
     unknown = set(doc) - allowed
     if unknown:
         raise PolicyError(f"unknown policy keys: {sorted(unknown)}")
-    if doc.get("schema") != POLICY_SCHEMA:
+    if doc.get("schema") not in (POLICY_SCHEMA, POLICY_SCHEMA_V2):
         raise PolicyError(f"schema must be {POLICY_SCHEMA!r}")
     if doc.get("canonical_contract") != CANONICAL_CONTRACT_ID:
         raise PolicyError(f"canonical_contract must be {CANONICAL_CONTRACT_ID!r}")
@@ -197,7 +264,7 @@ def parse_policy(doc) -> Policy:
     for i, r in enumerate(rules_doc):
         where = f"rules[{i}]"
         if not isinstance(r, dict) or set(r) - {"id", "methods", "path", "query",
-                                                 "required_query", "headers"}:
+                                                 "required_query", "headers", "required_headers"}:
             raise PolicyError(f"{where}: unknown or missing keys")
         rid = _name(r.get("id"), f"{where}.id")
         if rid in seen:
@@ -232,11 +299,15 @@ def parse_policy(doc) -> Policy:
             if (not isinstance(low, str) or low == "" or low in _FORBIDDEN_HEADERS
                     or any(c not in _UNRESERVED for c in low)):
                 raise PolicyError(f"{where}.headers: {hn!r} is not an allowed header name")
-            headers.append((low, _grammar(spec, header=True, where=f"{where}.headers[{hn}]")))
+            headers.append((low, _grammar(spec, header=True, where=f"{where}.headers[{hn}]", profiles=doc["schema"] == POLICY_SCHEMA_V2)))
         if len({h for h, _ in headers}) != len(headers):
             raise PolicyError(f"{where}.headers: names repeat after lowercasing")
+        required_headers = r.get("required_headers", [])
+        if (not isinstance(required_headers, list) or
+                any(not isinstance(h, str) or h not in dict(headers) for h in required_headers)):
+            raise PolicyError(f"{where}.required_headers must list declared lowercase header names")
         rules.append(Rule(rid, tuple(methods), tuple(segments), tuple(query),
-                          frozenset(required), tuple(headers)))
+                          frozenset(required), tuple(headers), frozenset(required_headers)))
     digest = hashlib.sha256(json.dumps(doc, sort_keys=True, separators=(",", ":"),
                                        ensure_ascii=True).encode("ascii")).hexdigest()
     return Policy(policy_id, status, tuple(versions), tuple(rules), digest)
@@ -430,6 +501,8 @@ def _match_rule(rule: Rule, inp: FastPathInput, versions) -> Optional[str]:
         seen_headers.add(low)
         if value is None or not allowed_headers[low].matches(value.strip(" ")):
             return "HEADER_VALUE_NOT_ALLOWED"
+    if not rule.required_headers <= seen_headers:
+        return "HEADER_REQUIRED_MISSING"
     return None
 
 

@@ -1,0 +1,218 @@
+{
+  "status": "REFERENCE_AUDIT_NOT_RELABELLED_DATASET",
+  "inputs_sha256": "3118bf663689c28b574094bc5e9797fa628d49106dbe4857b4c29962f59d51fe",
+  "historical_dataset_sha256": "2d01fd0266ffb15a148d17af4275af1efd69ca932388dbb50a7bb19d92f6f8da",
+  "historical_classifier_source_sha256": "9db1ee5150a5345d4011d799ade5419ca971cb53830abe46db037f25095b27ab",
+  "totals": {
+    "legacy_dev": {
+      "E5_non_blocks": 93,
+      "actually_ALLOWED": 89,
+      "invalid_runtime_denies": 4,
+      "inside_trained_categories": 15,
+      "outside_trained_categories": 78,
+      "families_or_reasons": {
+        "GraphQL injection payload detected.": 11,
+        "Command injection payload detected.": 10,
+        "LDAP injection payload detected.": 9,
+        "SQL injection payload detected.": 5,
+        "JWT token manipulation attack detected.": 14,
+        "CSRF attack pattern detected.": 4,
+        "HTTP parameter pollution detected.": 17,
+        "Insecure deserialization payload detected.": 5,
+        "HTTP request smuggling attack detected.": 3,
+        "Server-side request forgery attack detected.": 5,
+        "XML external entity injection detected.": 4,
+        "Open redirect payload detected.": 4,
+        "NoSQL injection payload detected.": 2
+      }
+    },
+    "authored_paired_dev": {
+      "E5_non_blocks": 41,
+      "actually_ALLOWED": 40,
+      "invalid_runtime_denies": 1,
+      "inside_trained_categories": 4,
+      "outside_trained_categories": 37,
+      "families_or_reasons": {
+        "sql_injection": 2,
+        "command_injection": 2,
+        "ssrf": 25,
+        "open_redirect": 2,
+        "jwt": 6,
+        "csrf": 4
+      }
+    }
+  },
+  "manual_review_sql_reason_unsupported_ids": [
+    "dev-00028",
+    "dev-00051",
+    "dev-00114",
+    "dev-00147",
+    "dev-00595"
+  ],
+  "warning": "Historical root eval.jsonl is the rejected pre-V4 corpus, not datasets/v4_clean/eval.jsonl. It contains weak reason assignment. Original DEV counts are unchanged, not security ground truth. Labels remain as recorded; uncertain references are not silently changed to improve scores.",
+  "TRAIN_diversity": [
+    {
+      "category": "Command Injection",
+      "TRAIN_attack_rows": 300,
+      "payload_records": 31,
+      "payload_families": 25,
+      "source_files": 3,
+      "templates": 17,
+      "carriers": {
+        "form": 100,
+        "path": 60,
+        "query": 60,
+        "text": 80
+      },
+      "encoders": {
+        "sp20.enc.compact.nocs": 12,
+        "sp20.lit.compact.cs": 15,
+        "sp20.enc.compact.cs": 22,
+        "spplus.enc.compact.cs": 20,
+        "sp20.lit.spaced.cs": 25,
+        "spplus.lit.spaced.nocs": 25,
+        "sp20.lit.compact.nocs": 17,
+        "sp20.lit.spaced.nocs": 20,
+        "spplus.enc.spaced.cs": 17,
+        "spplus.enc.spaced.nocs": 23,
+        "spplus.lit.compact.cs": 27,
+        "spplus.enc.compact.nocs": 17,
+        "spplus.lit.compact.nocs": 17,
+        "sp20.enc.spaced.nocs": 15,
+        "sp20.enc.spaced.cs": 17,
+        "spplus.lit.spaced.cs": 11
+      }
+    },
+    {
+      "category": "SQL Injection",
+      "TRAIN_attack_rows": 380,
+      "payload_records": 33,
+      "payload_families": 24,
+      "source_files": 3,
+      "templates": 21,
+      "carriers": {
+        "form": 100,
+        "json": 80,
+        "path": 60,
+        "query": 60,
+        "text": 80
+      },
+      "encoders": {
+        "sp20.enc.spaced.cs": 21,
+        "spplus.enc.compact.cs": 26,
+        "spplus.enc.spaced.cs": 27,
+        "spplus.enc.compact.nocs": 23,
+        "spplus.lit.compact.cs": 19,
+        "spplus.lit.spaced.cs": 23,
+        "sp20.enc.compact.cs": 22,
+        "sp20.enc.compact.nocs": 22,
+        "sp20.enc.spaced.nocs": 20,
+        "spplus.lit.compact.nocs": 34,
+        "sp20.lit.compact.cs": 23,
+        "sp20.lit.compact.nocs": 23,
+        "sp20.lit.spaced.cs": 32,
+        "sp20.lit.spaced.nocs": 28,
+        "spplus.lit.spaced.nocs": 17,
+        "spplus.enc.spaced.nocs": 20
+      }
+    },
+    {
+      "category": "Server Side Template Injection",
+      "TRAIN_attack_rows": 380,
+      "payload_records": 42,
+      "payload_families": 41,
+      "source_files": 8,
+      "templates": 21,
+      "carriers": {
+        "form": 100,
+        "json": 80,
+        "path": 60,
+        "query": 60,
+        "text": 80
+      },
+      "encoders": {
+        "sp20.lit.compact.nocs": 27,
+        "sp20.lit.spaced.cs": 27,
+        "sp20.lit.compact.cs": 23,
+        "sp20.enc.compact.cs": 22,
+        "spplus.enc.spaced.cs": 29,
+        "spplus.lit.spaced.cs": 27,
+        "spplus.enc.compact.nocs": 29,
+        "spplus.enc.spaced.nocs": 33,
+        "spplus.lit.compact.cs": 16,
+        "sp20.enc.spaced.cs": 18,
+        "sp20.lit.spaced.nocs": 28,
+        "sp20.enc.compact.nocs": 14,
+        "spplus.lit.compact.nocs": 20,
+        "spplus.enc.compact.cs": 29,
+        "sp20.enc.spaced.nocs": 16,
+        "spplus.lit.spaced.nocs": 22
+      }
+    },
+    {
+      "category": "XSS Injection",
+      "TRAIN_attack_rows": 380,
+      "payload_records": 27,
+      "payload_families": 24,
+      "source_files": 5,
+      "templates": 21,
+      "carriers": {
+        "form": 100,
+        "json": 80,
+        "path": 60,
+        "query": 60,
+        "text": 80
+      },
+      "encoders": {
+        "sp20.enc.compact.nocs": 25,
+        "sp20.lit.compact.cs": 28,
+        "sp20.lit.spaced.cs": 30,
+        "sp20.lit.compact.nocs": 23,
+        "spplus.lit.spaced.nocs": 28,
+        "spplus.enc.spaced.cs": 20,
+        "sp20.enc.compact.cs": 25,
+        "spplus.enc.compact.cs": 21,
+        "spplus.enc.spaced.nocs": 21,
+        "sp20.enc.spaced.nocs": 22,
+        "spplus.lit.compact.cs": 26,
+        "spplus.lit.spaced.cs": 23,
+        "spplus.enc.compact.nocs": 16,
+        "sp20.enc.spaced.cs": 25,
+        "sp20.lit.spaced.nocs": 25,
+        "spplus.lit.compact.nocs": 22
+      }
+    },
+    {
+      "category": "path_file_access",
+      "TRAIN_attack_rows": 100,
+      "payload_records": 93,
+      "payload_families": 46,
+      "source_files": 10,
+      "templates": 6,
+      "carriers": {
+        "form": 20,
+        "json": 20,
+        "path": 40,
+        "query": 20
+      },
+      "encoders": {
+        "spplus.enc.spaced.nocs": 6,
+        "sp20.lit.spaced.cs": 12,
+        "sp20.lit.compact.cs": 3,
+        "spplus.enc.spaced.cs": 8,
+        "spplus.lit.compact.cs": 7,
+        "sp20.enc.compact.cs": 6,
+        "spplus.lit.compact.nocs": 12,
+        "spplus.enc.compact.cs": 5,
+        "spplus.lit.spaced.cs": 8,
+        "sp20.lit.compact.nocs": 6,
+        "sp20.enc.spaced.cs": 5,
+        "spplus.enc.compact.nocs": 8,
+        "sp20.lit.spaced.nocs": 4,
+        "sp20.enc.spaced.nocs": 2,
+        "spplus.lit.spaced.nocs": 2,
+        "sp20.enc.compact.nocs": 6
+      }
+    }
+  ]
+}

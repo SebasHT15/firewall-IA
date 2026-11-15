@@ -1,0 +1,1070 @@
+{
+ "audit_budget": "bounded",
+ "health": {
+  "v5": {
+   "adapter_sha256": "7450214d65655f88a73e8910c1c99abd4a11ad3c06112d8d1fc4bb1813a4aa70",
+   "model_loaded": true,
+   "status": "ok",
+   "template_fingerprint": "ad93d3b6d0a115ddb313c2dcda37c9f4fb87b11e66914761c92509fb5df4c7e3"
+  }
+ },
+ "mode": "CASCADE_ACTIVE",
+ "name": "audit_candidate_rate1.0_bounded_rep1",
+ "order_sha256": "c05f958bab291af3e7319ed4774f4b7d2d3706c2f8c3b5adf56554a385e33526",
+ "rep": 1,
+ "sample_rate": 1.0,
+ "steps": [
+  {
+   "L2": {
+    "answered_200_not_received": 0,
+    "conformant": true,
+    "decided_forward_equals_received": true,
+    "denied_but_received": 0,
+    "forwarded": 1,
+    "received": 1,
+    "received_after_client_gave_up": 0,
+    "received_without_any_request": 0
+   },
+   "audit": {},
+   "audit_accounting": {
+    "completed": 0,
+    "discarded": 0,
+    "failed": 0,
+    "in_flight": 0,
+    "queued": 0,
+    "queued_bytes": 0,
+    "requested": 0
+   },
+   "cascade_vs_applied": {},
+   "client": {
+    "bad_gateway_502": 0,
+    "client_timeouts": 0,
+    "close_delimited": 0,
+    "closed_without_response": 0,
+    "completed": 3,
+    "connection_errors": 0,
+    "excess_body": 0,
+    "generator_lag_ms": {
+     "max": 3.116042000328889,
+     "mean": 1.7575910002657718,
+     "min": 0.04556700014290982,
+     "n": 3,
+     "p50": 2.111164000325516,
+     "p95": 3.116042000328889,
+     "p99": 3.116042000328889,
+     "p99_low_confidence": true
+    },
+    "incomplete_body": 0,
+    "incomplete_by_head_status": {},
+    "latency_blocked_ms": {
+     "max": 12.92368800022814,
+     "mean": 11.738435500092237,
+     "min": 10.553182999956334,
+     "n": 2,
+     "p50": 10.553182999956334,
+     "p95": 12.92368800022814,
+     "p99": 12.92368800022814,
+     "p99_low_confidence": true
+    },
+    "latency_forwarded_ms": {
+     "max": 53.767589000017324,
+     "mean": 53.767589000017324,
+     "min": 53.767589000017324,
+     "n": 1,
+     "p50": 53.767589000017324,
+     "p95": 53.767589000017324,
+     "p99": 53.767589000017324,
+     "p99_low_confidence": true
+    },
+    "latency_rejected_ms": {
+     "n": 0
+    },
+    "latency_useful_ms": {
+     "max": 53.767589000017324,
+     "mean": 25.748153333400598,
+     "min": 10.553182999956334,
+     "n": 3,
+     "p50": 12.92368800022814,
+     "p95": 53.767589000017324,
+     "p99": 53.767589000017324,
+     "p99_low_confidence": true
+    },
+    "offered": 3,
+    "offered_per_s": 1.0,
+    "other_status": {},
+    "outcomes": {
+     "response": 3
+    },
+    "rejected_503": 0,
+    "span_s": 3.0,
+    "statuses": {
+     "200": 1,
+     "403": 2
+    },
+    "useful": 3,
+    "useful_fraction": 1.0,
+    "useful_per_s": 1.0,
+    "useful_within_1s_per_s": 1.0,
+    "useful_within_3s_per_s": 1.0
+   },
+   "decisions": {
+    "records": 3,
+    "routes": {
+     "model2": {
+      "decoder_pipeline_ms": {},
+      "gateway_ms": {
+       "max": 3.572637000161194,
+       "mean": 3.098055000009481,
+       "min": 2.6234729998577677,
+       "n": 2,
+       "p50": 2.6234729998577677,
+       "p95": 3.572637000161194,
+       "p99": 3.572637000161194,
+       "p99_low_confidence": true
+      },
+      "n": 2,
+      "reasons": {
+       "model2_block": 2
+      },
+      "stages_ms": {
+       "admission": {
+        "max": 0.007626999831700232,
+        "mean": 0.0066754998897522455,
+        "min": 0.005723999947804259,
+        "n": 2,
+        "p50": 0.005723999947804259,
+        "p95": 0.007626999831700232,
+        "p99": 0.007626999831700232,
+        "p99_low_confidence": true
+       },
+       "binding": {
+        "max": 0.16762899986133561,
+        "mean": 0.1361029999316088,
+        "min": 0.10457700000188197,
+        "n": 2,
+        "p50": 0.10457700000188197,
+        "p95": 0.16762899986133561,
+        "p99": 0.16762899986133561,
+        "p99_low_confidence": true
+       },
+       "canonical": {
+        "max": 1.4397220002138056,
+        "mean": 1.1952550000842166,
+        "min": 0.9507879999546276,
+        "n": 2,
+        "p50": 0.9507879999546276,
+        "p95": 1.4397220002138056,
+        "p99": 1.4397220002138056,
+        "p99_low_confidence": true
+       },
+       "canonical_with_wait": {
+        "max": 1.5555499999209133,
+        "mean": 1.289792500074327,
+        "min": 1.024035000227741,
+        "n": 2,
+        "p50": 1.024035000227741,
+        "p95": 1.5555499999209133,
+        "p99": 1.5555499999209133,
+        "p99_low_confidence": true
+       },
+       "fast_path": {
+        "max": 0.06828000005043577,
+        "mean": 0.06438600007641071,
+        "min": 0.060492000102385646,
+        "n": 2,
+        "p50": 0.060492000102385646,
+        "p95": 0.06828000005043577,
+        "p99": 0.06828000005043577,
+        "p99_low_confidence": true
+       },
+       "model2": {
+        "max": 0.9329469999102002,
+        "mean": 0.8403694998833089,
+        "min": 0.7477919998564175,
+        "n": 4,
+        "p50": 0.7477919998564175,
+        "p95": 0.9329469999102002,
+        "p99": 0.9329469999102002,
+        "p99_low_confidence": true
+       }
+      }
+     },
+     "v5": {
+      "decoder_pipeline_ms": {
+       "native": {
+        "max": 40.17053500001566,
+        "mean": 40.17053500001566,
+        "min": 40.17053500001566,
+        "n": 1,
+        "p50": 40.17053500001566,
+        "p95": 40.17053500001566,
+        "p99": 40.17053500001566,
+        "p99_low_confidence": true
+       }
+      },
+      "gateway_ms": {
+       "max": 44.89818199999718,
+       "mean": 44.89818199999718,
+       "min": 44.89818199999718,
+       "n": 1,
+       "p50": 44.89818199999718,
+       "p95": 44.89818199999718,
+       "p99": 44.89818199999718,
+       "p99_low_confidence": true
+      },
+      "n": 1,
+      "reasons": {
+       "None": 1
+      },
+      "stages_ms": {
+       "admission": {
+        "max": 0.011703999916790053,
+        "mean": 0.011703999916790053,
+        "min": 0.011703999916790053,
+        "n": 1,
+        "p50": 0.011703999916790053,
+        "p95": 0.011703999916790053,
+        "p99": 0.011703999916790053,
+        "p99_low_confidence": true
+       },
+       "binding": {
+        "max": 0.25261900009354576,
+        "mean": 0.25261900009354576,
+        "min": 0.25261900009354576,
+        "n": 1,
+        "p50": 0.25261900009354576,
+        "p95": 0.25261900009354576,
+        "p99": 0.25261900009354576,
+        "p99_low_confidence": true
+       },
+       "canonical": {
+        "max": 1.1242589998801122,
+        "mean": 1.1242589998801122,
+        "min": 1.1242589998801122,
+        "n": 1,
+        "p50": 1.1242589998801122,
+        "p95": 1.1242589998801122,
+        "p99": 1.1242589998801122,
+        "p99_low_confidence": true
+       },
+       "canonical_with_wait": {
+        "max": 1.321002999702614,
+        "mean": 1.321002999702614,
+        "min": 1.321002999702614,
+        "n": 1,
+        "p50": 1.321002999702614,
+        "p95": 1.321002999702614,
+        "p99": 1.321002999702614,
+        "p99_low_confidence": true
+       },
+       "fast_path": {
+        "max": 0.08018700009415625,
+        "mean": 0.08018700009415625,
+        "min": 0.08018700009415625,
+        "n": 1,
+        "p50": 0.08018700009415625,
+        "p95": 0.08018700009415625,
+        "p99": 0.08018700009415625,
+        "p99_low_confidence": true
+       },
+       "model2": {
+        "max": 0.8408720000261383,
+        "mean": 0.8408720000261383,
+        "min": 0.8408720000261383,
+        "n": 2,
+        "p50": 0.8408720000261383,
+        "p95": 0.8408720000261383,
+        "p99": 0.8408720000261383,
+        "p99_low_confidence": true
+       },
+       "v5": {
+        "max": 41.76555300000473,
+        "mean": 41.76555300000473,
+        "min": 41.76555300000473,
+        "n": 1,
+        "p50": 41.76555300000473,
+        "p95": 41.76555300000473,
+        "p99": 41.76555300000473,
+        "p99_low_confidence": true
+       },
+       "v5_hop": {
+        "max": 41.76555300000473,
+        "mean": 41.76555300000473,
+        "min": 41.76555300000473,
+        "n": 1,
+        "p50": 41.76555300000473,
+        "p95": 41.76555300000473,
+        "p99": 41.76555300000473,
+        "p99_low_confidence": true
+       },
+       "v5_hop_outside_service": {
+        "max": 1.5746039998703054,
+        "mean": 1.5746039998703054,
+        "min": 1.5746039998703054,
+        "n": 1,
+        "p50": 1.5746039998703054,
+        "p95": 1.5746039998703054,
+        "p99": 1.5746039998703054,
+        "p99_low_confidence": true
+       },
+       "v5_inference": {
+        "max": 40.17053500001566,
+        "mean": 40.17053500001566,
+        "min": 40.17053500001566,
+        "n": 1,
+        "p50": 40.17053500001566,
+        "p95": 40.17053500001566,
+        "p99": 40.17053500001566,
+        "p99_low_confidence": true
+       },
+       "v5_queue": {
+        "max": 0.0017730003492033575,
+        "mean": 0.0017730003492033575,
+        "min": 0.0017730003492033575,
+        "n": 1,
+        "p50": 0.0017730003492033575,
+        "p95": 0.0017730003492033575,
+        "p99": 0.0017730003492033575,
+        "p99_low_confidence": true
+       },
+       "v5_service": {
+        "max": 40.190949000134424,
+        "mean": 40.190949000134424,
+        "min": 40.190949000134424,
+        "n": 1,
+        "p50": 40.190949000134424,
+        "p95": 40.190949000134424,
+        "p99": 40.190949000134424,
+        "p99_low_confidence": true
+       }
+      }
+     }
+    }
+   },
+   "egress": {
+    "DELIVERED:none": 1
+   },
+   "gateway_metric_delta": {
+    "firewall_admission_total{result=\"admitted\"}": 3.0,
+    "firewall_canonical_total{outcome=\"ACCEPT\"}": 3.0,
+    "firewall_egress_total{event=\"DELIVERED\",reason=\"none\"}": 1.0,
+    "firewall_fast_path_total{decision=\"CONTINUE\"}": 3.0,
+    "firewall_log_written_total": 4.0,
+    "firewall_model2_total{decision=\"BLOCK\",status=\"OK\"}": 2.0,
+    "firewall_model2_total{decision=\"DEFER\",status=\"OK\"}": 1.0,
+    "firewall_requests_total{applied=\"DENY\",mode=\"CASCADE_ACTIVE\",stage=\"model2\"}": 2.0,
+    "firewall_requests_total{applied=\"FORWARD\",mode=\"CASCADE_ACTIVE\",stage=\"v5\"}": 1.0,
+    "firewall_v5_total{decision=\"ALLOW\",status=\"ok\"}": 1.0
+   },
+   "label": "warmup",
+   "observations": {},
+   "offered_rate": 1.0,
+   "resources": {
+    "queues": {
+     "admission_inflight": {
+      "max": 1,
+      "mean": 0.25,
+      "samples": 4
+     },
+     "admission_waiting": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 4
+     },
+     "audit_queued": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 4
+     },
+     "observe_pending": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 4
+     },
+     "v5_client_in_flight": {
+      "max": 1,
+      "mean": 0.25,
+      "samples": 4
+     }
+    },
+    "roles": {
+     "canonical_workers": {
+      "cpu_percent_max": 0.983063194147237,
+      "cpu_percent_mean": 0.3276877313824123,
+      "rss_mib_first": 45.79296875,
+      "rss_mib_max": 46.05859375
+     },
+     "gateway": {
+      "cpu_percent_max": 1.966126388294474,
+      "cpu_percent_mean": 1.3107645213726997,
+      "rss_mib_first": 76.5078125,
+      "rss_mib_max": 76.5078125
+     },
+     "model2_worker": {
+      "cpu_percent_max": 0.0,
+      "cpu_percent_mean": 0.0,
+      "rss_mib_first": 109.31640625,
+      "rss_mib_max": 109.31640625
+     },
+     "v5": {
+      "cpu_percent_max": 0.0,
+      "cpu_percent_mean": 0.0,
+      "rss_mib_first": 19.38671875,
+      "rss_mib_max": 19.38671875
+     }
+    },
+    "samples": 4
+   },
+   "saturated": false,
+   "seconds": 3.0,
+   "t0": 1793561936.6048677,
+   "t1": 1793561938.6183715,
+   "v4_gateway_ms": {
+    "n": 0
+   },
+   "v4_model_ms": {
+    "n": 0
+   },
+   "v5_generate_service_ms": {
+    "n": 0
+   },
+   "v5_service": {
+    "invalid": 0,
+    "lock_timeouts": 0,
+    "saturated": 0
+   }
+  },
+  {
+   "L2": {
+    "answered_200_not_received": 0,
+    "conformant": true,
+    "decided_forward_equals_received": true,
+    "denied_but_received": 0,
+    "forwarded": 13,
+    "received": 13,
+    "received_after_client_gave_up": 0,
+    "received_without_any_request": 0
+   },
+   "audit": {
+    "AUDITED:AGREE": 8
+   },
+   "audit_accounting": {
+    "completed": 8,
+    "discarded": 0,
+    "failed": 0,
+    "in_flight": 0,
+    "queued": 0,
+    "queued_bytes": 0,
+    "requested": 8
+   },
+   "cascade_vs_applied": {},
+   "client": {
+    "bad_gateway_502": 0,
+    "client_timeouts": 0,
+    "close_delimited": 0,
+    "closed_without_response": 0,
+    "completed": 14,
+    "connection_errors": 0,
+    "excess_body": 0,
+    "generator_lag_ms": {
+     "max": 3.120656470400718,
+     "mean": 1.4743754226011723,
+     "min": 0.5689142271876335,
+     "n": 14,
+     "p50": 1.2317180830905272,
+     "p95": 3.120656470400718,
+     "p99": 3.120656470400718,
+     "p99_low_confidence": true
+    },
+    "incomplete_body": 0,
+    "incomplete_by_head_status": {},
+    "latency_blocked_ms": {
+     "max": 10.530814032335911,
+     "mean": 10.530814032335911,
+     "min": 10.530814032335911,
+     "n": 1,
+     "p50": 10.530814032335911,
+     "p95": 10.530814032335911,
+     "p99": 10.530814032335911,
+     "p99_low_confidence": true
+    },
+    "latency_forwarded_ms": {
+     "max": 58.27284645374675,
+     "mean": 26.038293221902748,
+     "min": 7.367911117398762,
+     "n": 13,
+     "p50": 10.823848208474374,
+     "p95": 58.27284645374675,
+     "p99": 58.27284645374675,
+     "p99_low_confidence": true
+    },
+    "latency_rejected_ms": {
+     "n": 0
+    },
+    "latency_useful_ms": {
+     "max": 58.27284645374675,
+     "mean": 24.930616136933686,
+     "min": 7.367911117398762,
+     "n": 14,
+     "p50": 10.7503970889411,
+     "p95": 58.27284645374675,
+     "p99": 58.27284645374675,
+     "p99_low_confidence": true
+    },
+    "offered": 14,
+    "offered_per_s": 2.3333333333333335,
+    "other_status": {},
+    "outcomes": {
+     "response": 14
+    },
+    "rejected_503": 0,
+    "span_s": 6,
+    "statuses": {
+     "200": 13,
+     "403": 1
+    },
+    "useful": 14,
+    "useful_fraction": 1.0,
+    "useful_per_s": 2.3333333333333335,
+    "useful_within_1s_per_s": 2.3333333333333335,
+    "useful_within_3s_per_s": 2.3333333333333335
+   },
+   "decisions": {
+    "records": 14,
+    "routes": {
+     "fast_path": {
+      "decoder_pipeline_ms": {},
+      "gateway_ms": {
+       "max": 1.7068729998754861,
+       "mean": 1.2690698749793228,
+       "min": 0.7634260000486393,
+       "n": 8,
+       "p50": 1.1777290001191432,
+       "p95": 1.7068729998754861,
+       "p99": 1.7068729998754861,
+       "p99_low_confidence": true
+      },
+      "n": 8,
+      "reasons": {
+       "None": 8
+      },
+      "stages_ms": {
+       "admission": {
+        "max": 0.0058760001593327615,
+        "mean": 0.004681000007167313,
+        "min": 0.003451999873504974,
+        "n": 8,
+        "p50": 0.004645999979402404,
+        "p95": 0.0058760001593327615,
+        "p99": 0.0058760001593327615,
+        "p99_low_confidence": true
+       },
+       "binding": {
+        "max": 0.4494899999372137,
+        "mean": 0.12794037502317224,
+        "min": 0.06277800002862932,
+        "n": 8,
+        "p50": 0.08155500017892336,
+        "p95": 0.4494899999372137,
+        "p99": 0.4494899999372137,
+        "p99_low_confidence": true
+       },
+       "canonical": {
+        "max": 0.7541370000581082,
+        "mean": 0.5437651250872477,
+        "min": 0.3639589999693271,
+        "n": 8,
+        "p50": 0.5312460002642183,
+        "p95": 0.7541370000581082,
+        "p99": 0.7541370000581082,
+        "p99_low_confidence": true
+       },
+       "canonical_with_wait": {
+        "max": 0.8230979997279064,
+        "mean": 0.5973993749535111,
+        "min": 0.4009389999737323,
+        "n": 8,
+        "p50": 0.5829460001223197,
+        "p95": 0.8230979997279064,
+        "p99": 0.8230979997279064,
+        "p99_low_confidence": true
+       },
+       "fast_path": {
+        "max": 0.08929800014811917,
+        "mean": 0.06807075010328845,
+        "min": 0.043125000047439244,
+        "n": 8,
+        "p50": 0.06031600014466676,
+        "p95": 0.08929800014811917,
+        "p99": 0.08929800014811917,
+        "p99_low_confidence": true
+       }
+      }
+     },
+     "model2": {
+      "decoder_pipeline_ms": {},
+      "gateway_ms": {
+       "max": 2.9005910000705626,
+       "mean": 2.9005910000705626,
+       "min": 2.9005910000705626,
+       "n": 1,
+       "p50": 2.9005910000705626,
+       "p95": 2.9005910000705626,
+       "p99": 2.9005910000705626,
+       "p99_low_confidence": true
+      },
+      "n": 1,
+      "reasons": {
+       "model2_block": 1
+      },
+      "stages_ms": {
+       "admission": {
+        "max": 0.006239999947865726,
+        "mean": 0.006239999947865726,
+        "min": 0.006239999947865726,
+        "n": 1,
+        "p50": 0.006239999947865726,
+        "p95": 0.006239999947865726,
+        "p99": 0.006239999947865726,
+        "p99_low_confidence": true
+       },
+       "binding": {
+        "max": 0.12539599993033335,
+        "mean": 0.12539599993033335,
+        "min": 0.12539599993033335,
+        "n": 1,
+        "p50": 0.12539599993033335,
+        "p95": 0.12539599993033335,
+        "p99": 0.12539599993033335,
+        "p99_low_confidence": true
+       },
+       "canonical": {
+        "max": 0.8652360002088244,
+        "mean": 0.8652360002088244,
+        "min": 0.8652360002088244,
+        "n": 1,
+        "p50": 0.8652360002088244,
+        "p95": 0.8652360002088244,
+        "p99": 0.8652360002088244,
+        "p99_low_confidence": true
+       },
+       "canonical_with_wait": {
+        "max": 0.9549879996484378,
+        "mean": 0.9549879996484378,
+        "min": 0.9549879996484378,
+        "n": 1,
+        "p50": 0.9549879996484378,
+        "p95": 0.9549879996484378,
+        "p99": 0.9549879996484378,
+        "p99_low_confidence": true
+       },
+       "fast_path": {
+        "max": 0.09218900004270836,
+        "mean": 0.09218900004270836,
+        "min": 0.09218900004270836,
+        "n": 1,
+        "p50": 0.09218900004270836,
+        "p95": 0.09218900004270836,
+        "p99": 0.09218900004270836,
+        "p99_low_confidence": true
+       },
+       "model2": {
+        "max": 0.9486540002399124,
+        "mean": 0.9486540002399124,
+        "min": 0.9486540002399124,
+        "n": 2,
+        "p50": 0.9486540002399124,
+        "p95": 0.9486540002399124,
+        "p99": 0.9486540002399124,
+        "p99_low_confidence": true
+       }
+      }
+     },
+     "v5": {
+      "decoder_pipeline_ms": {
+       "native": {
+        "max": 40.19861300002958,
+        "mean": 40.18774679989292,
+        "min": 40.18020699959379,
+        "n": 5,
+        "p50": 40.18167699996411,
+        "p95": 40.19861300002958,
+        "p99": 40.19861300002958,
+        "p99_low_confidence": true
+       }
+      },
+      "gateway_ms": {
+       "max": 45.144365999931324,
+       "mean": 43.86412959993322,
+       "min": 42.54279699989638,
+       "n": 5,
+       "p50": 43.608585000129096,
+       "p95": 45.144365999931324,
+       "p99": 45.144365999931324,
+       "p99_low_confidence": true
+      },
+      "n": 5,
+      "reasons": {
+       "None": 5
+      },
+      "stages_ms": {
+       "admission": {
+        "max": 0.007952000032673823,
+        "mean": 0.004722399989987025,
+        "min": 0.0021639998522005044,
+        "n": 5,
+        "p50": 0.0042310002754675224,
+        "p95": 0.007952000032673823,
+        "p99": 0.007952000032673823,
+        "p99_low_confidence": true
+       },
+       "binding": {
+        "max": 0.15108599973245873,
+        "mean": 0.10144099996978184,
+        "min": 0.05314800000633113,
+        "n": 5,
+        "p50": 0.1150050002252101,
+        "p95": 0.15108599973245873,
+        "p99": 0.15108599973245873,
+        "p99_low_confidence": true
+       },
+       "canonical": {
+        "max": 0.9727400001793285,
+        "mean": 0.6596486001399171,
+        "min": 0.2571410000200558,
+        "n": 5,
+        "p50": 0.723170000128448,
+        "p95": 0.9727400001793285,
+        "p99": 0.9727400001793285,
+        "p99_low_confidence": true
+       },
+       "canonical_with_wait": {
+        "max": 1.0808520000864519,
+        "mean": 0.7213752001007379,
+        "min": 0.28226100039319135,
+        "n": 5,
+        "p50": 0.7728539999334316,
+        "p95": 1.0808520000864519,
+        "p99": 1.0808520000864519,
+        "p99_low_confidence": true
+       },
+       "fast_path": {
+        "max": 0.13107299992043409,
+        "mean": 0.07062240001687314,
+        "min": 0.037647000226570526,
+        "n": 5,
+        "p50": 0.047016000280564185,
+        "p95": 0.13107299992043409,
+        "p99": 0.13107299992043409,
+        "p99_low_confidence": true
+       },
+       "model2": {
+        "max": 1.1615189996518893,
+        "mean": 0.7960097998875426,
+        "min": 0.5260230000203592,
+        "n": 10,
+        "p50": 0.6602550001844065,
+        "p95": 1.1615189996518893,
+        "p99": 1.1615189996518893,
+        "p99_low_confidence": true
+       },
+       "v5": {
+        "max": 42.02938800017364,
+        "mean": 41.612882200024615,
+        "min": 41.25799199982794,
+        "n": 5,
+        "p50": 41.56063499976881,
+        "p95": 42.02938800017364,
+        "p99": 42.02938800017364,
+        "p99_low_confidence": true
+       },
+       "v5_hop": {
+        "max": 42.02938800017364,
+        "mean": 41.612882200024615,
+        "min": 41.25799199982794,
+        "n": 5,
+        "p50": 41.56063499976881,
+        "p95": 42.02938800017364,
+        "p99": 42.02938800017364,
+        "p99_low_confidence": true
+       },
+       "v5_hop_outside_service": {
+        "max": 1.8028130002676335,
+        "mean": 1.4058353999644169,
+        "min": 1.0657199995875999,
+        "n": 5,
+        "p50": 1.3428079996629094,
+        "p95": 1.8028130002676335,
+        "p99": 1.8028130002676335,
+        "p99_low_confidence": true
+       },
+       "v5_inference": {
+        "max": 40.19861300002958,
+        "mean": 40.18774679989292,
+        "min": 40.18020699959379,
+        "n": 5,
+        "p50": 40.18167699996411,
+        "p95": 40.19861300002958,
+        "p99": 40.19861300002958,
+        "p99_low_confidence": true
+       },
+       "v5_queue": {
+        "max": 0.0013570002010965254,
+        "mean": 0.0010232001841359306,
+        "min": 0.0007830003596609458,
+        "n": 5,
+        "p50": 0.0009890000001178123,
+        "p95": 0.0013570002010965254,
+        "p99": 0.0013570002010965254,
+        "p99_low_confidence": true
+       },
+       "v5_service": {
+        "max": 40.226574999906006,
+        "mean": 40.2070468000602,
+        "min": 40.19227200024034,
+        "n": 5,
+        "p50": 40.20383599981869,
+        "p95": 40.226574999906006,
+        "p99": 40.226574999906006,
+        "p99_low_confidence": true
+       }
+      }
+     }
+    }
+   },
+   "dev_client": {
+    "bad_gateway_502": 0,
+    "client_timeouts": 0,
+    "close_delimited": 0,
+    "closed_without_response": 0,
+    "completed": 6,
+    "connection_errors": 0,
+    "excess_body": 0,
+    "generator_lag_ms": {
+     "max": 2.1380664534262905,
+     "mean": 1.2478319768736885,
+     "min": 0.5689142271876335,
+     "n": 6,
+     "p50": 1.0314132150597288,
+     "p95": 2.1380664534262905,
+     "p99": 2.1380664534262905,
+     "p99_low_confidence": true
+    },
+    "incomplete_body": 0,
+    "incomplete_by_head_status": {},
+    "latency_blocked_ms": {
+     "max": 10.530814032335911,
+     "mean": 10.530814032335911,
+     "min": 10.530814032335911,
+     "n": 1,
+     "p50": 10.530814032335911,
+     "p95": 10.530814032335911,
+     "p99": 10.530814032335911,
+     "p99_low_confidence": true
+    },
+    "latency_forwarded_ms": {
+     "max": 58.27284645374675,
+     "mean": 52.37017676590767,
+     "min": 47.75505896714094,
+     "n": 5,
+     "p50": 50.75121196614418,
+     "p95": 58.27284645374675,
+     "p99": 58.27284645374675,
+     "p99_low_confidence": true
+    },
+    "latency_rejected_ms": {
+     "n": 0
+    },
+    "latency_useful_ms": {
+     "max": 58.27284645374675,
+     "mean": 45.39694964364571,
+     "min": 10.530814032335911,
+     "n": 6,
+     "p50": 49.18356821508496,
+     "p95": 58.27284645374675,
+     "p99": 58.27284645374675,
+     "p99_low_confidence": true
+    },
+    "offered": 6,
+    "offered_per_s": 1.0,
+    "other_status": {},
+    "outcomes": {
+     "response": 6
+    },
+    "rejected_503": 0,
+    "span_s": 6,
+    "statuses": {
+     "200": 5,
+     "403": 1
+    },
+    "useful": 6,
+    "useful_fraction": 1.0,
+    "useful_per_s": 1.0,
+    "useful_within_1s_per_s": 1.0,
+    "useful_within_3s_per_s": 1.0
+   },
+   "egress": {
+    "DELIVERED:none": 13
+   },
+   "gateway_metric_delta": {
+    "firewall_admission_total{result=\"admitted\"}": 14.0,
+    "firewall_canonical_total{outcome=\"ACCEPT\"}": 14.0,
+    "firewall_egress_total{event=\"DELIVERED\",reason=\"none\"}": 13.0,
+    "firewall_fast_path_audit_completed_total{verdict=\"AGREE\"}": 8.0,
+    "firewall_fast_path_audit_eligible_total": 8.0,
+    "firewall_fast_path_audit_requested_total": 8.0,
+    "firewall_fast_path_audit_total{status=\"AUDITED\",verdict=\"AGREE\"}": 8.0,
+    "firewall_fast_path_total{decision=\"CONTINUE\"}": 6.0,
+    "firewall_fast_path_total{decision=\"FAST_ALLOW\"}": 8.0,
+    "firewall_log_written_total": 35.0,
+    "firewall_model2_total{decision=\"BLOCK\",status=\"OK\"}": 1.0,
+    "firewall_model2_total{decision=\"DEFER\",status=\"OK\"}": 5.0,
+    "firewall_requests_total{applied=\"DENY\",mode=\"CASCADE_ACTIVE\",stage=\"model2\"}": 1.0,
+    "firewall_requests_total{applied=\"FORWARD\",mode=\"CASCADE_ACTIVE\",stage=\"fast_path\"}": 8.0,
+    "firewall_requests_total{applied=\"FORWARD\",mode=\"CASCADE_ACTIVE\",stage=\"v5\"}": 5.0,
+    "firewall_v5_total{decision=\"ALLOW\",status=\"ok\"}": 5.0
+   },
+   "label": "audit",
+   "observations": {},
+   "offered_rate": 3.0,
+   "permit_client": {
+    "bad_gateway_502": 0,
+    "client_timeouts": 0,
+    "close_delimited": 0,
+    "closed_without_response": 0,
+    "completed": 8,
+    "connection_errors": 0,
+    "excess_body": 0,
+    "generator_lag_ms": {
+     "max": 3.120656470400718,
+     "mean": 1.644283006896785,
+     "min": 0.6548720689352194,
+     "n": 8,
+     "p50": 1.2317180830905272,
+     "p95": 3.120656470400718,
+     "p99": 3.120656470400718,
+     "p99_low_confidence": true
+    },
+    "incomplete_body": 0,
+    "incomplete_by_head_status": {},
+    "latency_blocked_ms": {
+     "n": 0
+    },
+    "latency_forwarded_ms": {
+     "max": 11.54060447061056,
+     "mean": 9.580866006899669,
+     "min": 7.367911117398762,
+     "n": 8,
+     "p50": 10.085176083066472,
+     "p95": 11.54060447061056,
+     "p99": 11.54060447061056,
+     "p99_low_confidence": true
+    },
+    "latency_rejected_ms": {
+     "n": 0
+    },
+    "latency_useful_ms": {
+     "max": 11.54060447061056,
+     "mean": 9.580866006899669,
+     "min": 7.367911117398762,
+     "n": 8,
+     "p50": 10.085176083066472,
+     "p95": 11.54060447061056,
+     "p99": 11.54060447061056,
+     "p99_low_confidence": true
+    },
+    "offered": 8,
+    "offered_per_s": 1.3333333333333333,
+    "other_status": {},
+    "outcomes": {
+     "response": 8
+    },
+    "rejected_503": 0,
+    "span_s": 6,
+    "statuses": {
+     "200": 8
+    },
+    "useful": 8,
+    "useful_fraction": 1.0,
+    "useful_per_s": 1.3333333333333333,
+    "useful_within_1s_per_s": 1.3333333333333333,
+    "useful_within_3s_per_s": 1.3333333333333333
+   },
+   "resources": {
+    "queues": {
+     "admission_inflight": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 7
+     },
+     "admission_waiting": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 7
+     },
+     "audit_queued": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 7
+     },
+     "observe_pending": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 7
+     },
+     "v5_client_in_flight": {
+      "max": 0,
+      "mean": 0.0,
+      "samples": 7
+     }
+    },
+    "roles": {
+     "canonical_workers": {
+      "cpu_percent_max": 0.0,
+      "cpu_percent_mean": 0.0,
+      "rss_mib_first": 46.05859375,
+      "rss_mib_max": 46.05859375
+     },
+     "gateway": {
+      "cpu_percent_max": 5.91622949752133,
+      "cpu_percent_mean": 2.300489312371203,
+      "rss_mib_first": 76.5078125,
+      "rss_mib_max": 76.5078125
+     },
+     "model2_worker": {
+      "cpu_percent_max": 0.0,
+      "cpu_percent_mean": 0.0,
+      "rss_mib_first": 109.31640625,
+      "rss_mib_max": 109.31640625
+     },
+     "v5": {
+      "cpu_percent_max": 0.9860382495868883,
+      "cpu_percent_mean": 0.16433970826448138,
+      "rss_mib_first": 19.38671875,
+      "rss_mib_max": 19.38671875
+     }
+    },
+    "samples": 7
+   },
+   "sample_rate": 1.0,
+   "saturated": false,
+   "seconds": 6,
+   "t0": 1793561940.1252627,
+   "t1": 1793561945.9017186,
+   "v4_gateway_ms": {
+    "n": 0
+   },
+   "v4_model_ms": {
+    "n": 0
+   },
+   "v5_generate_service_ms": {
+    "n": 0
+   },
+   "v5_service": {
+    "invalid": 0,
+    "lock_timeouts": 0,
+    "saturated": 0
+   }
+  }
+ ]
+}

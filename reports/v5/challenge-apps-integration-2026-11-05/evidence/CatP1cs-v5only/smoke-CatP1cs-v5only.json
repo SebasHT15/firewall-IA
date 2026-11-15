@@ -1,0 +1,158 @@
+{
+  "app": "CatP1cs",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "v5only",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 4153,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 16958,
+      "check": "benign GET /show?img=favicon.ico",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None. A POST to / returns a random message id; nothing is stored.",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "b335d4fcd9b2",
+        "deciding_stage": "v5",
+        "delivered_bytes": 51,
+        "fast_path": null,
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 3.385595999134239,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "V5_ONLY",
+        "model2": null,
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.005383000825531781,
+          "binding": 0.11100199844804592,
+          "canonical": 0.6939859995327424,
+          "canonical_with_wait": 0.7648079990758561,
+          "v5": 1.7159050003101584
+        },
+        "timings_ms": {
+          "v5_ms": 1.7159050003101584
+        },
+        "utc": 1793898233.844162,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "0784fcd4c64ea2ce83db0f6733baf815fd040986b853d39f94a48a3ba7c43019"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 76673,
+      "check": "large response /show?img=alba.jpg (76673 B): cascade gateway 64 KiB framing cap -> 502",
+      "note": "64 KiB gateway cap kept; recorded, not tuned",
+      "pass": true,
+      "response_body_len": 175,
+      "status": 502
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app CatP1cs --arm v5only --out reports/v5/challenge-apps-integration-2026-11-05/evidence/CatP1cs-v5only/CatP1cs.v5only.stack.json",
+    "up --app CatP1cs --arm v5only --config reports/v5/challenge-apps-integration-2026-11-05/evidence/CatP1cs-v5only/CatP1cs.v5only.stack.json --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/CatP1cs-v5only --v5 double",
+    "down --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/CatP1cs-v5only",
+    "check-clean --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/CatP1cs-v5only"
+  ],
+  "commit_matches_pin": true,
+  "large_responses": [
+    {
+      "arm": "v5only",
+      "asset_bytes": 76673,
+      "capped_502": true,
+      "response_body_len": 175,
+      "status": 502,
+      "target": "/show?img=alba.jpg"
+    }
+  ],
+  "pass": true,
+  "utc": 1793898231.253001,
+  "v5": "double"
+}

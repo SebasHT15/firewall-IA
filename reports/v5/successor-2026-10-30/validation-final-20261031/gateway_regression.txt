@@ -1,0 +1,35 @@
+egress guard restart failed (OSError)
+[f53f199e7de6] DENY stage=framing reason=wire_framing-te-and-cl status=400
+[fd94f541029f] DENY stage=protocol reason=canonical_REJECT status=400
+[eba5445dcfee] DENY stage=deadline reason=decision_deadline status=503
+[75b8a33a1e24] DENY stage=model2 reason=model2_block status=403
+[404142ee701e] DENY stage=canonical reason=canonical_timeout status=503
+[48739f163cc9] DENY stage=readiness reason=not_ready status=503
+[9ece19956021] DENY stage=readiness reason=not_ready status=503
+[bbbbf0803439] DENY stage=framing reason=scope_http_version status=505
+[a49bc252a207] DENY stage=canonical reason=canonical_drop status=413
+egress guard restarted
+[1607d48368df] DENY stage=admission reason=saturated status=503
+[07c692ce9562] DENY stage=egress reason=ticket_book_full status=503
+[6fcb6731be3b] DENY stage=v5 reason=v5_block status=403
+[24666d3b9180] DENY stage=v5 reason=v5_invalid status=503
+[07a83bac2b28] DENY stage=v5 reason=v5_error status=503
+[6596fee199ca] DENY stage=v5 reason=v5_unavailable status=503
+[c2fabe852b5e] DENY stage=v5 reason=v5_ok status=503
+cascade observation failed (RuntimeError); V4 unchanged
+cascade observation failed (RuntimeError); V4 unchanged
+cascade observation failed (RuntimeError); V4 unchanged
+cascade observation failed (RuntimeError); V4 unchanged
+[2dc9812b] BLOCK GET shop.local:80/catalog reason='x' (classifier 0 ms)
+[4d61d46b] BLOCK (fail-closed) GET shop.local:80/catalog cause=classifier returned HTTP 503 (after 0 ms)
+return to V4 ACTIVE: V4 decides every request
+[b6bc85dc2883] DENY stage=model2 reason=model2_block status=403
+return to V4 ACTIVE: V4 decides every request
+[e6f2b942099f] DENY stage=model2 reason=model2_block status=403
+[5c6d9fd9] BLOCK GET shop.local:80/catalog reason='x' (classifier 0 ms)
+[75dca001] BLOCK (fail-closed) GET shop.local:80/catalog cause=classifier returned HTTP 503 (after 0 ms)
+[c1d4d4d193ac] DENY stage=v5 reason=v5_unavailable status=503
+----------------------------------------------------------------------
+Ran 83 tests in 3.897s
+
+OK

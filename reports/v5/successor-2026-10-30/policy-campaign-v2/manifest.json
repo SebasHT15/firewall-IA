@@ -1,0 +1,91 @@
+{
+  "schema": "v51-policy-review-campaign/v2",
+  "status": "PROVISIONAL_REVIEW_CORPUS_NOT_AUTHORIZED_FOR_TRAINING",
+  "artifacts": [
+    {
+      "split": "TRAIN_CANDIDATE",
+      "rows": 576,
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-policy-campaign-v2/TRAIN_CANDIDATE.jsonl",
+      "sha256": "af9cbedcb0b27d7486f0524ef90d688a99a94b5bc3c34fadc4ef85d2f6f0ad62"
+    },
+    {
+      "split": "VALIDATION_CANDIDATE",
+      "rows": 216,
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-policy-campaign-v2/VALIDATION_CANDIDATE.jsonl",
+      "sha256": "52f4773f793c6c1932f9fcdbc8fdc4ab1a51028e8d6960e2dec9e502ac2bdd41"
+    },
+    {
+      "split": "RESERVE_CANDIDATE",
+      "rows": 216,
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-policy-campaign-v2/RESERVE_CANDIDATE.jsonl",
+      "sha256": "2ab7be4bd0a3b142facd0ea861384e082351bd2a7fd6c0f948f2be26f024922a"
+    }
+  ],
+  "rows": 1008,
+  "unique_attack_values": 14,
+  "payload_family_keys": 10,
+  "near_duplicate_components": 9,
+  "component_mechanisms": [
+    [
+      "metadata-ipv4",
+      "metadata-ipv6",
+      "metadata-listed-address"
+    ],
+    [
+      "obfuscated-dword",
+      "obfuscated-hex",
+      "obfuscated-octal",
+      "ftp-scheme"
+    ],
+    [
+      "userinfo-confusion"
+    ],
+    [
+      "scheme-relative"
+    ],
+    [
+      "backslash-relative"
+    ],
+    [
+      "scheme-no-slashes"
+    ],
+    [
+      "file-scheme"
+    ],
+    [
+      "gopher-scheme"
+    ],
+    [
+      "dict-scheme"
+    ]
+  ],
+  "policy_sha256": "a881df75cc31ad8e93688c073127027cb824dff45f659caa042b454074306a22",
+  "builder_sha256": "c018b0eb7070c749de1f7fba8c54e96e1c12c81a73d264836729d95d8be3dfa6",
+  "helper_builder_sha256": "318aad734d2be1819a242076f62b43e749657c37e6e3c1937500ed1747ac5635",
+  "class_counts": {
+    "BLOCK": 504,
+    "ALLOW": 504
+  },
+  "checks": {
+    "exact_value_roundtrip": true,
+    "canonical_text_unique": true,
+    "equal_byte_length_pairs": true,
+    "normalized_payload_families_disjoint": true,
+    "value_equivalence_disjoint": true,
+    "original_4gram_jaccard_060_components_disjoint": true
+  },
+  "unexecuted_gates": [
+    "H1 full identity/secret scan",
+    "tokenizer budget audit on TRAIN/VALIDATION",
+    "full original template/cluster/value-entry SPL gates",
+    "stage-4 row-contract and category evidence admission",
+    "committed manifest-bound training authorization"
+  ],
+  "reserve": "New reserve sealed now, before training/inference. v1 reserve was never read; v1 retired for source-identity failure, not performance.",
+  "limitations": [
+    "1008 frames contain only 14 unique attack values; do not advertise 504 independent attacks",
+    "9 near-duplicate components, not production-independent families",
+    "Synthetic policy campaign supplements eligible original categories; never use it alone as replacement dataset",
+    "Still not a stage-4 authorized real build; no training may consume this review corpus"
+  ]
+}

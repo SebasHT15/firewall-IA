@@ -88,3 +88,17 @@ datasets/v5/
 # Required historical SQLi source input, retained locally and in the recovery archive.
 # Raw third-party source data is not published by this cleanup.
 /reports/v5/postfilter-audit/sqli-v2-correction/sqli_corrected_pool.jsonl
+
+# Cascade lab: the raw wire sample carries verbatim HTTP requests derived from the
+# legacy, non-redistributable eval.jsonl (CSIC-2010 / PayloadsAllTheThings; see
+# docs/data_sources.md). Kept locally only; regenerate deterministically with
+# scripts/cascade_lab/make_dev_sample.py --seed 20261026. Integrity + reproduction
+# in reports/v5/hybrid/cascade-lab/DATA_RETENTION.md. The paired-pass records
+# (results/dev_paired_v1.jsonl) carry NO request payloads (decisions/timings only)
+# and ARE kept in the tree for the recomputation cross-check.
+/reports/v5/hybrid/cascade-lab/dev_sample_v1.jsonl
+
+# Local successor model weights and raw authored cohorts; retained with hashes in PRIVATE_ARTIFACTS.json.
+/reports/v5/model2-successor-2026-11-05/artifact/model2.json
+/reports/v5/model2-successor-2026-11-05/artifact/cohort.TRAIN.json
+/reports/v5/model2-successor-2026-11-05/artifact/cohort.VALIDATION.json

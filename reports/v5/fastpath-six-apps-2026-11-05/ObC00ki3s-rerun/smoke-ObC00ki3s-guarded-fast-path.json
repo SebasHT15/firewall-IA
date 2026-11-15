@@ -1,0 +1,313 @@
+{
+  "app": "ObC00ki3s",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "guarded",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 698,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 592,
+      "check": "benign GET /static/js/cks.js",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "asset": "/static/js/cks.js",
+      "body_len": 592,
+      "check": "exact static asset FAST_ALLOW skips Model 2 and V5",
+      "last_decision": {
+        "applied": "FORWARD",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "FORWARD",
+        "cascade_stage": "fast_path",
+        "correlation_id": "1ffcd2f7e7ea",
+        "deciding_stage": "fast_path",
+        "delivered_bytes": 62,
+        "fast_path": {
+          "decision": "FAST_ALLOW",
+          "policy_id": "sec-challenges-ObC00ki3s-static-v1",
+          "policy_sha256": "2cc27b28a215e7fd232e84bd14800f9e419095347bcf6eae0ddf8d513d9ce0de",
+          "policy_status": "PROPOSED",
+          "reasons": [],
+          "rule_id": "exact-static-asset"
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 1.2859449998359196,
+        "http_status": null,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": null,
+        "reason": null,
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.006071000825613737,
+          "binding": 0.11698399976012297,
+          "canonical": 0.6104419990151655,
+          "canonical_with_wait": 0.6785549994674511,
+          "fast_path": 0.07504799941671081
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.07504799941671081
+        },
+        "utc": 1793899292.0689123,
+        "v4": null,
+        "v5": null,
+        "v5_service": null,
+        "wire_sha256": "fea2e8cc07dffccae713e7f99a42dd4ff1b805ecb318b0102439ec7ed3f90c46"
+      },
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "query on static asset cannot FAST_ALLOW",
+      "last_decision": {
+        "applied": "FORWARD",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "FORWARD",
+        "cascade_stage": "v5",
+        "correlation_id": "6722dacf3bab",
+        "deciding_stage": "v5",
+        "delivered_bytes": 66,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": "sec-challenges-ObC00ki3s-static-v1",
+          "policy_sha256": "2cc27b28a215e7fd232e84bd14800f9e419095347bcf6eae0ddf8d513d9ce0de",
+          "policy_status": "PROPOSED",
+          "reasons": [
+            "NO_RULE_MATCHED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 3.9967199991224334,
+        "http_status": null,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.2862035477557576,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": null,
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.004698998964158818,
+          "binding": 0.08340400017914362,
+          "canonical": 0.5912560009164736,
+          "canonical_with_wait": 0.6554000028700102,
+          "fast_path": 0.07801900210324675,
+          "model2": 1.0960120016534347,
+          "v5": 1.5347759981523268
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.07801900210324675,
+          "model2_ms": 1.0960120016534347,
+          "v5_ms": 1.5347759981523268
+        },
+        "utc": 1793899292.5269594,
+        "v4": null,
+        "v5": {
+          "decision": "ALLOW",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "5c91691a6394cddf3bb4df3daee9ed9c474bf916d0ac59f58170b4a227ad1f00"
+      },
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "Client-side cookies set by JavaScript in the browser; the server issues none.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None server-side.",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "28a03fa5cb82",
+        "deciding_stage": "v5",
+        "delivered_bytes": 53,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": "sec-challenges-ObC00ki3s-static-v1",
+          "policy_sha256": "2cc27b28a215e7fd232e84bd14800f9e419095347bcf6eae0ddf8d513d9ce0de",
+          "policy_status": "PROPOSED",
+          "reasons": [
+            "NO_RULE_MATCHED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 3.5964999988209456,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.24540937527019235,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.004820998583454639,
+          "binding": 0.08915800208342262,
+          "canonical": 0.49193900122190826,
+          "canonical_with_wait": 0.5462299995997455,
+          "fast_path": 0.0555179976799991,
+          "model2": 0.7327700004680082,
+          "v5": 1.5063520004332531
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.0555179976799991,
+          "model2_ms": 0.7327700004680082,
+          "v5_ms": 1.5063520004332531
+        },
+        "utc": 1793899293.0055385,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "f5d666becdf5a470147696ccc3d9c5e019e2538b3e9780b4cd330ea93b60af36"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 135981,
+      "check": "large response /static/img/bunchofcookies.jpeg (135981 B): cascade gateway 64 KiB framing cap -> 502",
+      "note": "64 KiB gateway cap kept; recorded, not tuned",
+      "pass": true,
+      "response_body_len": 175,
+      "status": 502
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app ObC00ki3s --arm guarded --out reports/v5/fastpath-six-apps-2026-11-05/ObC00ki3s-rerun/ObC00ki3s.guarded.fast-path.stack.json --fast-path",
+    "up --app ObC00ki3s --arm guarded --config reports/v5/fastpath-six-apps-2026-11-05/ObC00ki3s-rerun/ObC00ki3s.guarded.fast-path.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/fastpath-six-apps/ObC00ki3s-rerun --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/fastpath-six-apps/ObC00ki3s-rerun",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/fastpath-six-apps/ObC00ki3s-rerun"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": true,
+  "large_responses": [
+    {
+      "arm": "guarded",
+      "asset_bytes": 135981,
+      "capped_502": true,
+      "response_body_len": 175,
+      "status": 502,
+      "target": "/static/img/bunchofcookies.jpeg"
+    }
+  ],
+  "pass": true,
+  "utc": 1793899288.666147,
+  "v5": "double"
+}

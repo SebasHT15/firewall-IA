@@ -1,0 +1,99 @@
+{
+  "app": "ObC00ki3s",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "direct",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 698,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 592,
+      "check": "benign GET /static/js/cks.js",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "Client-side cookies set by JavaScript in the browser; the server issues none.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None server-side.",
+      "pass": true
+    },
+    {
+      "app_received": true,
+      "check": "direct arm has no blocking layer (request reaches app)",
+      "note": "baseline: front -> app, no gateway, no WAF",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 135981,
+      "check": "large response /static/img/bunchofcookies.jpeg (135981 B): direct: full asset delivered",
+      "note": "challenge gateway limit fixed at 16 MiB; front request limit remains 64 KiB",
+      "pass": true,
+      "response_body_len": 135981,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app ObC00ki3s --arm direct --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/ObC00ki3s-direct/ObC00ki3s.direct.stack.json",
+    "up --app ObC00ki3s --arm direct --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/ObC00ki3s-direct/ObC00ki3s.direct.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/ObC00ki3s-direct --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/ObC00ki3s-direct",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/ObC00ki3s-direct"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": false,
+  "large_responses": [
+    {
+      "arm": "direct",
+      "asset_bytes": 135981,
+      "capped_502": false,
+      "response_body_len": 135981,
+      "status": 200,
+      "target": "/static/img/bunchofcookies.jpeg"
+    }
+  ],
+  "pass": true,
+  "utc": 1793900459.4452624,
+  "v5": "double"
+}

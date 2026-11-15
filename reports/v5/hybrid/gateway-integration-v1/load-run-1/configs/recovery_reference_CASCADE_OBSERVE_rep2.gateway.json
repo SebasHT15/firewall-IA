@@ -1,0 +1,86 @@
+{
+  "cascade_gateway": {
+    "schema": "firewall-cascade-gateway-config/v1",
+    "mode": "CASCADE_OBSERVE",
+    "deployment_profile": "lab",
+    "manifest": "reports/v5/hybrid/gateway-integration-v1/manifests/dev_fixture_baseline34.json",
+    "listen": {
+      "host": "127.0.0.1",
+      "port": 42035
+    },
+    "v4": {
+      "url": "http://127.0.0.1:33229",
+      "timeout_seconds": 3.0
+    },
+    "v5": {
+      "url": "http://127.0.0.1:43501",
+      "timeout_seconds": 3.0
+    },
+    "model2": {
+      "python": "/home/sebas/Desktop/firewall-IA/.venv-analyzer/bin/python",
+      "timeout_seconds": 0.5,
+      "startup_timeout_seconds": 20.0,
+      "restart_backoff_seconds": 2.0,
+      "max_consecutive_failures": 3
+    },
+    "canonical": {
+      "worker": {
+        "python": "/home/sebas/Desktop/firewall-IA/.venv-dataplane/bin/python",
+        "timeout_seconds": 0.5,
+        "startup_timeout_seconds": 20.0,
+        "restart_backoff_seconds": 2.0,
+        "max_consecutive_failures": 3
+      },
+      "workers": 2,
+      "max_received_body": 19920,
+      "max_text_bytes": 262144
+    },
+    "admission": {
+      "max_inflight": 8,
+      "max_waiting": 16,
+      "max_wait_seconds": 2.0,
+      "decision_deadline_seconds": 5.0,
+      "observe_max_pending": 16
+    },
+    "framing": {
+      "contract": "gateway-framing/v1",
+      "body_size_limit": "64k",
+      "verified_evidence": false,
+      "owner_ruling_ref": null,
+      "egress_guard": {
+        "listen_port": 43307,
+        "upstream_host": "127.0.0.1",
+        "upstream_port": 43757,
+        "ticket_ttl_seconds": 5.0,
+        "max_tickets": 256,
+        "idle_timeout_seconds": 30.0
+      }
+    },
+    "fast_path": {
+      "activation": "disabled",
+      "policy_file": null,
+      "policy_sha256": null,
+      "application_contract_ref": null,
+      "audit": {
+        "sample_rate": 1.0,
+        "sample_salt": "live-check",
+        "queue_size": 64,
+        "max_queue_bytes": 1048576,
+        "workers": 1,
+        "timeout_seconds": 5.0,
+        "max_abandoned": 2,
+        "shutdown_drain_seconds": 2.0
+      }
+    },
+    "observability": {
+      "decision_log": "/home/sebas/Documents/Codex/2026-10-26/ta/work/gateway-real-2026-10-30/load-run-1/recovery_reference_CASCADE_OBSERVE_rep2/decisions.jsonl",
+      "max_log_bytes": 16777216,
+      "max_log_files": 2,
+      "log_queue_size": 4096,
+      "admin_port": 44385,
+      "log_wire_sha256": true
+    },
+    "rollback_file": "/home/sebas/Documents/Codex/2026-10-26/ta/work/gateway-real-2026-10-30/load-run-1/recovery_reference_CASCADE_OBSERVE_rep2/RETURN_TO_V4",
+    "probe_interval_seconds": 2.0
+  }
+}

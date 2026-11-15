@@ -1,0 +1,98 @@
+{
+  "app": "CatP1cs",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "direct",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 4153,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 16958,
+      "check": "benign GET /show?img=favicon.ico",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None. A POST to / returns a random message id; nothing is stored.",
+      "pass": true
+    },
+    {
+      "app_received": true,
+      "check": "direct arm has no blocking layer (request reaches app)",
+      "note": "baseline: front -> app, no gateway, no WAF",
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 76673,
+      "check": "large response /show?img=alba.jpg (76673 B): direct: no cascade cap, served in full",
+      "note": "64 KiB gateway cap kept; recorded, not tuned",
+      "pass": true,
+      "response_body_len": 76673,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app CatP1cs --arm direct --out reports/v5/challenge-apps-integration-2026-11-05/evidence/CatP1cs-direct/CatP1cs.direct.stack.json",
+    "up --app CatP1cs --arm direct --config reports/v5/challenge-apps-integration-2026-11-05/evidence/CatP1cs-direct/CatP1cs.direct.stack.json --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/CatP1cs-direct --v5 double",
+    "down --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/CatP1cs-direct",
+    "check-clean --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/CatP1cs-direct"
+  ],
+  "commit_matches_pin": true,
+  "large_responses": [
+    {
+      "arm": "direct",
+      "asset_bytes": 76673,
+      "capped_502": false,
+      "response_body_len": 76673,
+      "status": 200,
+      "target": "/show?img=alba.jpg"
+    }
+  ],
+  "pass": true,
+  "utc": 1793898228.3296037,
+  "v5": "double"
+}

@@ -1,0 +1,45 @@
+{
+  "recovery": {
+    "baseline": "one step at 1 r/s, whose P95 x 2 is the limit of a clean probe",
+    "max_seconds": 420,
+    "overload_rate": 9.0,
+    "overload_seconds": 90,
+    "probe_rate": 1.0,
+    "repetitions": 2,
+    "runs": [
+      [
+        "v4",
+        "V4_ONLY"
+      ],
+      [
+        "reference",
+        "CASCADE_OBSERVE"
+      ],
+      [
+        "verified",
+        "CASCADE_OBSERVE"
+      ]
+    ]
+  },
+  "return_under_load": {
+    "config": "verified",
+    "phases": [
+      "active",
+      "return_to_v4",
+      "authority_back"
+    ],
+    "rate": 8.0,
+    "repetitions": 2,
+    "seconds_per_phase": 50.0
+  },
+  "schema": "firewall-gateway-load-protocol-addendum/v1",
+  "soak_high": {
+    "modes": [
+      "V5_ONLY",
+      "CASCADE_ACTIVE"
+    ],
+    "rate": "0.7 x the lowest sustainable rate of V5_ONLY and CASCADE_ACTIVE, verified",
+    "repetitions": 2
+  },
+  "why": "In the ladder V4_ONLY and CASCADE_OBSERVE did not recover within the 45 s probe window, and the common soak rate is bound by V4, a small fraction of what verified carries."
+}

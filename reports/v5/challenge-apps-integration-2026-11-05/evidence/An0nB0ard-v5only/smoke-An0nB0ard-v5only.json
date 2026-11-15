@@ -1,0 +1,160 @@
+{
+  "app": "An0nB0ard",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "v5only",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 1825,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "app_received": true,
+      "body_len": 1293,
+      "check": "benign GET /messages",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None. blog.py imports flask.session but never sets a secret key or writes a session; no server-side session or auth cookie is issued.",
+      "pass": true
+    },
+    {
+      "check": "state reset: /messages shows only the seeded baseline at up",
+      "note": "MySQL on ephemeral tmpfs; re-seeded from members.sql each up",
+      "pass": true,
+      "seeded_entry_present": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "aa33825a9be5",
+        "deciding_stage": "v5",
+        "delivered_bytes": 53,
+        "fast_path": null,
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 3.3965209986490663,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "V5_ONLY",
+        "model2": null,
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.007213999197119847,
+          "binding": 0.18595499932416715,
+          "canonical": 0.544644000910921,
+          "canonical_with_wait": 0.635624001006363,
+          "v5": 1.7602840016479604
+        },
+        "timings_ms": {
+          "v5_ms": 1.7602840016479604
+        },
+        "utc": 1793898203.2749975,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "0a742c0c2395bce6ef79525ffd62bb0ec431507a4383d395dda7c73244e3313e"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "asset_bytes": 82972,
+      "check": "large response /static/css/bootstrap.min.css (82972 B): cascade gateway 64 KiB framing cap -> 502",
+      "note": "64 KiB gateway cap kept; recorded, not tuned",
+      "pass": true,
+      "response_body_len": 175,
+      "status": 502
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "db": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app An0nB0ard --arm v5only --out reports/v5/challenge-apps-integration-2026-11-05/evidence/An0nB0ard-v5only/An0nB0ard.v5only.stack.json",
+    "up --app An0nB0ard --arm v5only --config reports/v5/challenge-apps-integration-2026-11-05/evidence/An0nB0ard-v5only/An0nB0ard.v5only.stack.json --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/An0nB0ard-v5only --v5 double",
+    "down --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/An0nB0ard-v5only",
+    "check-clean --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/An0nB0ard-v5only"
+  ],
+  "commit_matches_pin": true,
+  "large_responses": [
+    {
+      "arm": "v5only",
+      "asset_bytes": 82972,
+      "capped_502": true,
+      "response_body_len": 175,
+      "status": 502,
+      "target": "/static/css/bootstrap.min.css"
+    }
+  ],
+  "pass": true,
+  "utc": 1793898193.956131,
+  "v5": "double"
+}

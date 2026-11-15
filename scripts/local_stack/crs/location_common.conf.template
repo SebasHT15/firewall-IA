@@ -1,0 +1,7 @@
+# firewall-IA local stack: replaces the image's includes/location_common.conf.template. The image answers
+# /healthz and /metrics/nginx itself, which would hide those routes of the application under test.
+# Only the error page for an unreachable backend is kept.
+error_page 500 502 503 504  /50x.html;
+location = /50x.html {
+    root /usr/share/nginx/html;
+}

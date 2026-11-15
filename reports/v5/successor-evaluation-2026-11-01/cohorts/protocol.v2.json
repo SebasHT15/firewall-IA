@@ -1,0 +1,102 @@
+{
+  "schema": "v51-post-training-dev-evaluation/v1",
+  "status": "PREPARED_NOT_EXECUTED",
+  "scope": "DEVELOPMENT_ONLY_NOT_FINAL_EVALUATION",
+  "training_manifest": {
+    "path": "/home/sebas/Desktop/firewall-IA/reports/v5/successor-training-2026-10-31-reviewed/dataset-manifest.EXPERIMENTAL.json",
+    "sha256": "930bc2cdabe05a060e4512aab905d4d50a340bf6288c60e60bbce439992ac4c1",
+    "bytes": 16181
+  },
+  "training_manifest_sha256": "930bc2cdabe05a060e4512aab905d4d50a340bf6288c60e60bbce439992ac4c1",
+  "cases_private": {
+    "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-evaluation-20261101/cases.private.jsonl",
+    "sha256": "d4dcf65f58dfb070015c875f9a6107ad56a22dca703b6b0a4c829e8a3d0e9da4",
+    "bytes": 2561198
+  },
+  "cases_public": {
+    "path": "/home/sebas/Desktop/firewall-IA/reports/v5/successor-evaluation-2026-11-01/cohorts/cases.public.jsonl",
+    "sha256": "cbf91fd56a4a17e4df7732b1930fc8e20b2d9068da41edcc678899e7383e7013",
+    "bytes": 2052562
+  },
+  "input_bindings": [
+    {
+      "name": "rows.VALIDATION.jsonl",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-training-candidate-20261031-reviewed/rows.VALIDATION.jsonl",
+      "sha256": "7befd22f1200f5a5336fef670f94ca12c77a5e182e1f314489ff9f38f24401a9",
+      "bytes": 573050
+    },
+    {
+      "name": "rows.VALIDATION.meta.jsonl",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-training-candidate-20261031-reviewed/rows.VALIDATION.meta.jsonl",
+      "sha256": "e7bf7604d39fc2a9cb7fde7082050f65060849e12c61bb13bb626305e9ea431d",
+      "bytes": 3600915
+    },
+    {
+      "name": "rows.TRAIN.meta.jsonl",
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-training-candidate-20261031-reviewed/rows.TRAIN.meta.jsonl",
+      "sha256": "54cde9baf49ef8ace9ebd0e04f5ef029bad309a5884bf90521c18913f305dd35",
+      "bytes": 8557496
+    },
+    {
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/v51-source-partitions/VALIDATION_CANDIDATE.source.jsonl",
+      "sha256": "5e51632ff5645be94a65192511b3503c7d2f14a333da5250f9a6295fab76ed0f",
+      "bytes": 29275
+    },
+    {
+      "path": "/home/sebas/Desktop/firewall-IA/reports/v5/hybrid/experiments-2026-10-30/protocol.json",
+      "sha256": "525678028e39bce551e1625c4ca2b506736a6c71481596ce3231a674173a3d82",
+      "bytes": 4558
+    },
+    {
+      "path": "/home/sebas/Documents/Codex/2026-10-26/ta/work/metrics-2026-10-30/inputs.private.jsonl",
+      "sha256": "3118bf663689c28b574094bc5e9797fa628d49106dbe4857b4c29962f59d51fe",
+      "bytes": 1184482
+    }
+  ],
+  "cohorts": {
+    "policy_validation_selection": 2080,
+    "authored_regression_known_DEV": 434
+  },
+  "policy_validation_components": 15,
+  "excluded_authored_canonical_outcomes": {},
+  "overlap_TRAIN": {},
+  "opposite_reference_same_text": {
+    "hash_groups": 2,
+    "cases": 22
+  },
+  "thresholds_descriptive_only": [
+    0.5,
+    0.7,
+    0.8,
+    0.9,
+    0.95,
+    0.975,
+    0.99
+  ],
+  "selected_threshold": null,
+  "random_seed": 20261101,
+  "bootstrap_replicates": 1000,
+  "protected_sets_used": false,
+  "reserve_opened": false,
+  "legacy_eval_admitted": false,
+  "benchmark": {
+    "status": "SEPARATE_OPERATIONAL_PROTOCOL_REQUIRED",
+    "rule": "Quality-pass latency is not capacity. Keep cold/warmup/steady phases separate; pool raw rows, never average percentiles."
+  },
+  "interpretation": [
+    "Policy validation was used for checkpoint selection; not independent final evaluation.",
+    "Known authored DEV is regression-only, not new generalization evidence.",
+    "Invalid => error in E5; derived fail-closed action is separate from detection.",
+    "No row-IID substitute for missing source groups in authored DEV.",
+    "Do not count sink delivery as exploit success. No protected/RESERVE selection.",
+    "Counterfactual Model2+V5 combination excludes Fast Path and is not observed gateway performance."
+  ],
+  "source_sha256": {
+    "scripts/v5_successor/prepare_evaluation.py": "b606e2743ff127232a3f6e7c97c85affafc87f78014918bb563ea874784d6481",
+    "scripts/v5_successor/evaluation_metrics.py": "189b3227feb18849f0c079d9f55458e4546e570f96c1640ea9541b221999925b",
+    "scripts/v5_successor/collect_evaluation.py": "82579e9d922d0012ff8855f7917fe7f31b3a4ff97f77e5b9dd26fcf3f69e97cb",
+    "scripts/v5_successor/run_evaluation_service.py": "8c8482918c5c40abf7adf446c5a4bee9d1901d6045a466ff5c42d3fdcb1b377e"
+  },
+  "parent_protocol_sha256": "ceee041989dcd8e5a01fce810a298cdeef7b628363651b6c85c54a8ebb47bf34",
+  "revision_note": "Same bound cases and selection; reporting adds explicit decoder-path accounting, EOS consistency and stricter input-count validation. No re-inference or training."
+}

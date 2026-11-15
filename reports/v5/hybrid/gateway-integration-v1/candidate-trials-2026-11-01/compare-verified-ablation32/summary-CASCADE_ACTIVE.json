@@ -1,0 +1,134 @@
+{
+  "attack_effect": {
+    "needs": "an authorized isolated application with an effect oracle per family; see docs/cascade_candidate_handoff.md",
+    "status": "NOT_MEASURED",
+    "why": "The destination is an inert sink. It records exact bytes and answers 200, so a delivered request proves delivery and never that an attack worked or failed."
+  },
+  "cases_sha256": "d4dcf65f58dfb070015c875f9a6107ad56a22dca703b6b0a4c829e8a3d0e9da4",
+  "census_sha256": "c9ecf59c2b66ca318375b2f8d8249f35fc1c0e43baac35911d930b38cec3c9b1",
+  "cohorts": {
+    "authored_regression_known_DEV": {
+      "action": {
+        "DENY": 203,
+        "FORWARD": 231
+      },
+      "action_follows_decision": 434,
+      "cases": 434,
+      "census": {
+        "compared": 357,
+        "different": [],
+        "same_status_and_decision": 357
+      },
+      "classification": {
+        "FN": 19,
+        "FP": 9,
+        "NO_DECISION": 0,
+        "TN": 212,
+        "TP": 194
+      },
+      "deciding_stage": {
+        "model2": 77,
+        "v5": 357
+      },
+      "note": "Sequential classification pass. These times are not a load result.",
+      "received": {
+        "0": 203,
+        "1": 231
+      },
+      "reception_follows_action": 434,
+      "round_trip": {
+        "canonical_equal": 357,
+        "different": [],
+        "reached_v5": 357
+      },
+      "sequential_client_ms": {
+        "max": 188.02876900008414,
+        "mean": 85.35189649066633,
+        "min": 2.4716009975236375,
+        "n": 434,
+        "p50": 80.48840799892787,
+        "p95": 177.28226799954427,
+        "p99": 182.28845200064825
+      },
+      "status": {
+        "200": 231,
+        "403": 203
+      },
+      "status_follows_action": 434,
+      "wire_origin": {
+        "recorded": 434
+      }
+    },
+    "policy_validation_selection": {
+      "action": {
+        "DENY": 1044,
+        "FORWARD": 1036
+      },
+      "action_follows_decision": 2080,
+      "cases": 2080,
+      "census": {
+        "compared": 2016,
+        "different": [],
+        "same_status_and_decision": 2016
+      },
+      "classification": {
+        "FN": 0,
+        "FP": 4,
+        "NO_DECISION": 0,
+        "TN": 1036,
+        "TP": 1040
+      },
+      "deciding_stage": {
+        "model2": 64,
+        "v5": 2016
+      },
+      "note": "Sequential classification pass. These times are not a load result.",
+      "received": {
+        "0": 1044,
+        "1": 1036
+      },
+      "reception_follows_action": 2080,
+      "round_trip": {
+        "canonical_equal": 2016,
+        "different": [],
+        "reached_v5": 2016
+      },
+      "sequential_client_ms": {
+        "max": 305.73270799868624,
+        "mean": 133.0222861335887,
+        "min": 2.9897159984102473,
+        "n": 2080,
+        "p50": 103.26421199715696,
+        "p95": 196.76861200059648,
+        "p99": 219.39368800303782
+      },
+      "status": {
+        "200": 1036,
+        "403": 1044
+      },
+      "status_follows_action": 2080,
+      "wire_origin": {
+        "built": 2080
+      }
+    }
+  },
+  "duration_s": 385.7466652393341,
+  "final_queues": {
+    "admission_inflight": 0,
+    "admission_waiting": 0,
+    "audit_queued": 0,
+    "observe_pending": 0,
+    "v5_client_in_flight": 0
+  },
+  "manifest_file_sha256": "743b7222e0895efeb9f638591b8eb8bf21092853dfde592acd7748fb7ba9cbe8",
+  "manifest_id": "v51-policy-20261101-verified-ablation32-control",
+  "manifest_sha256": "65ed4e359dda78674dd4e6d5b9965c76511487fc26f8abece503d267b31d88d7",
+  "mode": "CASCADE_ACTIVE",
+  "model2_policy_status": "LAB_EXPERIMENTAL",
+  "schema": "firewall-candidate-compare/v1",
+  "scope": "Known DEV and selection data, reverse proxy, HTTP/1.1 cleartext, inert sink. Sequential. Not an independent evaluation. No threshold, runtime or candidate selected.",
+  "started_utc": 1793578579.4549668,
+  "v4": "not used",
+  "v5": "real",
+  "wires_sha256": "3118bf663689c28b574094bc5e9797fa628d49106dbe4857b4c29962f59d51fe"
+}

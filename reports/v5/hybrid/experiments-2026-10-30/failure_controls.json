@@ -1,0 +1,204 @@
+[
+  {
+    "id": "model2_exception",
+    "injected": true,
+    "http_status": 200,
+    "client_ms": 323.4638879994236,
+    "trace": {
+      "correlation_id": "899d499ca8fc",
+      "wire_sha256": "9ca4b5612afca02529e96ba43cb325283132014dc04495393f746b96a579595c",
+      "applied": "FORWARD",
+      "deciding_stage": "v5",
+      "mode": "CASCADE_ACTIVE",
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "fast_path": {
+        "decision": "CONTINUE",
+        "reasons": [
+          "POLICY_UNAVAILABLE"
+        ],
+        "rule_id": null,
+        "policy_id": null,
+        "policy_sha256": null,
+        "policy_status": null
+      },
+      "model2": {
+        "decision": null,
+        "status": "error",
+        "detail": "RuntimeError"
+      },
+      "v5": {
+        "status": "ok",
+        "decision": "ALLOW",
+        "invalid_reason": null,
+        "generate_ms": 318.10803600001236
+      },
+      "v4": null,
+      "cascade_applied": "FORWARD",
+      "cascade_stage": "v5",
+      "reason": null,
+      "timings_ms": {
+        "fast_path_ms": 0.037524000617850106,
+        "model2_ms": 0.0071320000643027015,
+        "v5_ms": 321.6389720000734
+      },
+      "upstream_received": true,
+      "gateway_ms": 322.7422410000145
+    },
+    "independent_receipts": 1,
+    "passed": true
+  },
+  {
+    "id": "model2_non_ok_block",
+    "injected": true,
+    "http_status": 200,
+    "client_ms": 325.15243599937094,
+    "trace": {
+      "correlation_id": "6794b1f6c7b8",
+      "wire_sha256": "9ca4b5612afca02529e96ba43cb325283132014dc04495393f746b96a579595c",
+      "applied": "FORWARD",
+      "deciding_stage": "v5",
+      "mode": "CASCADE_ACTIVE",
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "fast_path": {
+        "decision": "CONTINUE",
+        "reasons": [
+          "POLICY_UNAVAILABLE"
+        ],
+        "rule_id": null,
+        "policy_id": null,
+        "policy_sha256": null,
+        "policy_status": null
+      },
+      "model2": {
+        "decision": "BLOCK",
+        "status": "SCORING_FAILED",
+        "p_block": null,
+        "threshold": null,
+        "feature_view": null,
+        "model_artifact_sha256": null,
+        "policy_id": null,
+        "policy_sha256": null,
+        "policy_status": null
+      },
+      "v5": {
+        "status": "ok",
+        "decision": "ALLOW",
+        "invalid_reason": null,
+        "generate_ms": 319.77048499993543
+      },
+      "v4": null,
+      "cascade_applied": "FORWARD",
+      "cascade_stage": "v5",
+      "reason": null,
+      "timings_ms": {
+        "fast_path_ms": 0.038981999750831164,
+        "model2_ms": 0.04678000004787464,
+        "v5_ms": 323.36619200032146
+      },
+      "upstream_received": true,
+      "gateway_ms": 324.4193839991567
+    },
+    "independent_receipts": 1,
+    "passed": true
+  },
+  {
+    "id": "v5_unavailable",
+    "injected": true,
+    "http_status": 403,
+    "client_ms": 1.893196999844804,
+    "trace": {
+      "correlation_id": "cf0748390ff5",
+      "wire_sha256": "9ca4b5612afca02529e96ba43cb325283132014dc04495393f746b96a579595c",
+      "applied": "DENY",
+      "deciding_stage": "v5",
+      "mode": "CASCADE_ACTIVE",
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "fast_path": {
+        "decision": "CONTINUE",
+        "reasons": [
+          "POLICY_UNAVAILABLE"
+        ],
+        "rule_id": null,
+        "policy_id": null,
+        "policy_sha256": null,
+        "policy_status": null
+      },
+      "model2": {
+        "decision": null,
+        "status": "error",
+        "detail": "RuntimeError"
+      },
+      "v5": {
+        "status": "transport_error",
+        "decision": null,
+        "invalid_reason": null,
+        "generate_ms": null
+      },
+      "v4": null,
+      "cascade_applied": "DENY",
+      "cascade_stage": "v5",
+      "reason": "v5_transport_error",
+      "timings_ms": {
+        "fast_path_ms": 0.03786100023717154,
+        "model2_ms": 0.008504999641445465,
+        "v5_ms": 0.5640780000248924
+      },
+      "upstream_received": false,
+      "gateway_ms": 1.0380649991930113
+    },
+    "independent_receipts": 0,
+    "passed": true
+  },
+  {
+    "id": "v5_invalid",
+    "injected": true,
+    "http_status": 403,
+    "client_ms": 1.6307099995174212,
+    "trace": {
+      "correlation_id": "17425faa49aa",
+      "wire_sha256": "9ca4b5612afca02529e96ba43cb325283132014dc04495393f746b96a579595c",
+      "applied": "DENY",
+      "deciding_stage": "v5",
+      "mode": "CASCADE_ACTIVE",
+      "canonical_outcome": "ACCEPT",
+      "canonical_reject": null,
+      "fast_path": {
+        "decision": "CONTINUE",
+        "reasons": [
+          "POLICY_UNAVAILABLE"
+        ],
+        "rule_id": null,
+        "policy_id": null,
+        "policy_sha256": null,
+        "policy_status": null
+      },
+      "model2": {
+        "decision": null,
+        "status": "error",
+        "detail": "RuntimeError"
+      },
+      "v5": {
+        "status": "invalid",
+        "decision": null,
+        "invalid_reason": "no_eos",
+        "generate_ms": null
+      },
+      "v4": null,
+      "cascade_applied": "DENY",
+      "cascade_stage": "v5",
+      "reason": "v5_invalid",
+      "timings_ms": {
+        "fast_path_ms": 0.032405999263573904,
+        "model2_ms": 0.005425999916042201,
+        "v5_ms": 0.007276000360434409
+      },
+      "upstream_received": false,
+      "gateway_ms": 0.4807450004591374
+    },
+    "independent_receipts": 0,
+    "passed": true
+  }
+]

@@ -1,0 +1,6232 @@
+{
+  "clean_after": {
+    "checked_utc": 1793845390.6698482,
+    "clean": true,
+    "leftovers": [],
+    "run_id": "20261104T202306-4710b3",
+    "schema": "firewall-local-stack-clean/v1"
+  },
+  "created_utc": 1793845390.6699314,
+  "cross_path_problems": [],
+  "detection_quality": "NOT_MEASURED",
+  "failed_steps": [],
+  "identity": {
+    "app": {
+      "image": "firewall-ia/lab-app:lab",
+      "image_id": "sha256:7e7f96b9ae8d7ae90dcb4acf0680f67be1e3de9e8a2ef71db01260aa513fd2ef",
+      "source": "scripts/local_stack/notes_app/app.py",
+      "source_sha256": "f6d25d46e8abfe7b85f753258c6b8107527aee75547d41269285bc2c77b7dd5c"
+    },
+    "effect_routes": true,
+    "fast_path": null,
+    "front": {
+      "alpn": "h2",
+      "conf_sha256": "d90e95223aff83153cdf27fcc9a6a5ee1a73b9bc750bef08b233f4ebbac0b759",
+      "image": "nginx:1.25-alpine",
+      "image_id": "sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00",
+      "template_sha256": "542d0aee16dcd2be2b1f4199711cac85f6d43499636a09ba5d7577e8bb64a4dc",
+      "tls_version": "TLSv1.3"
+    },
+    "manifest": {
+      "manifest_id": "v51-policy-20261101-native-baseline34",
+      "path": "reports/v5/successor-post-training-2026-11-01/cascade-native.EXPERIMENTAL.json",
+      "sha256": "a3eb71aa1ccdbe07e289c515c5885172cff9b64703a5344cc13ea57d91a3d829",
+      "status": "EXPERIMENTAL"
+    },
+    "mode": "V5_ONLY",
+    "schema": "firewall-local-stack-identity/v1",
+    "stack_source_sha256": "ca2b5ebb06bd0ddf2b992c5e203b61e3c3f9465ac8a369bafed12f4302b43b4e",
+    "upstream": "app",
+    "v4": "not started",
+    "v5": "url"
+  },
+  "kind": "MECHANISM_CHECK_WITH_V5_DOUBLE",
+  "passed": true,
+  "rows": [
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "home",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "notes_without_session",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "login_form",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "login_without_csrf",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "login_bad_csrf",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "origin_mismatch"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "origin_mismatch"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "login_cross_origin",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "referer_mismatch"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "referer_mismatch"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "login_cross_referer",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "login_wrong_password",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "session_rotated": true,
+      "step": "login_ok",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "notes_list",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_with_prelogin_csrf",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_with_prelogin_session",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_note",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        400,
+        "app_rejected",
+        "validation",
+        "field_too_long"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        400,
+        "app_rejected",
+        "validation",
+        "field_too_long"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_title_too_long",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "csrf_in_header",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "own_note",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "other_users_note",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "search",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "search_blocked_by_double",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_blocked_by_double",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "static_css",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "healthz",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "routing",
+        "not_found"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "routing",
+        "not_found"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "unknown_route",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "logout",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "after_logout",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "token_bad_password",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        415,
+        "app_rejected",
+        "validation",
+        "json_required"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        415,
+        "app_rejected",
+        "validation",
+        "json_required"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "token_not_json",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "token_read",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "token_write",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "token_missing"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "token_missing"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "no_token",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "basic_scheme",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "list_read",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "alg_none",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "alg_hs512",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "alg_rs256_confusion",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "tampered_subject",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "wrong_key",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_kid"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_kid"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "unknown_kid",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "crit_unsupported"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "crit_unsupported"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "crit_header",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "expired",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "not_yet_valid"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "not_yet_valid"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "not_yet_valid",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_audience"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_audience"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "wrong_audience",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_issuer"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_issuer"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "wrong_issuer",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_subject"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_subject"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "unknown_subject",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "missing_exp",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "string_exp",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "three_parts_garbage",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "jwt",
+        "insufficient_scope"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "jwt",
+        "insufficient_scope"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "write_with_read_scope",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_api",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "create_api_blocked_by_double",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        400,
+        "app_rejected",
+        "validation",
+        "json_malformed"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        400,
+        "app_rejected",
+        "validation",
+        "json_malformed"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "json_malformed",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "other_users_note_api",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        204,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "DELETE",
+      "observed": [
+        204,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "delete_api",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "revoke",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "revoked"
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "revoked"
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "after_revoke",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_sql_benign",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_sql_attack",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_files_benign",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_files_attack",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "external_location": false
+      },
+      "expected": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_redirect_benign",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "external_location": true
+      },
+      "expected": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_redirect_attack",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "unescaped_reflection": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_xss_benign",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "unescaped_reflection": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [],
+      "gateway": [],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "direct",
+      "step": "effect_xss_attack",
+      "v5_calls": 0
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "home",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "notes_without_session",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "login_form",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "login_without_csrf",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "login_bad_csrf",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "origin_mismatch"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "origin_mismatch"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "login_cross_origin",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "referer_mismatch"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "referer_mismatch"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "login_cross_referer",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "login_wrong_password",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "session_rotated": true,
+      "step": "login_ok",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "notes_list",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_with_prelogin_csrf",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_with_prelogin_session",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_note",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        400,
+        "app_rejected",
+        "validation",
+        "field_too_long"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 400,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "400"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        400,
+        "app_rejected",
+        "validation",
+        "field_too_long"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_title_too_long",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "csrf_in_header",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "own_note",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 404,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "404"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "other_users_note",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "search",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "expected": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 403,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "search_blocked_by_double",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "expected": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 403,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_blocked_by_double",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "static_css",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "healthz",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "routing",
+        "not_found"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 404,
+          "upstream_connect_time": "0.002",
+          "upstream_status": "404"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "routing",
+        "not_found"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "unknown_route",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "logout",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "after_logout",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "token_bad_password",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        415,
+        "app_rejected",
+        "validation",
+        "json_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 415,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "415"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        415,
+        "app_rejected",
+        "validation",
+        "json_required"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "token_not_json",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "token_read",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "token_write",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "token_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "token_missing"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "no_token",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "basic_scheme",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "list_read",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "alg_none",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "alg_hs512",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "alg_rs256_confusion",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "tampered_subject",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "wrong_key",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_kid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_kid"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "unknown_kid",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "crit_unsupported"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "crit_unsupported"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "crit_header",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "expired",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "not_yet_valid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "not_yet_valid"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "not_yet_valid",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_audience"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_audience"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "wrong_audience",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_issuer"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_issuer"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "wrong_issuer",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_subject"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_subject"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "unknown_subject",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "missing_exp",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "string_exp",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "three_parts_garbage",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "jwt",
+        "insufficient_scope"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "jwt",
+        "insufficient_scope"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "write_with_read_scope",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 201,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "201"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_api",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "expected": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 403,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 403,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "create_api_blocked_by_double",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        400,
+        "app_rejected",
+        "validation",
+        "json_malformed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 400,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "400"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        400,
+        "app_rejected",
+        "validation",
+        "json_malformed"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "json_malformed",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 404,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "404"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "other_users_note_api",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        204,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 204,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "204"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "DELETE",
+      "observed": [
+        204,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "delete_api",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "revoke",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "revoked"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "revoked"
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "after_revoke",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_sql_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_sql_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_files_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_files_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "external_location": false
+      },
+      "expected": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 302,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "302"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_redirect_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "external_location": true
+      },
+      "expected": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 302,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "302"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_redirect_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "unescaped_reflection": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_xss_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "unescaped_reflection": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/1.1",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h1",
+      "step": "effect_xss_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "home",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "notes_without_session",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "login_form",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_missing"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "login_without_csrf",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "login_bad_csrf",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "origin_mismatch"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "origin_mismatch"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "login_cross_origin",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "referer_mismatch"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "referer_mismatch"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "login_cross_referer",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "login_wrong_password",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "session_rotated": true,
+      "step": "login_ok",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "notes_list",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "csrf",
+        "token_invalid"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_with_prelogin_csrf",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_with_prelogin_session",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_note",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        400,
+        "app_rejected",
+        "validation",
+        "field_too_long"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 400,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "400"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        400,
+        "app_rejected",
+        "validation",
+        "field_too_long"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_title_too_long",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "csrf_in_header",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "own_note",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 404,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "404"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "other_users_note",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "search",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "expected": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 403,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "search_blocked_by_double",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "expected": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 403,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_blocked_by_double",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "static_css",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "healthz",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "routing",
+        "not_found"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 404,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "404"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "routing",
+        "not_found"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "unknown_route",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        303,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "logout",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 303,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "303"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        303,
+        "app_rejected",
+        "session",
+        "session_required"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "after_logout",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        401,
+        "app_rejected",
+        "login",
+        "bad_credentials"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "token_bad_password",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        415,
+        "app_rejected",
+        "validation",
+        "json_required"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 415,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "415"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        415,
+        "app_rejected",
+        "validation",
+        "json_required"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "token_not_json",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "token_read",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "token_write",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "token_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "token_missing"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "no_token",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "basic_scheme",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "list_read",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "alg_none",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "alg_hs512",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "alg_not_allowed"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "alg_rs256_confusion",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "tampered_subject",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_signature"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "wrong_key",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_kid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_kid"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "unknown_kid",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "crit_unsupported"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "crit_unsupported"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "crit_header",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "expired"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "expired",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "not_yet_valid"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "not_yet_valid"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "not_yet_valid",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_audience"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_audience"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "wrong_audience",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_issuer"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "bad_issuer"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "wrong_issuer",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_subject"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "unknown_subject"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "unknown_subject",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "missing_exp",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "claim_missing_or_type"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "string_exp",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "malformed"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "three_parts_garbage",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        403,
+        "app_rejected",
+        "jwt",
+        "insufficient_scope"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "app_rejected",
+        "jwt",
+        "insufficient_scope"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "write_with_read_scope",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 201,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "201"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        201,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_api",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 0,
+      "expected": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 403,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "403"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "DENY",
+          "http_status": 403,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        403,
+        "firewall",
+        "v5",
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "create_api_blocked_by_double",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        400,
+        "app_rejected",
+        "validation",
+        "json_malformed"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 400,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "400"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        400,
+        "app_rejected",
+        "validation",
+        "json_malformed"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "json_malformed",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 404,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "404"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        404,
+        "app_rejected",
+        "authorization",
+        "not_owner_or_missing"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "other_users_note_api",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        204,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 204,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "204"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "DELETE",
+      "observed": [
+        204,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "delete_api",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "POST",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "revoke",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "expected": [
+        401,
+        "app_rejected",
+        "jwt",
+        "revoked"
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 401,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "401"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        401,
+        "app_rejected",
+        "jwt",
+        "revoked"
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "after_revoke",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_sql_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_sql_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_files_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_files_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "external_location": false
+      },
+      "expected": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 302,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "302"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_redirect_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "external_location": true
+      },
+      "expected": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 302,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "302"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        302,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_redirect_attack",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "unescaped_reflection": false
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.001",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_xss_benign",
+      "v5_calls": 1
+    },
+    {
+      "app_lines": 1,
+      "effect": {
+        "canary_in_response": false,
+        "unescaped_reflection": true
+      },
+      "expected": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "front": [
+        {
+          "protocol": "HTTP/2.0",
+          "status": 200,
+          "upstream_connect_time": "0.000",
+          "upstream_status": "200"
+        }
+      ],
+      "gateway": [
+        {
+          "applied": "FORWARD",
+          "http_status": null,
+          "stage": "v5"
+        }
+      ],
+      "marker_consistent": true,
+      "method": "GET",
+      "observed": [
+        200,
+        "app",
+        null,
+        null
+      ],
+      "passed": true,
+      "path": "tls_h2",
+      "step": "effect_xss_attack",
+      "v5_calls": 1
+    }
+  ],
+  "schema": "firewall-local-stack-app-check/v1",
+  "summary": {
+    "direct": {
+      "application_rejections": {
+        "authorization/not_owner_or_missing": 2,
+        "csrf/origin_mismatch": 1,
+        "csrf/referer_mismatch": 1,
+        "csrf/token_invalid": 2,
+        "csrf/token_missing": 1,
+        "jwt/alg_not_allowed": 3,
+        "jwt/bad_audience": 1,
+        "jwt/bad_issuer": 1,
+        "jwt/bad_signature": 2,
+        "jwt/claim_missing_or_type": 2,
+        "jwt/crit_unsupported": 1,
+        "jwt/expired": 1,
+        "jwt/insufficient_scope": 1,
+        "jwt/malformed": 2,
+        "jwt/not_yet_valid": 1,
+        "jwt/revoked": 1,
+        "jwt/token_missing": 1,
+        "jwt/unknown_kid": 1,
+        "jwt/unknown_subject": 1,
+        "login/bad_credentials": 2,
+        "routing/not_found": 1,
+        "session/session_required": 3,
+        "validation/field_too_long": 1,
+        "validation/json_malformed": 1,
+        "validation/json_required": 1
+      },
+      "by_layer": {
+        "app": 28,
+        "app_rejected": 35
+      },
+      "passed": 63,
+      "requests": 63,
+      "v5_calls": 0
+    },
+    "tls_h1": {
+      "application_rejections": {
+        "authorization/not_owner_or_missing": 2,
+        "csrf/origin_mismatch": 1,
+        "csrf/referer_mismatch": 1,
+        "csrf/token_invalid": 2,
+        "csrf/token_missing": 1,
+        "jwt/alg_not_allowed": 3,
+        "jwt/bad_audience": 1,
+        "jwt/bad_issuer": 1,
+        "jwt/bad_signature": 2,
+        "jwt/claim_missing_or_type": 2,
+        "jwt/crit_unsupported": 1,
+        "jwt/expired": 1,
+        "jwt/insufficient_scope": 1,
+        "jwt/malformed": 2,
+        "jwt/not_yet_valid": 1,
+        "jwt/revoked": 1,
+        "jwt/token_missing": 1,
+        "jwt/unknown_kid": 1,
+        "jwt/unknown_subject": 1,
+        "login/bad_credentials": 2,
+        "routing/not_found": 1,
+        "session/session_required": 3,
+        "validation/field_too_long": 1,
+        "validation/json_malformed": 1,
+        "validation/json_required": 1
+      },
+      "by_layer": {
+        "app": 25,
+        "app_rejected": 35,
+        "firewall": 3
+      },
+      "passed": 63,
+      "requests": 63,
+      "v5_calls": 63
+    },
+    "tls_h2": {
+      "application_rejections": {
+        "authorization/not_owner_or_missing": 2,
+        "csrf/origin_mismatch": 1,
+        "csrf/referer_mismatch": 1,
+        "csrf/token_invalid": 2,
+        "csrf/token_missing": 1,
+        "jwt/alg_not_allowed": 3,
+        "jwt/bad_audience": 1,
+        "jwt/bad_issuer": 1,
+        "jwt/bad_signature": 2,
+        "jwt/claim_missing_or_type": 2,
+        "jwt/crit_unsupported": 1,
+        "jwt/expired": 1,
+        "jwt/insufficient_scope": 1,
+        "jwt/malformed": 2,
+        "jwt/not_yet_valid": 1,
+        "jwt/revoked": 1,
+        "jwt/token_missing": 1,
+        "jwt/unknown_kid": 1,
+        "jwt/unknown_subject": 1,
+        "login/bad_credentials": 2,
+        "routing/not_found": 1,
+        "session/session_required": 3,
+        "validation/field_too_long": 1,
+        "validation/json_malformed": 1,
+        "validation/json_required": 1
+      },
+      "by_layer": {
+        "app": 25,
+        "app_rejected": 35,
+        "firewall": 3
+      },
+      "passed": 63,
+      "requests": 63,
+      "v5_calls": 63
+    }
+  }
+}

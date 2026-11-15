@@ -1,0 +1,107 @@
+{
+  "candidate_selected": null,
+  "inputs": {
+    "new_artifact_sha256": "ed00693cc702d21dcd86b22dc3958021c03e7f09e92958f48e132802aa4963bc",
+    "old_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+    "private_cases_sha256": "a7837f40b36a56c3dcac16db65e7fe243ead3816a9d959b0bfeac66e0ce0ebaf",
+    "public_cases_sha256": "a5c6cbab8a9d164fc34eca8206d4901f9dd0991be6521e116aaa7b319b4e4d72",
+    "source_sha256": "b77509653d5108fa5bb7e3b6ec1a81c004ff7930b32299eb2411ebc1f9af1633",
+    "v5_rows_sha256": "70deee12d30672d49147910768a7bf3339e1c2b7c08b1d549d1e10a28c931775"
+  },
+  "limits": [
+    "Known development population; repeated cases share templates and texts",
+    "New Model 2 scores were not run through the gateway",
+    "The downstream decisions are recorded V5.1, not V5.2"
+  ],
+  "root": {
+    "new_p_block": 0.547081848120512,
+    "old_p_block": 0.9999261626310745
+  },
+  "scenarios": {
+    "V5.1_only": {
+      "confusion": {
+        "FN": 17,
+        "FP": 29,
+        "TN": 343,
+        "TP": 151
+      },
+      "early_by_family": [],
+      "early_by_label": {},
+      "unique_early_texts_by_label": {}
+    },
+    "new_model2_at_0_9": {
+      "confusion": {
+        "FN": 17,
+        "FP": 31,
+        "TN": 341,
+        "TP": 151
+      },
+      "early_by_family": [
+        {
+          "count": 2,
+          "family": "benign_edge",
+          "label": "ALLOW"
+        },
+        {
+          "count": 6,
+          "family": "sqli",
+          "label": "BLOCK"
+        },
+        {
+          "count": 6,
+          "family": "ssti",
+          "label": "BLOCK"
+        }
+      ],
+      "early_by_label": {
+        "ALLOW": 2,
+        "BLOCK": 12
+      },
+      "unique_early_texts_by_label": {
+        "ALLOW": 2,
+        "BLOCK": 12
+      }
+    },
+    "old_model2_at_0_9": {
+      "confusion": {
+        "FN": 17,
+        "FP": 48,
+        "TN": 324,
+        "TP": 151
+      },
+      "early_by_family": [
+        {
+          "count": 4,
+          "family": "benign_edge",
+          "label": "ALLOW"
+        },
+        {
+          "count": 15,
+          "family": "routine",
+          "label": "ALLOW"
+        },
+        {
+          "count": 12,
+          "family": "sqli",
+          "label": "BLOCK"
+        },
+        {
+          "count": 12,
+          "family": "ssti",
+          "label": "BLOCK"
+        }
+      ],
+      "early_by_label": {
+        "ALLOW": 19,
+        "BLOCK": 24
+      },
+      "unique_early_texts_by_label": {
+        "ALLOW": 5,
+        "BLOCK": 24
+      }
+    }
+  },
+  "schema": "model2-successor-known-dev-counterfactual/v1",
+  "scope": "KNOWN_DEV_CPU_COUNTERFACTUAL_V51_RECORDED",
+  "threshold": 0.9
+}

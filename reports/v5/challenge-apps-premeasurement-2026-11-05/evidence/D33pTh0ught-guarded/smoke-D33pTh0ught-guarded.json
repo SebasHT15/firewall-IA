@@ -1,0 +1,153 @@
+{
+  "app": "D33pTh0ught",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "guarded",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 415,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None (flag ciphertext is a module constant).",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "cascade block attributed to firewall ('/?q=evil' -> V5 double DENY)",
+      "firewall_body": true,
+      "gateway_denied": true,
+      "last_decision": {
+        "applied": "DENY",
+        "body_framing": "none",
+        "canonical_outcome": "ACCEPT",
+        "canonical_reject": null,
+        "cascade_applied": "DENY",
+        "cascade_stage": "v5",
+        "correlation_id": "841f65128eee",
+        "deciding_stage": "v5",
+        "delivered_bytes": 55,
+        "fast_path": {
+          "decision": "CONTINUE",
+          "policy_id": null,
+          "policy_sha256": null,
+          "policy_status": null,
+          "reasons": [
+            "POLICY_UNAVAILABLE",
+            "FRAMING_UNVERIFIED"
+          ],
+          "rule_id": null
+        },
+        "framing_contract": "gateway-framing/v1",
+        "framing_status": "EGRESS_BOUND",
+        "gateway_ms": 5.0220669982081745,
+        "http_status": 403,
+        "kind": "decision",
+        "manifest_id": "v51-model2-guarded-lab-20261105",
+        "manifest_sha256": "11ffa213c304e6d6c2169220f7312c2119a5495fbcfea3643c73f4e6cd328fab",
+        "mode": "CASCADE_ACTIVE",
+        "model2": {
+          "decision": "DEFER",
+          "feature_view": "baseline_34",
+          "model_artifact_sha256": "da6f6eb85c5a687bd038c6298baf59abdbe0489a80c8993b74a34dae7c60aa38",
+          "p_block": 0.24540937527019235,
+          "policy_id": "model2-v51-selective-guard-lab-20261105",
+          "policy_sha256": "4d2e4202588ed1c28db79dbea0d0d191e3d4864e9262c7bc9b3777e2f0fc80e4",
+          "policy_status": "LAB_EXPERIMENTAL",
+          "status": "OK",
+          "threshold": 0.9
+        },
+        "reason": "v5_block",
+        "schema": "firewall-cascade-decision/v1",
+        "stage_ms": {
+          "admission": 0.00857600025483407,
+          "binding": 0.13286399916978553,
+          "canonical": 1.1402559975977056,
+          "canonical_with_wait": 1.2140329999965616,
+          "fast_path": 0.049144000513479114,
+          "model2": 0.9720759990159422,
+          "v5": 1.8409170006634668
+        },
+        "timings_ms": {
+          "fast_path_ms": 0.049144000513479114,
+          "model2_ms": 0.9720759990159422,
+          "v5_ms": 1.8409170006634668
+        },
+        "utc": 1793900435.2182195,
+        "v4": null,
+        "v5": {
+          "decision": "BLOCK",
+          "generate_ms": 0.1,
+          "invalid_reason": null,
+          "status": "ok"
+        },
+        "v5_service": {
+          "decoder_fallback": null,
+          "decoder_verified": null,
+          "generated_tokens": null,
+          "pipeline_ms": null,
+          "queue_wait_ms": null,
+          "service_ms": null
+        },
+        "wire_sha256": "7b6456a3fb0cc02cd39a7d18adffbb352124c2ed7197fa1aa441db5501d9fd5a"
+      },
+      "pass": true,
+      "status": 403
+    },
+    {
+      "app_received": true,
+      "check": "cascade forwards benign to app",
+      "gateway_denied": false,
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "front": "removed",
+        "gateway": "terminated",
+        "v5-double": "terminated"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app D33pTh0ught --arm guarded --out /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/D33pTh0ught-guarded/D33pTh0ught.guarded.stack.json",
+    "up --app D33pTh0ught --arm guarded --config /home/sebas/Desktop/firewall-IA/reports/v5/challenge-apps-premeasurement-2026-11-05/evidence/D33pTh0ught-guarded/D33pTh0ught.guarded.stack.json --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/D33pTh0ught-guarded --v5 double",
+    "down --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/D33pTh0ught-guarded",
+    "check-clean --work /home/sebas/Documents/Codex/2026-11-02/firewall-ia-cierre-pc-paper/work/challenge-premeasurement/D33pTh0ught-guarded"
+  ],
+  "commit_matches_pin": true,
+  "fast_path": false,
+  "large_responses": [],
+  "pass": true,
+  "utc": 1793900432.2510514,
+  "v5": "double"
+}

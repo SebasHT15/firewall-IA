@@ -1,5 +1,8 @@
 # Issue disposition and follow-up drafts — 2026-10-20
 
+**Historical snapshot.** Use the [2026-11-14 issue review](issue_closure_2026-11-14.md)
+for the current integration. Open/blocked statements below describe the October checkpoint.
+
 Snapshot verified against GitHub while PR #79 was OPEN. This is a plan, not evidence that issues
 were edited or closed. No issue was opened, closed or commented on by this documentation update.
 

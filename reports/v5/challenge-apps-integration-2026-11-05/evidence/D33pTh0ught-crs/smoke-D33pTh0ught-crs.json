@@ -1,0 +1,72 @@
+{
+  "app": "D33pTh0ught",
+  "apps_commit": "be8e4e8f1c6aa12a17430146d569870d96d43dd5",
+  "arm": "crs",
+  "checks": [
+    {
+      "check": "startup",
+      "pass": true,
+      "stderr": ""
+    },
+    {
+      "app_received": true,
+      "body_len": 415,
+      "check": "benign GET /",
+      "front_status": [
+        200
+      ],
+      "front_upstream_status": [
+        "200"
+      ],
+      "pass": true,
+      "status": 200
+    },
+    {
+      "check": "sessions: none issued server-side (expected)",
+      "http_status": 200,
+      "note": "None.",
+      "pass": true
+    },
+    {
+      "check": "state reset: N/A (no server-side state)",
+      "note": "None (flag ciphertext is a module constant).",
+      "pass": true
+    },
+    {
+      "app_received": false,
+      "check": "crs attribution consistent ('/?x=%3Cscript%3Ealert(1)%3C/script%3E')",
+      "crs_audit_new": 1,
+      "crs_blocked": true,
+      "crs_interrupted": true,
+      "note": "known DEV mechanism request; gives no CRS rate",
+      "pass": true,
+      "status": 403
+    },
+    {
+      "check": "teardown",
+      "down": {
+        "app": "removed",
+        "app-network": "removed",
+        "crs": "removed",
+        "front": "removed"
+      },
+      "pass": true
+    },
+    {
+      "check": "check-clean",
+      "leftovers": [],
+      "pass": true
+    }
+  ],
+  "commands": [
+    "config --app D33pTh0ught --arm crs --out reports/v5/challenge-apps-integration-2026-11-05/evidence/D33pTh0ught-crs/D33pTh0ught.crs.stack.json",
+    "up --app D33pTh0ught --arm crs --config reports/v5/challenge-apps-integration-2026-11-05/evidence/D33pTh0ught-crs/D33pTh0ught.crs.stack.json --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/D33pTh0ught-crs --v5 double",
+    "down --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/D33pTh0ught-crs",
+    "check-clean --work /tmp/claude-1000/-home-sebas--claude-spares-spare-E6WbeE/e7579436-d83b-4066-bf39-d474e5763dad/scratchpad/work/D33pTh0ught-crs"
+  ],
+  "commit_matches_pin": true,
+  "large_responses": [],
+  "pass": true,
+  "utc": 1793898256.7780597,
+  "v5": "double"
+}
